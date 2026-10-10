@@ -143,6 +143,8 @@ app.run(host="0.0.0.0", port=8080)
 ## Essayer sans matériel (mode simulé)
 `NICHOIR_MOCK=1 python nichoir.py` sur un ordinateur : le programme invente des mesures plausibles (nid autour de 15 °C, dissipateur qui chauffe avec le Peltier, humidité 60–80 %), accepte les commandes sans toucher de GPIO et sert deux flux vidéo animés. `NICHOIR_MOCK_SURCHAUFFE=60` force le dissipateur à 60 °C pour voir la coupure de sécurité à 55 °C. Un bandeau « MODE SIMULÉ » prévient sur la page. Testé : lecture de l'état, commande du Peltier, coupure à 55,2 °C, LED, flux PNG.
 
+Chaque caméra a son bouton marche / arrêt (route `/api/camera`, `camera(num, on)` : le flux est arrêté pour économiser l'énergie) et, juste à côté, le bouton de sa carte de LED infrarouges (nid pour la caméra 1, extérieures pour la 2).
+
 ## Simulateur dans l'app (bouton « 🐍 Pi »)
 Le bouton « 🐍 Pi » en haut à droite de la vue 3D ouvre un écran qui simule le Pi **sans rien installer** : le vrai `nichoir.py` (mode simulé) est exécuté dans le navigateur par Pyodide (Python en WebAssembly, ≈ 10 Mo téléchargés à la première ouverture), la vraie page `web/index.html` s'affiche à gauche et un **terminal** à droite montre la sortie du programme comme `journalctl -u nichoir -f` sur le Pi (une ligne par lecture, commandes du Peltier et des LED, coupures de sécurité, requêtes façon Flask). Les **flux vidéo sont la scène 3D vue depuis l'objectif des caméras** : caméra 1 dans le nid (en niveaux de gris, comme la NoIR sous infrarouge), caméra 2 dehors (horizon redressé). Le bouton « 🔥 Surchauffe 60 °C » essaie la coupure à 55 °C. Seul Flask est remplacé par une doublure : les routes sont appelées directement.
 

@@ -48,14 +48,8 @@
       <div class="row">Puissance <input id="puiss" type="range" min="0" max="60" value="30" oninput="document.getElementById('puiss_v').textContent = this.value" /> <span id="puiss_v">30</span> %</div>
       <div class="err" id="err_gpio"></div>
     </div>
-    <div class="card"><h2>LED infrarouges</h2>
-      <div class="row">
-        <button id="l_nid" onclick="led('nid')">LED du nid</button>
-        <button id="l_ext" onclick="led('ext')">LED extérieures</button>
-      </div>
-    </div>
-    <div class="card"><h2>Caméra 1 (nid)</h2><img class="cam" src="/video/1" alt="caméra 1" /><div class="err" id="err_camera1"></div></div>
-    <div class="card"><h2>Caméra 2 (entrée)</h2><img class="cam" src="/video/2" alt="caméra 2" /><div class="err" id="err_camera2"></div></div>
+    <div class="card"><h2>Caméra 1 (nid)</h2><div class="row"><button id="c_1" onclick="camera(0)">Caméra 1</button><button id="l_nid" onclick="led('nid')">LED infrarouges</button></div><img class="cam" src="/video/1" alt="caméra 1" /><div class="err" id="err_camera1"></div></div>
+    <div class="card"><h2>Caméra 2 (entrée)</h2><div class="row"><button id="c_2" onclick="camera(1)">Caméra 2</button><button id="l_ext" onclick="led('ext')">LED infrarouges</button></div><img class="cam" src="/video/2" alt="caméra 2" /><div class="err" id="err_camera2"></div></div>
   </div>
 
   <script src="app.js"></script>

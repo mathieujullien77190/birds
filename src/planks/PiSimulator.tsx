@@ -36,6 +36,7 @@ def api(url, body):
     if url == "/api/etat": r = nichoir.api_etat()
     elif url == "/api/peltier": fl.request.payload = json.loads(body or "{}"); r = nichoir.api_peltier()
     elif url == "/api/led": fl.request.payload = json.loads(body or "{}"); r = nichoir.api_led()
+    elif url == "/api/camera": fl.request.payload = json.loads(body or "{}"); r = nichoir.api_camera()
     else: return None
     return json.dumps(r)
 
@@ -44,6 +45,9 @@ def tick():
 
 def frame(num, n):
     return base64.b64encode(nichoir.cameras[num].image(n, 160, 120)).decode()
+
+def cam_on(num):
+    return bool(nichoir.etat["cam" + str(num + 1)])
 
 def surchauffe(v):
     nichoir.MOCK_SURCHAUFFE = float(v)
@@ -70,6 +74,9 @@ function loadPy(): Promise<Py> {
   pyPromise.catch(() => { pyPromise = null; });
   return pyPromise;
 }
+
+/** Image d'une caméra éteinte (noir). */
+const OFF = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240"><rect width="320" height="240" fill="#000"/><text x="160" y="126" fill="#666" font-family="monospace" font-size="14" text-anchor="middle">caméra éteinte</text></svg>');
 
 /** Page du Pi, avec `fetch` redirigé vers le Python du parent (le cadre est de même origine : `parent.__piFetch`). */
 const PAGE = indexHtml.replace(
@@ -101,7 +108,7 @@ export function PiSimulator({ onClose, shoot }: { onClose: () => void; shoot?: (
     loadPy().then((py) => {
       if (dead) return;
       pyRef.current = py;
-      const api = py.globals.get('api'), tick = py.globals.get('tick'), frame = py.globals.get('frame');
+      const api = py.globals.get('api'), tick = py.globals.get('tick'), frame = py.globals.get('frame'), camOn = py.globals.get('cam_on');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).__piFetch = async (url: string, opts?: { method?: string; body?: string }) => {
         const out = api(url, opts?.body ?? '');
@@ -117,7 +124,7 @@ export function PiSimulator({ onClose, shoot }: { onClose: () => void; shoot?: (
         const doc = frameRef.current?.contentDocument;
         if (!doc) return;
         n++;
-        doc.querySelectorAll<HTMLImageElement>('img.cam').forEach((img, i) => { img.src = shoot?.(i) ?? 'data:image/png;base64,' + frame(i, n); }); // vue 3D depuis la caméra ; image de test du Python si la caméra n'existe pas
+        doc.querySelectorAll<HTMLImageElement>('img.cam').forEach((img, i) => { img.src = !camOn(i) ? OFF : shoot?.(i) ?? 'data:image/png;base64,' + frame(i, n); }); // vue 3D depuis la caméra ; image de test du Python si la caméra n'existe pas
       }, 300));
       setState('prêt');
     }).catch((e: Error) => { setErr(String(e.message ?? e)); setState('erreur'); });

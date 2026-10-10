@@ -46,6 +46,7 @@ etat = {
     "t_nid": None, "hum_nid": None, "t_dissipateur": None,
     "peltier": "arrêt", "puissance": 0.0,
     "led_nid": False, "led_ext": False,
+    "cam1": True, "cam2": True,   # caméras allumées (flux en direct) ou éteintes (économie d'énergie)
     "erreurs": {},        # nom du matériel → message, quand quelque chose manque
     "derniere_lecture": None,
 }
@@ -86,6 +87,7 @@ except Exception as e:
     etat["erreurs"]["ds18b20"] = f"sonde du dissipateur indisponible : {e}"
 
 cameras = {}
+capteurs_cam = {}   # numéro → objet Picamera2, pour pouvoir arrêter / relancer le flux
 # FACULTATIF : les caméras (picamera2). Chaque caméra qui manque est signalée sur la page, l'autre continue.
 try:
     from picamera2 import Picamera2
@@ -110,6 +112,7 @@ try:
             flux = Flux()
             cam.start_recording(MJPEGEncoder(), FileOutput(flux))
             cameras[num] = flux
+            capteurs_cam[num] = (cam, flux)
         except Exception as e:
             etat["erreurs"][f"camera{num + 1}"] = f"caméra {num + 1} indisponible : {e}"
 except Exception as e:
@@ -202,6 +205,21 @@ def peltier(sens: str, puissance: float):
         pwm.value = puissance
 
 
+# FACULTATIF : allume ou éteint une caméra (num 0 ou 1). Éteinte, elle ne filme plus (le Pi consomme moins) et la page n'affiche plus son flux.
+def camera(num: int, on: bool):
+    etat[f"cam{num + 1}"] = bool(on)
+    if num in capteurs_cam:
+        cam, flux = capteurs_cam[num]
+        try:
+            if on:
+                cam.start_recording(MJPEGEncoder(), FileOutput(flux))
+            else:
+                cam.stop_recording()
+        except Exception as e:
+            etat["erreurs"][f"camera{num + 1}"] = f"commande de la caméra {num + 1} : {e}"
+    log(f"Caméra {num + 1} : {'allumée' if on else 'éteinte'}")
+
+
 # FACULTATIF : sans le module MOSFET des LED, ces commandes ne font rien de visible.
 def leds(nid=None, ext=None):
     if nid is not None:
@@ -273,6 +291,15 @@ def api_peltier():
     return jsonify(etat)
 
 
+@app.post("/api/camera")
+def api_camera():
+    d = request.get_json(force=True) or {}
+    num = int(d.get("num", 0))
+    if num in (0, 1):
+        camera(num, bool(d.get("on", True)))
+    return jsonify(etat)
+
+
 @app.post("/api/led")
 def api_led():
     d = request.get_json(force=True) or {}
@@ -285,6 +312,8 @@ def mjpeg(num: int):
     flux = cameras.get(num)
     if flux is None:
         return Response("caméra indisponible", status=503)
+    if not etat[f"cam{num + 1}"]:
+        return Response("caméra éteinte", status=503)
 
     def gen():
         while True:

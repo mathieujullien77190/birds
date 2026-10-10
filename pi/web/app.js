@@ -11,6 +11,8 @@ function afficher(e) {
   for (const b of ['froid', 'chaud', 'arrêt']) $('p_' + (b === 'arrêt' ? 'arret' : b)).classList.toggle('on', e.peltier === b);
   $('l_nid').classList.toggle('on', !!e.led_nid);
   $('l_ext').classList.toggle('on', !!e.led_ext);
+  // caméras : bouton allumé = flux en direct ; éteintes, l'image est masquée
+  [e.cam1, e.cam2].forEach((on, i) => { $('c_' + (i + 1)).classList.toggle('on', !!on); const img = document.querySelectorAll('img.cam')[i]; if (img) img.style.visibility = on ? 'visible' : 'hidden'; });
   for (const k of ['mock', 'bme280', 'ds18b20', 'gpio', 'securite', 'camera1', 'camera2']) { const el = $('err_' + k); if (el) el.textContent = e.erreurs?.[k] ?? ''; }
   if (e.erreurs?.picamera2) { $('err_camera1').textContent = e.erreurs.picamera2; $('err_camera2').textContent = e.erreurs.picamera2; }
 }
@@ -27,6 +29,10 @@ async function envoyer(url, corps) {
 
 // FACULTATIF : commandes du Peltier et des LED — retirer les deux fonctions et leurs boutons pour une page en lecture seule.
 function peltier(sens) { envoyer('/api/peltier', { sens, puissance: Number($('puiss').value) / 100 }); }
+function camera(num) {
+  const on = !$('c_' + (num + 1)).classList.contains('on');
+  envoyer('/api/camera', { num, on });
+}
 function led(quoi) {
   const on = !$('l_' + quoi).classList.contains('on');
   envoyer('/api/led', quoi === 'nid' ? { nid: on } : { ext: on });
