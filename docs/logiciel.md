@@ -20,7 +20,7 @@ flowchart LR
   APP -->|"toutes les 10 s"| DB
   APP --> WEB
   APP --> CAM
-  TEL -->|"Wi-Fi de la maison<br/>http://nichoir.local:8080"| WEB
+  TEL -->|"Wi-Fi de la maison (réseau local)"| WEB
   TEL -->|"de l'extérieur : Tailscale"| WEB
 ```
 
@@ -132,7 +132,7 @@ app.run(host="0.0.0.0", port=8080)
 
 ## La page web : voir les capteurs
 
-- Adresse sur le Wi-Fi de la maison : **http://nichoir.local:8080** (le Pi s'appelle `nichoir` dans `raspi-config`), ou son adresse IP.
+- Accès en **local** : depuis le Wi-Fi de la maison, avec l'adresse IP du Pi et le port 8080 (aucun nom à configurer).
 - Ce qu'elle montre :
   - les valeurs du moment : température et humidité du nid, température du dissipateur, tension de la batterie, état du Peltier (froid / chaud / arrêt, puissance), LED ;
   - un graphique des dernières 24 h (courbes tracées dans le navigateur depuis `/api/historique`) ;
