@@ -32,7 +32,7 @@ export function Chip({ active, className = '', ...props }: ButtonHTMLAttributes<
   );
 }
 
-const OPEN_KEY = (title: string) => `ui-section:${title}`;
+const OPEN_KEY = (title: string) => `ui-section-v2:${title}`;
 const readOpen = (title: string, fallback: boolean): boolean => { try { const v = localStorage.getItem(OPEN_KEY(title)); return v === null ? fallback : v === '1'; } catch { return fallback; } };
 
 /**
