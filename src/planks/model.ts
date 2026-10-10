@@ -1099,13 +1099,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // plaque froide + Peltier + dissipateur forment un bloc incliné de TILT_DEG vers l'arrière (rotation autour de x) : le bord arrière est plus bas
   const TILT = (TILT_DEG * Math.PI) / 180, plateZ = r2(bodyH - t / 2 - 0.5 - (COLD_D / 2) * Math.sin(TILT));
   const stackAt = (d: number): [number, number, number] => { const dy = (TEC_Y - COLD_Y) / Math.cos(TILT); return [0, r2(COLD_Y + Math.cos(TILT) * dy + Math.sin(TILT) * d), r2(plateZ - Math.sin(TILT) * dy + Math.cos(TILT) * d)]; };
-  const climate: Plank[] = n.clim ? [
-    // une GRANDE plaque d'aluminium (100 × 100 × t) sous le plafond, collée au Peltier, découpée autour de l'objectif, de la fenêtre des LED et du capteur
-    { id: uid(), name: 'Plaque froide alu', w: COLD_W, h: COLD_D, pos: [0, COLD_Y, plateZ] as Vec3, rot: [-TILT_DEG, 0, 0] as Vec3, notches: [], holes: [], group: climGroup, special: 'alu' as const, color: '#cbd5e1' }, // rectangle plein, derrière la caméra, légèrement incliné vers l'arrière (le bord arrière est plus bas) : l'eau coule vers la gouttière
-    part('Peltier TEC1-12706', TEC, TEC, TEC_T, ...stackAt(t / 2 + TEC_T / 2), 'peltier', '#f8fafc', [-TILT_DEG, 0, 0]), // collé sur la plaque, incliné comme elle (face froide sur la plaque)
-    part('Dissipateur alu', TEC, TEC, 30, ...stackAt(t / 2 + TEC_T + 15), 'heatsink', '#cbd5e1', [-TILT_DEG, 0, 0]), // posé sur la face chaude, dans le compartiment du toit : le haut est ouvert
-    part('Pont en H Pololu VNH5019 (froid le jour, chaud la nuit)', 38, 28, 10, DRV[0], DRV[1], topZ + 3 + 5, 'driver', '#b91c1c'),
-    part('Régulateur de charge Genasun GV-10-Li (137 × 61 × 33, sous le nichoir)', 61, 137, 33, RGX, RGY, RGZ, 'block', '#1d4ed8'), // à plat sous le plancher, le lambris descend autour pour le protéger
+  // alimentation : toujours présente (le Pi en a besoin) — batterie 4 × 32700, fusible, deux Wago du rail 12 V, convertisseur 12 → 5 V, leurs cales et leurs fils
+  const power: Plank[] = [
     part('Convertisseur 12 V → 5 V 5 A USB-C (taille à confirmer, ≈ 60 × 36 × 16)', 36, 60, 16, CVX, CVY, topZ + 3 + 8, 'block', '#0e7490'), // centré dans la place libre de l'avant gauche, calé
     part('Cale convertisseur gauche', 3, 66, t, CVX - 18 - 1.5, CVY, topZ + t / 2, 'block', '#a16207'),
     part('Cale convertisseur droite', 3, 66, t, CVX + 18 + 1.5, CVY, topZ + t / 2, 'block', '#a16207'),
@@ -1114,10 +1109,6 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     part('Fusible lame 15 A (19 × 18 × 5, posé à plat)', 19, 18.5, 5, FX, FY, topZ + 2.5, 'block', '#dc2626'), // près de la sortie de la gaine
     part('Wago 221 (3 entrées) rail 12 V +', 20, 13, 11, WGX, FY, topZ + 3 + 5.5, 'block', '#f97316'), // bornier du rail 12 V : un fil de la batterie, deux départs (pont en H, convertisseur)
     part('Wago 221 (3 entrées) rail 12 V −', 20, 13, 11, WGX, FY - 14, topZ + 3 + 5.5, 'block', '#9ca3af'),
-    part('Cale pont en H gauche', 4, 24, t, DRV[0] - 22, DRV[1], topZ + t / 2, 'block', '#a16207'),
-    part('Cale pont en H droite', 4, 24, t, DRV[0] + 22, DRV[1], topZ + t / 2, 'block', '#a16207'),
-    part('Cale pont en H avant', 24, 4, t, DRV[0], DRV[1] - 17, topZ + t / 2, 'block', '#a16207'),
-    part('Cale pont en H arrière', 24, 4, t, DRV[0], DRV[1] + 17, topZ + t / 2, 'block', '#a16207'),
     // cales de bois autour de la batterie (tous les côtés ; à gauche c'est le mur du compartiment du Peltier qui la bloque)
     part('Cale batterie droite', 3, 76, t, BX + 64 + 1.5, BY, topZ + t / 2, 'block', '#a16207'), // cale tout autour (3 mm de large, 3 de haut) ; la batterie est à 1 cm du mur de droite et du mur avant
     part('Cale batterie gauche', 3, 76, t, BX - 64 - 1.5, BY, topZ + t / 2, 'block', '#a16207'),
@@ -1128,6 +1119,27 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       return segs.map(([a, b], k) => part(`Cale batterie arrière${segs.length > 1 ? ' ' + (k + 1) : ''}`, r2(b - a), 3, t, r2((a + b) / 2), y, topZ + t / 2, 'block', '#a16207'));
     })(),
     part('Batterie LiFePO4 12,8 V 6 Ah (4 × 32700, 128 × 70 × 32)', 128, 70, 32, BX, BY, topZ + 3 + 16, 'block', '#047857'), // dans le grenier, coin avant droit, à 1 cm du mur de droite et du mur avant
+    wire('Fil fusible → batterie + (rouge)', '#dc2626', [[FX, FY - 8, topZ + 8], [(FX + BX) / 2, (FY + BY) / 2, topZ + 34], [BX - 8, BY + 37, topZ + 40], [BX - 8, BY + 29, topZ + 36]] as Vec3[], 3.6),
+    wire('Fil rail → convertisseur + (rouge)', '#dc2626', [[DRV[0] + 10, DRV[1] - 14, topZ + 11], [DRV[0] - 32, DRV[1] - 32, topZ + 14], [MX + 10, MY, topZ + 20], [MX - 10, MY - 4, topZ + 20], [CVX + 7, CVY + 36, topZ + 14], [CVX + 7, CVY + 30, topZ + 11]] as Vec3[], 3.6),
+    wire('Fil rail → convertisseur − (noir)', '#111827', [[DRV[0] + 2, DRV[1] - 14, topZ + 11], [DRV[0] - 38, DRV[1] - 24, topZ + 12], [MX + 8, MY + 6, topZ + 24], [MX - 20, MY - 4, topZ + 22], [CVX - 7, CVY + 40, topZ + 13], [CVX - 7, CVY + 30, topZ + 11]] as Vec3[], 3.6),
+  ];
+  // avec le panneau solaire : le régulateur sous le nichoir, ses deux fils vers la batterie et la gaine qui les porte
+  const solarElec: Plank[] = n.solar ? [
+    part('Régulateur de charge Genasun GV-10-Li (137 × 61 × 33, sous le nichoir)', 61, 137, 33, RGX, RGY, RGZ, 'block', '#1d4ed8'), // à plat sous le plancher, le lambris descend autour pour le protéger
+    wire('Fil régulateur → batterie + (rouge, 2,5 mm²)', '#dc2626', [[RGX - 30.5, RGY - 8, RGZ + 6], [RGX - 37, RGY - 11, RGZ + 6], [RGX - 45, RGY - 14, RGZ + 5], [RGX - 45, RGY + 50, RGZ + 5], [RGX - 41, CND_Y - 26, RGZ + 5], [RGX - 26, CND_Y - 9, RGZ + 6], [CND_X - 13, CND_Y - 4, RGZ + 8], [CND_X - 2.5, CND_Y - 2.5, -4], [CND_X - 2.5, CND_Y - 2.5, topZ + 10], [FX, FY + 10, topZ + 8]] as Vec3[], 3.6),
+    wire('Fil régulateur → batterie − (noir, 2,5 mm²)', '#111827', [[RGX - 30.5, RGY + 8, RGZ + 6], [RGX - 37, RGY + 6, RGZ + 4], [RGX - 49, RGY, RGZ + 2], [RGX - 49, RGY + 90, RGZ + 2], [RGX - 40, CND_Y + 2, RGZ + 3], [CND_X - 21, CND_Y + 7, RGZ + 5], [CND_X + 2.5, CND_Y + 2.5, -4], [CND_X + 2.5, CND_Y + 2.5, topZ + 14], [(CND_X + BX) / 2 - 6, (CND_Y + BY) / 2 + 20, topZ + 36], [BX + 12, BY + 57, topZ + 40], [BX + 12, BY + 29, topZ + 36]] as Vec3[], 3.6),
+    { id: uid(), name: 'Gaine des fils (ICTA Ø 16 ou multicouche Ø 16, dans l’isolant)', w: CND_D, h: CND_D, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'conduit' as const, color: '#1c1917', path: [[CND_X, CND_Y, -8], [CND_X, CND_Y, topZ + 6]] as Vec3[] }, // gaine annelée noire (ICTA)
+  ] : [];
+  const climate: Plank[] = n.clim ? [
+    // une GRANDE plaque d'aluminium (100 × 100 × t) sous le plafond, collée au Peltier, découpée autour de l'objectif, de la fenêtre des LED et du capteur
+    { id: uid(), name: 'Plaque froide alu', w: COLD_W, h: COLD_D, pos: [0, COLD_Y, plateZ] as Vec3, rot: [-TILT_DEG, 0, 0] as Vec3, notches: [], holes: [], group: climGroup, special: 'alu' as const, color: '#cbd5e1' }, // rectangle plein, derrière la caméra, légèrement incliné vers l'arrière (le bord arrière est plus bas) : l'eau coule vers la gouttière
+    part('Peltier TEC1-12706', TEC, TEC, TEC_T, ...stackAt(t / 2 + TEC_T / 2), 'peltier', '#f8fafc', [-TILT_DEG, 0, 0]), // collé sur la plaque, incliné comme elle (face froide sur la plaque)
+    part('Dissipateur alu', TEC, TEC, 30, ...stackAt(t / 2 + TEC_T + 15), 'heatsink', '#cbd5e1', [-TILT_DEG, 0, 0]), // posé sur la face chaude, dans le compartiment du toit : le haut est ouvert
+    part('Pont en H Pololu VNH5019 (froid le jour, chaud la nuit)', 38, 28, 10, DRV[0], DRV[1], topZ + 3 + 5, 'driver', '#b91c1c'),
+    part('Cale pont en H gauche', 4, 24, t, DRV[0] - 22, DRV[1], topZ + t / 2, 'block', '#a16207'),
+    part('Cale pont en H droite', 4, 24, t, DRV[0] + 22, DRV[1], topZ + t / 2, 'block', '#a16207'),
+    part('Cale pont en H avant', 24, 4, t, DRV[0], DRV[1] - 17, topZ + t / 2, 'block', '#a16207'),
+    part('Cale pont en H arrière', 24, 4, t, DRV[0], DRV[1] + 17, topZ + t / 2, 'block', '#a16207'),
     // filtre LC (self 100 µH 10 A + condensateur 1000 µF 25 V) entre le pont en H et le Peltier : le PWM devient un courant presque continu, le Peltier rend mieux
     part('Filtre LC Peltier (self 100 µH + condensateur 1000 µF)', 28, 18, 20, FLX, FLY, topZ + 3 + 10, 'block', '#374151'),
     part('Cale filtre avant', 28, 3, t, FLX, FLY - 9 - 1.5, topZ + t / 2, 'block', '#a16207'), // à droite c'est le mur du toit qui le bloque, à gauche la gaine
@@ -1136,14 +1148,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     wire('Fil Peltier − (noir)', '#111827', [[TEC / 2 + 0.5, TEC_Y - 5, bodyH + 2], [TEC / 2 + 0.6, TEC_Y - 5, bodyH + 36], [TEC / 2 + 0.6, TEC_Y - 5, topZ + 8], [44, 26, topZ + 8], [54, 56, topZ + 10], [68, 72, topZ + 12], [FLX - 14, FLY - 4, topZ + 11]] as Vec3[], 2.4),
     wire('Fil filtre → pont en H + (rouge)', '#dc2626', [[FLX - 4, FLY - 9, topZ + 11], [FLX - 6, FLY - 30, topZ + 28], [DRV[0] - 12, DRV[1] + 12, topZ + 22], [DRV[0] - 15.5, DRV[1] + 5, topZ + 11]] as Vec3[], 2.4), // filtre (face avant) → sorties OUTA / OUTB du pont en H, en passant au-dessus du fusible et des fils du rail
     wire('Fil filtre → pont en H − (noir)', '#111827', [[FLX + 4, FLY - 9, topZ + 11], [FLX + 2, FLY - 30, topZ + 30], [DRV[0] - 10, DRV[1] + 2, topZ + 24], [DRV[0] - 15.5, DRV[1] - 5, topZ + 11]] as Vec3[], 2.4),
-    wire('Fil régulateur → batterie + (rouge, 2,5 mm²)', '#dc2626', [[RGX - 30.5, RGY - 8, RGZ + 6], [RGX - 37, RGY - 11, RGZ + 6], [RGX - 45, RGY - 14, RGZ + 5], [RGX - 45, RGY + 50, RGZ + 5], [RGX - 41, CND_Y - 26, RGZ + 5], [RGX - 26, CND_Y - 9, RGZ + 6], [CND_X - 13, CND_Y - 4, RGZ + 8], [CND_X - 2.5, CND_Y - 2.5, -4], [CND_X - 2.5, CND_Y - 2.5, topZ + 10], [FX, FY + 10, topZ + 8]] as Vec3[], 3.6),
-    wire('Fil régulateur → batterie − (noir, 2,5 mm²)', '#111827', [[RGX - 30.5, RGY + 8, RGZ + 6], [RGX - 37, RGY + 6, RGZ + 4], [RGX - 49, RGY, RGZ + 2], [RGX - 49, RGY + 90, RGZ + 2], [RGX - 40, CND_Y + 2, RGZ + 3], [CND_X - 21, CND_Y + 7, RGZ + 5], [CND_X + 2.5, CND_Y + 2.5, -4], [CND_X + 2.5, CND_Y + 2.5, topZ + 14], [(CND_X + BX) / 2 - 6, (CND_Y + BY) / 2 + 20, topZ + 36], [BX + 12, BY + 57, topZ + 40], [BX + 12, BY + 29, topZ + 36]] as Vec3[], 3.6),
-    { id: uid(), name: 'Gaine des fils (ICTA Ø 16 ou multicouche Ø 16, dans l’isolant)', w: CND_D, h: CND_D, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'conduit' as const, color: '#1c1917', path: [[CND_X, CND_Y, -8], [CND_X, CND_Y, topZ + 6]] as Vec3[] }, // gaine annelée noire (ICTA)
-    wire('Fil fusible → batterie + (rouge)', '#dc2626', [[FX, FY - 8, topZ + 8], [(FX + BX) / 2, (FY + BY) / 2, topZ + 34], [BX - 8, BY + 37, topZ + 40], [BX - 8, BY + 29, topZ + 36]] as Vec3[], 3.6),
     wire('Fil rail → pont en H + (rouge)', '#dc2626', [[FX + 4, FY - 8, topZ + 8], [DRV[0] - 2, DRV[1] + 24, topZ + 10], [DRV[0] + 3, DRV[1] + 14, topZ + 11]] as Vec3[], 3.6),
     wire('Fil rail → pont en H − (noir)', '#111827', [[BX + 12, BY + 29, topZ + 39], [BX + 20, BY + 51, topZ + 34], [DRV[0] + 22, DRV[1] - 10, topZ + 22], [DRV[0] + 22, DRV[1] + 12, topZ + 14], [DRV[0] + 13, DRV[1] + 14, topZ + 11]] as Vec3[], 3.6),
-    wire('Fil rail → convertisseur + (rouge)', '#dc2626', [[DRV[0] + 10, DRV[1] - 14, topZ + 11], [DRV[0] - 32, DRV[1] - 32, topZ + 14], [MX + 10, MY, topZ + 20], [MX - 10, MY - 4, topZ + 20], [CVX + 7, CVY + 36, topZ + 14], [CVX + 7, CVY + 30, topZ + 11]] as Vec3[], 3.6),
-    wire('Fil rail → convertisseur − (noir)', '#111827', [[DRV[0] + 2, DRV[1] - 14, topZ + 11], [DRV[0] - 38, DRV[1] - 24, topZ + 12], [MX + 8, MY + 6, topZ + 24], [MX - 20, MY - 4, topZ + 22], [CVX - 7, CVY + 40, topZ + 13], [CVX - 7, CVY + 30, topZ + 11]] as Vec3[], 3.6),
     wire('Fil INA du pont en H (bleu, broche 33)', '#2563eb', [[DRV[0] + 2, DRV[1] - 9, topZ + 8], [DRV[0] - 14, DRV[1] - 16, topZ + 21], [20, 6, topZ + 24], [-40, 5, topZ + 24], [...pw(PI_PIN_X0 + 16 * 2.54, PI_PIN_Y - 2.54 + 8), topZ + 24], [...pw(PI_PIN_X0 + 16 * 2.54, PI_PIN_Y - 2.54), piZ + 8], [...pw(PI_PIN_X0 + 16 * 2.54, PI_PIN_Y - 2.54), piZ + 3.5]] as Vec3[]),
     wire('Fil INB du pont en H (vert, broche 35)', '#16a34a', [[DRV[0] + 9, DRV[1] - 9, topZ + 8], [DRV[0] - 10, DRV[1] - 20, topZ + 21], [20, 6, topZ + 26], [-40, 5, topZ + 26], [...pw(PI_PIN_X0 + 17 * 2.54, PI_PIN_Y - 2.54 + 8), topZ + 24], [...pw(PI_PIN_X0 + 17 * 2.54, PI_PIN_Y - 2.54), piZ + 8], [...pw(PI_PIN_X0 + 17 * 2.54, PI_PIN_Y - 2.54), piZ + 3.5]] as Vec3[]),
     wire('Fil PWM du pont en H (violet, broche 12)', '#7c3aed', [[DRV[0], DRV[1] - 9, topZ + 8], [DRV[0] - 10, DRV[1] - 16, topZ + 18], [20, 6, topZ + 20], [-40, 5, topZ + 20], [...pw(PI_PIN_X0 + 5 * 2.54, PI_PIN_Y + 8), topZ + 20], [...pw(PI_PIN_X0 + 5 * 2.54, PI_PIN_Y), piZ + 8], [...pw(PI_PIN_X0 + 5 * 2.54, PI_PIN_Y), piZ + 3.5]] as Vec3[]),
@@ -1290,6 +1296,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     ...lambris, ...pitched,
     ...solar, ...brackets, ...mounts, ...keys,
     ...camBox, ...cable2, ...wires2, ...ledSwitch,
+    ...power, ...solarElec,
     ...climate,
     ...insulation,
     ...entry,
