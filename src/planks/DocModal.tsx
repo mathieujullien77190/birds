@@ -37,6 +37,7 @@ const CSS = `
 .doc-md pre:not(.mermaid){background:#f6f8fa;border:1px solid #e7e5e4;border-radius:8px;padding:12px;overflow-x:auto;margin:1em 0;font:12.5px/1.5 ui-monospace,Consolas,monospace}
 .doc-md code{font:12.5px/1.5 ui-monospace,Consolas,monospace}
 .doc-md p code,.doc-md li code,.doc-md td code{background:#f5f5f4;border-radius:4px;padding:1px 4px}
+.doc-md .cluster-label,.doc-md .cluster-label *{font-size:20px!important;font-weight:700!important;color:#064e3b!important;fill:#064e3b!important}
 .doc-md pre.mermaid{background:#fafaf9;border:1px solid #e7e5e4;border-radius:8px;padding:12px;overflow-x:auto;text-align:center;margin:1em 0}
 `;
 

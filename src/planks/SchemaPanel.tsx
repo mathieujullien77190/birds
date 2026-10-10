@@ -57,6 +57,8 @@ const CSS = `
 .schema-panel g.node.hl rect,.schema-panel g.node.hl polygon,.schema-panel g.node.hl circle,.schema-panel g.node.hl path{stroke:#f59e0b!important;stroke-width:4px!important} /* le bloc garde sa couleur, seul son contour grossit */
 .schema-panel path.hl{stroke-width:7px!important} /* le trait garde la couleur de son fil, il grossit */
 .schema-panel g.node,.schema-panel path.flowchart-link{cursor:pointer}
+.schema-panel .cluster-label,.schema-panel .cluster-label *{font-size:24px!important;font-weight:700!important;color:#064e3b!important;fill:#064e3b!important;line-height:1.3!important} /* titres des zones : Dehors, grenier, sous le plafond */
+.schema-panel .cluster-label foreignObject{overflow:visible}
 `;
 
 export function SchemaPanel({ hover, planks, onHover }: { hover: { plank?: string; group?: string } | null; planks: Plank[]; onHover: (id: string | null) => void }) {
