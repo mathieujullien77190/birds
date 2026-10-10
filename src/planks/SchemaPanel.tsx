@@ -54,8 +54,8 @@ const edgeKey = (id: string): [string, string] | null => { const m = /L[-_]([A-Z
 
 const CSS = `
 .schema-panel svg{max-width:100%;height:auto}
-.schema-panel g.node.hl rect,.schema-panel g.node.hl polygon,.schema-panel g.node.hl circle,.schema-panel g.node.hl path{stroke:#d97706!important;stroke-width:3px!important;fill:#fef3c7!important}
-.schema-panel path.hl{stroke:#d97706!important;stroke-width:4px!important}
+.schema-panel g.node.hl rect,.schema-panel g.node.hl polygon,.schema-panel g.node.hl circle,.schema-panel g.node.hl path{stroke:#f59e0b!important;stroke-width:4px!important} /* le bloc garde sa couleur, seul son contour grossit */
+.schema-panel path.hl{stroke-width:7px!important} /* le trait garde la couleur de son fil, il grossit */
 .schema-panel g.node,.schema-panel path.flowchart-link{cursor:pointer}
 `;
 
