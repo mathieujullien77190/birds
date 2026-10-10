@@ -904,6 +904,8 @@ export default function Planks() {
   const [nest, setNest] = useState<NestParams>(() => { try { return { ...NEST_DEFAULT, ...JSON.parse(localStorage.getItem('plaques-nichoir-2') ?? '{}') }; } catch { return NEST_DEFAULT; } });
   useEffect(() => { try { localStorage.setItem('plaques-nichoir-2', JSON.stringify(nest)); } catch { /* rien */ } }, [nest]);
   const addNest = () => { const b = makeNest(nest, sc.t, sc.fit, sc.planks.length + 1); commit('Nichoir créé', (s) => ({ ...s, planks: [...s.planks, ...b.planks], groupNames: { ...(s.groupNames ?? {}), ...b.groupNames } })); setSelectedId(b.planks[0].id); setGroupSel(b.group); setOpenGroups((g) => new Set([...g, b.group])); setHidden((h) => new Set([...h, ...b.planks.filter((p) => /^Isolant/.test(p.name) || /^Barre /.test(p.name)).map((p) => p.id)])); /* l'isolant et les quatre barres du toit sont cachés par défaut */ };
+  const autoNest = useRef(false);
+  useEffect(() => { if (!autoNest.current && sc.planks.length === 0) { autoNest.current = true; addNest(); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
   /** Boîte choisie : tourner d'un quart de tour autour de son centre, ou déplacer son centre. */
   const groupMembers = (g: string) => sc.planks.filter((p) => p.group === g);
   const rotateGroup = (g: string, axis: 0 | 1 | 2, deg: number) => {
@@ -1022,7 +1024,7 @@ export default function Planks() {
             <Chip active={nest.cam2} onClick={() => setNest({ ...nest, cam2: !nest.cam2 })} title="Deuxième caméra dans une mini boîte en contreplaqué sous le toit à gauche, tournée vers le trou d'entrée">2ᵉ caméra</Chip>
             <Chip active={nest.clim} onClick={() => setNest({ ...nest, clim: !nest.clim })} title="Peltier + radiateur alu sur la moitié haute du mur arrière, capteur de température et d'humidité">Peltier + capteur</Chip>
           </div>
-          <Btn variant="primary" onClick={addNest}>Créer le nichoir ({nest.l + 2 * (2 * sc.t + nest.ins)} × {nest.L + 2 * (2 * sc.t + nest.ins)} × {nest.floorToHole + nest.hole + nest.above + 2 * sc.t + 2 * (sc.t + nest.ins)})</Btn>
+          <Btn variant="primary" onClick={addNest} disabled={sc.planks.length > 0} title={sc.planks.length > 0 ? "Un nichoir est déjà là : « Tout supprimer » dans « Pièces » pour en créer un autre" : undefined}>Créer le nichoir ({nest.l + 2 * (2 * sc.t + nest.ins)} × {nest.L + 2 * (2 * sc.t + nest.ins)} × {nest.floorToHole + nest.hole + nest.above + 2 * sc.t + 2 * (sc.t + nest.ins)})</Btn>
         </Section>
 
         {selected && groupSel && (() => {
