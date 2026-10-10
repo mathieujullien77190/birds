@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { marked } from 'marked';
 import schemaMd from '../../docs/schema-electronique.md?raw';
+import { DOC_CSS } from './DocModal';
 import type { Plank } from './model';
 
 /** Le schéma électrique (bloc mermaid du document) affiché à côté de la 3D : survoler un fil ou un composant dans la 3D (ou dans « Pièces ») met en
@@ -45,6 +47,18 @@ const MAP: [RegExp, Keys][] = [
   [/^Fil (3,3 V|SDA|SCL)/, { nodes: [], edges: [['PI', 'SENS']] }],
   [/^Fil sonde/, { nodes: [], edges: [['HOT', 'PI']] }],
 ];
+/** Fiches des composants : les sections « ### … » du document (tableaux de paramètres), repérées par le début de leur titre. */
+const FICHES: Record<string, string> = {
+  PV: 'Panneau solaire', MPPT: 'Régulateur de charge', BAT: 'Batterie', FUSE: 'Fusible', BUCK: 'Convertisseur', PI: 'Raspberry Pi', HB: 'Pont en H', FILT: 'Filtre LC',
+  TEC: 'Peltier', HOT: 'Sonde de température', CAM1: 'Caméras', CAM2: 'Caméras', IR: 'Carte de 4 LED', IR2: 'Carte de 4 LED', SENS: 'Capteur de température', SW: 'Module 2 × MOSFET', RAIL: 'Wago 221',
+};
+const SECTIONS = (() => {
+  const out: { title: string; md: string }[] = [];
+  const params = schemaMd.slice(schemaMd.indexOf('## Paramètres à respecter'));
+  for (const part of params.split(/^### /m).slice(1)) { const nl = part.indexOf('\n'); out.push({ title: part.slice(0, nl).trim(), md: '### ' + part.trim() }); }
+  return out;
+})();
+const ficheOf = (key: string) => { const start = FICHES[key]; return start ? SECTIONS.find((s) => s.title.startsWith(start)) : undefined; };
 export function schemaKeys(name: string): Keys | null { const m = MAP.find(([re]) => re.test(name)); return m ? m[1] : null; }
 
 /** Identifiant de nœud mermaid (`flowchart-PI-12`) → clé (`PI`). */
@@ -65,6 +79,8 @@ export function SchemaPanel({ hover, planks, onHover }: { hover: { plank?: strin
   const ref = useRef<HTMLDivElement>(null);
   const fromSchema = useRef(false); // vrai quand c'est le schéma lui-même qui est survolé : pas de défilement dans ce cas
   const [svg, setSvg] = useState<string>('');
+  const [fiche, setFiche] = useState<string | null>(null); // module dont on affiche les caractéristiques par-dessus le schéma
+  const ficheHtml = useMemo(() => { const f = fiche ? ficheOf(fiche) : undefined; return f ? (marked.parse(f.md, { async: false }) as string) : ''; }, [fiche]);
   useEffect(() => {
     let off = false;
     import('mermaid').then(async ({ default: mermaid }) => {
@@ -103,9 +119,17 @@ export function SchemaPanel({ hover, planks, onHover }: { hover: { plank?: strin
   };
   return (
     <div className="schema-panel flex h-full w-[48rem] shrink-0 flex-col border-l border-stone-200 bg-white">
-      <style>{CSS}</style>
+      <style>{CSS + DOC_CSS}</style>
       <div className="border-b border-stone-200 px-3 py-2 text-[11px] font-semibold text-stone-700">Schéma électrique <span className="font-normal text-stone-400">· survole un fil ou un composant, dans la 3D ou ici</span></div>
-      <div ref={ref} className="min-h-0 flex-1 overflow-auto p-2" onMouseMove={onMove} onMouseLeave={() => { fromSchema.current = false; onHover(null); }} dangerouslySetInnerHTML={{ __html: svg || '<p class="p-3 text-[11px] text-stone-400">chargement du schéma…</p>' }} />
+      <div className="relative min-h-0 flex-1">
+      <div ref={ref} className="h-full overflow-auto p-2" onClick={(e) => { const g = (e.target as Element).closest('g.node'); const k = g ? nodeKey(g.id) : null; setFiche(k && ficheOf(k) ? k : null); }} onMouseMove={onMove} onMouseLeave={() => { fromSchema.current = false; onHover(null); }} dangerouslySetInnerHTML={{ __html: svg || '<p class="p-3 text-[11px] text-stone-400">chargement du schéma…</p>' }} />
+      {fiche && ficheHtml && (
+        <div className="absolute inset-0 z-10 flex flex-col bg-white shadow-inner">
+          <div className="flex items-center justify-between border-b border-stone-200 px-3 py-1.5 text-[11px] text-stone-500"><span>Caractéristiques du module · × pour revenir au schéma</span><button onClick={() => setFiche(null)} className="rounded px-2 text-lg leading-none text-stone-500 hover:bg-stone-100">×</button></div>
+          <div className="doc-md min-h-0 flex-1 overflow-auto px-4 py-3" dangerouslySetInnerHTML={{ __html: ficheHtml }} />
+        </div>
+      )}
+      </div>
     </div>
   );
 }

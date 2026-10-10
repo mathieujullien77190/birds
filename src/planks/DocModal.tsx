@@ -13,7 +13,7 @@ import { CodeBrowser } from './CodeBrowser';
 /** Documents lisibles dans l'app (fichiers Markdown du dossier docs/). */
 export const DOCS = [{ id: 'schema', title: 'Schéma électronique', md: schema }, { id: 'logiciel', title: 'Logiciel (Pi, page web)', md: logiciel }, { id: 'code', title: 'Code', md: '' }];
 
-const CSS = `
+export const DOC_CSS = `
 .doc-md{font:15px/1.65 system-ui,sans-serif;color:#1c1917}
 .doc-md h1{font-size:1.9rem;line-height:1.2;margin:0 0 .6em;color:#064e3b;text-wrap:balance}
 .doc-md h2{font-size:1.25rem;margin:2em 0 .6em;padding-bottom:.3em;border-bottom:2px solid #a7f3d0;color:#065f46}
@@ -112,7 +112,7 @@ export function DocModal({ doc: first, onClose }: { doc: { title: string; md: st
   }, [html, onClose]);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 p-4" onClick={onClose}>
-      <style>{CSS}</style>
+      <style>{DOC_CSS}</style>
       <div className="flex max-h-full w-full max-w-6xl flex-col rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-stone-200 px-5 py-3">
           <div className="flex items-center gap-1">{DOCS.map((x) => <button key={x.id} onClick={() => setCur(x.title)} className={`rounded px-2 py-1 text-sm font-semibold ${x.title === doc.title ? 'bg-emerald-100 text-emerald-900' : 'text-stone-500 hover:bg-stone-100'}`}>{x.title}</button>)}</div>

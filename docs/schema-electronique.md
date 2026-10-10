@@ -180,7 +180,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Calibre | 15 A suffit (charge au plus 10 A, décharge environ 8 A) ; il doit être inférieur à ce que le câble supporte | 15 A |
 | Type | fusible à lame automobile 12 V avec porte-fusible, placé au plus près du + de la batterie | 19 × 18,5 × 5 mm, posé à plat |
 
-### Convertisseur 12 V → 5 V (pas encore dans le modèle)
+### Convertisseur 12 V → 5 V
 
 | Paramètre | Valeur à viser |
 | --- | --- |
@@ -277,6 +277,24 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Mesures | température, humidité et pression | — |
 | Dimensions de la carte | environ 19 × 18 mm (jusqu'à 25 × 18 selon la marque) | 19 × 18 mm |
 | Contrainte | la condensation est possible sous le plafond : choisir un capteur protégé ou le vernir | collé sous le plafond |
+
+### Module 2 × MOSFET (LED infrarouges)
+
+| Paramètre | Valeur à viser | Dans le modèle |
+| --- | --- | --- |
+| Rôle | allumer et éteindre les deux cartes de LED depuis le Pi, en coupant leur masse | module 20 × 14 × 6 mm |
+| Commande | niveau logique 3,3 V (MOSFET « logic level », par exemple IRLZ44N), IN1 sur GPIO23 (broche 16), IN2 sur GPIO24 (broche 18) | broches 16, 18 et masse 6 |
+| Courant | largement au-dessus des LED (quelques centaines de mA) | — |
+| Alimentation des LED | 5 V direct depuis les broches 2 et 4 du Pi, la masse passe par le module (OUT1 : nid, OUT2 : extérieur) | — |
+
+### Wago 221 du rail 12 V
+
+| Paramètre | Valeur à viser | Dans le modèle |
+| --- | --- | --- |
+| Rôle | répartir le + et le − de la batterie vers le pont en H et le convertisseur (un fil entre, deux repartent) | deux blocs 20 × 13 × 11 mm |
+| Modèle | Wago 221-413, 3 entrées à levier, fil de 0,2 à 4 mm² | — |
+| Courant | 32 A annoncés, nous sommes à environ 8 A | — |
+| Précaution | enfoncer les fils jusqu'au fond ; pour un montage définitif, bornier à vis ou cosses serties | à droite du fusible |
 
 ### Câblage
 
