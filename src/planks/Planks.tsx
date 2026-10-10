@@ -574,7 +574,7 @@ export default function Planks() {
     scene.add(sun);
     const camera = new PerspectiveCamera(40, 1, 1, 6000);
     camera.up.set(0, 0, 1); // Z = hauteur, comme la visionneuse STL
-    camera.position.set(-490, 1250, 700); // vue de départ en 3/4 tournée de 180° (demande de l'utilisateur), assez loin pour voir le nichoir ET le panneau solaire
+    camera.position.set(-945, -1676, 1548); // vue de départ en 3/4 tournée de 180° (demande de l'utilisateur), assez loin pour voir le nichoir ET le panneau solaire
     const renderer = new WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     el.appendChild(renderer.domElement);
