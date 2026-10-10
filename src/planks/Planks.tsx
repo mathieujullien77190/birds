@@ -3,6 +3,8 @@ import { Btn, Hint } from '@/ui/kit';
 import { Sheet2D } from '../ui/Sheet2D';
 import { bounds, makeNest, NEST_DEFAULT, type NestParams, nestSheets, sheetsPreviewSvg, moveWithGroup, extents, fitHole, newHole, saveHistory, saveScene, loadScene, type FaceAxis, type Hole, type Plank, type PlankScene, type Vec3 } from './model';
 import { DocModal, DOCS } from './DocModal';
+import { PiSimulator } from './PiSimulator';
+import { shootCamera } from './three/cameraShot';
 import { SchemaPanel } from './SchemaPanel';
 import { ContextMenu } from './components/ContextMenu';
 import { CutPanel } from './components/CutPanel';
@@ -33,6 +35,7 @@ export default function Planks() {
   pullRef.current = pull;
   const [leftOpen, setLeftOpen] = usePersistentFlag('plaques-menu-gauche'); // panneau de gauche replié ou non
   const [rightOpen, setRightOpen] = usePersistentFlag('plaques-menu-droit'); // panneau de droite (« Pièces » / « Historique ») replié ou non
+  const [piOpen, setPiOpen] = useState(false); // simulateur de la page web du Pi (Python exécuté dans le navigateur)
   const [schemaOn, setSchemaOn] = usePersistentFlag('plaques-schema'); // ouvert par défaut // schéma électrique à côté de la 3D
   const [cut, setCut] = useState<Cut>(() => { try { const j = JSON.parse(localStorage.getItem('plaques-coupe') ?? '{}'); return { on: false, axis: j.axis ?? 'y', pos: 0, flip: !!j.flip }; } catch { return { on: false, axis: 'y', pos: 0, flip: false }; } });
   const cutRef = useRef(cut);
@@ -77,6 +80,13 @@ export default function Planks() {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<View | null>(null);
   const scRef = useRef(sc);
+  /** Flux vidéo du simulateur du Pi : la scène 3D vue depuis l'objectif de la caméra 1 (dans le nid, en infrarouge) ou 2 (dehors). `null` si la carte n'existe pas. */
+  const shoot = (num: number): string | null => {
+    const v = view.current;
+    const p = scRef.current.planks.find((x) => x.special === 'camera' && (num === 0 ? x.name === 'Caméra' : x.name === 'Caméra 2'));
+    const m = p && v?.meshes.get(p.id);
+    return v && m ? shootCamera(v, m, num === 0 ? 'CAM1 (nid, IR)' : 'CAM2 (entrée)', { gray: num === 0, fov: num === 0 ? 80 : 66, level: num === 1 }) : null;
+  };
   scRef.current = sc;
   const selRef = useRef(selectedId);
   selRef.current = selectedId;
@@ -202,6 +212,9 @@ export default function Planks() {
           <button onClick={() => setSchemaOn((s) => !s)} aria-pressed={schemaOn} title="Schéma électrique à côté de la 3D : survoler un fil ou un composant le met en surbrillance des deux côtés" className={`flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium ${schemaOn ? 'bg-emerald-600 text-white' : 'text-stone-700 hover:bg-stone-100'}`}>
             <span aria-hidden>🔌</span> Schéma
           </button>
+          <button onClick={() => setPiOpen(true)} title="Page web du Pi simulée : le vrai programme Python tourne dans le navigateur" className="flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-semibold text-stone-700 transition-colors hover:bg-stone-100">
+            <span aria-hidden>🐍</span> Pi
+          </button>
           <button onClick={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} aria-pressed={cut.on} title="Plan de coupe : l'espace est coupé en deux, un côté devient invisible" className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-semibold transition-colors ${cut.on ? 'bg-sky-100 text-sky-900' : 'text-stone-800 hover:bg-stone-100'}`}>
             <span aria-hidden>✂</span> Coupe
           </button>
@@ -226,6 +239,7 @@ export default function Planks() {
         {editingHole && editingPlank && <HoleWindow plank={editingPlank} hole={editingHole} onChange={(patch) => setHole(editingPlank, editingHole.id, patch)} onClose={() => setHoleEdit(null)} onRemove={() => removeHole(editingPlank, editingHole.id)} />}
       </main>
 
+      {piOpen && <PiSimulator onClose={() => setPiOpen(false)} shoot={shoot} />}
       {docOpen && DOCS.find((d) => d.id === docOpen) && <DocModal doc={DOCS.find((d) => d.id === docOpen)!} onClose={() => setDocOpen(null)} />}
       {schemaOn && <SchemaPanel hover={hover} planks={sc.planks} onHover={(id) => setHover(id ? { plank: id } : null)} />}
       <RightPanel

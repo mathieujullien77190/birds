@@ -38,6 +38,8 @@ NICHOIR_MOCK=1 python nichoir.py          # Windows PowerShell : $env:NICHOIR_MO
 ```
 Pour essayer la coupure de sécurité : `NICHOIR_MOCK_SURCHAUFFE=60` force le dissipateur à 60 °C dès que le Peltier tourne ; il est coupé à 55 °C et la page affiche « Peltier coupé ».
 
+Dans l'app 3D, le bouton « 🐍 Pi » fait la même chose **sans installer Python** (exécuté dans le navigateur) et montre la sortie du programme dans un terminal ; les flux vidéo y sont des vues 3D prises depuis les caméras du modèle.
+
 ## Brochage
 
 Voir le document « Schéma électronique » de l'application. En résumé : Peltier PWM GPIO18, INA GPIO13, INB GPIO19 ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; DS18B20 sur 1-Wire (GPIO4, résistance de 4,7 kΩ vers le 3,3 V) ; caméras sur CAM0 et CAM1.

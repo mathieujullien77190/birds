@@ -28,6 +28,11 @@ import zlib
 from flask import Flask, Response, jsonify, request, send_from_directory
 
 # REQUIS : les trois réglages ci-dessous. Ne pas augmenter HOT_MAX ni PWM_MAX sans raison : ce sont les sécurités du Peltier et de la batterie.
+def log(msg):
+    """Écrit une ligne datée sur la sortie standard (visible avec `journalctl -u nichoir -f` sur le Pi, ou dans le terminal du simulateur)."""
+    print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
+
+
 HOT_MAX = 55.0      # °C sur le dissipateur : au-dessus, le Peltier est coupé
 PWM_MAX = 0.6       # puissance maximale du Peltier (batterie de 6 Ah)
 PERIODE = 5.0       # secondes entre deux lectures
@@ -122,6 +127,7 @@ if MOCK:
     etat["erreurs"].clear()
     etat["erreurs"]["mock"] = "MODE SIMULÉ : valeurs fausses, rien n'est branché"
     PERIODE = 1.0
+    log("MODE SIMULÉ : capteurs, GPIO et caméras remplacés par des valeurs fausses")
 
     def _bloc(t, d):
         return struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d))
@@ -163,7 +169,6 @@ if MOCK:
     cameras.clear()
     for num, teinte in ((0, (80, 255, 120)), (1, (90, 150, 255))):
         cameras[num] = FluxFaux(teinte)
-        threading.Thread(target=cameras[num].tourne, daemon=True).start()
 
     sim = {"diss": 20.0, "decalage": 0.0}
 
@@ -191,6 +196,7 @@ def peltier(sens: str, puissance: float):
     if sens == "arrêt":
         puissance = 0.0
     etat["peltier"], etat["puissance"] = sens, puissance
+    log(f"Peltier : {sens}, puissance {round(puissance * 100)} %")
     if GPIO_OK:
         ina.value, inb.value = (1, 0) if sens == "froid" else (0, 1) if sens == "chaud" else (0, 0)
         pwm.value = puissance
@@ -200,38 +206,47 @@ def peltier(sens: str, puissance: float):
 def leds(nid=None, ext=None):
     if nid is not None:
         etat["led_nid"] = bool(nid)
+        log(f"LED du nid : {'allumées' if nid else 'éteintes'}")
         if GPIO_OK:
             led_nid.value = int(nid)
     if ext is not None:
         etat["led_ext"] = bool(ext)
+        log(f"LED extérieures : {'allumées' if ext else 'éteintes'}")
         if GPIO_OK:
             led_ext.value = int(ext)
 
 
 # ---------------------------------------------------------------- lecture des capteurs, toutes les PERIODE secondes
 # REQUIS : c'est la boucle qui lit les capteurs et applique la coupure de sécurité. Elle tourne en tâche de fond.
+def lecture():
+    """Une lecture des capteurs + la coupure de sécurité (appelée toutes les PERIODE secondes par boucle())."""
+    if MOCK:
+        simuler()
+    elif BME_OK:
+        try:
+            d = bme280.sample(bus, BME_ADDR, cal)
+            etat["t_nid"], etat["hum_nid"] = round(d.temperature, 1), round(d.humidity, 0)
+            etat["erreurs"].pop("bme280", None)
+        except Exception as e:
+            etat["erreurs"]["bme280"] = f"lecture du capteur du nid : {e}"
+    if SONDE_OK:
+        try:
+            if not MOCK:
+                etat["t_dissipateur"] = round(sonde.get_temperature(), 1)
+            etat["erreurs"].pop("ds18b20", None)
+            if etat["t_dissipateur"] > HOT_MAX and etat["peltier"] != "arrêt":
+                peltier("arrêt", 0)
+                etat["erreurs"]["securite"] = f"Peltier coupé : dissipateur à {etat['t_dissipateur']} °C (> {HOT_MAX})"
+                log("SÉCURITÉ : " + etat["erreurs"]["securite"])
+        except Exception as e:
+            etat["erreurs"]["ds18b20"] = f"lecture de la sonde : {e}"
+    etat["derniere_lecture"] = time.strftime("%H:%M:%S")
+    log(f"nid {etat['t_nid']} °C, {etat['hum_nid']} % · dissipateur {etat['t_dissipateur']} °C · Peltier {etat['peltier']} {round(etat['puissance'] * 100)} %")
+
+
 def boucle():
     while True:
-        if MOCK:
-            simuler()
-        elif BME_OK:
-            try:
-                d = bme280.sample(bus, BME_ADDR, cal)
-                etat["t_nid"], etat["hum_nid"] = round(d.temperature, 1), round(d.humidity, 0)
-                etat["erreurs"].pop("bme280", None)
-            except Exception as e:
-                etat["erreurs"]["bme280"] = f"lecture du capteur du nid : {e}"
-        if SONDE_OK:
-            try:
-                if not MOCK:
-                    etat["t_dissipateur"] = round(sonde.get_temperature(), 1)
-                etat["erreurs"].pop("ds18b20", None)
-                if etat["t_dissipateur"] > HOT_MAX and etat["peltier"] != "arrêt":
-                    peltier("arrêt", 0)
-                    etat["erreurs"]["securite"] = f"Peltier coupé : dissipateur à {etat['t_dissipateur']} °C (> {HOT_MAX})"
-            except Exception as e:
-                etat["erreurs"]["ds18b20"] = f"lecture de la sonde : {e}"
-        etat["derniere_lecture"] = time.strftime("%H:%M:%S")
+        lecture()
         time.sleep(PERIODE)
 
 
@@ -292,5 +307,11 @@ def video2():
 
 
 if __name__ == "__main__":
+    log("Nichoir mésange : page sur http://0.0.0.0:8080" + (" (mode simulé)" if MOCK else ""))
+    for msg in etat["erreurs"].values():
+        log("! " + msg)
     threading.Thread(target=boucle, daemon=True).start()
+    if MOCK:
+        for flux in cameras.values():
+            threading.Thread(target=flux.tourne, daemon=True).start()
     app.run(host="0.0.0.0", port=8080, threaded=True)
