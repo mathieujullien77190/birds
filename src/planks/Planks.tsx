@@ -5,7 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import Slider from '@/ui/Slider';
 import { Btn, Chip, Hint, Section } from '@/ui/kit';
 import { saveSvg, Sheet2D } from '../ui/Sheet2D';
-import { bounds, castellation, pullFace, type FaceAxis, edgeLength, teethFor, slotsForTeeth, makeNest, NEST_DEFAULT, type NestParams, nestSheets, sheetSvg, sheetsPreviewSvg, moveWithGroup, movingWith, r2, transformPlanks, EDGES, extents, fitHole, holeOutline, recastAll, loadHistory, loadScene, newHole, outline, plankSvg, saveHistory, saveScene, type Edge, type Hole, type HistoryEntry, type Plank, type PlankScene, type Vec3 } from './model';
+import { bounds, castellation, pullFace, type FaceAxis, edgeLength, teethFor, slotsForTeeth, makeNest, NEST_DEFAULT, type NestParams, nestSheets, sheetSvg, sheetsPreviewSvg, moveWithGroup, r2, EDGES, extents, fitHole, holeOutline, recastAll, loadHistory, loadScene, newHole, outline, plankSvg, saveHistory, saveScene, type Edge, type Hole, type HistoryEntry, type Plank, type PlankScene, type Vec3 } from './model';
 import { DocModal, DOCS } from './DocModal';
 import { SchemaPanel } from './SchemaPanel';
 
@@ -903,17 +903,11 @@ export default function Planks() {
   const remove = (id: string) => { commit('Plaque supprimée', (s) => ({ ...s, planks: s.planks.filter((p) => p.id !== id) })); if (selectedId === id) setSelectedId(null); setHoleEdit(null); };
   const [nest, setNest] = useState<NestParams>(() => { try { return { ...NEST_DEFAULT, ...JSON.parse(localStorage.getItem('plaques-nichoir-2') ?? '{}') }; } catch { return NEST_DEFAULT; } });
   useEffect(() => { try { localStorage.setItem('plaques-nichoir-2', JSON.stringify(nest)); } catch { /* rien */ } }, [nest]);
-  const addNest = () => { const b = makeNest(nest, sc.t, sc.fit, sc.planks.length + 1); commit('Nichoir créé', (s) => ({ ...s, planks: [...s.planks, ...b.planks], groupNames: { ...(s.groupNames ?? {}), ...b.groupNames } })); setSelectedId(b.planks[0].id); setGroupSel(b.group); setOpenGroups((g) => new Set([...g, b.group])); setHidden((h) => new Set([...h, ...b.planks.filter((p) => /^Isolant/.test(p.name) || /^Barre /.test(p.name)).map((p) => p.id)])); /* l'isolant et les quatre barres du toit sont cachés par défaut */ };
+  const addNest = () => { const b = makeNest(nest, sc.t, sc.fit, sc.planks.length + 1); commit('Nichoir créé', (s) => ({ ...s, planks: [...s.planks, ...b.planks], groupNames: { ...(s.groupNames ?? {}), ...b.groupNames } })); setSelectedId(b.planks[0].id); setGroupSel(b.group); setOpenGroups((g) => new Set([...g, b.group])); setHidden((h) => new Set([...h, ...b.planks.filter((p) => /^Isolant/.test(p.name) || /^Barre /.test(p.name) || p.name === 'Toit en chêne').map((p) => p.id)])); /* l'isolant, les quatre barres du toit et le pan de toit en chêne sont cachés par défaut (l'œil de « Pièces » les affiche) */ };
   const autoNest = useRef(false);
   useEffect(() => { if (!autoNest.current && sc.planks.length === 0) { autoNest.current = true; addNest(); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  /** Boîte choisie : tourner d'un quart de tour autour de son centre, ou déplacer son centre. */
+  /** Membres d'un groupe (boîte). */
   const groupMembers = (g: string) => sc.planks.filter((p) => p.group === g);
-    const ms = groupMembers(g); if (!ms.length) return;
-    const { min, max } = bounds(ms, sc.t);
-    const pivot: Vec3 = [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2];
-    const ax = [new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1)][axis];
-    commit('Quart de tour de la boîte', (s) => { const ids = new Set([...ms.map((x) => x.id), ...movingWith(s, ms[0]).map((x) => x.id)]); return transformPlanks(s, ids, [0, 0, 0], new Quaternion().setFromAxisAngle(ax, MathUtils.degToRad(deg)), pivot); });
-  };
   /** Copie une boîte entière (nouveau groupe), décalée vers la droite de sa largeur + 20 mm. */
   const duplicateGroup = (g: string) => {
     const ms = groupMembers(g); if (!ms.length) return;
