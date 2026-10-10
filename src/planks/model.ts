@@ -1094,6 +1094,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const FLX = W / 2 - t - 2 - 14, FLY = CND_Y - 1; // filtre LC du Peltier (28 × 18) : derrière le fusible, contre le mur droit, à droite de la gaine
   const CVX = -(W / 2 - t) + 10 + 18, CVY = -(D / 2 - t) + 10 + 30; // convertisseur : coin avant gauche, 1 cm des murs
   const BX = W / 2 - t - 10 - 64, BY = -(D / 2 - t) + 10 + 35; // batterie : coin avant droit, 1 cm des murs
+  const WGX = W / 2 - t - 2 - 10; // les deux Wago du rail 12 V : à droite du fusible, contre le mur droit
   const FX = CND_X + 3, FY = CND_Y - 24; // fusible, près de la sortie de la gaine // centre du convertisseur : milieu de la place libre entre le tasseau gauche, la cale gauche de la batterie, le tasseau avant et la cale avant du Pi
   // plaque froide + Peltier + dissipateur forment un bloc incliné de TILT_DEG vers l'arrière (rotation autour de x) : le bord arrière est plus bas
   const TILT = (TILT_DEG * Math.PI) / 180, plateZ = r2(bodyH - t / 2 - 0.5 - (COLD_D / 2) * Math.sin(TILT));
@@ -1111,6 +1112,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     part('Cale convertisseur avant', 36, 3, t, CVX, CVY - 30 - 1.5, topZ + t / 2, 'block', '#a16207'),
     part('Cale convertisseur arrière', 36, 3, t, CVX, CVY + 30 + 1.5, topZ + t / 2, 'block', '#a16207'),
     part('Fusible lame 15 A (19 × 18 × 5, posé à plat)', 19, 18.5, 5, FX, FY, topZ + 2.5, 'block', '#dc2626'), // près de la sortie de la gaine
+    part('Wago 221 (3 entrées) rail 12 V +', 20, 13, 11, WGX, FY, topZ + 3 + 5.5, 'block', '#f97316'), // bornier du rail 12 V : un fil de la batterie, deux départs (pont en H, convertisseur)
+    part('Wago 221 (3 entrées) rail 12 V −', 20, 13, 11, WGX, FY - 14, topZ + 3 + 5.5, 'block', '#9ca3af'),
     part('Cale pont en H gauche', 4, 24, t, DRV[0] - 22, DRV[1], topZ + t / 2, 'block', '#a16207'),
     part('Cale pont en H droite', 4, 24, t, DRV[0] + 22, DRV[1], topZ + t / 2, 'block', '#a16207'),
     part('Cale pont en H avant', 24, 4, t, DRV[0], DRV[1] - 17, topZ + t / 2, 'block', '#a16207'),
@@ -1311,6 +1314,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     [/^Caméra( 2)?$/, 'https://www.raspberrypi.com/products/camera-module-3/'],
     [/^Peltier/, 'https://www.radiolocman.com/datasheet/pdf.html?di=173597'],
     [/^Pont en H/, 'https://www.pololu.com/product/1451'],
+    [/^Wago/, 'https://www.wago.com/fr/bornes-de-connexion-pour-conducteurs/221-413'],
     [/^Batterie/, 'https://robu.in/?p=2024523'],
     [/^Régulateur/, 'https://azcus.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948'],
     [/^Capteur/, 'https://cdn.sparkfun.com/assets/5/3/0/f/7/BME280_Datasheet.pdf'],
