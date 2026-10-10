@@ -33,7 +33,7 @@ Le dépôt contient le workflow `.github/workflows/pages.yml` : à chaque push s
 | `docs/` | Les documents Markdown affichés dans l'application. |
 | `pi/` | Le programme de test du Raspberry Pi (Python + page web) et son installation. |
 | `public/models/` | Le modèle 3D du Raspberry Pi. |
-| `archive-autres-outils/` | Les anciens outils (visionneuse STL, pavé isolé, nichoir complet, menu de départ), gardés pour mémoire, non compilés. |
-| `archive-editeur-oiseaux/`, `ancien-monde-lowpoly/` | Projets précédents, lecture seule. |
+| `archives/autres-outils/` | Les anciens outils (visionneuse STL, pavé isolé, nichoir complet, menu de départ), gardés pour mémoire, non compilés. |
+| `archives/editeur-oiseaux/`, `archives/ancien-monde-lowpoly/` | Projets précédents, lecture seule. |
 
 Le fichier `CLAUDE.md` décrit le modèle en détail (conventions, décisions, historique des choix).
