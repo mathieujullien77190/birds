@@ -11,7 +11,7 @@ function afficher(e) {
   for (const b of ['froid', 'chaud', 'arrêt']) $('p_' + (b === 'arrêt' ? 'arret' : b)).classList.toggle('on', e.peltier === b);
   $('l_nid').classList.toggle('on', !!e.led_nid);
   $('l_ext').classList.toggle('on', !!e.led_ext);
-  for (const k of ['bme280', 'ds18b20', 'gpio', 'securite', 'camera1', 'camera2']) { const el = $('err_' + k); if (el) el.textContent = e.erreurs?.[k] ?? ''; }
+  for (const k of ['mock', 'bme280', 'ds18b20', 'gpio', 'securite', 'camera1', 'camera2']) { const el = $('err_' + k); if (el) el.textContent = e.erreurs?.[k] ?? ''; }
   if (e.erreurs?.picamera2) { $('err_camera1').textContent = e.erreurs.picamera2; $('err_camera2').textContent = e.erreurs.picamera2; }
 }
 

@@ -140,6 +140,9 @@ app.run(host="0.0.0.0", port=8080)
   - quelques boutons : forcer froid / chaud / arrêt, allumer les LED, prendre une photo.
 - La page se rafraîchit toute seule toutes les 10 secondes en lisant `/api/etat`.
 
+## Essayer sans matériel (mode simulé)
+`NICHOIR_MOCK=1 python nichoir.py` sur un ordinateur : le programme invente des mesures plausibles (nid autour de 15 °C, dissipateur qui chauffe avec le Peltier, humidité 60–80 %), accepte les commandes sans toucher de GPIO et sert deux flux vidéo animés. `NICHOIR_MOCK_SURCHAUFFE=60` force le dissipateur à 60 °C pour voir la coupure de sécurité à 55 °C. Un bandeau « MODE SIMULÉ » prévient sur la page. Testé : lecture de l'état, commande du Peltier, coupure à 55,2 °C, LED, flux PNG.
+
 ## Hébergé où ?
 
 - **Sur le Pi, et nulle part ailleurs.** Pas d'abonnement, pas de serveur extérieur, les données restent chez toi. Le Pi est allumé en permanence de toute façon.

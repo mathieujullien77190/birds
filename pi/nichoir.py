@@ -7,6 +7,8 @@ Version volontairement minimale pour vérifier le matériel :
 - sert une page web sur le port 8080.
 
 Chaque partie du matériel est optionnelle : si un capteur ou une caméra manque, la page le dit et le reste marche.
+Mode simulé : `NICHOIR_MOCK=1 python nichoir.py` (ou `--mock`) remplace capteurs, GPIO et caméras par des valeurs fausses mais plausibles,
+pour essayer la page sur un ordinateur sans rien de branché (voir README).
 Sécurité : le Peltier est coupé si le dissipateur dépasse HOT_MAX °C.
 
 Brochage (voir docs/schema-electronique.md) :
@@ -14,8 +16,14 @@ Brochage (voir docs/schema-electronique.md) :
   LED du nid : GPIO23 (module MOSFET IN1)   LED extérieures : GPIO24 (IN2)
   BME280 : I2C adresse 0x76 (ou 0x77)        DS18B20 : 1-Wire sur GPIO4
 """
+import math
+import os
+import random
+import struct
+import sys
 import threading
 import time
+import zlib
 
 from flask import Flask, Response, jsonify, request, send_from_directory
 
@@ -23,6 +31,10 @@ from flask import Flask, Response, jsonify, request, send_from_directory
 HOT_MAX = 55.0      # °C sur le dissipateur : au-dessus, le Peltier est coupé
 PWM_MAX = 0.6       # puissance maximale du Peltier (batterie de 6 Ah)
 PERIODE = 5.0       # secondes entre deux lectures
+
+# FACULTATIF : mode simulé, pour tester la page sans matériel (ordinateur). Jamais actif par défaut.
+MOCK = os.environ.get("NICHOIR_MOCK") == "1" or "--mock" in sys.argv
+MOCK_SURCHAUFFE = float(os.environ.get("NICHOIR_MOCK_SURCHAUFFE", "0"))  # °C : force le dissipateur à cette température quand le Peltier tourne (essai de la coupure)
 
 # ---------------------------------------------------------------- matériel (chaque bloc est optionnel)
 etat = {
@@ -99,6 +111,76 @@ except Exception as e:
     etat["erreurs"]["picamera2"] = f"picamera2 indisponible : {e}"
 
 
+# ---------------------------------------------------------------- mode simulé (remplace le matériel quand MOCK est actif)
+if MOCK:
+    class Faux:
+        """Sortie GPIO factice : accepte .value = … sans rien piloter."""
+        value = 0
+
+    pwm, ina, inb, led_nid, led_ext = Faux(), Faux(), Faux(), Faux(), Faux()
+    GPIO_OK = BME_OK = SONDE_OK = True
+    etat["erreurs"].clear()
+    etat["erreurs"]["mock"] = "MODE SIMULÉ : valeurs fausses, rien n'est branché"
+    PERIODE = 1.0
+
+    def _bloc(t, d):
+        return struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d))
+
+    class FluxFaux:
+        """Flux vidéo factice : une petite image PNG animée par caméra (barre qui se déplace, carré qui clignote)."""
+        mime = "image/png"
+
+        def __init__(self, teinte):
+            self.frame, self.cond, self.teinte = None, threading.Condition(), teinte
+
+        def image(self, n, w=320, h=240):
+            x0 = (n * 8) % w
+            lignes = bytearray()
+            for y in range(h):
+                lignes.append(0)  # filtre PNG « aucun »
+                g = 40 + (y * 120) // h
+                fond = bytes(g * c // 255 for c in self.teinte)
+                for x in range(w):
+                    if x0 <= x < x0 + 12:
+                        lignes += bytes((255, 255, 255))  # barre blanche
+                    elif 8 <= x < 28 and 8 <= y < 28 and (n // 5) % 2 == 0:
+                        lignes += bytes((255, 40, 40))  # carré rouge qui clignote
+                    else:
+                        lignes += fond
+            signature = bytes((137, 80, 78, 71, 13, 10, 26, 10))
+            return (signature + _bloc(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0))
+                    + _bloc(b"IDAT", zlib.compress(bytes(lignes), 3)) + _bloc(b"IEND", b""))
+
+        def tourne(self):
+            n = 0
+            while True:
+                with self.cond:
+                    self.frame = self.image(n)
+                    self.cond.notify_all()
+                n += 1
+                time.sleep(0.2)
+
+    cameras.clear()
+    for num, teinte in ((0, (80, 255, 120)), (1, (90, 150, 255))):
+        cameras[num] = FluxFaux(teinte)
+        threading.Thread(target=cameras[num].tourne, daemon=True).start()
+
+    sim = {"diss": 20.0, "decalage": 0.0}
+
+    def simuler():
+        """Un pas de simulation : le nid suit un cycle de 10 min, le Peltier le refroidit / le chauffe, le dissipateur chauffe avec la puissance."""
+        p = etat["puissance"]
+        signe = -1 if etat["peltier"] == "froid" else 1 if etat["peltier"] == "chaud" else 0
+        sim["decalage"] += (signe * 8 * p / PWM_MAX - sim["decalage"]) * 0.05
+        cible = 20 + 40 * p
+        if p > 0 and MOCK_SURCHAUFFE:
+            cible = max(cible, MOCK_SURCHAUFFE)
+        sim["diss"] += (cible - sim["diss"]) * 0.3
+        etat["t_nid"] = round(15 + 3 * math.sin(time.time() / 600 * 2 * math.pi) + sim["decalage"] + random.uniform(-0.2, 0.2), 1)
+        etat["hum_nid"] = round(70 + 10 * math.sin(time.time() / 900 * 2 * math.pi) + random.uniform(-1, 1), 0)
+        etat["t_dissipateur"] = round(sim["diss"] + random.uniform(-0.2, 0.2), 1)
+
+
 # ---------------------------------------------------------------- commandes
 # REQUIS si le Peltier est monté : c'est la seule fonction qui commande le pont en H (sens + puissance plafonnée à PWM_MAX).
 def peltier(sens: str, puissance: float):
@@ -130,7 +212,9 @@ def leds(nid=None, ext=None):
 # REQUIS : c'est la boucle qui lit les capteurs et applique la coupure de sécurité. Elle tourne en tâche de fond.
 def boucle():
     while True:
-        if BME_OK:
+        if MOCK:
+            simuler()
+        elif BME_OK:
             try:
                 d = bme280.sample(bus, BME_ADDR, cal)
                 etat["t_nid"], etat["hum_nid"] = round(d.temperature, 1), round(d.humidity, 0)
@@ -139,7 +223,8 @@ def boucle():
                 etat["erreurs"]["bme280"] = f"lecture du capteur du nid : {e}"
         if SONDE_OK:
             try:
-                etat["t_dissipateur"] = round(sonde.get_temperature(), 1)
+                if not MOCK:
+                    etat["t_dissipateur"] = round(sonde.get_temperature(), 1)
                 etat["erreurs"].pop("ds18b20", None)
                 if etat["t_dissipateur"] > HOT_MAX and etat["peltier"] != "arrêt":
                     peltier("arrêt", 0)
@@ -191,7 +276,8 @@ def mjpeg(num: int):
             with flux.cond:
                 flux.cond.wait()
                 frame = flux.frame
-            yield b"--frame\r\nContent-Type: image/jpeg\r\nContent-Length: " + str(len(frame)).encode() + b"\r\n\r\n" + frame + b"\r\n"
+            mime = getattr(flux, "mime", "image/jpeg").encode()  # le mode simulé sert des PNG
+            yield b"--frame\r\nContent-Type: " + mime + b"\r\nContent-Length: " + str(len(frame)).encode() + b"\r\n\r\n" + frame + b"\r\n"
     return Response(gen(), mimetype="multipart/x-mixed-replace; boundary=frame")
 
 

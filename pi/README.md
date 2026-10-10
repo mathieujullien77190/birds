@@ -29,6 +29,15 @@ sudo systemctl enable --now nichoir
 journalctl -u nichoir -f         # voir ce qu'il raconte
 ```
 
+## Essayer sans matériel (mode simulé)
+Sur un ordinateur, sans rien de branché : capteurs, GPIO et caméras sont remplacés par des valeurs fausses mais plausibles (nid autour de 15 °C, dissipateur qui chauffe avec la puissance du Peltier, deux flux vidéo animés). Un bandeau « MODE SIMULÉ » s'affiche en haut de la page.
+```sh
+pip install flask
+NICHOIR_MOCK=1 python nichoir.py          # Windows PowerShell : $env:NICHOIR_MOCK=1; python nichoir.py
+# puis http://localhost:8080
+```
+Pour essayer la coupure de sécurité : `NICHOIR_MOCK_SURCHAUFFE=60` force le dissipateur à 60 °C dès que le Peltier tourne ; il est coupé à 55 °C et la page affiche « Peltier coupé ».
+
 ## Brochage
 
 Voir le document « Schéma électronique » de l'application. En résumé : Peltier PWM GPIO18, INA GPIO13, INB GPIO19 ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; DS18B20 sur 1-Wire (GPIO4, résistance de 4,7 kΩ vers le 3,3 V) ; caméras sur CAM0 et CAM1.
