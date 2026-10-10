@@ -5,7 +5,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import Slider from '@/ui/Slider';
 import { Btn, Chip, Hint, Section } from '@/ui/kit';
 import { saveSvg, Sheet2D } from '../ui/Sheet2D';
-import { bounds, castellation, pullFace, type FaceAxis, edgeLength, teethFor, slotsForTeeth, makeNest, NEST_DEFAULT, type NestParams, nestSheets, sheetSvg, sheetsPreviewSvg, moveWithGroup, r2, EDGES, extents, fitHole, holeOutline, recastAll, loadHistory, loadScene, newHole, outline, plankSvg, saveHistory, saveScene, type Edge, type Hole, type HistoryEntry, type Plank, type PlankScene, type Vec3 } from './model';
+import { bounds, pullFace, type FaceAxis, makeNest, NEST_DEFAULT, type NestParams, nestSheets, sheetSvg, sheetsPreviewSvg, moveWithGroup, r2, extents, fitHole, holeOutline, recastAll, loadHistory, loadScene, newHole, outline, plankSvg, saveHistory, saveScene, type Hole, type HistoryEntry, type Plank, type PlankScene, type Vec3 } from './model';
 import { DocModal, DOCS } from './DocModal';
 import { SchemaPanel } from './SchemaPanel';
 
@@ -499,8 +499,7 @@ export default function Planks() {
   useEffect(() => { try { localStorage.setItem('plaques-volet', drawer ?? ''); } catch { /* rien */ } }, [drawer]);
   const [ctx, setCtx] = useState<{ x: number; y: number; plankId: string; local: [number, number] } | null>(null); // menu du clic droit
   const [holeEdit, setHoleEdit] = useState<{ plankId: string; holeId: string; fresh?: boolean } | null>(null); // fenêtre de réglage d'un trou ; `fresh` : trou qui vient d'être créé, ses réglages se fondent dans « Trou ajouté »
-  const [holeHover, setHoleHover] = useState<{ plankId: string; holeId: string } | null>(null); // trou survolé dans la section « Trous »
-  const [cast, setCast] = useState<{ n: number; phase: 0 | 1; auto: boolean }>({ n: 7, phase: 0, auto: true }); // réglages du prochain crénelage ; auto = même règle que les boîtes (une dent ≈ 16 mm, impair)
+  const holeHover = null as { plankId: string; holeId: string } | null; // plus de section « Trous » : plus de trou survolé // trou survolé dans la section « Trous »
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<View | null>(null);
   const scRef = useRef(sc);
@@ -943,17 +942,9 @@ export default function Planks() {
     commit(fresh ? 'Trou ajouté' : 'Réglage du trou', (s) => ({ ...s, planks: s.planks.map((x) => (x.id === p.id ? { ...x, holes: x.holes.map((h) => (h.id === id ? fitHole(x, { ...h, ...patch }) : h)) } : x)) }), fresh);
   };
   /** Bouton magique : perce les fentes partout où la plaque en traverse d'autres. */
-  const [magicMsg, setMagicMsg] = useState<string | null>(null);
-  const magic = (p: Plank) => {
-    const r = slotsForTeeth(scRef.current, p.id);
-    if (!r.added) { setMagicMsg('Rien à percer : aucune autre plaque ne traverse celle-ci (ou les fentes existent déjà).'); return; }
-    commit('Fentes percées', () => r.scene);
-    setMagicMsg(`${r.added} fente${r.added > 1 ? 's' : ''} percée${r.added > 1 ? 's' : ''} pour ${r.planks} plaque${r.planks > 1 ? 's' : ''} qui la traversent.`);
-  };
   const removeHole = (p: Plank, id: string) => { update(p.id, { holes: p.holes.filter((h) => h.id !== id) }, 'Trou retiré'); setHoleEdit(null); };
   const editingHole = holeEdit ? sc.planks.find((p) => p.id === holeEdit.plankId)?.holes.find((h) => h.id === holeEdit.holeId) : undefined;
   const editingPlank = holeEdit ? sc.planks.find((p) => p.id === holeEdit.plankId) : undefined;
-  const setRot = (p: Plank, i: number, val: number) => { const rot = [...p.rot] as Vec3; rot[i] = ((((val + 180) % 360) + 360) % 360) - 180; commit('Rotation', (s) => moveWithGroup(s, p.id, p.pos, rot)); };
   /** Lie toutes les plaques sélectionnées (principale + Ctrl + clic) dans un seul groupe (les groupes existants fusionnent). */
   const linkSelection = () => {
     const ids = new Set([selectedId, ...extra].filter(Boolean) as string[]);
@@ -969,25 +960,8 @@ export default function Planks() {
     setExtra(new Set());
   };
   /** Détache la plaque de son groupe. */
-  const link = (p: Plank, _otherId: null) => update(p.id, { group: undefined }, 'Plaque déliée');
   /** Bascule le crénelage d'un bord : on / off ; les crans de ce bord sont régénérés ou retirés. */
-  const toggleCast = (p: Plank, edge: Edge) => {
-    const on = !!p.cast?.[edge];
-    const nextCast = { ...(p.cast ?? {}) };
-    const n = cast.auto ? teethFor(edgeLength(p, edge)) : cast.n; // auto : comme les boîtes, le nombre de dents dépend de la longueur du bord
-    if (on) delete nextCast[edge]; else nextCast[edge] = { n, phase: cast.phase };
-    const kept = p.notches.filter((n) => n.edge !== edge);
-    update(p.id, { cast: nextCast, notches: on ? kept : [...kept, ...castellation(p, edge, n, cast.phase, sc.t, sc.fit)] }, on ? 'Crénelage retiré' : 'Crénelage');
-  };
   /** Nouveaux réglages (dents, phase) : appliqués aux bords déjà crénelés. */
-  const recast = (p: Plank, n: number, phase: 0 | 1, auto = cast.auto) => {
-    setCast({ n, phase, auto });
-    const edges = Object.keys(p.cast ?? {}) as Edge[];
-    if (!edges.length) return;
-    const nFor = (e: Edge) => (auto ? teethFor(edgeLength(p, e)) : n);
-    const nextCast = Object.fromEntries(edges.map((e) => [e, { n: nFor(e), phase }])) as Plank['cast'];
-    update(p.id, { cast: nextCast, notches: [...p.notches.filter((x) => !edges.includes(x.edge)), ...edges.flatMap((e) => castellation(p, e, nFor(e), phase, sc.t, sc.fit))] }, 'Crénelage');
-  };
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-stone-100 text-stone-800">
@@ -1021,77 +995,6 @@ export default function Planks() {
         </Section>
 
 
-        {selected && !groupSel && (
-          <>
-            <Section title="Plaque choisie" defaultOpen note={`${selected.name} · ${selected.w} × ${selected.h} mm`}>
-              <input value={selected.name} onChange={(e) => update(selected.id, { name: e.target.value }, 'Nom')} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1 text-xs" />
-              <Slider label="Largeur" value={selected.w} min={10} max={600} step={1} unit=" mm" onChange={(v) => update(selected.id, { w: v }, 'Largeur')} />
-              <Slider label="Hauteur" value={selected.h} min={10} max={600} step={1} unit=" mm" onChange={(v) => update(selected.id, { h: v }, 'Hauteur')} />
-              <Hint>Déplacer : tire un rond vert d'un coin ; il s'aimante aux coins des autres pièces (ronds bleus). Clic droit : trou, transparence. Ctrl + clic : sélection multiple, puis « Lier ». Suppr : supprimer.</Hint>
-              {selected.group && (
-                <div className="flex items-center gap-2 text-[11px] text-stone-600">
-                  <span className="min-w-0 flex-1 truncate">Liée avec {sc.planks.filter((p) => p.group === selected.group && p.id !== selected.id).map((p) => p.name).join(', ') || 'personne'}</span>
-                  <Btn block={false} onClick={() => link(selected, null)}>Délier</Btn>
-                </div>
-              )}
-            </Section>
-
-            <Section title="Rotation" defaultOpen>
-              <Hint>Pour déplacer : tire un rond vert d'un coin dans la 3D. La rotation se règle ici, aux curseurs ou par quarts de tour.</Hint>
-              {(['X', 'Y', 'Z'] as const).map((ax, i) => (
-                <div key={ax} className="flex items-end gap-1.5">
-                  <div className="min-w-0 flex-1"><Slider label={`Rotation ${ax}`} value={selected.rot[i]} min={-180} max={180} step={1} unit="°" onChange={(v) => setRot(selected, i, v)} /></div>
-                  <Btn block={false} onClick={() => setRot(selected, i, selected.rot[i] - 90)} title="Un quart de tour en arrière">−90°</Btn>
-                  <Btn block={false} onClick={() => setRot(selected, i, selected.rot[i] + 90)} title="Un quart de tour en avant">+90°</Btn>
-                </div>
-              ))}
-            </Section>
-
-            <Section title="Crans" defaultOpen={false} note={Object.keys(selected.cast ?? {}).length ? `${Object.keys(selected.cast ?? {}).length} bord${Object.keys(selected.cast ?? {}).length > 1 ? 's' : ''}` : 'aucun'}>
-              <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-stone-700">
-                Bords crénelés
-                {EDGES.map((e) => <Chip key={e.id} active={!!selected.cast?.[e.id]} onClick={() => toggleCast(selected, e.id)} title={selected.cast?.[e.id] ? 'Retirer les crans de ce bord' : 'Créneler ce bord'}>{e.label}</Chip>)}
-              </div>
-                            <div className="flex items-center gap-1.5 text-[11px] text-stone-700">
-                Dents
-                <Chip active={cast.auto} onClick={() => recast(selected, cast.n, cast.phase, true)} title="Une dent ≈ 16 mm, nombre impair : la même règle que les boîtes">auto (comme les boîtes)</Chip>
-                <Chip active={!cast.auto} onClick={() => recast(selected, cast.n, cast.phase, false)}>fixe</Chip>
-              </div>
-              {cast.auto ? (
-                <Hint>Haut / bas : {teethFor(selected.w)} dents ({+(selected.w / teethFor(selected.w)).toFixed(2)} mm) · gauche / droite : {teethFor(selected.h)} dents ({+(selected.h / teethFor(selected.h)).toFixed(2)} mm). Deux bords de même longueur ont exactement les mêmes crans.</Hint>
-              ) : (
-                <Slider label="Dents (nombre impair : les deux bouts pareils)" value={cast.n} min={3} max={25} step={2} onChange={(n) => recast(selected, n, cast.phase)} />
-              )}
-              <div className="flex items-center gap-1.5 text-[11px] text-stone-700">
-                Première dent
-                <Chip active={cast.phase === 0} onClick={() => recast(selected, cast.n, 0)}>creuse</Chip>
-                <Chip active={cast.phase === 1} onClick={() => recast(selected, cast.n, 1)}>pleine</Chip>
-              </div>
-              <Hint>Un bouton par bord : allumé = crénelé. Une dent sur deux est creusée de l'épaisseur du bois ; la plaque d'en face, crénelée pareil avec la première dent inversée, s'emboîte à fleur.</Hint>
-            </Section>
-
-            <Section title="Fentes magiques" defaultOpen={false}>
-              <Btn variant="primary" onClick={() => magic(selected)}>✨ Percer les fentes de cette plaque</Btn>
-              {magicMsg && <Hint>{magicMsg}</Hint>}
-              <Hint>Partout où une autre plaque (perpendiculaire, pas du même groupe) traverse la plaque choisie, une fente rectangulaire est percée dans celle-ci : longueur de chaque dent × épaisseur du bois. Les fentes déjà là ne sont pas doublées.</Hint>
-            </Section>
-
-            <Section title="Trous" defaultOpen={false} note={`${selected.holes.length}`}>
-              <Btn onClick={() => addHole(selected.id, [0, 0], false)}>Ajouter un trou au centre</Btn>
-              <Hint>Ou clic droit sur la plaque dans la 3D, à l'endroit voulu.</Hint>
-              {selected.holes.map((h, k) => (
-                <div key={h.id} onMouseEnter={() => setHoleHover({ plankId: selected.id, holeId: h.id })} onMouseLeave={() => setHoleHover(null)} className={`space-y-2 rounded-md border bg-white p-2 ${holeEdit?.holeId === h.id ? 'border-emerald-400' : 'border-stone-200'}`}>
-                  <div className="flex items-center gap-1.5 text-[11px] text-stone-600">
-                    <span className="font-semibold">Trou {k + 1}</span>
-                    <span className="text-stone-400">{h.shape === 'round' ? `Ø ${h.size}` : `${h.size} × ${h.sh ?? h.size}`} mm</span>
-                    <button onClick={() => removeHole(selected, h.id)} className="ml-auto rounded px-1.5 text-sm text-stone-400 hover:bg-stone-200 hover:text-stone-700" title="Retirer ce trou">×</button>
-                  </div>
-                  <HoleFields plank={selected} hole={h} onChange={(patch) => setHole(selected, h.id, patch)} />
-                </div>
-              ))}
-            </Section>
-          </>
-        )}
 
         <Section title="Découpe laser" defaultOpen={false} note={`${sheets.length} planche${sheets.length > 1 ? 's' : ''} de ${cutCfg.W} × ${cutCfg.H}`}>
           <Slider label="Largeur de la planche" value={cutCfg.W} min={100} max={1500} step={5} unit=" mm" onChange={(W) => setCutCfg({ ...cutCfg, W })} />
@@ -1161,7 +1064,6 @@ export default function Planks() {
         {ctx && (
           <div className="absolute z-10 min-w-36 rounded-md border border-stone-200 bg-white py-1 text-xs shadow-lg" style={{ left: ctx.x, top: ctx.y }} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => addHole(ctx.plankId, ctx.local)} className="block w-full px-3 py-1.5 text-left hover:bg-emerald-50">Trou…</button>
-            <button onClick={() => { const pl = sc.planks.find((p) => p.id === ctx.plankId); if (pl) magic(pl); setCtx(null); }} className="block w-full px-3 py-1.5 text-left hover:bg-emerald-50" title="Perce, dans cette plaque, les fentes où d'autres plaques la traversent">✨ Percer les fentes</button>
             <button onClick={() => { toggleHidden([ctx.plankId]); setCtx(null); }} className="block w-full px-3 py-1.5 text-left hover:bg-emerald-50">{hidden.has(ctx.plankId) ? 'Voir' : 'Cacher'}</button>
             {sc.planks.find((p) => p.id === ctx.plankId)?.group && (
               <button onClick={() => { const g = sc.planks.find((p) => p.id === ctx.plankId)?.group; if (g) toggleHidden(sc.planks.filter((p) => p.group === g).map((p) => p.id)); setCtx(null); }} className="block w-full px-3 py-1.5 text-left hover:bg-emerald-50">Cacher le groupe</button>
