@@ -12,9 +12,9 @@ import yaml from 'highlight.js/lib/languages/yaml';
 hljs.registerLanguage('typescript', typescript); hljs.registerLanguage('javascript', javascript); hljs.registerLanguage('python', python); hljs.registerLanguage('xml', xml);
 hljs.registerLanguage('css', css); hljs.registerLanguage('json', json); hljs.registerLanguage('markdown', markdown); hljs.registerLanguage('ini', ini); hljs.registerLanguage('yaml', yaml);
 
-/** Tout le code du projet, lu à la compilation (aucun fichier n'est chargé à l'exécution) : l'application, le programme du Pi, les documents, les réglages. */
+/** Le code du dossier pi/ (le programme du Raspberry Pi), lu à la compilation : aucun fichier n'est chargé à l'exécution. */
 const SOURCES = import.meta.glob(
-  ['/src/**/*.{ts,tsx,css}', '/pi/**/*.{py,html,js,service,txt,md}', '/docs/*.md', '/.github/workflows/*.yml', '/README.md', '/CLAUDE.md', '/index.html', '/vite.config.ts', '/package.json', '/tsconfig.json'],
+  ['/pi/**/*.{py,html,js,service,txt,md}'],
   { query: '?raw', import: 'default', eager: true },
 ) as Record<string, string>;
 
@@ -56,8 +56,8 @@ function buildTree(paths: string[]): Node {
 export function CodeBrowser() {
   const files = useMemo(() => Object.fromEntries(Object.entries(SOURCES).map(([k, v]) => [k.replace(/^\//, ''), v])), []);
   const tree = useMemo(() => buildTree(Object.keys(files)), [files]);
-  const [sel, setSel] = useState('src/planks/model.ts');
-  const [open, setOpen] = useState<Set<string>>(new Set(['src', 'src/planks', 'pi', 'docs']));
+  const [sel, setSel] = useState('pi/nichoir.py');
+  const [open, setOpen] = useState<Set<string>>(new Set(['pi', 'pi/web']));
   const text = files[sel] ?? '';
   const ext = sel.split('.').pop() ?? '';
   const html = useMemo(() => {

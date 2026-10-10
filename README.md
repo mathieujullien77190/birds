@@ -9,7 +9,7 @@ Un nichoir à mésanges isolé, dessiné en 3D dans le navigateur et découpé a
 - Un seul écran : le nichoir en 3D (Three.js), réglable par quelques curseurs (intérieur carré, hauteur et diamètre du trou), avec les options Solaire, 2ᵉ caméra et Peltier + capteur.
 - Chaque pièce est une plaque de contreplaqué crénelée : cliquer une pièce dans la 3D la choisit et la montre dans le volet « Pièces » ; survoler un fil ou un composant le met en surbrillance dans le schéma électrique (bouton 🔌 Schéma) et inversement.
 - « Découpe laser » : les plaques sont rangées sur des planches de 410 × 400 mm (marge de 8 mm, 5 mm entre pièces) et exportées en SVG, un fichier par planche.
-- Deux documents intégrés (pièce « Schéma électronique » du volet « Pièces ») : le **schéma électronique** (branchements fil par fil, paramètres de chaque composant, poids, prix par groupe avec cases à cocher, liens vers les fiches) le **logiciel** (programme Python sur le Pi, service systemd, page web, accès à distance) et un explorateur de **code** (arborescence des fichiers et sources colorées).
+- Deux documents intégrés (pièce « Schéma électronique » du volet « Pièces ») : le **schéma électronique** (branchements fil par fil, paramètres de chaque composant, poids, prix par groupe avec cases à cocher, liens vers les fiches) le **logiciel** (programme Python sur le Pi, service systemd, page web, accès à distance) et un explorateur du **code du Pi** (arborescence du dossier `pi/`, sources colorées).
 
 ## Lancer en local
 
