@@ -310,9 +310,9 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Câbles (2,5 mm², 4 mm², signaux), gaine ICTA, presse-étoupe, cosses | 25 € |
 | Solaire | Panneau solaire 100 W | 90 € |
 | Solaire | Régulateur de charge Genasun GV-10-Li | 120 € |
-| Nichoir | Contreplaqué peuplier 3 mm (10 planches de 41 × 40 cm) | 20 € |
-| Nichoir | Laine de bois 40 mm (0,3 m²) | 10 € |
-| Nichoir | Colle, vis inox | 8 € |
+| Corps | Contreplaqué peuplier 3 mm (10 planches de 41 × 40 cm) | 20 € |
+| Corps | Laine de bois 40 mm (0,3 m²) | 10 € |
+| Corps | Colle, vis inox | 8 € |
 | Habillage | Chêne 18 mm (27 × 30 cm) | 12 € |
 | Habillage | Lambris pin 10 mm (0,35 m²) | 15 € |
 | Habillage | Peinture blanche | 7 € |
