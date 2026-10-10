@@ -19,6 +19,7 @@ import time
 
 from flask import Flask, Response, jsonify, request, send_from_directory
 
+# REQUIS : les trois réglages ci-dessous. Ne pas augmenter HOT_MAX ni PWM_MAX sans raison : ce sont les sécurités du Peltier et de la batterie.
 HOT_MAX = 55.0      # °C sur le dissipateur : au-dessus, le Peltier est coupé
 PWM_MAX = 0.6       # puissance maximale du Peltier (batterie de 6 Ah)
 PERIODE = 5.0       # secondes entre deux lectures
@@ -32,6 +33,8 @@ etat = {
     "derniere_lecture": None,
 }
 
+# FACULTATIF : sans les GPIO (ordinateur, Pi non câblé) le programme tourne quand même, la page signale seulement « GPIO indisponible ».
+# REQUIS pour piloter le Peltier et les LED : le pont en H sur GPIO18 / 13 / 19 et le module MOSFET sur GPIO23 / 24.
 try:
     from gpiozero import DigitalOutputDevice, PWMOutputDevice
     pwm = PWMOutputDevice(18, frequency=20000)
@@ -42,6 +45,8 @@ except Exception as e:  # pas sur un Pi, ou gpiozero absent
     GPIO_OK = False
     etat["erreurs"]["gpio"] = f"GPIO indisponible : {e}"
 
+# FACULTATIF : capteur BME280 du nid (température, humidité). Sans lui, la page affiche « — » et le reste marche.
+# Il n'est PAS nécessaire à la sécurité : la coupure du Peltier ne dépend que de la sonde du dissipateur.
 try:
     import bme280
     import smbus2
@@ -53,6 +58,8 @@ except Exception as e:
     BME_OK = False
     etat["erreurs"]["bme280"] = f"capteur du nid indisponible : {e}"
 
+# FACULTATIF mais FORTEMENT CONSEILLÉ : sonde DS18B20 du dissipateur. C'est elle qui coupe le Peltier au-dessus de HOT_MAX.
+# Sans sonde, n'allume le Peltier que sous surveillance (jamais la nuit, jamais sans dissipateur monté).
 try:
     from w1thermsensor import W1ThermSensor
     sonde = W1ThermSensor()
@@ -62,6 +69,7 @@ except Exception as e:
     etat["erreurs"]["ds18b20"] = f"sonde du dissipateur indisponible : {e}"
 
 cameras = {}
+# FACULTATIF : les caméras (picamera2). Chaque caméra qui manque est signalée sur la page, l'autre continue.
 try:
     from picamera2 import Picamera2
     from picamera2.encoders import MJPEGEncoder
@@ -92,6 +100,7 @@ except Exception as e:
 
 
 # ---------------------------------------------------------------- commandes
+# REQUIS si le Peltier est monté : c'est la seule fonction qui commande le pont en H (sens + puissance plafonnée à PWM_MAX).
 def peltier(sens: str, puissance: float):
     """sens : 'froid' (refroidit le nid), 'chaud' (le réchauffe) ou 'arrêt' ; puissance 0..1 (plafonnée à PWM_MAX)."""
     puissance = max(0.0, min(PWM_MAX, puissance))
@@ -105,6 +114,7 @@ def peltier(sens: str, puissance: float):
         pwm.value = puissance
 
 
+# FACULTATIF : sans le module MOSFET des LED, ces commandes ne font rien de visible.
 def leds(nid=None, ext=None):
     if nid is not None:
         etat["led_nid"] = bool(nid)
@@ -117,6 +127,7 @@ def leds(nid=None, ext=None):
 
 
 # ---------------------------------------------------------------- lecture des capteurs, toutes les PERIODE secondes
+# REQUIS : c'est la boucle qui lit les capteurs et applique la coupure de sécurité. Elle tourne en tâche de fond.
 def boucle():
     while True:
         if BME_OK:
@@ -140,6 +151,7 @@ def boucle():
 
 
 # ---------------------------------------------------------------- page web et API
+# REQUIS : la page web et son API. Sans eux on ne voit ni ne commande rien (le service tourne mais reste muet).
 app = Flask(__name__, static_folder="web", static_url_path="")
 
 
@@ -168,6 +180,7 @@ def api_led():
     return jsonify(etat)
 
 
+# FACULTATIF : les deux flux vidéo (/video/1 et /video/2). Retirer les deux routes si le Pi n'a pas de caméra.
 def mjpeg(num: int):
     flux = cameras.get(num)
     if flux is None:

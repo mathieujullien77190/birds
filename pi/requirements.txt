@@ -1,3 +1,4 @@
+# REQUIS : flask, gpiozero, lgpio.  FACULTATIF : smbus2 + RPi.bme280 (capteur du nid), w1thermsensor (sonde du dissipateur) — à installer seulement si le capteur est branché.
 flask>=3.0
 gpiozero>=2.0
 lgpio>=0.2

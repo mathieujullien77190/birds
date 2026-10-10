@@ -1,3 +1,4 @@
+// REQUIS : ce fichier est le seul JavaScript de la page ; sans lui la page reste vide (index.html le charge en bas).
 // Page de test : lit l'état toutes les 5 s, envoie les commandes au programme Python (même machine, port 8080).
 
 const $ = (id) => document.getElementById(id);
@@ -24,6 +25,7 @@ async function envoyer(url, corps) {
   afficher(await r.json());
 }
 
+// FACULTATIF : commandes du Peltier et des LED — retirer les deux fonctions et leurs boutons pour une page en lecture seule.
 function peltier(sens) { envoyer('/api/peltier', { sens, puissance: Number($('puiss').value) / 100 }); }
 function led(quoi) {
   const on = !$('l_' + quoi).classList.contains('on');
