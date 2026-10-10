@@ -8,9 +8,10 @@ import 'highlight.js/styles/github.css';
 hljs.registerLanguage('python', python); hljs.registerLanguage('ini', ini); hljs.registerLanguage('sh', bash); hljs.registerLanguage('bash', bash);
 import schema from '../../docs/schema-electronique.md?raw';
 import logiciel from '../../docs/logiciel.md?raw';
+import { CodeBrowser } from './CodeBrowser';
 
 /** Documents lisibles dans l'app (fichiers Markdown du dossier docs/). */
-export const DOCS = [{ id: 'schema', title: 'Schéma électronique', md: schema }, { id: 'logiciel', title: 'Logiciel (Pi, page web)', md: logiciel }];
+export const DOCS = [{ id: 'schema', title: 'Schéma électronique', md: schema }, { id: 'logiciel', title: 'Logiciel (Pi, page web)', md: logiciel }, { id: 'code', title: 'Code', md: '' }];
 
 const CSS = `
 .doc-md{font:15px/1.65 system-ui,sans-serif;color:#1c1917}
@@ -111,12 +112,12 @@ export function DocModal({ doc: first, onClose }: { doc: { title: string; md: st
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 p-4" onClick={onClose}>
       <style>{CSS}</style>
-      <div className="flex max-h-full w-full max-w-4xl flex-col rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="flex max-h-full w-full max-w-6xl flex-col rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-stone-200 px-5 py-3">
           <div className="flex items-center gap-1">{DOCS.map((x) => <button key={x.id} onClick={() => setCur(x.title)} className={`rounded px-2 py-1 text-sm font-semibold ${x.title === doc.title ? 'bg-emerald-100 text-emerald-900' : 'text-stone-500 hover:bg-stone-100'}`}>{x.title}</button>)}</div>
           <button onClick={onClose} className="rounded px-2 text-xl leading-none text-stone-500 hover:bg-stone-100" title="Fermer (Échap)">×</button>
         </div>
-        <div ref={ref} className="doc-md overflow-y-auto px-6 py-5" dangerouslySetInnerHTML={{ __html: html }} />
+        {doc.title === 'Code' ? <CodeBrowser /> : <div ref={ref} className="doc-md overflow-y-auto px-6 py-5" dangerouslySetInnerHTML={{ __html: html }} />}
       </div>
     </div>
   );
