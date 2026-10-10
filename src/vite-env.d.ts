@@ -2,5 +2,5 @@
 
 interface ImportMetaEnv {
   /** Outil lancé par `npm run dev <outil>` (bird, birdhouse) ; vide = menu. */
-  readonly VITE_TOOL?: string;
+  readonly VITE_TOOL_ARCHIVE?: string;
 }
