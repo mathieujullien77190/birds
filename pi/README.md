@@ -1,0 +1,50 @@
+# Programme de test du nichoir (Raspberry Pi 5)
+
+Version minimale pour vérifier que le matériel marche : lecture des deux capteurs de température, les deux caméras en direct, le Peltier (froid / chaud / arrêt, puissance) et les deux cartes de LED infrarouges, sur une page web.
+
+| Fichier | Rôle |
+| --- | --- |
+| `nichoir.py` | Le programme Python : capteurs, caméras, commandes, serveur web (port 8080). |
+| `web/index.html`, `web/app.js` | La page : valeurs, flux des caméras, boutons. |
+| `nichoir.service` | Démarrage automatique au boot (systemd). |
+| `requirements.txt` | Les bibliothèques Python. |
+
+## Installation (une seule fois, sur le Pi)
+
+```sh
+sudo raspi-config                # Interface Options : activer I2C, 1-Wire et les caméras
+sudo apt install -y python3-picamera2 git
+mkdir -p /home/pi/nichoir && cd /home/pi/nichoir
+# copier ici nichoir.py, web/, nichoir.service, requirements.txt (scp, clé USB ou git)
+python3 -m venv --system-site-packages venv
+venv/bin/pip install -r requirements.txt
+venv/bin/python nichoir.py       # premier essai à la main : http://<ip-du-pi>:8080
+```
+
+Pour que ça démarre tout seul :
+
+```sh
+sudo cp nichoir.service /etc/systemd/system/
+sudo systemctl enable --now nichoir
+journalctl -u nichoir -f         # voir ce qu'il raconte
+```
+
+## Brochage
+
+Voir le document « Schéma électronique » de l'application. En résumé : Peltier PWM GPIO18, INA GPIO13, INB GPIO19 ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; DS18B20 sur 1-Wire (GPIO4, résistance de 4,7 kΩ vers le 3,3 V) ; caméras sur CAM0 et CAM1.
+
+## Ce que fait la page
+
+- Toutes les 5 s : température et humidité du nid, température du dissipateur.
+- Deux flux vidéo MJPEG (640 × 480).
+- Boutons Froid / Chaud / Arrêt et curseur de puissance (plafonné à 60 %).
+- Boutons LED du nid et LED extérieures.
+- Si un capteur, une caméra ou les GPIO manquent, la page l'écrit à côté du bloc concerné et le reste continue de marcher : on peut donc lancer le programme sur un Pi à moitié câblé, ou même sur un ordinateur pour voir la page.
+
+## Sécurité intégrée
+
+Si la sonde du dissipateur dépasse 55 °C, le Peltier est coupé et un message s'affiche. Il faut re-cliquer Froid ou Chaud pour le relancer.
+
+## Ce que ce programme ne fait pas encore
+
+Pas de régulation automatique (c'est volontaire : on teste), pas d'historique, pas de mot de passe. La version complète est décrite dans le document « Logiciel » de l'application.

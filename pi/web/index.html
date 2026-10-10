@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nichoir mésange</title>
+  <style>
+    :root { --bg: #f5f5f4; --fg: #1c1917; --card: #fff; --line: #e7e5e4; --green: #059669; --muted: #78716c; --warn: #b45309; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, sans-serif; }
+    h1 { font-size: 1.3rem; margin: 0 0 12px; color: #064e3b; }
+    h2 { font-size: 0.85rem; margin: 0 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; min-width: 0; }
+    .val { font-size: 1.8rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .val small { font-size: 0.9rem; font-weight: 400; color: var(--muted); }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+    button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 8px 12px; font: inherit; cursor: pointer; }
+    button.on { background: var(--green); color: #fff; border-color: var(--green); }
+    input[type=range] { width: 160px; }
+    img.cam { width: 100%; aspect-ratio: 4 / 3; background: #d6d3d1; border-radius: 8px; object-fit: cover; }
+    .err { color: var(--warn); font-size: 0.85rem; margin-top: 6px; }
+    .muted { color: var(--muted); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <h1>Nichoir mésange — test du matériel</h1>
+  <p class="muted">Dernière lecture : <span id="maj">—</span></p>
+
+  <div class="grid">
+    <div class="card"><h2>Nid</h2>
+      <div class="val"><span id="t_nid">—</span> <small>°C</small></div>
+      <div class="val"><span id="hum_nid">—</span> <small>% d'humidité</small></div>
+      <div class="err" id="err_bme280"></div>
+    </div>
+    <div class="card"><h2>Dissipateur du Peltier</h2>
+      <div class="val"><span id="t_dissipateur">—</span> <small>°C</small></div>
+      <div class="err" id="err_ds18b20"></div>
+      <div class="err" id="err_securite"></div>
+    </div>
+    <div class="card"><h2>Peltier</h2>
+      <div class="row">
+        <button id="p_froid" onclick="peltier('froid')">Froid</button>
+        <button id="p_chaud" onclick="peltier('chaud')">Chaud</button>
+        <button id="p_arret" onclick="peltier('arrêt')">Arrêt</button>
+      </div>
+      <div class="row">Puissance <input id="puiss" type="range" min="0" max="60" value="30" oninput="document.getElementById('puiss_v').textContent = this.value" /> <span id="puiss_v">30</span> %</div>
+      <div class="err" id="err_gpio"></div>
+    </div>
+    <div class="card"><h2>LED infrarouges</h2>
+      <div class="row">
+        <button id="l_nid" onclick="led('nid')">LED du nid</button>
+        <button id="l_ext" onclick="led('ext')">LED extérieures</button>
+      </div>
+    </div>
+    <div class="card"><h2>Caméra 1 (nid)</h2><img class="cam" src="/video/1" alt="caméra 1" /><div class="err" id="err_camera1"></div></div>
+    <div class="card"><h2>Caméra 2 (entrée)</h2><img class="cam" src="/video/2" alt="caméra 2" /><div class="err" id="err_camera2"></div></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+[Unit]
+Description=Nichoir mésange (capteurs, Peltier, LED, page web de test)
+After=network-online.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/nichoir
+ExecStart=/home/pi/nichoir/venv/bin/python nichoir.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

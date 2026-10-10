@@ -1,5 +1,7 @@
 # Logiciel du nichoir
 
+**Le programme de test est prêt dans le dossier `pi/` du dépôt** : `pi/nichoir.py` (capteurs, caméras, Peltier, LED, page web), `pi/web/` (la page), `pi/nichoir.service`, `pi/requirements.txt` et un `pi/README.md` qui explique l'installation. Il lit les capteurs, montre les caméras et allume / éteint le Peltier et les LED : juste de quoi vérifier que tout marche. Ce qui suit décrit la version complète (régulation, historique).
+
 Tout tourne sur le Raspberry Pi 5, dans le grenier du nichoir : un programme Python lit les capteurs, pilote le Peltier et les LED, enregistre les mesures et sert une page web. Rien n'est hébergé ailleurs : la page web est servie par le Pi lui-même, sur le Wi-Fi de la maison.
 
 ## Vue d'ensemble

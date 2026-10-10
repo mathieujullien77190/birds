@@ -455,7 +455,7 @@ export default function Planks() {
   pullRef.current = pull;
   const [leftOpen, setLeftOpen] = useState<boolean>(() => { try { return localStorage.getItem('plaques-menu-gauche') !== '0'; } catch { return true; } }); // panneau de gauche replié ou non
   useEffect(() => { try { localStorage.setItem('plaques-menu-gauche', leftOpen ? '1' : '0'); } catch { /* rien */ } }, [leftOpen]);
-  const [schemaOn, setSchemaOn] = useState<boolean>(() => { try { return localStorage.getItem('plaques-schema') === '1'; } catch { return false; } }); // schéma électrique à côté de la 3D
+  const [schemaOn, setSchemaOn] = useState<boolean>(() => { try { return localStorage.getItem('plaques-schema') !== '0'; } catch { return true; } }); // ouvert par défaut // schéma électrique à côté de la 3D
   useEffect(() => { try { localStorage.setItem('plaques-schema', schemaOn ? '1' : '0'); } catch { /* rien */ } }, [schemaOn]);
   const [cut, setCut] = useState<Cut>(() => { try { const j = JSON.parse(localStorage.getItem('plaques-coupe') ?? '{}'); return { on: false, axis: j.axis ?? 'y', pos: 0, flip: !!j.flip }; } catch { return { on: false, axis: 'y', pos: 0, flip: false }; } });
   const cutRef = useRef(cut);
@@ -574,13 +574,13 @@ export default function Planks() {
     scene.add(sun);
     const camera = new PerspectiveCamera(40, 1, 1, 6000);
     camera.up.set(0, 0, 1); // Z = hauteur, comme la visionneuse STL
-    camera.position.set(380, -520, 320);
+    camera.position.set(1150, -1250, 700); // vue de départ en 3/4, assez loin pour voir le nichoir ET le panneau solaire (à 70 cm à droite)
     const renderer = new WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     el.appendChild(renderer.domElement);
     const orbit = new OrbitControls(camera, renderer.domElement);
     orbit.mouseButtons = { LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.ROTATE, RIGHT: MOUSE.PAN };
-    orbit.target.set(0, 0, 40);
+    orbit.target.set(330, 0, 100);
     orbit.enableDamping = true;
     const labels = new Group();
     const handles = new Group(); // ronds aux coins de l'élément choisi : on les tire pour déplacer l'élément par ce coin
@@ -908,7 +908,6 @@ export default function Planks() {
   useEffect(() => { if (!autoNest.current && sc.planks.length === 0) { autoNest.current = true; addNest(); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
   /** Boîte choisie : tourner d'un quart de tour autour de son centre, ou déplacer son centre. */
   const groupMembers = (g: string) => sc.planks.filter((p) => p.group === g);
-  const rotateGroup = (g: string, axis: 0 | 1 | 2, deg: number) => {
     const ms = groupMembers(g); if (!ms.length) return;
     const { min, max } = bounds(ms, sc.t);
     const pivot: Vec3 = [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2];
@@ -1013,7 +1012,7 @@ export default function Planks() {
           <Slider label="Épaisseur de toutes les plaques" value={sc.t} min={1} max={30} step={0.5} unit=" mm" onChange={(t) => commit('Épaisseur', (s) => ({ ...s, t, planks: s.planks.map((p) => recastAll(p, t, s.fit)) }))} />
         </Section>
 
-        <Section title="Nichoir mésange" defaultOpen note={`${nest.l} × ${nest.L}`}>
+        <Section title="Nichoir mésange" defaultOpen={false} note={`${nest.l} × ${nest.L}`}>
           <Slider label="Intérieur (carré, fond)" value={nest.l} min={120} max={300} step={1} unit=" mm" onChange={(l) => setNest({ ...nest, l, L: l })} />
           <Slider label="Du sol au bas du trou" value={nest.floorToHole} min={60} max={600} step={1} unit=" mm" onChange={(floorToHole) => setNest({ ...nest, floorToHole })} />
           <Slider label="Diamètre du trou" value={nest.hole} min={20} max={120} step={1} unit=" mm" onChange={(hole) => setNest({ ...nest, hole })} />
@@ -1027,28 +1026,6 @@ export default function Planks() {
           <Btn variant="primary" onClick={addNest} disabled={sc.planks.length > 0} title={sc.planks.length > 0 ? "Un nichoir est déjà là : « Tout supprimer » dans « Pièces » pour en créer un autre" : undefined}>Créer le nichoir ({nest.l + 2 * (2 * sc.t + nest.ins)} × {nest.L + 2 * (2 * sc.t + nest.ins)} × {nest.floorToHole + nest.hole + nest.above + 2 * sc.t + 2 * (sc.t + nest.ins)})</Btn>
         </Section>
 
-        {selected && groupSel && (() => {
-          const ms = groupMembers(groupSel);
-          const name = (sc.groupNames?.[groupSel] ?? 'Boîte').replace(/ \(.*\)$/, ''); // les anciens noms portaient les dimensions entre parenthèses
-          return (
-            <Section title="Boîte choisie" defaultOpen note={`${name} · ${extents(ms, sc.t).join(' × ')} mm`}>
-              <input value={name} onChange={(e) => commit('Nom de la boîte', (s) => ({ ...s, groupNames: { ...(s.groupNames ?? {}), [groupSel]: e.target.value } }))} className="w-full rounded-md border border-stone-300 bg-white px-2 py-1 text-xs" />
-              <Hint>{ms.length} plaques, {extents(ms, sc.t).join(' × ')} mm (largeur x × profondeur y × hauteur z). Seules les plaques liées bougent avec. Pour régler une plaque de la boîte : déplie-la dans « Pièces » et clique dessus.</Hint>
-              {(['X', 'Y', 'Z'] as const).map((ax, k) => (
-                <div key={ax} className="flex items-center gap-1.5 text-[11px] text-stone-600">
-                  <span className="w-24">Tourner autour de {ax}</span>
-                  <Btn block={false} onClick={() => rotateGroup(groupSel, k as 0 | 1 | 2, -90)}>−90°</Btn>
-                  <Btn block={false} onClick={() => rotateGroup(groupSel, k as 0 | 1 | 2, 90)}>+90°</Btn>
-                </div>
-              ))}
-              <div className="grid grid-cols-3 gap-1.5">
-                <Btn onClick={() => duplicateGroup(groupSel)}>Dupliquer</Btn>
-                <Btn onClick={() => { commit('Boîte déliée', (s) => ({ ...s, planks: s.planks.map((x) => (x.group === groupSel ? { ...x, group: undefined } : x)) })); setGroupSel(null); }}>Délier les plaques</Btn>
-                <Btn variant="danger" onClick={() => removeGroup(groupSel)}>Supprimer la boîte</Btn>
-              </div>
-            </Section>
-          );
-        })()}
 
         {selected && !groupSel && (
           <>

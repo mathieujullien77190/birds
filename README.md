@@ -31,6 +31,7 @@ Le dépôt contient le workflow `.github/workflows/pages.yml` : à chaque push s
 | `src/planks/` | L'application : modèle du nichoir (`model.ts`), vue 3D et interface (`Planks.tsx`), documents (`DocModal.tsx`), schéma à côté de la 3D (`SchemaPanel.tsx`). |
 | `src/ui/` | Composants d'interface partagés (boutons, sections, curseur, planche 2D). |
 | `docs/` | Les documents Markdown affichés dans l'application. |
+| `pi/` | Le programme de test du Raspberry Pi (Python + page web) et son installation. |
 | `public/models/` | Le modèle 3D du Raspberry Pi. |
 | `archive-autres-outils/` | Les anciens outils (visionneuse STL, pavé isolé, nichoir complet, menu de départ), gardés pour mémoire, non compilés. |
 | `archive-editeur-oiseaux/`, `ancien-monde-lowpoly/` | Projets précédents, lecture seule. |
