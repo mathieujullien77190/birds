@@ -48,7 +48,56 @@ flowchart TB
   SW -->|"masse commutée OUT2"| IR2
   PI -->|"I2C : 3,3 V broche 1, SDA 3, SCL 5, masse 9"| SENS
   HOT -->|"1-Wire : 3,3 V broche 1, données GPIO4 broche 7, masse broche 25"| PI
+  linkStyle 0 stroke:#111827,stroke-width:2.5px
+  linkStyle 1 stroke:#dc2626,stroke-width:2.5px
+  linkStyle 2 stroke:#dc2626,stroke-width:2.5px
+  linkStyle 3 stroke:#dc2626,stroke-width:2.5px
+  linkStyle 4 stroke:#dc2626,stroke-width:2.5px
+  linkStyle 5 stroke:#dc2626,stroke-width:2.5px
+  linkStyle 6 stroke:#dc2626,stroke-width:2.5px
+  linkStyle 7 stroke:#dc2626,stroke-width:2.5px
+  linkStyle 8 stroke:#dc2626,stroke-width:2.5px
+  linkStyle 9 stroke:#7c3aed,stroke-width:2.5px
+  linkStyle 10 stroke:#d97706,stroke-width:2.5px
+  linkStyle 11 stroke:#d97706,stroke-width:2.5px
+  linkStyle 12 stroke:#6b7280,stroke-width:2.5px
+  linkStyle 13 stroke:#dc2626,stroke-width:2.5px
+  linkStyle 14 stroke:#dc2626,stroke-width:2.5px
+  linkStyle 15 stroke:#111827,stroke-width:2.5px
+  linkStyle 16 stroke:#111827,stroke-width:2.5px
+  linkStyle 17 stroke:#eab308,stroke-width:2.5px
+  linkStyle 18 stroke:#2563eb,stroke-width:2.5px
+  classDef pv fill:#1e3a8a,stroke:#1c1917,color:#fff
+  classDef mppt fill:#1d4ed8,stroke:#1c1917,color:#fff
+  classDef fuse fill:#dc2626,stroke:#1c1917,color:#fff
+  classDef bat fill:#047857,stroke:#1c1917,color:#fff
+  classDef buck fill:#0e7490,stroke:#1c1917,color:#fff
+  classDef pi fill:#15803d,stroke:#1c1917,color:#fff
+  classDef sw fill:#1f2937,stroke:#1c1917,color:#fff
+  classDef hb fill:#b91c1c,stroke:#1c1917,color:#fff
+  classDef filt fill:#374151,stroke:#1c1917,color:#fff
+  classDef tec fill:#e2e8f0,stroke:#1c1917,color:#1c1917
+  classDef hot fill:#111827,stroke:#1c1917,color:#fff
+  classDef cam fill:#166534,stroke:#1c1917,color:#fff
+  classDef ir fill:#7f1d1d,stroke:#1c1917,color:#fff
+  classDef sens fill:#1d4ed8,stroke:#1c1917,color:#fff
+  class PV pv
+  class MPPT mppt
+  class FUSE fuse
+  class BAT bat
+  class BUCK buck
+  class PI pi
+  class SW sw
+  class HB hb
+  class FILT filt
+  class TEC tec
+  class HOT hot
+  class CAM1,CAM2 cam
+  class IR,IR2 ir
+  class SENS sens
 ```
+
+Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régulateur bleu, fusible rouge, batterie verte, convertisseur bleu-vert, Pi vert, pont en H rouge, Peltier blanc, LED brun-rouge…). Couleur des traits = couleur des fils dans la 3D : rouge pour le + (12 V, 5 V), noir pour la masse et le câble du panneau, violet pour la commande du pont en H, jaune pour l'I2C, bleu pour le 1-Wire, gris pour la commande des LED, orange pour les nappes caméra.
 
 ## Branchements, fil par fil
 
