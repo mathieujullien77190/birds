@@ -444,6 +444,7 @@ export default function Planks() {
   const [sc, setSc] = useState<PlankScene>(() => loadScene());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [extra, setExtra] = useState<Set<string>>(new Set()); // sélection multiple (Ctrl + clic) en plus de la plaque principale
+  const [camInfo, setCamInfo] = useState(''); // position de la caméra et cible, affichées sous la vue (réglage de la vue de départ)
   const [hover, setHover] = useState<{ plank?: string; group?: string } | null>(null); // survol dans le volet « Pièces » : surbrillance dans la 3D
   const [cutCfg, setCutCfg] = useState<{ W: number; H: number; gap: number }>(() => { try { const d = JSON.parse(localStorage.getItem('plaques-decoupe') ?? ''); if (d && typeof d.W === 'number') return d; } catch { /* rien */ } return { W: 410, H: 400, gap: 5 }; });
   useEffect(() => { try { localStorage.setItem('plaques-decoupe', JSON.stringify(cutCfg)); } catch { /* rien */ } }, [cutCfg]);
@@ -573,7 +574,7 @@ export default function Planks() {
     scene.add(sun);
     const camera = new PerspectiveCamera(40, 1, 1, 6000);
     camera.up.set(0, 0, 1); // Z = hauteur, comme la visionneuse STL
-    camera.position.set(1150, -1250, 700); // vue de départ en 3/4, assez loin pour voir le nichoir ET le panneau solaire (à 70 cm à droite)
+    camera.position.set(-490, 1250, 700); // vue de départ en 3/4 tournée de 180° (demande de l'utilisateur), assez loin pour voir le nichoir ET le panneau solaire
     const renderer = new WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     el.appendChild(renderer.domElement);
@@ -760,7 +761,12 @@ export default function Planks() {
     ro.observe(el);
     resize();
     let raf = 0;
-    const loop = () => { orbit.update(); renderer.render(scene, camera); raf = requestAnimationFrame(loop); };
+    let lastInfo = 0;
+    const loop = () => {
+      orbit.update(); renderer.render(scene, camera); raf = requestAnimationFrame(loop);
+      const now = performance.now();
+      if (now - lastInfo > 250) { lastInfo = now; const p = camera.position, t = orbit.target; setCamInfo(`caméra (${p.x.toFixed(0)}, ${p.y.toFixed(0)}, ${p.z.toFixed(0)}) · cible (${t.x.toFixed(0)}, ${t.y.toFixed(0)}, ${t.z.toFixed(0)})`); }
+    };
     loop();
     view.current = v;
     return () => { cancelAnimationFrame(raf); ro.disconnect(); orbit.dispose(); renderer.dispose(); renderer.domElement.remove(); view.current = null; };
@@ -1017,6 +1023,7 @@ export default function Planks() {
       <main className="relative min-w-0 flex-1" onClick={() => setCtx(null)}>
         <div ref={host} className="h-full w-full" />
         {cutView && <Sheet2D svg={preview} width={cutCfg.W} height={sheets.length * (cutCfg.H + 12)} />}
+        <div className="absolute bottom-2 left-2 rounded bg-white/80 px-1.5 py-0.5 font-mono text-[10px] text-stone-500 select-all" title="Position de la caméra et point visé (mm) : tourne la vue puis copie ces nombres pour en faire la vue de départ">{camInfo}</div>
         <div className="absolute top-3 left-3 flex items-center gap-1 rounded-lg border border-stone-200 bg-white/90 p-1 shadow-sm backdrop-blur">
           <button onClick={back} disabled={!backLabel} title={backLabel ? `Annuler : ${backLabel} (Ctrl+Z)` : 'Rien à annuler'} className="flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-semibold text-stone-800 transition-colors hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40">
             <span aria-hidden className="text-sm leading-none">↶</span> Retour
