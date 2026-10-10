@@ -36,9 +36,15 @@ def log(msg):
 HOT_MAX = 55.0      # °C sur le dissipateur : au-dessus, le Peltier est coupé
 PWM_MAX = 0.6       # puissance maximale du Peltier (batterie de 6 Ah)
 PERIODE = 5.0       # secondes entre deux lectures
+CAPACITE_WH = 76.8  # batterie LiFePO4 12,8 V × 6 Ah
+# Consommation estimée (W) de chaque élément quand il est allumé : valeurs usuelles, à remplacer par des mesures (INA219) dès que possible.
+CONSO_W = {"pi": 3.5, "camera": 0.7, "led": 1.2, "peltier_max": 72.0}  # Peltier : 72 W à pleine tension, proportionnel au carré du rapport cyclique (TEC1-12706, ~2 Ω)
+# Tension au repos d'une batterie LiFePO4 12,8 V (4 cellules) selon sa charge : (pourcentage, volts). Sous charge la tension chute : l'estimation est grossière.
+COURBE_LIFEPO4 = [(0, 10.0), (10, 12.0), (20, 12.8), (30, 12.9), (40, 13.0), (70, 13.1), (90, 13.2), (100, 13.4)]
 
 # FACULTATIF : mode simulé, pour tester la page sans matériel (ordinateur). Jamais actif par défaut.
 MOCK = os.environ.get("NICHOIR_MOCK") == "1" or "--mock" in sys.argv
+SIM_ACCEL = float(os.environ.get("NICHOIR_MOCK_ACCEL", "10"))  # le temps passe 10 fois plus vite sur la batterie simulée (pour voir le niveau bouger)
 MOCK_SURCHAUFFE = float(os.environ.get("NICHOIR_MOCK_SURCHAUFFE", "0"))  # °C : force le dissipateur à cette température quand le Peltier tourne (essai de la coupure)
 
 # ---------------------------------------------------------------- matériel (chaque bloc est optionnel)
@@ -46,6 +52,8 @@ etat = {
     "t_nid": None, "hum_nid": None, "t_dissipateur": None,
     "peltier": "arrêt", "puissance": 0.0,
     "led_nid": False, "led_ext": False,
+    "batterie": {"pourcent": None, "tension": None, "source": None},   # niveau de charge (mesuré par l'INA219 si présent, sinon simulé)
+    "conso": {"total_w": None, "detail": {}},                          # consommation estimée selon ce qui est allumé
     "cam1": True, "cam2": True,   # caméras allumées (flux en direct) ou éteintes (économie d'énergie)
     "erreurs": {},        # nom du matériel → message, quand quelque chose manque
     "derniere_lecture": None,
@@ -86,6 +94,16 @@ except Exception as e:
     SONDE_OK = False
     etat["erreurs"]["ds18b20"] = f"sonde du dissipateur indisponible : {e}"
 
+# FACULTATIF : mesure de la batterie par un module INA219 (I2C 0x41, shunt de 10 mΩ). Sans lui, la page affiche « — » pour le niveau mais la consommation estimée reste visible.
+try:
+    from ina219 import INA219
+    ina_bat = INA219(0.01, 10, address=0x41)
+    ina_bat.configure()
+    BAT_OK = True
+except Exception as e:
+    BAT_OK = False
+    etat["erreurs"]["batterie"] = f"mesure de la batterie indisponible : {e}"
+
 cameras = {}
 capteurs_cam = {}   # numéro → objet Picamera2, pour pouvoir arrêter / relancer le flux
 # FACULTATIF : les caméras (picamera2). Chaque caméra qui manque est signalée sur la page, l'autre continue.
@@ -119,6 +137,31 @@ except Exception as e:
     etat["erreurs"]["picamera2"] = f"picamera2 indisponible : {e}"
 
 
+def pourcent_depuis_tension(v):
+    """Charge (0–100 %) d'après la tension au repos, en interpolant COURBE_LIFEPO4."""
+    for (p0, v0), (p1, v1) in zip(COURBE_LIFEPO4, COURBE_LIFEPO4[1:]):
+        if v <= v1:
+            return max(0.0, p0 + (p1 - p0) * (v - v0) / (v1 - v0))
+    return 100.0
+
+
+def tension_depuis_pourcent(p):
+    for (p0, v0), (p1, v1) in zip(COURBE_LIFEPO4, COURBE_LIFEPO4[1:]):
+        if p <= p1:
+            return v0 + (v1 - v0) * (p - p0) / (p1 - p0)
+    return COURBE_LIFEPO4[-1][1]
+
+
+def consommation():
+    """Consommation estimée (W) de ce qui est allumé : Pi, caméras, LED infrarouges, Peltier."""
+    d = {"pi": CONSO_W["pi"]}
+    d["cameras"] = CONSO_W["camera"] * (bool(etat["cam1"]) + bool(etat["cam2"]))
+    d["led"] = CONSO_W["led"] * (bool(etat["led_nid"]) + bool(etat["led_ext"]))
+    d["peltier"] = round(CONSO_W["peltier_max"] * etat["puissance"] ** 2, 1)
+    d = {k: round(v, 1) for k, v in d.items()}
+    return {"total_w": round(sum(d.values()), 1), "detail": d}
+
+
 # ---------------------------------------------------------------- mode simulé (remplace le matériel quand MOCK est actif)
 if MOCK:
     class Faux:
@@ -126,7 +169,7 @@ if MOCK:
         value = 0
 
     pwm, ina, inb, led_nid, led_ext = Faux(), Faux(), Faux(), Faux(), Faux()
-    GPIO_OK = BME_OK = SONDE_OK = True
+    GPIO_OK = BME_OK = SONDE_OK = BAT_OK = True
     etat["erreurs"].clear()
     etat["erreurs"]["mock"] = "MODE SIMULÉ : valeurs fausses, rien n'est branché"
     PERIODE = 1.0
@@ -173,7 +216,7 @@ if MOCK:
     for num, teinte in ((0, (80, 255, 120)), (1, (90, 150, 255))):
         cameras[num] = FluxFaux(teinte)
 
-    sim = {"diss": 20.0, "decalage": 0.0}
+    sim = {"diss": 20.0, "decalage": 0.0, "wh": 0.8 * CAPACITE_WH}  # la batterie simulée part à 80 %
 
     def simuler():
         """Un pas de simulation : le nid suit un cycle de 10 min, le Peltier le refroidit / le chauffe, le dissipateur chauffe avec la puissance."""
@@ -187,6 +230,12 @@ if MOCK:
         etat["t_nid"] = round(15 + 3 * math.sin(time.time() / 600 * 2 * math.pi) + sim["decalage"] + random.uniform(-0.2, 0.2), 1)
         etat["hum_nid"] = round(70 + 10 * math.sin(time.time() / 900 * 2 * math.pi) + random.uniform(-1, 1), 0)
         etat["t_dissipateur"] = round(sim["diss"] + random.uniform(-0.2, 0.2), 1)
+        # batterie simulée : décharge de la consommation, recharge solaire selon l'heure (0 la nuit, jusqu'à 60 W vers midi)
+        h = time.localtime().tm_hour + time.localtime().tm_min / 60
+        solaire = max(0.0, 60 * math.sin((h - 6) / 12 * math.pi)) if 6 <= h <= 18 else 0.0
+        sim["wh"] = min(CAPACITE_WH, max(0.0, sim["wh"] + (solaire - consommation()["total_w"]) * PERIODE / 3600 * SIM_ACCEL))
+        pc = 100 * sim["wh"] / CAPACITE_WH
+        etat["batterie"] = {"pourcent": round(pc, 1), "tension": round(tension_depuis_pourcent(pc), 2), "source": "simulée", "solaire_w": round(solaire, 1)}
 
 
 # ---------------------------------------------------------------- commandes
@@ -258,8 +307,16 @@ def lecture():
                 log("SÉCURITÉ : " + etat["erreurs"]["securite"])
         except Exception as e:
             etat["erreurs"]["ds18b20"] = f"lecture de la sonde : {e}"
+    if BAT_OK and not MOCK:
+        try:
+            v = ina_bat.voltage()
+            etat["batterie"] = {"pourcent": round(pourcent_depuis_tension(v), 0), "tension": round(v, 2), "source": "mesurée"}
+            etat["erreurs"].pop("batterie", None)
+        except Exception as e:
+            etat["erreurs"]["batterie"] = f"lecture de la batterie : {e}"
+    etat["conso"] = consommation()
     etat["derniere_lecture"] = time.strftime("%H:%M:%S")
-    log(f"nid {etat['t_nid']} °C, {etat['hum_nid']} % · dissipateur {etat['t_dissipateur']} °C · Peltier {etat['peltier']} {round(etat['puissance'] * 100)} %")
+    log(f"nid {etat['t_nid']} °C, {etat['hum_nid']} % · dissipateur {etat['t_dissipateur']} °C · Peltier {etat['peltier']} {round(etat['puissance'] * 100)} %" + (f" · conso {etat['conso']['total_w']} W · batterie {etat['batterie']['pourcent']} %" if etat["batterie"]["pourcent"] is not None else f" · conso {etat['conso']['total_w']} W"))
 
 
 def boucle():
