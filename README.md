@@ -28,10 +28,10 @@ Le dépôt contient le workflow `.github/workflows/pages.yml` : à chaque push s
 
 | Dossier | Rôle |
 | --- | --- |
-| `src/planks/` | L'application : modèle du nichoir (`model.ts`), vue 3D et interface (`Planks.tsx`), documents (`DocModal.tsx`), schéma à côté de la 3D (`SchemaPanel.tsx`). |
-| `src/ui/` | Composants d'interface partagés (boutons, sections, curseur, planche 2D). |
+| `src/app/`, `src/features/` | L'application : `features/planks` (vue 3D, interface, historique), `features/schema` (schéma à côté de la 3D), `features/docs` (documents, code), `features/laser` (découpe laser) ; `src/planks/` garde le modèle du nichoir (`model.ts`), la géométrie Three (`three/`) et le simulateur du Pi.
+| `src/ui/`, `src/hooks/`, `src/lib/` | Briques d'interface partagées (un dossier par brique), hooks et utilitaires communs. |
 | `docs/` | Les documents Markdown affichés dans l'application. |
-| `pi/` | Le programme de test du Raspberry Pi (Python + page web) et son installation. |
+| `pi/` | Ce qui tourne sur le Raspberry Pi : programme Python (`nichoir.py`), site React + TypeScript (`pi/site/`, projet autonome, compilé dans `pi/web/`) et installation. |
 | `public/models/` | Le modèle 3D du Raspberry Pi. |
 | `archives/autres-outils/` | Les anciens outils (visionneuse STL, pavé isolé, nichoir complet, menu de départ), gardés pour mémoire, non compilés. |
 | `archives/editeur-oiseaux/`, `archives/ancien-monde-lowpoly/` | Projets précédents, lecture seule. |

@@ -1,0 +1,13 @@
+import hljs from 'highlight.js/lib/core';
+import typescript from 'highlight.js/lib/languages/typescript';
+import javascript from 'highlight.js/lib/languages/javascript';
+import python from 'highlight.js/lib/languages/python';
+import xml from 'highlight.js/lib/languages/xml';
+import css from 'highlight.js/lib/languages/css';
+import json from 'highlight.js/lib/languages/json';
+import markdown from 'highlight.js/lib/languages/markdown';
+import ini from 'highlight.js/lib/languages/ini';
+import yaml from 'highlight.js/lib/languages/yaml';
+hljs.registerLanguage('typescript', typescript); hljs.registerLanguage('javascript', javascript); hljs.registerLanguage('python', python); hljs.registerLanguage('xml', xml);
+hljs.registerLanguage('css', css); hljs.registerLanguage('json', json); hljs.registerLanguage('markdown', markdown); hljs.registerLanguage('ini', ini); hljs.registerLanguage('yaml', yaml);
+export { hljs };

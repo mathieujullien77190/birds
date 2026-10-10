@@ -3,3 +3,4 @@ dist
 .vite
 __pycache__/
 *.pyc
+pi/site/node_modules/

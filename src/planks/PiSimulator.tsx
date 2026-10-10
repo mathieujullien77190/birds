@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import nichoirPy from '../../pi/nichoir.py?raw';
 import indexHtml from '../../pi/web/index.html?raw';
 import appJs from '../../pi/web/app.js?raw';
+import appCss from '../../pi/web/app.css?raw';
 
 /** Simulateur de l'interface web du Pi : le VRAI `pi/nichoir.py` (mode simulé) tourne dans le navigateur grâce à Pyodide (Python compilé en WebAssembly),
  *  et la VRAIE page `pi/web/index.html` + `app.js` s'affiche dans un cadre. Seul Flask est remplacé par une petite doublure : les appels de la page
@@ -79,10 +80,13 @@ function loadPy(): Promise<Py> {
 const OFF = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240"><rect width="320" height="240" fill="#000"/><text x="160" y="126" fill="#666" font-family="monospace" font-size="14" text-anchor="middle">caméra éteinte</text></svg>');
 
 /** Page du Pi, avec `fetch` redirigé vers le Python du parent (le cadre est de même origine : `parent.__piFetch`). */
-const PAGE = indexHtml.replace(
-  '<script src="app.js"></script>',
-  () => `<script>window.fetch = (u, o) => parent.__piFetch(u, o);</script><script>${appJs}</script>`,
-).replace(/(<img class="cam" src=)"[^"]*"/g, '$1""');
+const PAGE = indexHtml
+  .replace(/<link rel="stylesheet" href="\.\/app\.css">/, () => `<style>${appCss}</style>`)
+  .replace(
+    /<script src="\.\/app\.js"><\/script>/,
+    // `</script` dans le code compilé fermerait la balise : on l'échappe
+    () => `<script>window.fetch = (u, o) => parent.__piFetch(u, o);</script><script>${appJs.replace(/<\/script/gi, '<\\/script')}</script>`,
+  );
 
 export function PiSimulator({ onClose, shoot }: { onClose: () => void; shoot?: (num: number) => string | null }) {
   const [state, setState] = useState<'chargement' | 'prêt' | 'erreur'>('chargement');

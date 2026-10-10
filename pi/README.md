@@ -5,7 +5,8 @@ Version minimale pour vérifier que le matériel marche : lecture des deux capte
 | Fichier | Rôle |
 | --- | --- |
 | `nichoir.py` | Le programme Python : capteurs, caméras, commandes, serveur web (port 8080). |
-| `web/index.html`, `web/app.js` | La page : valeurs, flux des caméras, boutons. |
+| `web/` | La page, **compilée** (`index.html`, `app.js`, `app.css`, committés : le Pi n'a pas Node). |
+| `site/` | Les sources de la page : projet React + TypeScript **autonome** (voir `site/README.md`). Rebuild : `npm run build` dans `pi/site` ou `npm run build:pi` à la racine. |
 | `nichoir.service` | Démarrage automatique au boot (systemd). |
 | `requirements.txt` | Les bibliothèques Python. |
 
@@ -59,3 +60,8 @@ Si la sonde du dissipateur dépasse 55 °C, le Peltier est coupé et un message 
 ## Ce que ce programme ne fait pas encore
 
 Pas de régulation automatique (c'est volontaire : on teste), pas d'historique, pas de mot de passe. La version complète est décrite dans le document « Logiciel » de l'application.
+
+## Séparation des dossiers
+`pi/` = ce qui tourne sur le Raspberry (Python + site) ; `src/` à la racine = l'app de conception et de simulation. `pi/site` a son propre `package.json` et `node_modules` ; aucun import entre `src/` et `pi/site/` (l'app lit seulement la sortie `pi/web/` pour le simulateur « 🐍 Pi »).
+
+La page affiche aussi la batterie (niveau, tension, énergie restante) et la consommation estimée par élément (cartes `BatteryCard` et `ConsumptionCard` de `site/`).

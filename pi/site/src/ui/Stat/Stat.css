@@ -1,0 +1,2 @@
+.val { font-size: 1.8rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.val small { font-size: 0.9rem; font-weight: 400; color: var(--muted); }

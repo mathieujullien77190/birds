@@ -1,0 +1,2 @@
+button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 8px 12px; font: inherit; cursor: pointer; }
+button.on { background: var(--green); color: #fff; border-color: var(--green); }
