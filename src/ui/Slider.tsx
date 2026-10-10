@@ -8,6 +8,8 @@ interface Props {
   step: number;
   unit?: string;
   onChange: (v: number) => void;
+  /** Repères sous le curseur (ex. le milieu de la pièce) : un trait cliquable à chaque valeur, avec son nom. */
+  marks?: { at: number; label?: string }[];
 }
 
 /** Le dernier curseur touché à la souris : un chiffre tapé ensuite (même si le focus est perdu) va dans son champ. */
@@ -15,7 +17,7 @@ let lastTouched: HTMLInputElement | null = null;
 const DIGIT = /^[0-9.,-]$/;
 
 /** Curseur + valeur éditable au clavier : clic sur le nombre (ou sur le curseur puis un chiffre), taper, Entrée ou Tab ; Échap annule. */
-export default function Slider({ label, value, min, max, step, unit = '', onChange }: Props) {
+export default function Slider({ label, value, min, max, step, unit = '', onChange, marks }: Props) {
   const digits = step < 0.01 ? 3 : step < 1 ? 2 : 0;
   const shown = value.toFixed(digits);
   const [text, setText] = useState(shown);
@@ -115,6 +117,23 @@ export default function Slider({ label, value, min, max, step, unit = '', onChan
         onDoubleClick={() => onChange(min <= 0 && max >= 0 ? 0 : min)}
         onPointerDown={() => { lastTouched = range.current; }}
       />
+      {marks && marks.length > 0 && (
+        <span className="relative block h-3">
+          {marks.map((m, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => onChange(Math.min(max, Math.max(min, m.at)))}
+              title={m.label ? `${m.label} : ${m.at}${unit}` : `${m.at}${unit}`}
+              style={{ left: `${((m.at - min) / (max - min)) * 100}%` }}
+              className="absolute top-0 -translate-x-1/2 text-[9px] leading-none text-emerald-700 hover:text-emerald-900"
+            >
+              <span className="block h-1.5 w-px bg-emerald-600 mx-auto" />
+              {m.label && <span>{m.label}</span>}
+            </button>
+          ))}
+        </span>
+      )}
     </label>
   );
 }

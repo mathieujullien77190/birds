@@ -79,3 +79,48 @@ export const loadModelPrefs = (name: string): ModelPrefs | undefined => readStat
 /** Ancien format (clés par identifiant de session) : lu une fois pour migrer vers les clés par nom. */
 export const getLegacyEdit = (id: string): Promise<SavedEdit | undefined> => run<SavedEdit | undefined>('readonly', (s) => s.get(`${id}:edit`));
 export const getLegacyTraces = (id: string): Promise<Float32Array[] | undefined> => run<Float32Array[] | undefined>('readonly', (s) => s.get(`${id}:traces`));
+
+// ----- sessions : une par fichier, nom généré (fichier1, fichier2…), jamais supprimée -----
+
+export interface SessionInfo { name: string; label: string; at: number }
+const SESSIONS_KEY = 'visionneuse-stl-sessions';
+
+export const loadSessions = (): SessionInfo[] => {
+  try { return (JSON.parse(localStorage.getItem(SESSIONS_KEY) ?? '[]') as SessionInfo[]) ?? []; } catch { return []; }
+};
+
+/** Crée la session d'un nom de fichier si elle n'existe pas (nom généré : fichier1, fichier2…) et renvoie toute la liste. */
+export const ensureSession = (name: string): SessionInfo[] => {
+  const list = loadSessions();
+  if (list.some((s) => s.name === name)) return list;
+  const n = list.reduce((m, s) => Math.max(m, Number(/^fichier(\d+)$/.exec(s.label)?.[1] ?? 0)), 0) + 1;
+  const next = [...list, { name, label: `fichier${n}`, at: Date.now() }];
+  try { localStorage.setItem(SESSIONS_KEY, JSON.stringify(next)); } catch { /* quota : tant pis */ }
+  return next;
+};
+
+// ----- annulation réversible : l'état avant « annuler tout » est gardé pour pouvoir reprendre -----
+
+export interface Snapshot { prefs: ModelPrefs; edit?: SavedEdit; traces?: Float32Array[] }
+const SNAPS_KEY = 'visionneuse-stl-annulations';
+const snapNames = (): string[] => { try { return JSON.parse(localStorage.getItem(SNAPS_KEY) ?? '[]') as string[]; } catch { return []; } };
+export const hasSnapshot = (name: string): boolean => snapNames().includes(name);
+export const putSnapshot = async (name: string, snap: Snapshot): Promise<void> => {
+  await run('readwrite', (s) => s.put(snap, `n:${name}:snap`));
+  try { localStorage.setItem(SNAPS_KEY, JSON.stringify([...new Set([...snapNames(), name])])); } catch { /* quota */ }
+};
+export const getSnapshot = (name: string): Promise<Snapshot | undefined> => run<Snapshot | undefined>('readonly', (s) => s.get(`n:${name}:snap`));
+export const dropSnapshot = async (name: string): Promise<void> => {
+  await run('readwrite', (s) => s.delete(`n:${name}:snap`));
+  try { localStorage.setItem(SNAPS_KEY, JSON.stringify(snapNames().filter((n) => n !== name))); } catch { /* quota */ }
+};
+
+/** Supprime pour de bon une session fermée : entrée de la liste, réglages, fichier, retouches, traits et annulation gardés. */
+export const deleteSession = async (name: string): Promise<SessionInfo[]> => {
+  const next = loadSessions().filter((s) => s.name !== name);
+  try { localStorage.setItem(SESSIONS_KEY, JSON.stringify(next)); } catch { /* quota */ }
+  try { const all = readStates(); delete all[name]; localStorage.setItem(STATES_KEY, JSON.stringify(all)); } catch { /* quota */ }
+  try { localStorage.setItem(SNAPS_KEY, JSON.stringify(snapNames().filter((n) => n !== name))); } catch { /* quota */ }
+  await Promise.all([name, `n:${name}:edit`, `n:${name}:traces`, `n:${name}:snap`].map((k) => deleteFile(k).catch(() => undefined)));
+  return next;
+};

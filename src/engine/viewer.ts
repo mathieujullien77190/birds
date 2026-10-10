@@ -5,6 +5,7 @@ import {
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
 import { simplify } from './simplify';
 import { EditMesh } from './meshEdit';
@@ -36,6 +37,18 @@ export interface ModelState {
   width: number;
 }
 
+/** Éclairages disponibles : réglages de la lumière et du fond. */
+export type LightingPreset = 'studio' | 'doux' | 'contraste' | 'dessus' | 'frontal' | 'sombre';
+export const LIGHTING_LABELS: Record<LightingPreset, string> = { studio: 'Studio', doux: 'Doux', contraste: 'Contraste', dessus: 'Dessus', frontal: 'Frontal', sombre: 'Sombre' };
+const LIGHTING: Record<LightingPreset, { sky: string; ground: string; hemi: number; sunColor: string; sun: number; pos: [number, number, number]; follow: boolean; background: string }> = {
+  studio: { sky: '#ffffff', ground: '#b9c4a8', hemi: 1.4, sunColor: '#fff4dc', sun: 1.6, pos: [3, 2, 6], follow: false, background: '#e8f0f2' },
+  doux: { sky: '#ffffff', ground: '#e6e6e6', hemi: 2.4, sunColor: '#ffffff', sun: 0.5, pos: [3, 2, 6], follow: false, background: '#eef0f2' },
+  contraste: { sky: '#cfd8e6', ground: '#6b6b6b', hemi: 0.45, sunColor: '#fff1d6', sun: 3.2, pos: [5, -3, 2.5], follow: false, background: '#d9dee3' },
+  dessus: { sky: '#ffffff', ground: '#8a8f94', hemi: 0.7, sunColor: '#ffffff', sun: 2.6, pos: [0.4, 0.4, 8], follow: false, background: '#e8f0f2' },
+  frontal: { sky: '#ffffff', ground: '#c9ccd0', hemi: 0.8, sunColor: '#ffffff', sun: 2.4, pos: [0, 0, 0], follow: true, background: '#e8f0f2' },
+  sombre: { sky: '#8aa0c0', ground: '#2a2f38', hemi: 0.6, sunColor: '#ffe9c4', sun: 2.4, pos: [3, 2, 6], follow: false, background: '#1f242c' },
+};
+
 export type EditTool = 'vertex' | 'edge' | 'tri' | 'select' | 'plane';
 /** Axe autour duquel tournent les plans de « Générer les traits » : X, Y, Z, ou une diagonale du plan courant. */
 export type TraceAxis = 'X' | 'Y' | 'Z' | 'D1' | 'D2';
@@ -51,8 +64,11 @@ export interface CutPlane {
   /** Rotations (degrés) autour des deux diagonales du carré, appliquées après l'orientation et l'inclinaison. */
   diag1: number;
   diag2: number;
+  /** Inclinaison autour de l'axe horizontal X de la scène (degrés), appliquée en dernier : le plan bascule d'avant en arrière quelle que soit son orientation. */
+  horiz: number;
   keep: 'right' | 'left';
 }
+export interface WorkState { ov?: { target: number; geo: BufferGeometry; simplified?: boolean }; base?: BufferGeometry }
 /** Couleurs des triangles gardés / supprimés quand le plan de coupe est actif. */
 const PLANE_COLORS = ['#9be7a8', '#f49a9a'];
 
@@ -78,6 +94,29 @@ const FIT = 2;
 const EDIT_HISTORY = 100;
 
 /** Scène Three.js pure : aucune dépendance React. La caméra se manie comme dans l'éditeur archivé. */
+/** STL (binaire ou ASCII) ou OBJ, reconnu au contenu : un OBJ est fusionné en un seul maillage de triangles (les quads sont découpés par le lecteur). */
+function parseModel(buffer: ArrayBuffer): BufferGeometry {
+  const binaryStl = buffer.byteLength >= 84 && buffer.byteLength === 84 + 50 * new DataView(buffer).getUint32(80, true);
+  const head = new TextDecoder().decode(new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 512)));
+  if (binaryStl || /^\s*solid/i.test(head)) return new STLLoader().parse(buffer);
+  const group = new OBJLoader().parse(new TextDecoder().decode(buffer));
+  const parts: Float32Array[] = [];
+  group.traverse((o) => {
+    const m = o as Mesh;
+    if (!m.isMesh) return;
+    const g = m.geometry.index ? m.geometry.toNonIndexed() : m.geometry;
+    parts.push(g.attributes.position.array as Float32Array);
+  });
+  const total = parts.reduce((n, p) => n + p.length, 0);
+  if (!total) throw new Error('OBJ sans triangle');
+  const pos = new Float32Array(total);
+  let at = 0;
+  for (const p of parts) { pos.set(p, at); at += p.length; }
+  const geo = new BufferGeometry();
+  geo.setAttribute('position', new Float32BufferAttribute(pos, 3));
+  return geo;
+}
+
 export class StlViewer {
   readonly renderer: WebGLRenderer;
   readonly scene = new Scene();
@@ -89,11 +128,16 @@ export class StlViewer {
   /** Dernière réduction calculée par modèle (pour ne pas la refaire si la cible n'a pas changé). */
   private readonly reduced = new Map<string, { target: number; geo: BufferGeometry }>();
   /** Maillage retouché à la main, valable pour une cible de réduction donnée. */
-  private readonly overrides = new Map<string, { target: number; geo: BufferGeometry }>();
+  private readonly overrides = new Map<string, { target: number; geo: BufferGeometry; simplified?: boolean }>();
+  /** Maillage retouché avant sa dernière réduction : on réduit toujours depuis lui, pour pouvoir remonter le nombre de triangles. */
+  private readonly bases = new Map<string, BufferGeometry>();
   /** Aperçu temporaire (modèle arrondi en bandes) affiché à la place du maillage courant, non enregistré. */
   private readonly previews = new Map<string, BufferGeometry>();
   private readonly raycaster = new Raycaster();
   private readonly ro: ResizeObserver;
+  private readonly hemi = new HemisphereLight(new Color('#ffffff'), new Color('#b9c4a8'), 1.4);
+  private readonly sun = new DirectionalLight(new Color('#fff4dc'), 1.6);
+  private lightFollowsCamera = false;
   /** Axes généraux (ligne + lettre), affichables ou non. */
   private readonly axisGroups: Record<string, Group> = {};
   /** Plans ⟂ aux axes généraux, par le centre du modèle sélectionné, avec leur ligne de coupe. */
@@ -121,9 +165,11 @@ export class StlViewer {
   private lasso: Vector2[] = [];
   private selectThrough = false;
   // plan de coupe vertical (outil « plane ») : plan bleu transparent, triangles teintés selon le côté
-  private plane: CutPlane = { offset: 0, angle: 90, tilt: 0, diag1: 0, diag2: 0, keep: 'right' };
+  private plane: CutPlane = { offset: 0, angle: 90, tilt: 0, diag1: 0, diag2: 0, horiz: 0, keep: 'right' };
   /** Traits de coupe gardés par modèle (rouge sombre) : enfants du mesh, visibles en permanence, enregistrés. */
   private readonly traces = new Map<string, LineSegments[]>();
+  /** Parmi les traits d'un modèle, ceux qui sont des fils de fer (pour « Annuler le fil de fer »). */
+  private readonly wires = new Map<string, LineSegments[]>();
   private readonly planeGroup = new Group();
   private dropCount = 0;
   // trait de coupe : contours fermés de l'intersection plan/modèle (les trous sont pontés par une courbe lissée)
@@ -180,10 +226,8 @@ export class StlViewer {
       this.worldPlanes[name] = { group: plane, trace, dir: dir.clone(), key: '' };
     });
 
-    this.scene.add(new HemisphereLight(new Color('#ffffff'), new Color('#b9c4a8'), 1.4));
-    const sun = new DirectionalLight(new Color('#fff4dc'), 1.6);
-    sun.position.set(3, 2, 6);
-    this.scene.add(sun);
+    this.scene.add(this.hemi, this.sun);
+    this.setLighting('studio');
 
     // surbrillance du mode édition : par-dessus tout
     this.wire.renderOrder = 10;
@@ -239,6 +283,7 @@ export class StlViewer {
     dom.addEventListener('contextmenu', (e) => e.preventDefault());
     this.renderer.setAnimationLoop(() => {
       this.controls.update();
+      if (this.lightFollowsCamera) this.sun.position.copy(this.camera.position); // lampe frontale : éclaire ce qu'on regarde
       this.renderer.render(this.scene, this.camera);
     });
   }
@@ -280,13 +325,13 @@ export class StlViewer {
     }
     if (this.edit) { this.applyEdit(this.pickEditTarget(e)); return; }
     this.setRay(e);
-    const hit = this.raycaster.intersectObjects([...this.meshes.values()], false)[0];
+    const hit = this.raycaster.intersectObjects([...this.meshes.values()].filter((m) => m.visible), false)[0];
     this.events.onPick(hit ? (hit.object.userData.id as string) : null);
   };
 
-  /** Lit un .stl, le centre sur son pivot et le met à l'échelle. Renvoie ses réglages de départ (centré en x = `x`). */
+  /** Lit un .stl ou un .obj (reconnu au contenu), le centre sur son pivot et le met à l'échelle. Renvoie ses réglages de départ (centré en x = `x`). */
   load(id: string, name: string, buffer: ArrayBuffer, x: number): ModelState {
-    const geo: BufferGeometry = new STLLoader().parse(buffer);
+    const geo = parseModel(buffer);
     geo.computeBoundingBox();
     const bb = geo.boundingBox!;
     const size = bb.getSize(new Vector3());
@@ -307,7 +352,7 @@ export class StlViewer {
 
   /** Une géométrie est-elle gardée en réserve (original, réduction, retouche) ? Sinon on peut la libérer. */
   private kept(id: string, g: BufferGeometry): boolean {
-    return g === this.originals.get(id) || g === this.reduced.get(id)?.geo || g === this.overrides.get(id)?.geo;
+    return g === this.originals.get(id) || g === this.reduced.get(id)?.geo || g === this.overrides.get(id)?.geo || g === this.bases.get(id);
   }
 
   private show(id: string, geo: BufferGeometry): void {
@@ -325,6 +370,14 @@ export class StlViewer {
   rebuild(id: string, target: number): number {
     const mesh = this.meshes.get(id), original = this.originals.get(id);
     if (!mesh || !original) return 0;
+    const ov = this.overrides.get(id);
+    if (ov) { // retouché à la main : on réduit ce qu'il reste, pas le modèle d'origine
+      if (ov.target !== target) this.resimplifyOverride(id, target);
+      const cur = this.overrides.get(id)!;
+      this.show(id, cur.geo);
+      if (this.edit?.id === id && this.edit.target !== target) this.setEdit(null);
+      return cur.geo.attributes.position.count / 3;
+    }
     let base = this.reduced.get(id);
     if (!base || base.target !== target) {
       if (base && base.geo !== original) base.geo.dispose();
@@ -332,17 +385,45 @@ export class StlViewer {
       base = { target, geo };
       this.reduced.set(id, base);
     }
-    const o = this.overrides.get(id);
-    const next = o && o.target === target ? o.geo : base.geo;
+    const next = base.geo;
     this.show(id, next);
     if (this.edit?.id === id && this.edit.target !== target) this.setEdit(null); // la réduction a changé : l'édition en cours ne vaut plus
     return next.attributes.position.count / 3;
+  }
+
+  /** Réduit le maillage retouché à ~`target` triangles (0 = tel que retouché), depuis sa dernière version retouchée à la main. */
+  private resimplifyOverride(id: string, target: number): void {
+    const o = this.overrides.get(id)!;
+    const base = o.simplified ? this.bases.get(id) ?? o.geo : o.geo;
+    const geo = target > 0 && target < base.attributes.position.count / 3 ? simplify(base, target) : base;
+    this.overrides.set(id, { target, geo, simplified: geo !== base });
+    if (geo !== base) this.bases.set(id, base); else this.bases.delete(id);
+  }
+
+  /** Photographie de l'état retouché / réduit d'un modèle (pour « Retour » sur une réduction). Les géométries ne sont jamais détruites : disposer ne fait que libérer la mémoire GPU, elles se rechargent à l'affichage. */
+  workState(id: string): WorkState {
+    const o = this.overrides.get(id);
+    return { ov: o ? { ...o } : undefined, base: this.bases.get(id) };
+  }
+
+  /** Remet un état photographié ; l'appelant doit ensuite appeler `rebuild` avec la cible d'alors. */
+  restoreWorkState(id: string, s: WorkState): void {
+    if (s.ov) this.overrides.set(id, { ...s.ov }); else this.overrides.delete(id);
+    if (s.base) this.bases.set(id, s.base); else this.bases.delete(id);
+  }
+
+  /** Retouche courante d'un modèle (cible de réduction + sommets), ou null : à enregistrer après une réduction. */
+  overrideState(id: string): { target: number; positions: Float32Array } | null {
+    const o = this.overrides.get(id);
+    return o ? { target: o.target, positions: o.geo.attributes.position.array as Float32Array } : null;
   }
 
   /** Installe (ou retire, avec null) un maillage retouché à la main, enregistré pour cette cible de réduction. */
   setOverride(id: string, target: number, positions: Float32Array | null): void {
     const old = this.overrides.get(id);
     if (old && old.geo !== this.meshes.get(id)?.geometry) old.geo.dispose();
+    const b = this.bases.get(id);
+    if (b) { this.bases.delete(id); if (b !== this.meshes.get(id)?.geometry) b.dispose(); }
     if (!positions) { this.overrides.delete(id); return; }
     const g = new BufferGeometry();
     g.setAttribute('position', new Float32BufferAttribute(positions, 3));
@@ -517,7 +598,7 @@ export class StlViewer {
 
   /**
    * Orientation du plan : le carré de base a sa normale selon X et ses diagonales selon (0, 1, ±1)/√2.
-   * On tourne autour de Z (orientation), puis de Y (inclinaison), puis autour de chaque diagonale du carré lui-même.
+   * On tourne autour de Z (orientation), puis de Y (inclinaison), puis autour de chaque diagonale du carré lui-même, enfin autour de l'axe X de la scène (inclinaison horizontale).
    */
   private planeQuaternion(): Quaternion {
     const d = MathUtils.degToRad;
@@ -525,7 +606,7 @@ export class StlViewer {
     q.multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), -d(this.plane.tilt)));
     q.multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 1).normalize(), d(this.plane.diag1)));
     q.multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 1, -1).normalize(), d(this.plane.diag2)));
-    return q;
+    return new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), d(this.plane.horiz ?? 0)).multiply(q);
   }
 
   private planeNormal(): Vector3 {
@@ -583,6 +664,47 @@ export class StlViewer {
       out.push({ normal: n.normalize(), point: c });
     }
     return out;
+  }
+
+  /**
+   * Fil de fer : les contours exacts (sans simplification) de toutes les coupes données, tracés d'un coup comme un seul trait gardé.
+   * Marche hors mode édition, sur le modèle de travail. Renvoie le nombre de segments.
+   */
+  wireFromPlanes(id: string, planes: SlicePlane[]): number {
+    const geo = this.sourceGeometryOf(id);
+    if (!geo) return 0;
+    const pos = geo.attributes.position.array;
+    const out: number[] = [];
+    for (const pl of planes) {
+      const { polys } = sectionContours(pos, pl.normal, pl.normal.dot(pl.point));
+      for (const poly of polys) for (let i = 0; i + 1 < poly.length; i++) out.push(poly[i].x, poly[i].y, poly[i].z, poly[i + 1].x, poly[i + 1].y, poly[i + 1].z);
+    }
+    if (!out.length) return 0;
+    this.addTrace(id, Float32Array.from(out));
+    const all = this.traces.get(id)!;
+    this.wires.set(id, [...(this.wires.get(id) ?? []), all[all.length - 1]]);
+    this.events.onTraces(id, this.exportTraces(id));
+    return out.length / 6;
+  }
+
+  /** Nombre de fils de fer tracés sur le modèle (annulables un par un, le dernier d'abord). */
+  wireCount(id: string): number { return (this.wires.get(id) ?? []).filter((l) => (this.traces.get(id) ?? []).includes(l)).length; }
+
+  /** Annule le dernier fil de fer tracé : le retire des traits (et de l'enregistrement). */
+  undoWire(id: string): boolean {
+    const list = this.wires.get(id) ?? [];
+    while (list.length) {
+      const line = list.pop()!;
+      const i = (this.traces.get(id) ?? []).indexOf(line);
+      if (i >= 0) { this.removeTrace(id, i); return true; } // removeTrace annonce déjà le changement
+    }
+    return false;
+  }
+
+  /** Cache (ou montre) la surface du modèle : les traits restent visibles, on ne voit que le fil de fer. */
+  setModelHidden(id: string, hidden: boolean): void {
+    const mesh = this.meshes.get(id);
+    if (mesh) (mesh.material as MeshStandardMaterial).visible = !hidden;
   }
 
   /** Les traits d'un modèle, sous forme de tableaux de sommets (pour l'enregistrement). */
@@ -797,6 +919,19 @@ export class StlViewer {
     this.refreshEdit(true);
   }
 
+  /** Les triangles sélectionnés seuls, en STL binaire (même repère que `exportStl` : rotation affichée, sans position ni taille à l'écran). */
+  exportSelectionStl(): DataView | null {
+    const ed = this.edit;
+    const mesh = ed && this.meshes.get(ed.id);
+    if (!ed || !mesh || !this.selection.size) return null;
+    const bare = new Mesh(new EditMesh(ed.mesh.pts, ed.mesh.tris.filter((_, i) => this.selection.has(i))).toGeometry());
+    bare.quaternion.copy(mesh.quaternion);
+    bare.updateMatrixWorld();
+    const out = new STLExporter().parse(bare, { binary: true }) as DataView;
+    bare.geometry.dispose();
+    return out;
+  }
+
   get editing(): string | null { return this.edit?.id ?? null; }
   get canUndo(): boolean { return (this.edit?.history.length ?? 0) > 0; }
 
@@ -830,7 +965,11 @@ export class StlViewer {
     const mesh = this.meshes.get(ed.id)!;
     const geo = ed.mesh.toGeometry();
     const old = this.overrides.get(ed.id);
-    this.overrides.set(ed.id, { target: ed.target, geo });
+    if (changed || old) { // entrer en édition sans rien toucher ne compte pas comme une retouche
+      this.overrides.set(ed.id, { target: ed.target, geo });
+      const b = this.bases.get(ed.id);
+      if (b) { this.bases.delete(ed.id); b.dispose(); } // la retouche part du maillage réduit affiché, plus de l'ancienne base
+    }
     this.show(ed.id, geo);
     if (old && old.geo !== geo) old.geo.dispose();
     // fil de fer : chaque arête une fois (clé numérique a·N + b)
@@ -937,6 +1076,16 @@ export class StlViewer {
     this.refreshEdit(true);
   }
 
+  /** Change l'éclairage : lumière ambiante (ciel / sol), lumière directionnelle (couleur, intensité, position ou frontale) et fond. */
+  setLighting(preset: LightingPreset): void {
+    const p = LIGHTING[preset];
+    this.hemi.color.set(p.sky); this.hemi.groundColor.set(p.ground); this.hemi.intensity = p.hemi;
+    this.sun.color.set(p.sunColor); this.sun.intensity = p.sun;
+    this.lightFollowsCamera = p.follow;
+    if (!p.follow) this.sun.position.set(...p.pos);
+    (this.scene.background as Color).set(p.background);
+  }
+
   /** Affiche ou cache un axe général. */
   setAxisVisible(axis: 'X' | 'Y' | 'Z', on: boolean): void { const g = this.axisGroups[axis]; if (g) g.visible = on; }
 
@@ -1023,9 +1172,7 @@ export class StlViewer {
 
   /** Géométrie de travail hors aperçu : retouche, sinon réduction, sinon original. */
   sourceGeometryOf(id: string): BufferGeometry | null {
-    const o = this.overrides.get(id), r = this.reduced.get(id);
-    const target = r ? r.target : 0; // jamais réduit : cible 0 (original)
-    return (o && o.target === target ? o.geo : r?.geo) ?? this.originals.get(id) ?? null;
+    return this.overrides.get(id)?.geo ?? this.reduced.get(id)?.geo ?? this.originals.get(id) ?? null;
   }
 
   /** Affiche un aperçu à la place du maillage courant (et le colore par pièce). Il disparaît à la prochaine réduction ou retouche. */
@@ -1075,12 +1222,13 @@ export class StlViewer {
   }
 
   /** Le maillage affiché (réduit, retouché) en STL binaire, dans son repère local. */
-  exportStl(id: string, source = false): DataView | null {
+  exportStl(id: string, source = false, scale = 1): DataView | null {
     const mesh = this.meshes.get(id);
     if (!mesh) return null;
     const geo = source ? this.sourceGeometryOf(id) ?? mesh.geometry : mesh.geometry; // `source` : le modèle de travail, même si un aperçu est affiché
     const bare = new Mesh(geo); // avec la rotation affichée, sans la position ni la taille à l'écran
     bare.quaternion.copy(mesh.quaternion);
+    bare.scale.setScalar(scale); // ex. millimètres : unités du modèle × scale
     bare.updateMatrixWorld();
     return new STLExporter().parse(bare, { binary: true }) as DataView;
   }
@@ -1097,6 +1245,8 @@ export class StlViewer {
       this.originals.get(id)?.dispose();
       this.reduced.get(id)?.geo.dispose();
       this.overrides.get(id)?.geo.dispose();
+      this.bases.get(id)?.dispose();
+      this.bases.delete(id);
       (mesh.material as MeshStandardMaterial).dispose();
       this.meshes.delete(id);
       this.originals.delete(id);
@@ -1109,6 +1259,7 @@ export class StlViewer {
       mesh.position.set(...m.pos);
       mesh.rotation.set(...((m.rot ?? [0, 0, 0]).map(MathUtils.degToRad) as Vec3));
       mesh.scale.setScalar(m.scale);
+      mesh.visible = !selectedId || m.id === selectedId; // un modèle sélectionné : les autres sont cachés (surface, traits et repères) ; rien de sélectionné : tous visibles
       const mat = mesh.material as MeshStandardMaterial;
       mat.color.set(mesh.userData.painted ? '#ffffff' : m.color); // peint par pièces : les couleurs de sommets font tout
       mat.emissive.set(m.id === selectedId ? '#3d6f5a' : '#000000');
@@ -1141,6 +1292,8 @@ export class StlViewer {
     for (const g of this.originals.values()) g.dispose();
     for (const r of this.reduced.values()) r.geo.dispose();
     for (const o of this.overrides.values()) o.geo.dispose();
+    for (const b of this.bases.values()) b.dispose();
+    this.bases.clear();
     this.meshes.clear();
     this.originals.clear();
     this.reduced.clear();
