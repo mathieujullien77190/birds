@@ -11,6 +11,45 @@ import type { Plank } from './model';
 const MERMAID_SRC = (/```mermaid\n([\s\S]*?)```/.exec(schemaMd)?.[1] ?? 'flowchart TB\n  X["schéma introuvable"]').trim();
 
 type Keys = { nodes: string[]; edges: [string, string][] };
+/** Schéma DYNAMIQUE : on part du schéma complet du document et on enlève les blocs et les flèches des options absentes de la scène
+ *  (Peltier + capteur : HB, FILT, TEC, HOT, SENS ; 2ᵉ caméra : CAM2, IR2 ; Solaire : PV, MPPT), puis les zones devenues vides. Les couleurs des traits suivent leur flèche. */
+const OPTION_NODES = { clim: ['HB', 'FILT', 'TEC', 'HOT', 'SENS'], cam2: ['CAM2', 'IR2'], solar: ['PV', 'MPPT'] } as const;
+function buildSchema(opts: { clim: boolean; cam2: boolean; solar: boolean }): string {
+  const gone = new Set<string>([...(opts.clim ? [] : OPTION_NODES.clim), ...(opts.cam2 ? [] : OPTION_NODES.cam2), ...(opts.solar ? [] : OPTION_NODES.solar)]);
+  if (!gone.size) return MERMAID_SRC;
+  const lines = MERMAID_SRC.split('\n');
+  const colors = lines.filter((l) => /^\s*linkStyle \d+ /.test(l)).map((l) => /stroke:([^,]+)/.exec(l)?.[1] ?? '#444');
+  const out: string[] = [];
+  let edge = -1, kept = 0;
+  const keptColors: string[] = [];
+  const isEdge = (l: string) => /-->|---/.test(l) && !/^\s*(subgraph|%%)/.test(l);
+  const idOf = (l: string) => /^\s*([A-Z0-9]+)(\[|\(\()/.exec(l)?.[1];
+  for (const l of lines) {
+    if (/^\s*linkStyle /.test(l)) continue; // refait plus bas
+    if (isEdge(l)) {
+      edge++;
+      const m = /^\s*([A-Z0-9]+)\s*(?:-->|---)(?:\|[^|]*\|)?\s*([A-Z0-9]+)/.exec(l);
+      if (m && (gone.has(m[1]) || gone.has(m[2]))) continue;
+      out.push(l); keptColors.push(colors[edge] ?? '#444'); kept++;
+      continue;
+    }
+    const id = idOf(l);
+    if (id && gone.has(id)) continue;
+    const cls = /^(\s*class )([A-Z0-9,]+)( \w+)$/.exec(l);
+    if (cls) { const ids = cls[2].split(',').filter((x) => !gone.has(x)); if (!ids.length) continue; out.push(cls[1] + ids.join(',') + cls[3]); continue; }
+    out.push(l);
+  }
+  // zones vides : un « subgraph X[…] » suivi directement de son « end » disparaît
+  const clean: string[] = [];
+  for (let i = 0; i < out.length; i++) {
+    if (/^\s*subgraph /.test(out[i]) && /^\s*end\s*$/.test(out[i + 1] ?? '')) { i++; continue; }
+    clean.push(out[i]);
+  }
+  keptColors.forEach((c, n) => clean.push('  linkStyle ' + n + ' stroke:' + c + ',stroke-width:2.5px'));
+  void kept;
+  return clean.join('\n');
+}
+
 /** Pièce (nom) → nœuds et flèches du schéma. Les flèches sont [de, vers] comme dans la source mermaid. */
 const MAP: [RegExp, Keys][] = [
   [/^Raspberry Pi/, { nodes: ['PI'], edges: [] }],
@@ -81,15 +120,18 @@ export function SchemaPanel({ hover, planks, onHover }: { hover: { plank?: strin
   const [svg, setSvg] = useState<string>('');
   const [fiche, setFiche] = useState<string | null>(null); // module dont on affiche les caractéristiques par-dessus le schéma
   const ficheHtml = useMemo(() => { const f = fiche ? ficheOf(fiche) : undefined; return f ? (marked.parse(f.md, { async: false }) as string) : ''; }, [fiche]);
+  const opts = useMemo(() => ({ clim: planks.some((p) => /^Peltier/.test(p.name)), cam2: planks.some((p) => p.name === 'Caméra 2'), solar: planks.some((p) => /^Régulateur/.test(p.name)) }), [planks]);
+  const src = useMemo(() => buildSchema(opts), [opts.clim, opts.cam2, opts.solar]); // eslint-disable-line react-hooks/exhaustive-deps
+  const renders = useRef(0);
   useEffect(() => {
     let off = false;
     import('mermaid').then(async ({ default: mermaid }) => {
       mermaid.initialize({ startOnLoad: false, theme: 'neutral', flowchart: { htmlLabels: true, useMaxWidth: true } });
-      const { svg } = await mermaid.render('schema-cote-3d', MERMAID_SRC);
+      const { svg } = await mermaid.render('schema-cote-3d-' + ++renders.current, src);
       if (!off) setSvg(svg);
     }).catch(() => { if (!off) setSvg('<p>schéma indisponible</p>'); });
     return () => { off = true; };
-  }, []);
+  }, [src]);
   // surbrillance d'après la pièce survolée dans la 3D / « Pièces »
   const keys = useMemo(() => {
     if (!hover) { fromSchema.current = false; return null; }
