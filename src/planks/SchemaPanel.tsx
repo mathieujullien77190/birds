@@ -13,7 +13,7 @@ const MERMAID_SRC = (/```mermaid\n([\s\S]*?)```/.exec(schemaMd)?.[1] ?? 'flowcha
 type Keys = { nodes: string[]; edges: [string, string][] };
 /** Schéma DYNAMIQUE : on part du schéma complet du document et on enlève les blocs et les flèches des options absentes de la scène
  *  (Peltier + capteur : HB, FILT, TEC, HOT, SENS ; 2ᵉ caméra : CAM2, IR2 ; Solaire : PV, MPPT), puis les zones devenues vides. Les couleurs des traits suivent leur flèche. */
-const OPTION_NODES = { clim: ['HB', 'FILT', 'TEC', 'HOT', 'SENS'], cam2: ['CAM2', 'IR2'], solar: ['PV', 'MPPT'] } as const;
+const OPTION_NODES = { clim: ['HB', 'FILT', 'TEC', 'HOT', 'SENS', 'RAIL'], cam2: ['CAM2', 'IR2'], solar: ['PV', 'MPPT'] } as const;
 function buildSchema(opts: { clim: boolean; cam2: boolean; solar: boolean }): string {
   const gone = new Set<string>([...(opts.clim ? [] : OPTION_NODES.clim), ...(opts.cam2 ? [] : OPTION_NODES.cam2), ...(opts.solar ? [] : OPTION_NODES.solar)]);
   if (!gone.size) return MERMAID_SRC;
@@ -29,6 +29,7 @@ function buildSchema(opts: { clim: boolean; cam2: boolean; solar: boolean }): st
     if (isEdge(l)) {
       edge++;
       const m = /^\s*([A-Z0-9]+)\s*(?:-->|---)(?:\|[^|]*\|)?\s*([A-Z0-9]+)/.exec(l);
+      if (!opts.clim && m && m[1] === 'FUSE' && m[2] === 'RAIL') { out.push('  FUSE --> BUCK'); keptColors.push(colors[edge] ?? '#444'); kept++; continue; } // sans Peltier : pas de Wago, le fusible va droit au convertisseur
       if (m && (gone.has(m[1]) || gone.has(m[2]))) continue;
       out.push(l); keptColors.push(colors[edge] ?? '#444'); kept++;
       continue;
@@ -71,6 +72,7 @@ const MAP: [RegExp, Keys][] = [
   [/^Câble 12 V/, { nodes: [], edges: [['PV', 'MPPT']] }],
   [/^(Gaine des fils|Fil régulateur → batterie)/, { nodes: [], edges: [['MPPT', 'FUSE']] }],
   [/^Fil fusible → batterie/, { nodes: [], edges: [['FUSE', 'BAT']] }],
+  [/^Fil (fusible|batterie −) → convertisseur/, { nodes: [], edges: [['FUSE', 'BUCK']] }],
   [/^Fil rail → pont en H/, { nodes: [], edges: [['RAIL', 'HB']] }],
   [/^Fil rail → convertisseur/, { nodes: [], edges: [['RAIL', 'BUCK']] }],
   [/^Fil Peltier/, { nodes: [], edges: [['FILT', 'TEC']] }],

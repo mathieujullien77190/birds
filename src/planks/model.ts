@@ -1107,8 +1107,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     part('Cale convertisseur avant', 36, 3, t, CVX, CVY - 30 - 1.5, topZ + t / 2, 'block', '#a16207'),
     part('Cale convertisseur arrière', 36, 3, t, CVX, CVY + 30 + 1.5, topZ + t / 2, 'block', '#a16207'),
     part('Fusible lame 15 A (19 × 18 × 5, posé à plat)', 19, 18.5, 5, FX, FY, topZ + 2.5, 'block', '#dc2626'), // près de la sortie de la gaine
-    part('Wago 221 (3 entrées) rail 12 V +', 20, 13, 11, WGX, FY, topZ + 3 + 5.5, 'block', '#f97316'), // bornier du rail 12 V : un fil de la batterie, deux départs (pont en H, convertisseur)
-    part('Wago 221 (3 entrées) rail 12 V −', 20, 13, 11, WGX, FY - 14, topZ + 3 + 5.5, 'block', '#9ca3af'),
+    ...(n.clim ? [part('Wago 221 (3 entrées) rail 12 V +', 20, 13, 11, WGX, FY, topZ + 3 + 5.5, 'block', '#f97316')] : []), // bornier du rail 12 V : un fil de la batterie, deux départs (pont en H, convertisseur) — absent sans Peltier : un seul départ, pas besoin de borne
+    ...(n.clim ? [part('Wago 221 (3 entrées) rail 12 V −', 20, 13, 11, WGX, FY - 14, topZ + 3 + 5.5, 'block', '#9ca3af')] : []),
     // cales de bois autour de la batterie (tous les côtés ; à gauche c'est le mur du compartiment du Peltier qui la bloque)
     part('Cale batterie droite', 3, 76, t, BX + 64 + 1.5, BY, topZ + t / 2, 'block', '#a16207'), // cale tout autour (3 mm de large, 3 de haut) ; la batterie est à 1 cm du mur de droite et du mur avant
     part('Cale batterie gauche', 3, 76, t, BX - 64 - 1.5, BY, topZ + t / 2, 'block', '#a16207'),
@@ -1120,10 +1120,15 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     })(),
     part('Batterie LiFePO4 12,8 V 6 Ah (4 × 32700, 128 × 70 × 32)', 128, 70, 32, BX, BY, topZ + 3 + 16, 'block', '#047857'), // dans le grenier, coin avant droit, à 1 cm du mur de droite et du mur avant
     wire('Fil fusible → batterie + (rouge)', '#dc2626', [[FX, FY - 8, topZ + 8], [(FX + BX) / 2, (FY + BY) / 2, topZ + 34], [BX - 8, BY + 37, topZ + 40], [BX - 8, BY + 29, topZ + 36]] as Vec3[], 3.6),
-    wire('Fil fusible → Wago + (rouge)', '#dc2626', [[FX + 9, FY, topZ + 8], [WGX - 14, FY, topZ + 12], [WGX - 7, FY, topZ + 14]] as Vec3[], 3.6), // le + sort du fusible et entre dans le Wago +
-    wire('Fil batterie − → Wago − (noir)', '#111827', [[BX + 12, BY + 29, topZ + 39], [BX + 34, -6, topZ + 36], [WGX - 22, 22, topZ + 24], [WGX - 14, FY - 14, topZ + 16], [WGX - 7, FY - 14, topZ + 14]] as Vec3[], 3.6), // le − de la batterie entre dans le Wago −
-    wire('Fil rail → convertisseur + (rouge)', '#dc2626', [[WGX + 7, FY, topZ + 14], [99, 30, topZ + 22], [58, 2, topZ + 22], [MX + 10, MY, topZ + 20], [MX - 10, MY - 4, topZ + 20], [CVX + 7, CVY + 36, topZ + 14], [CVX + 7, CVY + 30, topZ + 11]] as Vec3[], 3.6), // départ 2 du Wago +
-    wire('Fil rail → convertisseur − (noir)', '#111827', [[WGX + 7, FY - 14, topZ + 14], [88, 34, topZ + 28], [58, -4, topZ + 28], [MX + 8, MY + 6, topZ + 24], [MX - 20, MY - 4, topZ + 22], [CVX - 7, CVY + 40, topZ + 13], [CVX - 7, CVY + 30, topZ + 11]] as Vec3[], 3.6), // départ 2 du Wago −
+    ...(n.clim ? [
+      wire('Fil fusible → Wago + (rouge)', '#dc2626', [[FX + 9, FY, topZ + 8], [WGX - 14, FY, topZ + 12], [WGX - 7, FY, topZ + 14]] as Vec3[], 3.6), // le + sort du fusible et entre dans le Wago +
+      wire('Fil batterie − → Wago − (noir)', '#111827', [[BX + 12, BY + 29, topZ + 39], [BX + 34, -6, topZ + 36], [WGX - 22, 22, topZ + 24], [WGX - 14, FY - 14, topZ + 16], [WGX - 7, FY - 14, topZ + 14]] as Vec3[], 3.6), // le − de la batterie entre dans le Wago −
+      wire('Fil rail → convertisseur + (rouge)', '#dc2626', [[WGX + 7, FY, topZ + 14], [99, 30, topZ + 22], [58, 2, topZ + 22], [MX + 10, MY, topZ + 20], [MX - 10, MY - 4, topZ + 20], [CVX + 7, CVY + 36, topZ + 14], [CVX + 7, CVY + 30, topZ + 11]] as Vec3[], 3.6), // départ 2 du Wago +
+      wire('Fil rail → convertisseur − (noir)', '#111827', [[WGX + 7, FY - 14, topZ + 14], [88, 34, topZ + 28], [58, -4, topZ + 28], [MX + 8, MY + 6, topZ + 24], [MX - 20, MY - 4, topZ + 22], [CVX - 7, CVY + 40, topZ + 13], [CVX - 7, CVY + 30, topZ + 11]] as Vec3[], 3.6), // départ 2 du Wago −
+    ] : [
+      wire('Fil fusible → convertisseur + (rouge)', '#dc2626', [[FX + 9, FY, topZ + 8], [WGX + 7, FY, topZ + 14], [99, 30, topZ + 22], [58, 2, topZ + 22], [MX + 10, MY, topZ + 20], [MX - 10, MY - 4, topZ + 20], [CVX + 7, CVY + 36, topZ + 14], [CVX + 7, CVY + 30, topZ + 11]] as Vec3[], 3.6), // sans Peltier : pas de Wago, le fusible va droit au convertisseur
+      wire('Fil batterie − → convertisseur − (noir)', '#111827', [[BX + 12, BY + 29, topZ + 39], [BX + 34, -6, topZ + 36], [58, -4, topZ + 28], [MX + 8, MY + 6, topZ + 24], [MX - 20, MY - 4, topZ + 22], [CVX - 7, CVY + 40, topZ + 13], [CVX - 7, CVY + 30, topZ + 11]] as Vec3[], 3.6),
+    ]),
   ];
   // avec le panneau solaire : le régulateur sous le nichoir, ses deux fils vers la batterie et la gaine qui les porte
   const solarElec: Plank[] = n.solar ? [
