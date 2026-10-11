@@ -29,7 +29,7 @@ flowchart TB
   end
   PV -->|"câble 12 V"| MPPT
   MPPT -->|"2 fils, passe-câble Ø 10 du toit"| FUSE
-  FUSE --- BAT
+  FUSE <-->|"charge le jour, alimente la nuit"| BAT
   FUSE --> RAIL
   RAIL --> BUCK
   BUCK -->|"5 V USB-C"| PI
