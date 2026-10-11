@@ -19,7 +19,7 @@ export interface Plank {
   poly?: [number, number][];
   /** Pavé à contour en plan : le haut est un plan incliné z = z0 + bx · x + by · y (repère de la plaque, z relatif au centre). */
   top?: { z0: number; bx: number; by: number };
-  special?: 'camera' | 'ir' | 'bar' | 'pi' | 'cable' | 'wire' | 'case' | 'block' | 'sensor' | 'fan' | 'driver' | 'solar' | 'doc' | 'conduit' | 'wago';
+  special?: 'camera' | 'ir' | 'bar' | 'pi' | 'cable' | 'wire' | 'case' | 'block' | 'sensor' | 'fan' | 'driver' | 'solar' | 'doc' | 'conduit';
   /** « block » (pavé) : épaisseur réelle du pavé selon z, au lieu de l'épaisseur du bois. */
   depth?: number;
   /** « wire » : couleur du fil (CSS). */

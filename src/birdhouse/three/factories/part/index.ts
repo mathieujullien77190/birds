@@ -12,7 +12,6 @@ import { irBoardGeometry } from './ir';
 import { piGeometry } from './pi';
 import { sensorGeometry } from './sensor';
 import { solarGeometry } from './solar';
-import { wagoGeometry } from './wago';
 
 type Special = NonNullable<Plank['special']>;
 type PartFactory = (p: Plank, t: number) => PartGeometry;
@@ -35,7 +34,6 @@ const FACTORIES: Partial<Record<Special, PartFactory>> = {
   bar: barGeometry,
   ir: irBoardGeometry,
   camera: cameraBoardGeometry,
-  wago: wagoGeometry,
 };
 
 /** Géométrie (surface colorée + arêtes) d'une pièce spéciale ; une pièce inconnue est dessinée comme une carte caméra (comme avant). */

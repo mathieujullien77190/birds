@@ -286,8 +286,8 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
-| Rôle | répartir le + et le − de la batterie vers l'interrupteur du ventilateur et le convertisseur | 221-413 : 21 × 13 × 11 mm ; 221-415 : 35 × 13 × 11 mm (taille à vérifier sur la fiche WAGO) |
-| Modèle | Wago 221-413 (3 entrées) pour le + et 221-415 (5 entrées) pour le − : à levier, tension 12 V, courant ≤ 32 A, sections de 0,2 à 4 mm², fils souples sans embout acceptés | pas de 7 mm, entrées sur la face ouest |
+| Rôle | répartir le + et le − de la batterie vers l'interrupteur du ventilateur et le convertisseur | pavés aux cotes officielles de la fiche technique WAGO (version du 08.05.2024, [221-413](https://www.wago.com/221-413) / [221-415](https://www.wago.com/221-415)) : 221-413 = 18,8 × 8,4 × 18,8 mm, 221-415 = 30 × 8,4 × 18,8 mm (largeur de la rangée × hauteur × profondeur dans le sens des fils) ; d'anciennes fiches de revendeurs donnent 18,7 × 8,3 × 18,6 mm : on retient la fiche WAGO actuelle |
+| Modèle | Wago 221-413 (3 entrées) pour le + et 221-415 (5 entrées) pour le − : à levier, tension 12 V, courant ≤ 32 A, sections de 0,2 à 4 mm², fils souples sans embout acceptés | pas de 6 mm (3 × 6 + 0,8 = 18,8 et 5 × 6 = 30, déduit des cotes), **tous les fils du même côté** : face ouest ; chaque fil arrive perpendiculairement à la face, parallèle aux autres, au même niveau (mi-hauteur), sur au moins 12 mm rectilignes |
 | Entrées du + | fusible, interrupteur du ventilateur, convertisseur : une entrée chacun | 3 sur 3 |
 | Entrées du − | batterie, convertisseur, ventilateur, masse de l'interrupteur : une entrée chacun, la 5ᵉ est libre | 4 sur 5 |
 | Courant | nous sommes à environ 1 A | — |

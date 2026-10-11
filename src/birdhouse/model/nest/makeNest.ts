@@ -349,17 +349,19 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       .flatMap(([x0, y0, x1, y1], k) => block(`Isolant toit ${k + 1}`, x0, x1, y0, y1, bodyH + t, bodyH + roofH - t)),
   ];
   // outils pour les pièces de l'électronique (groupe Électronique) : pavé et fil
-  const part = (name: string, w: number, h: number, depth: number, x: number, y: number, z: number, special: 'block' | 'driver' | 'wago', color = '#cbd5e1', rot: Vec3 = [0, 0, 0]): Plank =>
+  const part = (name: string, w: number, h: number, depth: number, x: number, y: number, z: number, special: 'block' | 'driver', color = '#cbd5e1', rot: Vec3 = [0, 0, 0]): Plank =>
     ({ id: uid(), name, w, h, depth, pos: [x, y, z] as Vec3, rot, notches: [], holes: [], group: elecGroup, special, color });
   const wire = (name: string, color: string, path: Vec3[], d = 1.2): Plank => ({ id: uid(), name, w: d, h: d, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'wire' as const, color, path });
   const CVX = -(W / 2 - t) + 10 + 18, CVY = -(D / 2 - t) + 10 + 30; // convertisseur : coin avant gauche, 1 cm des murs
   const BX = W / 2 - t - 10 - 64, BY = -(D / 2 - t) + 10 + 35; // batterie : coin avant droit, 1 cm des murs
   const WGX = W / 2 - t - 2 - 10; // les deux Wago du rail 12 V : à droite du fusible, contre le mur droit
   const FX = CND_X + 3, FY = CND_Y - 24; // fusible, près de la sortie de la gaine // centre du convertisseur : milieu de la place libre entre le tasseau gauche, la cale gauche de la batterie, le tasseau avant et la cale avant du Pi
-  // Wago 221-413 (+, 3 entrées) et 221-415 (−, 5 entrées) : rangée d'entrées le long de y (pas de 7 mm), face d'entrée à l'OUEST (x = WGF), corps de 13 mm de profondeur contre le mur droit ; le − est en dessous du +
-  const WGF = r2(WGX - 3), WGBX = r2(WGX + 3.5), WGP_Y = r2(FY - 5.5), WGM_Y = r2(WGP_Y - 29.5), WG_Z = topZ + 7; // WG_Z : hauteur des orifices
-  const wgPort = (cy: number, n: number, i: number) => r2(cy + 7 * ((n - 1) / 2 - i)); // y de l'entrée i (0 = au nord) d'un Wago de n entrées centré en cy
-  const wgEnd = (y: number, from: [number, number, number][]): Vec3[] => [...from, [r2(WGF - 8), y, WG_Z], [r2(WGF + 2.5), y, WG_Z]] as Vec3[]; // arrivée horizontale dans l'axe de l'orifice, 2,5 mm dedans
+  // Wago 221-413 (+, 3 entrées) et 221-415 (−, 5 entrées) : simples PAVÉS aux cotes officielles WAGO (fiche 08.05.2024 : 221-413 = 18,8 × 8,4 × 18,8 mm, 221-415 = 30 × 8,4 × 18,8 mm : largeur dans le sens de la rangée, hauteur, profondeur dans le sens des fils) ;
+  // TOUS les fils entrent par la MÊME face (ouest, x = WGF), au pas de 6 mm (3 × 6 + 0,8 = 18,8 ; 5 × 6 = 30), à mi-hauteur : WG_Z
+  const WG_W = 18.8, WG_H = 8.4, WG_PITCH = 6, WG_L3 = 18.8, WG_L5 = 30;
+  const WGF = r2(WGX + 10 - WG_W), WGBX = r2(WGF + WG_W / 2), FUY = r2(FY - 1.5), WGP_Y = FUY, WGM_Y = r2(WGP_Y - WG_L3 / 2 - 1.5 - WG_L5 / 2), WG_Z = r2(topZ + 3 + WG_H / 2); // le fusible est dans l'axe de l'entrée du milieu du Wago +
+  const wgPort = (cy: number, n: number, i: number) => r2(cy + WG_PITCH * ((n - 1) / 2 - i)); // y de l'entrée i (0 = au nord) d'un Wago de n entrées centré en cy
+  const wgEnd = (y: number, from: [number, number, number][]): Vec3[] => [...from, [r2(WGF + 2.5), y, WG_Z]] as Vec3[]; // les ≥ 12 derniers mm sont rectilignes, perpendiculaires à la face, au niveau des orifices ; 2,5 mm dans l'orifice
   // alimentation : toujours présente (le Pi en a besoin) — batterie 4 × 32700, fusible, deux Wago du rail 12 V, convertisseur 12 → 5 V, leurs cales et leurs fils
   const power: Plank[] = [
     part('Convertisseur 12 V → 5 V 5 A USB-C (taille à confirmer, ≈ 60 × 36 × 16)', 36, 60, 16, CVX, CVY, topZ + 3 + 8, 'block', '#0e7490'), // centré dans la place libre de l'avant gauche, calé
@@ -367,9 +369,9 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     part('Cale convertisseur droite', 3, 66, t, CVX + 18 + 1.5, CVY, topZ + t / 2, 'block', '#a16207'),
     part('Cale convertisseur avant', 36, 3, t, CVX, CVY - 30 - 1.5, topZ + t / 2, 'block', '#a16207'),
     part('Cale convertisseur arrière', 36, 3, t, CVX, CVY + 30 + 1.5, topZ + t / 2, 'block', '#a16207'),
-    part('Fusible lame 15 A (19 × 18 × 5, posé à plat)', 19, 18.5, 5, FX, FY, topZ + 2.5, 'block', '#dc2626'), // près de la sortie de la gaine
-    part('Wago 221-413 (3 entrées) rail 12 V +', 13, 21, 11, WGBX, WGP_Y, topZ + 3 + 5.5, 'wago', '#dc2626'), // bornier du rail 12 V : le fusible, l'interrupteur du ventilateur, le convertisseur
-    part('Wago 221-415 (5 entrées) rail 12 V −', 13, 35, 11, WGBX, WGM_Y, topZ + 3 + 5.5, 'wago', '#111827'), // batterie −, convertisseur −, ventilateur −, masse de l'interrupteur (+ 1 entrée libre) ; taille à vérifier sur la fiche WAGO
+    part('Fusible lame 15 A (19 × 18 × 5, posé à plat)', 19, 18.5, 5, FX, FUY, topZ + 2.5, 'block', '#dc2626'), // près de la sortie de la gaine
+    part('Wago 221-413 (3 entrées) rail 12 V +', WG_W, WG_L3, WG_H, WGBX, WGP_Y, WG_Z, 'block', '#f97316'), // bornier du rail 12 V : le fusible, l'interrupteur du ventilateur, le convertisseur
+    part('Wago 221-415 (5 entrées) rail 12 V −', WG_W, WG_L5, WG_H, WGBX, WGM_Y, WG_Z, 'block', '#9ca3af'), // batterie −, convertisseur −, ventilateur −, masse de l'interrupteur (+ 1 entrée libre) ; taille à vérifier sur la fiche WAGO
     // cales de bois autour de la batterie (tous les côtés ; à gauche, la cale suit le compartiment de la caméra)
     part('Cale batterie droite', 3, 76, t, BX + 64 + 1.5, BY, topZ + t / 2, 'block', '#a16207'), // cale tout autour (3 mm de large, 3 de haut) ; la batterie est à 1 cm du mur de droite et du mur avant
     part('Cale batterie gauche', 3, 76, t, BX - 64 - 1.5, BY, topZ + t / 2, 'block', '#a16207'),
@@ -380,11 +382,11 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       return segs.map(([a, b], k) => part(`Cale batterie arrière${segs.length > 1 ? ' ' + (k + 1) : ''}`, r2(b - a), 3, t, r2((a + b) / 2), y, topZ + t / 2, 'block', '#a16207'));
     })(),
     part('Batterie LiFePO4 12,8 V 6 Ah (4 × 32700, 128 × 70 × 32)', 128, 70, 32, BX, BY, topZ + 3 + 16, 'block', '#047857'), // dans le grenier, coin avant droit, à 1 cm du mur de droite et du mur avant
-    wire('Fil fusible → batterie + (rouge)', '#dc2626', [[FX - 7.5, FY, topZ + 5], [FX - 8, FY - 7, topZ + 14], [(FX + BX) / 2, (FY + BY) / 2, topZ + 34], [BX - 8, BY + 46, topZ + 22], [BX - 8, BY + 38, topZ + 19], [BX - 8, BY + 31, topZ + 19]] as Vec3[], 3.6),
-    wire('Fil fusible → Wago + (rouge)', '#dc2626', wgEnd(wgPort(WGP_Y, 3, 1), [[FX + 7.5, FY, topZ + 5], [FX + 11, FY - 3, topZ + 10], [r2(WGF - 16), wgPort(WGP_Y, 3, 1), WG_Z]]), 3.6), // le + sort du fusible et entre dans l'entrée du milieu du Wago +
-    wire('Fil batterie − → Wago − (noir)', '#111827', [[BX + 12, BY + 31, topZ + 19], [BX + 12, BY + 38, topZ + 19], [BX + 12, BY + 46, topZ + 22], [BX + 34, -6, topZ + 36], [r2(WGF - 22), 18, topZ + 24]].concat(wgEnd(wgPort(WGM_Y, 5, 3), [[r2(WGF - 16), wgPort(WGM_Y, 5, 3), WG_Z + 2]])) as Vec3[], 3.6), // le − de la batterie entre dans la 4ᵉ entrée du Wago −
-    wire('Fil rail → convertisseur + (rouge)', '#dc2626', [...wgEnd(wgPort(WGP_Y, 3, 2), [[r2(WGF - 14), wgPort(WGP_Y, 3, 2), WG_Z + 4]]).reverse(), [r2(WGF - 24), 40, topZ + 22], [58, 2, topZ + 22], [MX + 10, MY, topZ + 20], [MX - 10, MY - 4, topZ + 20], [CVX + 7, CVY + 36, topZ + 14], [CVX + 7, CVY + 30, topZ + 11]] as Vec3[], 3.6), // départ 2 du Wago +
-    wire('Fil rail → convertisseur − (noir)', '#111827', [...wgEnd(wgPort(WGM_Y, 5, 2), [[r2(WGF - 14), wgPort(WGM_Y, 5, 2), WG_Z + 4]]).reverse(), [78, 22, topZ + 28], [58, -4, topZ + 28], [MX + 8, MY + 6, topZ + 24], [MX - 20, MY - 4, topZ + 22], [CVX - 7, CVY + 40, topZ + 13], [CVX - 7, CVY + 30, topZ + 11]] as Vec3[], 3.6), // départ 2 du Wago −
+    wire('Fil fusible → batterie + (rouge)', '#dc2626', [[FX - 7.5, FUY, topZ + 5], [FX - 8, FUY - 7, topZ + 14], [(FX + BX) / 2, (FUY + BY) / 2, topZ + 34], [BX - 8, BY + 46, topZ + 22], [BX - 8, BY + 38, topZ + 19], [BX - 8, BY + 31, topZ + 19]] as Vec3[], 3.6),
+    wire('Fil fusible → Wago + (rouge)', '#dc2626', wgEnd(wgPort(WGP_Y, 3, 1), [[FX + 3, FUY, WG_Z]]), 3.6), // le + sort du fusible, droit dans l'axe de l'entrée du milieu du Wago +
+    wire('Fil batterie − → Wago − (noir)', '#111827', wgEnd(wgPort(WGM_Y, 5, 3), [[BX + 12, BY + 31, topZ + 19], [BX + 12, BY + 38, topZ + 19], [BX + 12, BY + 46, topZ + 22], [BX + 34, -6, topZ + 36], [r2(WGF - 25.2), r2(WGM_Y - 24.6), topZ + 20], [r2(WGF - 25.2), wgPort(WGM_Y, 5, 3), WG_Z]]), 3.6), // le − de la batterie arrive du sud et entre dans la 4ᵉ entrée du Wago −
+    wire('Fil rail → convertisseur + (rouge)', '#dc2626', [...wgEnd(wgPort(WGP_Y, 3, 2), [[r2(WGF - 27.2), r2(WGP_Y - 18.5), topZ + 26], [r2(WGF - 27.2), r2(wgPort(WGP_Y, 3, 2) - 4), topZ + 26], [r2(WGF - 27.2), wgPort(WGP_Y, 3, 2), WG_Z]]).reverse(), [r2(WGF - 27.2), 2, topZ + 26], [58, 2, topZ + 24], [MX + 10, MY, topZ + 20], [MX - 10, MY - 4, topZ + 20], [CVX + 7, CVY + 36, topZ + 14], [CVX + 7, CVY + 30, topZ + 11]] as Vec3[], 3.6), // départ 2 du Wago +
+    wire('Fil rail → convertisseur − (noir)', '#111827', [...wgEnd(wgPort(WGM_Y, 5, 2), [[r2(WGF - 31.2), r2(WGM_Y - 12.6), topZ + 28], [r2(WGF - 31.2), wgPort(WGM_Y, 5, 2), WG_Z]]).reverse(), [50, -4, topZ + 28], [MX + 8, MY + 6, topZ + 24], [MX - 20, MY - 4, topZ + 22], [CVX - 7, CVY + 40, topZ + 13], [CVX - 7, CVY + 30, topZ + 11]] as Vec3[], 3.6), // départ 2 du Wago −
   ];
   // avec le panneau solaire : le régulateur sous le nichoir, ses deux fils vers la batterie et la gaine qui les porte
   const solarElec: Plank[] = n.solar ? [
@@ -475,10 +477,10 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   };
   const fanWires: Plank[] = [
     cw('Fil cassette + (rouge)', '#dc2626', 0), cw('Fil cassette PWM (bleu)', '#2563eb', 1), cw('Fil cassette tachymètre (jaune)', '#eab308', 2), cw('Fil cassette − (noir)', '#111827', 3),
-    wire('Fil Wago + → interrupteur ventilateur (rouge)', '#dc2626', [...wgEnd(wgPort(WGP_Y, 3, 0), [[r2(WGF - 14), wgPort(WGP_Y, 3, 0) + 3, WG_Z + 4]]).reverse(), [SWX + 4, SWY - 17, topZ + 15], [SWX + 4, SWY - 12.5, topZ + 11.5]] as Vec3[], 1.6),
+    wire('Fil Wago + → interrupteur ventilateur (rouge)', '#dc2626', [...wgEnd(wgPort(WGP_Y, 3, 0), [[r2(WGF - 29), r2(WGP_Y + 17.5), topZ + 14], [r2(WGF - 29), wgPort(WGP_Y, 3, 0), WG_Z]]).reverse(), [SWX + 4, SWY - 17, topZ + 15], [SWX + 4, SWY - 12.5, topZ + 11.5]] as Vec3[], 1.6),
     wire('Fil interrupteur → ventilateur + (rouge)', '#dc2626', [[SWX - 3, SWY + 10, topZ + 11.5], [SWX - 6, YREAR - 1.5, topZ + 14], [Math.max(66, CONX + 6), YREAR - 1.5, topZ + 14], [CONX, YREAR - 3, topZ + 14], [CONX, YREAR - 3, lvl[0]], [XPLUG + 14, NY(90), lvl[0]], ...out(0, NY(88)).slice(0, 2).reverse()] as Vec3[], 1.6),
-    wire('Fil ventilateur − (noir)', '#111827', [...out(3, NY(79)).slice(0, 2), [XPLUG + 12, NY(79), lvl[3]], [CONX - 1, NY(80), lvl[3]], [CONX - 1, NY(80), topZ + 9], [CONX, 50, topZ + 9], [56, 47.5, topZ + 9], ...wgEnd(wgPort(WGM_Y, 5, 1), [[r2(WGF - 14), wgPort(WGM_Y, 5, 1) + 3, WG_Z + 3]])] as Vec3[], 1.6),
-    wire('Fil masse interrupteur → Wago − (noir)', '#111827', [[SWX - 2, SWY - 12.5, topZ + 11.5], [SWX - 4, SWY - 16, topZ + 14], [84, 70, topZ + 22], [84, 45, topZ + 22], ...wgEnd(wgPort(WGM_Y, 5, 0), [[r2(WGF - 10), wgPort(WGM_Y, 5, 0) + 2, WG_Z + 4]])] as Vec3[], 1.6),
+    wire('Fil ventilateur − (noir)', '#111827', [...out(3, NY(79)).slice(0, 2), [XPLUG + 12, NY(79), lvl[3]], [CONX - 1, NY(80), lvl[3]], [CONX - 1, NY(80), topZ + 9], [CONX, r2(WGP_Y - 8.5), topZ + 9], ...wgEnd(wgPort(WGM_Y, 5, 1), [[r2(WGF - 25.2), r2(WGP_Y - 11), topZ + 9], [r2(WGF - 25.2), wgPort(WGM_Y, 5, 1), WG_Z]])] as Vec3[], 1.6),
+    wire('Fil masse interrupteur → Wago − (noir)', '#111827', [[SWX - 2, SWY - 12.5, topZ + 11.5], [SWX - 4, SWY - 16, topZ + 14], [r2(WGF + 2.8), r2(WGP_Y + 11.5), topZ + 22], [r2(WGF - 20.7), r2(WGP_Y + 11.5), topZ + 22], ...wgEnd(wgPort(WGM_Y, 5, 0), [[r2(WGF - 20.7), wgPort(WGM_Y, 5, 0), WG_Z]])] as Vec3[], 1.6),
     toPi('Fil PWM ventilateur (bleu)', '#2563eb', 1, out(1, NY(91)), NY(91), 5, PI_PIN_Y, true),
     toPi('Fil tachymètre ventilateur (jaune)', '#eab308', 2, out(2, NY(93.4)), NY(93.4), 5, PI_PIN_Y - 2.54, false),
     toPi('Fil masse commune ventilateur (noir)', '#111827', 3, out(3, NY(95.8)), NY(95.8), 6, PI_PIN_Y, true),

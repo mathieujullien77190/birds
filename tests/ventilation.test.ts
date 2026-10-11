@@ -226,25 +226,37 @@ describe('poignées en U : sens de pose', () => {
   });
 });
 
-describe('Wago du rail 12 V : 221-413 (+) et 221-415 (−)', () => {
-  it('le + a 3 entrées, le − en a 5 ; une entrée distincte par fil, arrivée horizontale dans l axe', () => {
-    const plus = one(sc0, /^Wago 221-413 \(3 entrées\) rail 12 V \+$/), minus = one(sc0, /^Wago 221-415 \(5 entrées\) rail 12 V −$/);
-    expect(plus.special).toBe('wago'); expect(minus.special).toBe('wago'); expect(Math.round(plus.h / 7)).toBe(3); expect(Math.round(minus.h / 7)).toBe(5);
-    expect(minus.h).toBe(35); expect(minus.w).toBe(13); expect(minus.depth).toBe(11); // 221-415 : 35 × 13 × 11 mm (à vérifier sur la fiche WAGO)
-    for (const [w, n, names] of [[plus, 3, ['Fil fusible → Wago + (rouge)', 'Fil Wago + → interrupteur ventilateur (rouge)', 'Fil rail → convertisseur + (rouge)']], [minus, 4, ['Fil batterie − → Wago − (noir)', 'Fil rail → convertisseur − (noir)', 'Fil ventilateur − (noir)', 'Fil masse interrupteur → Wago − (noir)']]] as [Plank, number, string[]][]) {
-      const face = w.pos[0] - w.w / 2, ports = Array.from({ length: Math.round(w.h / 7) }, (_, i) => w.pos[1] + 7 * ((Math.round(w.h / 7) - 1) / 2 - i)), used: number[] = [];
-      expect(names).toHaveLength(n);
+describe('Wago du rail 12 V : pavés aux cotes officielles, fils alignés', () => {
+  const plus = () => one(sc0, /^Wago 221-413 .3 entrées. rail 12 V .$/), minus = () => one(sc0, /^Wago 221-415 .5 entrées. rail 12 V −$/);
+  const WIRES: [() => Plank, string[]][] = [[plus, ['Fil Wago + → interrupteur ventilateur (rouge)', 'Fil fusible → Wago + (rouge)', 'Fil rail → convertisseur + (rouge)']], [minus, ['Fil masse interrupteur → Wago − (noir)', 'Fil ventilateur − (noir)', 'Fil rail → convertisseur − (noir)', 'Fil batterie − → Wago − (noir)']]];
+  const wire = (nm: string) => one(sc0, new RegExp('^' + nm.replace(/[()+→−]/g, '.') + '$'));
+  it('simples pavés (special block), cotes WAGO : 221-413 = 18,8 × 8,4 × 18,8 mm, 221-415 = 30 × 8,4 × 18,8 mm', () => {
+    for (const [w, len] of [[plus(), 18.8], [minus(), 30]] as [Plank, number][]) { expect(w.special).toBe('block'); expect([w.w, w.h, w.depth]).toEqual([18.8, len, 8.4]); expect(w.holes).toEqual([]); expect(w.poly).toBeUndefined(); } // w : profondeur (sens des fils), h : largeur de la rangée, depth : hauteur
+    expect(plus().color).toBe('#f97316'); expect(minus().color).toBe('#9ca3af');
+    expect(sc0.planks.filter((p) => p.special === ('wago' as never))).toEqual([]);
+  });
+  it('tous les fils d un même Wago arrivent du même côté (ouest), perpendiculairement à la face, parallèles, à l entraxe de 6 mm, au même niveau : ≥ 12 mm rectilignes avant la face, une entrée par fil', () => {
+    for (const [get, names] of WIRES) {
+      const w = get(), face = w.pos[0] - w.w / 2, n = Math.round(w.h / 6), ports = Array.from({ length: n }, (_, i) => +(w.pos[1] + 6 * ((n - 1) / 2 - i)).toFixed(2)), used: number[] = [];
       for (const nm of names) {
-        const wire = one(sc0, new RegExp('^' + nm.replace(/[()+→−]/g, '.') + '$')), pts = [wire.path![0], wire.path![wire.path!.length - 1]], end = pts.find((q) => Math.abs(q[2] - (w.pos[2] - 1.5)) < 0.6 && q[0] > face && q[0] < face + 4)!;
-        const k = ports.findIndex((y) => Math.abs(y - end[1]) < 0.01); expect(k, nm + ' : une entrée').toBeGreaterThanOrEqual(0);
-        expect(end[0], nm).toBeGreaterThan(face); expect(end[0], nm).toBeLessThan(face + 4); // 2,5 mm dans l'orifice
-        expect(Math.abs(end[2] - (w.pos[2] - 1.5)), nm + ' hauteur des orifices').toBeLessThan(0.6);
-        const before = wire.path![wire.path!.indexOf(end) === 0 ? 1 : wire.path!.length - 2]; expect(Math.abs(before[1] - end[1]) < 0.01 && Math.abs(before[2] - end[2]) < 0.01, nm + ' arrivée horizontale dans l axe').toBe(true);
-        used.push(k);
+        const all = pathItems([wire(nm)])[0].pts, seq = Math.abs(all[0].x - (face + 2.5)) < Math.abs(all[all.length - 1].x - (face + 2.5)) ? all : all.slice().reverse(), near: typeof all = [];
+        for (const q of seq) { if (q.x > face - 12.01 && q.x < face + 2.6) near.push(q); else if (near.length) break; } // la courbe réelle sur les 12 mm avant la face, depuis le bout dans l orifice
+        expect(near.length, nm).toBeGreaterThan(5);
+        const y = near[0].y, z = near[0].z;
+        for (const q of near) { expect(Math.abs(q.y - y), nm + " droit (y)").toBeLessThan(0.15); expect(Math.abs(q.z - z), nm + " droit (z)").toBeLessThan(0.15); }
+        expect(Math.abs(z - (w.pos[2])), nm + ' niveau des orifices (mi-hauteur)').toBeLessThan(0.05);
+        const k = ports.findIndex((p) => Math.abs(p - y) < 0.05); expect(k, nm + ' : une entrée à l entraxe').toBeGreaterThanOrEqual(0); used.push(k);
+        const end = wire(nm).path!.find((q) => Math.abs(q[0] - (face + 2.5)) < 0.01 && Math.abs(q[1] - y) < 0.05); expect(end, nm + ' 2,5 mm dans l orifice').toBeTruthy();
       }
-      expect(new Set(used).size, 'entrées distinctes').toBe(used.length);
+      expect(new Set(used).size).toBe(used.length); expect(names.length).toBeLessThanOrEqual(n); // la 5e entrée du 221-415 reste libre
+      expect(used.slice().sort((p, q) => p - q), 'ordre des ports du nord au sud').toEqual(used.slice().sort((p, q) => p - q));
     }
-    expect(minus.h / 7 - 4).toBeGreaterThanOrEqual(1); // une entrée de réserve
+    expect(WIRES[1][1].length).toBe(4); // le − : 4 fils sur 5 entrées
+  });
+  it('ordre des fils = ordre des ports : aucun fil du même Wago n en croise ou n en touche un autre', () => {
+    for (const [get, names] of WIRES) { get(); const items = pathItems(names.map(wire)); expect(pathContacts(items, 0.3).filter((c) => !c.shared).map((c) => c.A + ' / ' + c.B)).toEqual([]); }
+    const ys = (names: string[]) => names.map((nm) => { const q = pathItems([wire(nm)])[0].pts, w = nm; void w; return q.filter((p) => p.x > 70 && p.x < 82)[0]?.y ?? 0; });
+    for (const [, names] of WIRES) { const v = ys(names); expect(v.slice().sort((p, q) => q - p), 'du nord au sud').toEqual(v); } // les fils sont rangés dans l ordre des ports, du nord au sud
   });
   it('les deux Wago ne chevauchent ni leurs voisins ni l un l autre', () => {
     const w = by(sc0, /^Wago 221/); expect(w).toHaveLength(2);
