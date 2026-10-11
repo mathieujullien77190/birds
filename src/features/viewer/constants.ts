@@ -9,5 +9,5 @@ export const STORAGE = {
   nest: 'plaques-nichoir-3', // réglages du nichoir
 } as const;
 
-/** Types de pièces cachées d'office quand on crée un nichoir : isolant, barres du toit, pan de toit en chêne (l'œil de « Pièces » les affiche). */
-export const HIDDEN_AT_CREATION = [/^Isolant(?! bloc d'hiver)/, /^Toit en chêne$/];
+/** Types de pièces cachées d'office quand on crée un nichoir : isolant, pan de toit en chêne (l'œil de « Pièces » les affiche). */
+export const HIDDEN_AT_CREATION = [/^Isolant(?! bloc d'hiver)/, /^Toit en chêne$/, /^Cadre couvercle/];

@@ -119,7 +119,7 @@ describe('makeNest : pièces présentes / absentes selon les options', () => {
   });
   it('groupes : les pièces ont un groupe connu et nommé ; l\'habillage et l\'électronique existent', () => {
     const { planks, groupNames } = build();
-    expect(Object.values(groupNames).sort()).toEqual(['Corps', 'Entrée', 'Habillage', 'Isolant', 'Pièces d\'hiver (rechange)', 'Schéma électronique', 'Toit', 'Ventilation', 'Électronique'].sort());
+    expect(Object.values(groupNames).sort()).toEqual(['Corps', 'Couvercle', 'Entrée', 'Habillage', 'Isolant', 'Pièces d\'hiver (rechange)', 'Schéma électronique', 'Toit', 'Ventilation', 'Électronique'].sort());
     for (const p of planks) if (p.group) expect(groupNames[p.group], p.name).toBeDefined();
     expect(planks.some((p) => /^Lambris/.test(p.name))).toBe(true);
     expect(byName(planks, /^Schéma électronique$/).special).toBe('doc');

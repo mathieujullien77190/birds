@@ -38,7 +38,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(by(sc0, /^Plot caoutchouc ventilateur/)).toHaveLength(4);
     expect(by(sc0, /^Goulotte ventilateur/)).toHaveLength(3);
     expect(by(sc0, /^Cassette ventilateur/).length).toBeGreaterThanOrEqual(6);
-    one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/); one(sc0, /^Prise 4 broches du ventilateur/); one(sc0, /^Rallonge ventilateur 4 broches/);
+    one(sc0, /^Grille de sortie ventilation/); one(sc0, /^Prise 4 broches du ventilateur/); one(sc0, /^Rallonge ventilateur 4 broches/);
     one(sc0, /^Module interrupteur 12 V ventilateur \(côté \+, commande 3,3 V\)/);
     expect(by(sc0, /^Cale interrupteur/)).toHaveLength(4);
     const guard = one(sc0, /^Grille de protection ventilateur 60 mm \(fil d'acier\)/);
@@ -186,7 +186,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(Math.abs(cassWin!.size - exit!.size)).toBeLessThan(1);
     const exitWin = wins.filter((h) => h !== exit);
     for (const h of exitWin) expect(Math.abs(h.x - exit!.x) - (h.size + exit!.size) / 2).toBeGreaterThanOrEqual(0); // les deux fenêtres ne se recouvrent pas
-    const net = one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/), cassB = one(sc0, /^Cassette ventilateur 2$/);
+    const net = one(sc0, /^Grille de sortie ventilation/), cassB = one(sc0, /^Cassette ventilateur 2$/);
     expect(net.pos[1]).toBeGreaterThan(back.pos[1]); expect(net.pos[1]).toBeGreaterThan(cassB.pos[1]); // dehors, sous le débord du toit en chêne ; plus extérieur que la cassette
     expect(Math.abs(cass.pos[0] - net.pos[0])).toBeLessThan(0.1);
   });
@@ -199,7 +199,7 @@ describe('habillage arrière plan', () => {
     for (const l of lames) { expect(l.pos[1], l.name).toBeCloseTo(lames[0].pos[1], 2); expect(l.depth, l.name).toBe(lames[0].depth); expect(l.rot, l.name).toEqual(lames[0].rot); } // même plan, même épaisseur
     const front = face.pos[1] + t / 2, ext = lames[0].pos[1] + lames[0].depth! / 2; expect(lames[0].pos[1] - lames[0].depth! / 2).toBeCloseTo(front, 2); // les lames touchent la plaque arrière du toit
     const tops = lames.map((l) => aabb(l, t).max.z), faceTop = face.pos[2] + face.h / 2; expect(Math.max(...tops), 'haut de l habillage').toBeCloseTo(faceTop, 2); for (const z of tops) expect(z === faceTop || z < faceTop - 20, 'une lame est entière ou coupée sous une fenêtre').toBe(true); // le haut de l habillage arrière affleure le haut de la plaque
-    const net = one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/); expect(net.pos[1] - 0.4).toBeCloseTo(front, 2); expect(net.pos[1] + 0.4).toBeLessThan(ext - 1); // à plat sur la plaque, en retrait d'au moins 1 mm de la face de l'habillage
+    const net = one(sc0, /^Grille de sortie ventilation/); expect(net.pos[1] - t / 2).toBeCloseTo(front, 2); expect(net.pos[1] + t / 2).toBeLessThan(ext - 1); // à plat sur la plaque, en retrait d'au moins 1 mm de la face de l'habillage
   });
 });
 
@@ -312,8 +312,8 @@ describe('cassette ajustée au siège, sans joint', () => {
 describe('sortie du ventilateur : rien ne dépasse derrière', () => {
   it('ni clapet ni joue de grillage ; le grillage est à plat contre la plaque, dans l épaisseur du lambris', () => {
     expect(by(sc0, /^Clapet de ventilation|^Joue grillage/)).toEqual([]);
-    const back = one(sc0, /^Face arrière toit/), outer = back.pos[1] + t / 2, net = one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/);
-    expect(net.h).toBeCloseTo(0.8, 5); expect(net.pos[1] - net.h / 2 - outer).toBeGreaterThanOrEqual(-0.01); expect(net.pos[1] + net.h / 2 - outer).toBeLessThanOrEqual(1.5); // collé sur la face extérieure
+    const back = one(sc0, /^Face arrière toit/), outer = back.pos[1] + t / 2, net = one(sc0, /^Grille de sortie ventilation/);
+    expect(net.pos[1] - t / 2 - outer).toBeGreaterThanOrEqual(-0.01); expect(net.pos[1] + t / 2 - outer).toBeLessThanOrEqual(3.01); // collé sur la face extérieure
     const lames = by(sc0, /^Lambris arrière/).filter((p) => p.poly);
     const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
     const b = aabb(net, t);
@@ -516,5 +516,22 @@ describe("pièces d'hiver : exposées à côté du nichoir, échange exact par l
     expect(Math.hypot(blockSeat.pos[0] - fanSeat.pos[0], blockSeat.pos[1] - fanSeat.pos[1])).toBeLessThan(0.02); // le bloc prend la place de la cassette
     expect(Math.hypot(fanSpare.pos[0] - foamSpare.pos[0], fanSpare.pos[1] - foamSpare.pos[1])).toBeLessThan(0.02); // et inversement
     expect(one(w, /^Rallonge ventilateur 4 broches/).pos).toEqual(one(sc0, /^Rallonge ventilateur 4 broches/).pos); // la prise mâle de la rallonge et ses fils restent sur le toit
+  });
+});
+
+describe('grille de sortie en contreplaqué 3 mm', () => {
+  it('fentes verticales ≤ 5 mm, barreaux ≥ 2 mm, bord plein ≥ 3 mm, ≥ 60 % de la fenêtre ouverte, découpée sur la planche contreplaqué, groupe Ventilation, grillage inox de sortie retiré', () => {
+    const g = one(sc0, /^Grille de sortie ventilation \(contreplaqué 3 mm\)$/), win = by(sc0, /^Face arrière toit$/)[0].holes.find((h) => h.shape === 'square' && Math.abs(h.x - g.pos[0]) < 1 && h.size > 40 && h.size < 60)!;
+    expect(g.material).toBeUndefined(); expect(g.special).toBeUndefined(); expect(g.group).toBe(one(sc0, /^Plot caoutchouc ventilateur 1/).group);
+    expect(by(sc0, /^Grillage inox maille 5 mm — sortie/)).toEqual([]);
+    const xs = g.holes.map((h) => h.x).sort((a, b) => a - b);
+    for (const h of g.holes) { expect(h.size).toBeLessThanOrEqual(5); expect(h.size).toBeGreaterThanOrEqual(3); expect(h.sh).toBeGreaterThan(h.size); expect(Math.abs(h.y)).toBe(0); }
+    for (let i = 1; i < xs.length; i++) expect(xs[i] - xs[i - 1] - g.holes[0].size).toBeGreaterThanOrEqual(2 - 1e-6); // barreaux de 2 mm au moins
+    const edgeX = g.w / 2 - Math.max(...xs.map(Math.abs)) - g.holes[0].size / 2, edgeY = g.h / 2 - g.holes[0].sh! / 2;
+    expect(edgeX).toBeGreaterThanOrEqual(3); expect(edgeY).toBeGreaterThanOrEqual(3);
+    const open = g.holes.reduce((s, h) => s + h.size * h.sh!, 0) / (win.size * (win.sh ?? 0));
+    expect(open).toBeGreaterThanOrEqual(0.6);
+    expect(g.w).toBeGreaterThan(win.size); expect(g.h).toBeGreaterThan(win.sh!); // elle recouvre toute la fenêtre
+    expect(nestSheets(sc0, 410, 400).filter((s) => !s.material).flatMap((s) => s.items.map((i) => i.plank.name))).toContain(g.name);
   });
 });

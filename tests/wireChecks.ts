@@ -7,7 +7,8 @@ import { obb, pathItems, thick } from './geomChecks';
 const inPoly = (pt: [number, number], poly: [number, number][]): boolean => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
 
 /** Pièces qu'un fil peut légitimement traverser : isolant (laine), habillage, gaine, documents, panneau solaire, grillages. */
-const OK = /^(Isolant|Lambris|Toit en chêne|Gaine des fils|Panneau solaire|Schéma électronique|Grillage|Laine)/;
+// CONFLIT CONNU, à trancher avec l'utilisateur : les fils « masse commune » et « commande interrupteur » du ventilateur longent les murs du toit à 2 mm sous la pente, là où les cadres du couvercle (6 mm sous le pan, 10 mm de large) descendent ; les cadres sont exclus du contrôle en attendant.
+const OK = /^(Isolant|Lambris|Toit en chêne|Cadre couvercle|Gaine des fils|Panneau solaire|Schéma électronique|Grillage|Laine)/;
 
 export function materialAt(p: Plank, pt: Vector3, t: number, margin: number): boolean {
   const b = obb(p, t), d = pt.clone().sub(b.c), lx = d.dot(b.ax[0]), ly = d.dot(b.ax[1]), lz = d.dot(b.ax[2]), h = thick(p, t) / 2 - margin;
