@@ -3,10 +3,12 @@ import { Btn, Chip, Section, Slider } from '@/ui';
 import { saveSvg } from '@/lib';
 import { sheetSvg } from '@/planks/model';
 import type { CutCfg, Sheets } from '../types';
+import type { LaserMachine } from '../hooks/useLaserMachine';
+import { MachineSection } from '../components/MachineSection';
 
 /** Section « Découpe laser » du panneau de gauche : taille de la planche, espace entre pièces, vue 3D / planches, un SVG par planche. */
-export function LaserSection({ cutCfg, setCutCfg, cutView, setCutView, sheets }: {
-  cutCfg: CutCfg; setCutCfg: Dispatch<SetStateAction<CutCfg>>; cutView: boolean; setCutView: (v: boolean) => void; sheets: Sheets;
+export function LaserSection({ cutCfg, setCutCfg, cutView, setCutView, sheets, machine }: {
+  cutCfg: CutCfg; setCutCfg: Dispatch<SetStateAction<CutCfg>>; cutView: boolean; setCutView: (v: boolean) => void; sheets: Sheets; machine: LaserMachine;
 }) {
   return (
     <Section title="Découpe laser" defaultOpen note={`${sheets.length} planche${sheets.length > 1 ? 's' : ''} de ${cutCfg.W} × ${cutCfg.H}`}>
@@ -24,6 +26,7 @@ export function LaserSection({ cutCfg, setCutCfg, cutView, setCutView, sheets }:
           <Btn block={false} variant="primary" onClick={() => saveSvg(sheetSvg(sh, cutCfg.W, cutCfg.H, i), `planche-${i + 1}-${cutCfg.W}x${cutCfg.H}.svg`)}>SVG</Btn>
         </div>
       ))}
+      <MachineSection m={machine} />
     </Section>
   );
 }

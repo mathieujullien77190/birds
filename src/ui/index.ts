@@ -1,5 +1,6 @@
 /** Kit d'interface : briques réutilisables, un dossier par brique, sans logique métier. */
 export * from './Btn';
+export * from './ConfirmDialog';
 export * from './Chip';
 export * from './CollapseButton';
 export * from './Drawer';
@@ -11,10 +12,13 @@ export * from './Menu';
 export * from './Modal';
 export * from './NameEdit';
 export * from './Notice';
+export * from './ProgressBar';
 export * from './PanelHeader';
 export * from './Section';
 export * from './Sheet2D';
 export * from './SidePanel';
 export * from './Slider';
+export * from './StatusDot';
 export * from './Tabs';
+export * from './Terminal';
 export * from './ToolbarButton';

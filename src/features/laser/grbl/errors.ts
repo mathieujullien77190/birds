@@ -1,0 +1,55 @@
+/** Messages en clair des erreurs et alarmes de GRBL 1.1. */
+
+export const ERROR_MESSAGES: Record<number, string> = {
+  1: 'Lettre de commande G-code manquante ou inconnue.',
+  2: 'Valeur numérique mal formée ou manquante.',
+  3: 'Commande « $ » inconnue.',
+  4: 'Valeur négative non permise.',
+  5: 'Le retour à la position de référence (homing) est désactivé ($22).',
+  6: "Durée d'impulsion trop courte (réglage).",
+  7: 'Mémoire des réglages (EEPROM) illisible : réglages remis par défaut.',
+  8: "Commande refusée : la machine n'est pas inactive (Idle) — arrête ou attends la fin du mouvement.",
+  9: 'Commandes G-code bloquées : la machine est en alarme (déverrouille avec $X, vérifie la position).',
+  10: 'Limite logicielle impossible sans homing.',
+  11: 'Ligne trop longue (plus de 80 caractères).',
+  12: 'Réglage hors plage (fréquence de pas).',
+  13: 'Porte de sécurité ouverte.',
+  14: 'Ligne de démarrage trop longue.',
+  15: 'Déplacement hors de la zone de la machine (limite logicielle).',
+  16: 'Commande de déplacement invalide.',
+  17: 'Le mode laser demande la sortie PWM (réglage $32).',
+  20: 'Commande G-code non supportée.',
+  21: 'Conflit de groupes de commandes G-code.',
+  22: "Vitesse d'avance (F) non définie.",
+  23: 'Valeur entière attendue dans la commande G-code.',
+  24: 'Deux commandes utilisent les mêmes axes.',
+  25: 'Mot G-code répété dans la ligne.',
+  26: "Pas d'axe dans une commande qui en demande.",
+  27: 'Numéro de ligne (N) invalide.',
+  28: 'Mot obligatoire manquant (P, L…).',
+  29: 'Système de coordonnées G59.x non supporté.',
+  30: "G53 n'accepte que G0 et G1.",
+  31: 'Axes inutiles dans la commande.',
+  32: "Arc G2 / G3 sans axe du plan.",
+  33: 'Cible de mouvement invalide.',
+  34: "Rayon d'arc invalide.",
+  35: 'Arc G2 / G3 sans décalage du centre.',
+  36: 'Mots inutilisés dans la commande.',
+  37: "Compensation de longueur d'outil invalide.",
+  38: "Numéro d'outil trop grand.",
+};
+
+export const ALARM_MESSAGES: Record<number, string> = {
+  1: 'Limite matérielle atteinte (fin de course) : la position est peut-être perdue.',
+  2: 'Déplacement hors de la zone (limite logicielle) : déverrouille ($X) et recommence plus près.',
+  3: "Réinitialisation en plein mouvement : la position est peut-être perdue — refais l'origine avant de couper.",
+  4: 'Échec de la sonde (palpeur) : pas de contact.',
+  5: 'Échec de la sonde : contact avant le mouvement.',
+  6: 'Homing : le cycle a été réinitialisé.',
+  7: 'Homing : porte ouverte pendant le cycle.',
+  8: "Homing : la butée n'a pas été libérée.",
+  9: 'Homing : la butée est introuvable.',
+};
+
+export function errorMessage(code: number): string { return ERROR_MESSAGES[code] ?? `Erreur GRBL ${code}.`; }
+export function alarmMessage(code: number): string { return ALARM_MESSAGES[code] ?? `Alarme GRBL ${code}.`; }
