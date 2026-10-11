@@ -211,7 +211,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Commande | PWM 25 kHz (matériel du Pi) sur GPIO18 (broche 12) ; tachymètre 2 impulsions par tour sur GPIO17 (broche 11) avec tirage interne ; masse commune sur la broche 14 | fils bleu, jaune, noir |
 | Montage | cassette amovible à la main : quatre parois + cadre du bas + couvercle à poignée (contreplaqué 3 mm), quatre plots en caoutchouc de 12 × 2 × 3 mm sous le ventilateur, joint de mousse sous la cassette et derrière | oui, dans un siège fixe (la goulotte) |
 | Connecteur 4 broches (embase sur la plaque de la cassette + fiche côté toit) | plaque de prototypage 30 × 15 × 1,6 mm (pas 2,54, composant acheté) posée sur deux entretoises de 4 mm sur le couvercle de la cassette, à côté de la poignée ; les 4 fils du ventilateur y sont soudés ; une barrette 4 broches à plat reçoit une fiche Dupont 4 broches (emboîtement horizontal) reliée aux fils fixes du toit, qui font une boucle en U de ≈ 130 mm sur le couvercle (de quoi sortir la cassette fiche débranchée) | plaque, barrette et fiche : hauteur totale 8 mm sur le couvercle, marge de 5 mm sous la pente du toit |
-| Ouverture du plafond | 56 de large ; la profondeur (environ 21 mm) est limitée par le mur du nid et le compartiment de la caméra : le débit réel est à mesurer, une grille de contreplaqué (trous Ø 6, pas 8) protège les pales, encastrée à fleur dans le plafond (même épaisseur, collée sur le chant) | 56 × 21 mm |
+| Ouverture du plafond | 56 de large ; la profondeur (environ 21 mm) est limitée par le mur du nid et le compartiment de la caméra : c'est le point étroit, 11,8 cm² soit environ un tiers de la face de 60 × 60 du ventilateur (36 cm²). Sans bouger le siège elle peut aller jusqu'à 67 × 26 mm (17,4 cm², 48 %) ; en élargissant le siège en x, le plafond est libre de −59 à +59 mm (rien dessous : la caméra, ses LED et le capteur sont plus en avant, la batterie est au-dessus du toit), mais le ventilateur de 60 mm n'en aspire qu'une partie. L'ouverture est nue : la grille de protection en fil d'acier (60 × 60 × 3 mm, environ 90 % ouverte, pas de 6 à 8 mm entre fils, composant acheté) est fixée sur la face d'aspiration du ventilateur, dans la cassette, à environ 3 mm du plafond ; le débit réel est à mesurer | 56 × 21 mm ; grille de fil dans la cassette |
 | Sortie d'air | fenêtre de 60 × 45 mm dans la cassette puis dans la plaque arrière, grillage anti-insectes et clapet à gravité dehors, sous le débord du toit en chêne ; aucune communication avec la zone du Pi et de la batterie | oui |
 | Hiver | remplacer la cassette par le bloc isolant d'hiver (même empreinte, mousse de 35 mm) pour supprimer la déperdition de chaleur par l'ouverture | pièce de rechange cachée par défaut |
 
@@ -360,6 +360,7 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | 2 × carte 4 LED infrarouges 850 nm | 10 € |
 | Électronique | Capteur BME280 | 5 € |
 | Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € |
+| Électronique | Grille de protection ventilateur 60 mm (fil d'acier) | 1 € |
 | Électronique | Module interrupteur 12 V côté + (P-MOSFET, commande 3,3 V) | 4 € |
 | Électronique | Plaque de prototypage 30 × 15 + barrette 4 broches + fiche Dupont 4 broches | 2 € |
 | Électronique | Module 2 × MOSFET | 5 € |
@@ -379,7 +380,7 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Habillage | Lambris pin 10 mm (0,35 m²) | 15 € |
 | Habillage | Peinture blanche | 7 € |
 
-Le ventilateur et son interrupteur coûtent environ 21 € (le Peltier, son pont en H, son filtre, sa sonde et sa plaque en coûtaient 61 €). Le poste le plus cher est le régulateur Genasun (120 €) : un régulateur PWM LiFePO4 à 20 € ferait le travail avec un rendement moindre, et enlèverait 100 € au total. La découpe laser n'est pas comptée.
+Le ventilateur, sa grille et son interrupteur coûtent environ 22 € (le Peltier, son pont en H, son filtre, sa sonde et sa plaque en coûtaient 61 €). Le poste le plus cher est le régulateur Genasun (120 €) : un régulateur PWM LiFePO4 à 20 € ferait le travail avec un rendement moindre, et enlèverait 100 € au total. La découpe laser n'est pas comptée.
 
 ## Points à vérifier avant de construire
 

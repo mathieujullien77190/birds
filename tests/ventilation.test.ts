@@ -8,7 +8,7 @@ import { aabb, gap, inside, obb, pathContacts, pathItems, ribbonPoints, thick } 
 const by = (sc: PlankScene, re: RegExp): Plank[] => sc.planks.filter((p) => re.test(p.name));
 const one = (sc: PlankScene, re: RegExp): Plank => { const l = by(sc, re); expect(l, String(re)).toHaveLength(1); return l[0]; };
 const union = (ps: Plank[], t: number) => { const bs = ps.map((p) => aabb(p, t)); return { min: new Vector3(Math.min(...bs.map((b) => b.min.x)), Math.min(...bs.map((b) => b.min.y)), Math.min(...bs.map((b) => b.min.z))), max: new Vector3(Math.max(...bs.map((b) => b.max.x)), Math.max(...bs.map((b) => b.max.y)), Math.max(...bs.map((b) => b.max.z))) }; };
-const sc0 = buildNest({}), t = sc0.t;
+const sc0 = buildNest({}), t = sc0.t, GUARD_HALF = 1.5;
 
 describe('le Peltier est parti', () => {
   for (const [name, over] of Object.entries(VARIANTS)) {
@@ -36,14 +36,17 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(by(sc0, /^Plot caoutchouc ventilateur/)).toHaveLength(4);
     expect(by(sc0, /^Goulotte ventilateur/)).toHaveLength(3);
     expect(by(sc0, /^Cassette ventilateur/).length).toBeGreaterThanOrEqual(6);
-    one(sc0, /^Grille ventilateur/); one(sc0, /^Clapet de ventilation/); one(sc0, /^Grillage sortie ventilation/); one(sc0, /^Plaque de connexion cassette/); one(sc0, /^Barrette 4 broches plaque de connexion/); one(sc0, /^Fiche 4 broches toit/);
+    one(sc0, /^Clapet de ventilation/); one(sc0, /^Grillage sortie ventilation/); one(sc0, /^Plaque de connexion cassette/); one(sc0, /^Barrette 4 broches plaque de connexion/); one(sc0, /^Fiche 4 broches toit/);
     one(sc0, /^Module interrupteur 12 V ventilateur \(côté \+, commande 3,3 V\)/);
     expect(by(sc0, /^Cale interrupteur/)).toHaveLength(4);
-    const grille = one(sc0, /^Grille ventilateur/);
-    expect(grille.holes.length).toBeGreaterThan(4);
-    const plafond = one(sc0, /^Dessous toit/);
-    expect(Math.abs(grille.pos[2] - plafond.pos[2])).toBeLessThan(0.01); // à fleur : dans l'épaisseur du plafond, pas collée dessous
-    expect(grille.holes.every((h) => h.shape === 'round' && h.size === 6)).toBe(true);
+    const guard = one(sc0, /^Grille de protection ventilateur 60 mm \(fil d'acier\)/);
+    expect(guard.special).toBe('block'); expect(guard.holes).toEqual([]); // composant acheté, pas une plaque de contreplaqué percée
+    expect(by(sc0, /^Grille ventilateur$/)).toEqual([]);
+    const cass = union(by(sc0, /^Cassette ventilateur [1-4]$|^Cassette ventilateur cadre/), t), gb = aabb(guard, t); // la grille fait partie de la cassette
+    expect(gb.min.x).toBeGreaterThanOrEqual(cass.min.x); expect(gb.max.x).toBeLessThanOrEqual(cass.max.x); expect(gb.min.y).toBeGreaterThanOrEqual(cass.min.y); expect(gb.max.y).toBeLessThanOrEqual(cass.max.y);
+    const fan0 = one(sc0, /^Ventilateur Noctua/);
+    expect(guard.pos[2] + GUARD_HALF).toBeLessThanOrEqual(fan0.pos[2] - fan0.depth! / 2 + 0.01); // sous le ventilateur (côté nid)
+    expect(one(sc0, /^Grille de protection ventilateur/).group).toBe(one(sc0, /^Ventilateur Noctua/).group);
   });
   it('le plafond du nid est percé sous le ventilateur, le dessus du toit est ouvert au-dessus (encoche)', () => {
     const fan = one(sc0, /^Ventilateur Noctua/), floor = one(sc0, /^Dessous toit/), top = one(sc0, /^Dessus toit/);
@@ -83,7 +86,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     const front = one(sc0, /^Face avant toit/), back = one(sc0, /^Face arrière toit/), top = one(sc0, /^Dessus toit/);
     const roofTop = top.pos[2] + t / 2, base = front.pos[2] - front.h / 2;
     const plane = (y: number) => base + front.h + ((y - front.pos[1]) * (back.h - front.h)) / (back.pos[1] - front.pos[1]);
-    const solids = sc0.planks.filter((p) => !p.path && p.special !== 'doc' && p.special !== 'solar' && !/^(Dessus toit|Dessous toit|Face|Côté|Cadre|Isolant|Tasseau|Lambris|Toit en chêne|Grille anti|Grillage|Clapet|Entrée|Fixation|Clavette|Barre)/.test(p.name) && !/^Bloc isolant d'hiver|^Isolant bloc|^Poignée bloc/.test(p.name) && !/^Dessous ext|^Plancher int|^Conduit d.air|^Auvent|^Cale auvent|^Bouchon/.test(p.name) && p.pos[2] > roofTop - 20 && p.pos[2] < roofTop + 120);
+    const solids = sc0.planks.filter((p) => !p.path && p.special !== 'doc' && p.special !== 'solar' && !/^(Dessus toit|Dessous toit|Face|Côté|Cadre|Isolant|Tasseau|Lambris|Toit en chêne|Grille de protection|Grille anti|Grillage|Clapet|Entrée|Fixation|Clavette|Barre)/.test(p.name) && !/^Bloc isolant d'hiver|^Isolant bloc|^Poignée bloc/.test(p.name) && !/^Dessous ext|^Plancher int|^Conduit d.air|^Auvent|^Cale auvent|^Bouchon/.test(p.name) && p.pos[2] > roofTop - 20 && p.pos[2] < roofTop + 120);
     for (const w of toPi) {
       const pts = pathItems([w])[0].pts, end = new Vector3(...w.path![w.path!.length - 1]), start = new Vector3(...w.path![0]);
       for (const pt of pts) {

@@ -15,8 +15,8 @@ export const NEST_DEFAULT: NestParams = { l: 120, L: 120, floorToHole: 130, hole
 /** Position y du centre du compartiment caméra dans le toit (décalé un peu vers l'avant, côté trou d'entrée). */
 export const CAM_Y = -10;
 /** Ventilateur d'extraction (Noctua NF-A6x25 PWM : 60 × 60 × 25, 12 V) qui aspire l'air chaud du nid à travers le toit : cadre, hauteur, ouverture carrée du plafond (côté nid),
- *  hauteur des plots en caoutchouc entre le ventilateur et le plancher du toit, trous (Ø) et pas de la grille du plafond. */
-export const FAN = 60, FAN_T = 25, FAN_OPEN = 56, FAN_PLOT = 3, FAN_GRID_HOLE = 6, FAN_GRID_PITCH = 8;
+ *  hauteur des plots en caoutchouc entre le ventilateur et le plancher du toit. */
+export const FAN = 60, FAN_T = 25, FAN_OPEN = 56, FAN_PLOT = 3;
 
 /** Capteur température / humidité (carte type BME280 / DHT22, 15 × 11) fixé à l'intérieur du mur arrière, fils vers le GPIO du Pi. */
 export const SENSOR_X = 30, SENSOR_Y = -17; // décalé de 1 cm vers le centre : la fente de ses fils (12 × 6 en x = 30,25) reste dans le compartiment, elle passait sous son mur droit (x = 43) // collé sous le plafond (le dessous du plancher du toit), à droite de la caméra, hors de la plaque alu
