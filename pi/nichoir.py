@@ -46,7 +46,7 @@ COURBE_LIFEPO4 = [(0, 10.0), (10, 12.0), (20, 12.8), (30, 12.9), (40, 13.0), (70
 
 # FACULTATIF : mode simulé, pour tester la page sans matériel (ordinateur). Jamais actif par défaut.
 MOCK = os.environ.get("NICHOIR_MOCK") == "1" or "--mock" in sys.argv
-SIM_ACCEL = float(os.environ.get("NICHOIR_MOCK_ACCEL", "10"))  # le temps passe 10 fois plus vite sur la batterie simulée (pour voir le niveau bouger)
+SIM_ACCEL = float(os.environ.get("NICHOIR_MOCK_ACCEL", "1"))  # 1 = temps réel ; 10 ou 60 = le temps passe plus vite sur la batterie simulée (pour voir le niveau bouger)
 MOCK_NUIT = None   # None : jour / nuit d'après l'horloge ; True / False : imposé (le simulateur de l'app suit son bouton Jour / Nuit)
 MOCK_PANNES = {"bme": False, "sonde": False}  # pannes simulées (essais depuis le simulateur de l'app)
 MOCK_SURCHAUFFE = float(os.environ.get("NICHOIR_MOCK_SURCHAUFFE", "0"))  # °C : force le dissipateur à cette température quand le Peltier tourne (essai de la coupure)
@@ -220,7 +220,7 @@ if MOCK:
     for num, teinte in ((0, (80, 255, 120)), (1, (90, 150, 255))):
         cameras[num] = FluxFaux(teinte)
 
-    sim = {"diss": 20.0, "decalage": 0.0, "wh": 0.8 * CAPACITE_WH}  # la batterie simulée part à 80 %
+    sim = {"diss": 20.0, "decalage": 0.0, "wh": 0.8 * CAPACITE_WH, "nuage": 0.9, "nuage_cible": 0.9}  # la batterie simulée part à 80 %
 
     def simuler():
         """Un pas de simulation : le nid suit un cycle de 10 min, le Peltier le refroidit / le chauffe, le dissipateur chauffe avec la puissance."""
@@ -242,8 +242,16 @@ if MOCK:
         # batterie simulée : décharge de la consommation, recharge par le panneau solaire le jour (≈ 55 W), rien la nuit
         h = time.localtime().tm_hour
         nuit = MOCK_NUIT if MOCK_NUIT is not None else not 6 <= h < 18
-        solaire = 0.0 if nuit else round(55 + 5 * math.sin(time.time() / 7) + random.uniform(-1, 1), 1)  # le jour le panneau de 100 W donne ≈ 55 W (ensoleillement moyen)
-        sim["wh"] = min(CAPACITE_WH, max(0.0, sim["wh"] + (solaire - consommation()["total_w"]) * PERIODE / 3600 * SIM_ACCEL))
+        if random.random() < 0.02:
+            sim["nuage_cible"] = random.uniform(0.2, 1.0)  # un nuage passe (0,2 = très couvert) ou le ciel se dégage
+        sim["nuage"] += (sim["nuage_cible"] - sim["nuage"]) * 0.1
+        solaire = 0.0 if nuit else round(60 * sim["nuage"], 1)  # le jour le panneau de 100 W donne jusqu'à ≈ 60 W selon les nuages
+        pc = 100 * sim["wh"] / CAPACITE_WH
+        conso_w = consommation()["total_w"]
+        apport = solaire - conso_w
+        if apport > 0 and pc > 90:  # fin de charge : comme un vrai régulateur, le courant diminue en approchant de 100 %
+            apport = max(0.05 * apport, apport * (100 - pc) / 10)
+        sim["wh"] = min(CAPACITE_WH, max(0.0, sim["wh"] + apport * PERIODE / 3600 * SIM_ACCEL))
         pc = 100 * sim["wh"] / CAPACITE_WH
         etat["batterie"] = {"pourcent": round(pc, 1), "tension": round(tension_depuis_pourcent(pc), 2), "source": "simulée", "solaire_w": round(solaire, 1)}
 

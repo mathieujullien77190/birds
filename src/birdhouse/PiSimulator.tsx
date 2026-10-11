@@ -71,6 +71,9 @@ def restaurer():
     for k in ("securite", "delestage", "ds18b20", "bme280"):
         nichoir.etat["erreurs"].pop(k, None)
 
+def acceleration(v):
+    nichoir.SIM_ACCEL = float(v)
+
 def nuit(v):
     nichoir.MOCK_NUIT = bool(v)
 
@@ -140,6 +143,7 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
   const termRef = useRef<HTMLPreElement>(null);
   const [running, setRunning] = useState<string | null>(null); // essai en cours
   const [menu, setMenu] = useState(false);
+  const [accel, setAccel] = useState(1); // vitesse du temps de la batterie simulée (×1 = temps réel)
   const frameRef = useRef<HTMLIFrameElement>(null);
   const pyRef = useRef<Py>(null);
 
@@ -195,6 +199,8 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
 
   useEffect(() => { const el = termRef.current; if (el) el.scrollTop = el.scrollHeight; }, [log]);
 
+  useEffect(() => { if (state === 'prêt') pyRef.current?.globals.get('acceleration')(accel); }, [accel, state]);
+
   const fn = (name: string) => pyRef.current!.globals.get(name) as (...a: unknown[]) => unknown;
   const read = (): PiState => JSON.parse(fn('etat_json')() as string) as PiState;
   const cmd = (url: string, body: object) => { fn('api')(url, JSON.stringify(body)); };
@@ -228,6 +234,11 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
           <div className="min-w-0 flex-1">
             <div className="text-sm font-semibold text-stone-800">Interface web du Pi — simulateur</div>
             <div className="truncate text-[11px] text-stone-500">Le vrai <code>pi/nichoir.py</code> (mode simulé) tourne dans ton navigateur (Pyodide) ; la page est le vrai <code>pi/web/index.html</code>.</div>
+          </div>
+          <div className="flex items-center overflow-hidden rounded bg-stone-100 text-xs font-semibold" title="Vitesse du temps pour la batterie simulée : ×1 = temps réel, ×10 / ×60 pour voir le niveau bouger plus vite" role="group" aria-label="Vitesse du temps">
+            {[1, 10, 60].map((a) => (
+              <button key={a} onClick={() => setAccel(a)} aria-pressed={accel === a} className={`px-2 py-1 ${accel === a ? 'bg-stone-700 text-white' : 'text-stone-700 hover:bg-stone-200'}`}>×{a}</button>
+            ))}
           </div>
           {onToggleNight && (
             <button onClick={onToggleNight} aria-pressed={night} title="Jour / nuit de la scène : les caméras voient la même scène que la vue 3D (la nuit elles sont sombres, les LED infrarouges les éclairent)" className={`rounded px-2.5 py-1 text-xs font-semibold ${night ? 'bg-indigo-900 text-indigo-100 hover:bg-indigo-800' : 'bg-amber-100 text-amber-900 hover:bg-amber-200'}`}>{night ? '🌙 Nuit' : '☀ Jour'}</button>
