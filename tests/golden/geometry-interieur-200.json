@@ -1401,10 +1401,10 @@
  },
  "100 Fil PWM ventilateur (bleu)": {
   "geo": {
-   "n": 4329,
-   "idx": 23040,
-   "pos": "8b71d01d63f3f10a",
-   "col": "f4600352a2290e50"
+   "n": 2601,
+   "idx": 13824,
+   "pos": "e7d68b46f708efe4",
+   "col": "e0619ffd18e3d161"
   },
   "edges": {
    "n": 0,
@@ -1415,10 +1415,10 @@
  },
  "101 Fil tachymètre ventilateur (jaune)": {
   "geo": {
-   "n": 3897,
-   "idx": 20736,
-   "pos": "b8fea489f7fe3508",
-   "col": "9e39f0085bb0e67d"
+   "n": 2169,
+   "idx": 11520,
+   "pos": "42e40592c23a0873",
+   "col": "e46b8b1cac7c39c9"
   },
   "edges": {
    "n": 0,
@@ -1429,10 +1429,10 @@
  },
  "102 Fil masse commune ventilateur (noir)": {
   "geo": {
-   "n": 4329,
-   "idx": 23040,
-   "pos": "f4a43a4dd44ee0a4",
-   "col": "1e0ea0f6a62bf4e0"
+   "n": 2601,
+   "idx": 13824,
+   "pos": "a9eaa7326d1d4f78",
+   "col": "1248e75dfe6881a9"
   },
   "edges": {
    "n": 0,
@@ -1443,10 +1443,10 @@
  },
  "103 Fil commande interrupteur ventilateur (orange)": {
   "geo": {
-   "n": 4545,
-   "idx": 24192,
-   "pos": "5814625bcd0b1bd4",
-   "col": "d2c0b8434f1f98a4"
+   "n": 2169,
+   "idx": 11520,
+   "pos": "464b5d3c6851a0cb",
+   "col": "b98f285c1031fce0"
   },
   "edges": {
    "n": 0,
@@ -2633,15 +2633,15 @@
  },
  "188 Dessus toit": {
   "geo": {
-   "n": 780,
+   "n": 600,
    "idx": 0,
-   "pos": "44dec7db7c5e6544",
-   "col": "fc2cbc80cf7b37c9"
+   "pos": "5d2266af222d8af2",
+   "col": "c4bffc6926555c88"
   },
   "edges": {
-   "n": 296,
+   "n": 224,
    "idx": 0,
-   "pos": "d2e40e56efd93c74",
+   "pos": "ab5cd9a04f90c092",
    "col": null
   }
  },

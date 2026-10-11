@@ -144,7 +144,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const FOP_Y0 = FANY - FAN_OPEN / 2, FOP_Y1 = Math.min(FANY + FAN_OPEN / 2, n.L / 2 - 3.5); // l'ouverture du plafond reste au-dessus du nid (le mur intérieur est à L/2) : 56 de large, moins de profondeur
   const FOP_YC = r2((FOP_Y0 + FOP_Y1) / 2), FOP_H = r2(FOP_Y1 - FOP_Y0);
   const DUCT_Z1 = bodyH + VENT_Z0 + VENT_H; // haut de la fenêtre de sortie = haut des parois de la cassette et du siège
-  const WEST_X = r2(FANX - FO / 2 - 4.5), WEST_Y = 46, CONX = r2(FANX + FO / 2 + 4), CONY = r2(YREAR - 10), EAST_X = CONX, EAST_Y = 80, SWX = r2(W / 2 - t - 13.5), SWY = r2(D / 2 - t - 18), SLOT2X = r2(SWX - 22.5), SLOT2Y = r2(YREAR - 4.5); // passages des fils dans le dessus du toit (côté Pi, côté connecteur) ; connecteur de la cassette
+  const CONX = r2(FANX + FO / 2 + 4), CONY = r2(YREAR - 10), SWX = r2(W / 2 - t - 13.5), SWY = r2(D / 2 - t - 18); // connecteur de la cassette, module interrupteur
   // PRISE D'AIR BASSE : un conduit de contreplaqué (4 parois + couvercle) dans l'isolant du mur GAUCHE, à l'AVANT, du dessous de la boîte à mi-hauteur du nid, puis une fente dans la paroi intérieure
   const AIR_X0 = r2(-(W / 2 - t) + 3), AIR_X1 = r2(-(n.l / 2 + t) - 1), AIR_CX = r2((AIR_X0 + AIR_X1) / 2), AIR_LX = r2(AIR_X1 - AIR_X0), AIR_LY = 46; // empreinte extérieure du conduit
   const AIR_CY = r2(-n.L / 2 + 30), AIR_ZS = Math.round((e + t + bodyH) / 2), AIR_SH = 30, AIR_SW = 36; // centre en y, hauteur de la fente (mi-hauteur du nid), taille de la fente
@@ -153,8 +153,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     const q: Plank = { ...p, name: p.name.replace(/ (\d+)$/, ' toit $1'), pos: [p.pos[0], p.pos[1], p.pos[2] + bodyH] as Vec3, group: roofGroup };
     if (/^Dessous/.test(p.name)) q.holes = [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: SENSOR_X, y: SENSOR_Y, size: 19.5, sh: 18.5 }), // logement du capteur, incrusté à fleur du plafond (ses broches sortent dans l'isolant)
       fitHole(q, { id: uid(), shape: 'square' as const, x: FANX, y: FOP_YC, size: FAN_OPEN, sh: FOP_H })]; // ouverture du ventilateur dans le plafond du nid (56 de large)
-    if (/^Dessus/.test(p.name)) q.holes = [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: SENSOR_X + 0.25, y: SENSOR_Y + 8, size: 12, sh: 6 }), // les fils du capteur montent vers le Pi
-      fitHole(q, { id: uid(), shape: 'square' as const, x: WEST_X, y: WEST_Y, size: 4, sh: 12 }), fitHole(q, { id: uid(), shape: 'square' as const, x: EAST_X, y: EAST_Y, size: 4, sh: 12 }), fitHole(q, { id: uid(), shape: 'square' as const, x: SLOT2X, y: SLOT2Y, size: 4, sh: 6 })]; // passages des fils du ventilateur
+    if (/^Dessus/.test(p.name)) q.holes = [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: SENSOR_X + 0.25, y: SENSOR_Y + 8, size: 12, sh: 6 }),]; // les fils du capteur montent vers le Pi
     if (n.cam <= 0) return q;
     if (/^Dessus/.test(p.name)) return { ...q, holes: [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: 0, y: CAM_Y, size: n.cam, sh: n.cam })] }; // on accède au compartiment par le haut
     if (/^Dessous/.test(p.name)) return { ...q, holes: [...q.holes, fitHole(q, { id: uid(), shape: 'round' as const, x: CAM_X, y: CAM_Y, size: LENS_HOLE }), fitHole(q, { id: uid(), shape: 'square' as const, x: IR_X, y: CAM_Y, size: 10, sh: 20 })] };
@@ -448,25 +447,26 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     part('Cale interrupteur avant', 17, 3, t, SWX, SWY - 12.5 - 1.5, topZ + t / 2, 'block', '#a16207'),
     part('Cale interrupteur arrière', 17, 3, t, SWX, SWY + 12.5 + 1.5, topZ + t / 2, 'block', '#a16207'),
   ];
-  // fils : côté cassette (quatre fils qui sortent par le couvercle jusqu'au connecteur), côté toit (du connecteur au module, au Wago −, et au Pi par l'isolant)
+  // fils : côté cassette (quatre fils qui sortent par le couvercle jusqu'au connecteur), côté toit (du connecteur au module, au Wago −, et au Pi par-dessus le toit)
   const pinY = [r2(CONY + 3.6), r2(CONY + 1.2), r2(CONY - 1.2), r2(CONY - 3.6)]; // + (rouge), PWM, tachymètre, − (noir) : du nord au sud
   const cw = (nm: string, color: string, k: number): Plank => wire(nm, color, [[FANX + 26, pinY[k], FAN_Z + FAN_T / 2], [FANX + 26, pinY[k], FAN_Z + FAN_T / 2 + 4], [FANX + 27, pinY[k], DUCT_Z1 - 4], [FANX + 27, pinY[k], DUCT_Z1 + t + 2], [FANX + 34, pinY[k], DUCT_Z1 + t + 3], [CONX - 2, pinY[k], DUCT_Z1 + t + 3], [CONX - 2, pinY[k], topZ + 12], [CONX, pinY[k], topZ + 6]] as Vec3[], k === 0 || k === 3 ? 1.6 : 1.2);
-  const laine = (j: number) => bodyH + 28 + 2.6 * j; // les fils vers le Pi courent dans l'isolant, sous le dessus du toit (le siège est dans le chemin au-dessus) : un niveau chacun, le plus bas pour la commande du module
-  const toPi = (nm: string, color: string, j: number, pre: Vec3[], idx: number, py: number, west: boolean, d = 1.2): Plank => {
-    const [xp, yp] = pw(PI_PIN_X0 + idx * 2.54, py), zl = laine(j), hh = topZ + 22 + 3 * j, xj = r2(CONX + (j - 2) * 1.3), ys = r2(EAST_Y + 4.5 - 3 * j), yw = WEST_Y + 4.5 - 3 * j, ylane = 61 + 2.4 * j, xl = -64 - 3 * j, ye = 24 - 2 * j;
-    return wire(nm, color, [...pre, [xj, ys, zl], [xj, ye + 6, zl], [xj - 6, ye, zl], [40, ye, zl], [WEST_X + 6, ye, zl], [WEST_X, ye + 8, zl], [WEST_X, yw, zl], [WEST_X, yw, topZ + 3], [WEST_X, yw, hh], [WEST_X - 4, ylane, hh], [xl, ylane, hh], ...(west ? [[xl, 33.5 + 1.5 * j, hh], [-96 - j, 33.5 + 1.5 * j, hh], [-96 - j, yp, hh]] : [[xl, yp, hh]]), [xp, yp, hh], [xp, yp, piZ + 8], [xp, yp, piZ + 3.5]] as Vec3[], d); // les broches de la rangée extérieure (12, 14) sont abordées par l'ouest (la broche 11 / 13 est devant elles)
+  // les quatre fils vers le Pi restent SUR le dessus du toit, sous la pente : ils passent PAR-DESSUS la cassette (le siège barre le chemin direct), un niveau par fil ; à l'ouest du siège ils redescendent à un niveau
+  // plus bas (la pente est plus basse devant) puis longent le Pi jusqu'à leur broche ; les broches 12 et 14 (rangée extérieure) sont abordées par l'ouest, la 11 et la 13 par l'est
+  const toPi = (nm: string, color: string, j: number, pre: Vec3[], yN: number, idx: number, py: number, west: boolean, d = 1.2): Plank => {
+    const [xp, yp] = pw(PI_PIN_X0 + idx * 2.54, py), hN = topZ + 56 + 2.4 * j, hS = topZ + 36 + 3 * j, xl = -64 - 3 * j;
+    return wire(nm, color, [...pre, [CONX + 4 - 0.5 * j, yN, hN], [xl, yN, hN], [xl, yN, hS], ...(west ? [[xl, 33.5 + 1.5 * j, hS], [-96 - j, 33.5 + 1.5 * j, hS], [-96 - j, yp, hS]] : [[xl, yp, hS]]), [xp, yp, hS], [xp, yp, piZ + 8], [xp, yp, piZ + 3.5]] as Vec3[], d);
   };
-  const via = (k: number, j: number): Vec3[] => [[CONX, pinY[k], topZ + 6], [r2(CONX + (j - 2) * 1.3), r2(EAST_Y + 4.5 - 3 * j + 6), topZ + 8], [r2(CONX + (j - 2) * 1.3), r2(EAST_Y + 4.5 - 3 * j), topZ + 3]]; // du connecteur au passage du dessus du toit
+  const via = (k: number, j: number): Vec3[] => [[CONX, pinY[k], topZ + 6], [CONX + 3.5 - 0.5 * j, pinY[k], topZ + 12], [CONX + 4 - 0.5 * j, pinY[k], topZ + 56 + 2.4 * j]]; // du connecteur vers le haut, à l'est du siège
   const fanWires: Plank[] = [
     cw('Fil cassette + (rouge)', '#dc2626', 0), cw('Fil cassette PWM (bleu)', '#2563eb', 1), cw('Fil cassette tachymètre (jaune)', '#eab308', 2), cw('Fil cassette − (noir)', '#111827', 3),
     wire('Fil Wago + → interrupteur ventilateur (rouge)', '#dc2626', [[WGX, FY, topZ + 14], [WGX + 2, FY + 6, topZ + 17], [SWX + 4, SWY - 17, topZ + 15], [SWX + 4, SWY - 12.5, topZ + 11.5]] as Vec3[], 1.6),
     wire('Fil interrupteur → ventilateur + (rouge)', '#dc2626', [[SWX - 3, SWY + 10, topZ + 11.5], [SWX - 6, YREAR - 1.5, topZ + 14], [66, YREAR - 1.5, topZ + 14], [CONX + 4, YREAR - 2.5, topZ + 10], [CONX, pinY[0], topZ + 6]] as Vec3[], 1.6),
     wire('Fil ventilateur − (noir)', '#111827', [[CONX, pinY[3], topZ + 6], [CONX, 84, topZ + 9], [CONX, 50, topZ + 9], [56, 47.5, topZ + 9], [80, 46, topZ + 10], [WGX - 6, FY - 14, topZ + 13], [WGX, FY - 14, topZ + 14]] as Vec3[], 1.6),
     wire('Fil masse interrupteur → Wago − (noir)', '#111827', [[SWX - 2, SWY - 12.5, topZ + 11.5], [SWX - 4, SWY - 16, topZ + 14], [96, 66, topZ + 22], [96, 56, topZ + 22], [WGX + 4, FY - 14, topZ + 14]] as Vec3[], 1.6),
-    toPi('Fil PWM ventilateur (bleu)', '#2563eb', 1, via(1, 1), 5, PI_PIN_Y, true),
-    toPi('Fil tachymètre ventilateur (jaune)', '#eab308', 2, via(2, 2), 5, PI_PIN_Y - 2.54, false),
-    toPi('Fil masse commune ventilateur (noir)', '#111827', 3, via(3, 3), 6, PI_PIN_Y, true),
-    toPi('Fil commande interrupteur ventilateur (orange)', '#f97316', 0, [[SWX + 3, SWY + 10, topZ + 11.5], [SWX + 4, YREAR - 5, topZ + 19], [SLOT2X, YREAR - 5, topZ + 19], [SLOT2X, SLOT2Y, topZ + 3], [SLOT2X, SLOT2Y, laine(0)], [CONX + 2.5, SLOT2Y, laine(0)]], 6, PI_PIN_Y - 2.54, false), // GPIO27 (broche 13) : par un passage près du module, puis dans l'isolant
+    toPi('Fil PWM ventilateur (bleu)', '#2563eb', 1, via(1, 1), 84, 5, PI_PIN_Y, true),
+    toPi('Fil tachymètre ventilateur (jaune)', '#eab308', 2, via(2, 2), 81.6, 5, PI_PIN_Y - 2.54, false),
+    toPi('Fil masse commune ventilateur (noir)', '#111827', 3, via(3, 3), 79.2, 6, PI_PIN_Y, true),
+    toPi('Fil commande interrupteur ventilateur (orange)', '#f97316', 0, [[SWX + 3, SWY + 10, topZ + 11.5], [SWX + 4, YREAR - 3.5, topZ + 19], [CONX + 5, YREAR - 3.5, topZ + 19]], YREAR - 3.5, 6, PI_PIN_Y - 2.54, false), // GPIO27 (broche 13) : par le nord de la gaine, par-dessus la cassette
   ];
   const fanSet: Plank[] = [fanPart, ...plots, ...swFan, connector, ...fanWires, ...cassette.filter((p) => p.group === elecGroup), ...winter];
   const fanWood: Plank[] = [...seat, fanGrid, exitNet, flap, ...cassette.filter((p) => p.group === roofGroup)];

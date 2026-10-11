@@ -317,7 +317,7 @@ Contrôle fait par calcul sur le modèle : recouvrement entre chaque composant e
 | Pièces en bois | contrôle de recouvrement par boîtes orientées : les seuls recouvrements restants sont voulus (dents dans leurs fentes, parois du siège et de la cassette qui traversent le dessus du toit par son encoche, conduit d'air dans le passage du fond) |
 | Caméra 2 | dehors, ne touche pas le toit ; sa nappe passe par la fente de la plaque avant |
 
-Contrôle des fils : aucun fil du ventilateur ne traverse une nappe ni un autre fil (distance mesurée sur les courbes réelles) ; les fils vers le Pi courent en partie dans l'isolant, sous le dessus du toit, pour contourner le siège. Limite du contrôle : les formes des pièces sont des boîtes, donc les trous et encoches ne sont pas pris en compte. Les composants sont dessinés à leur vraie taille même quand ils ne tiennent pas : les chevauchements restants (régulateur, batterie) sont à corriger en choisissant d'autres emplacements ou composants.
+Contrôle des fils : les fils du ventilateur côté 12 V ne traversent ni nappe ni autre fil ; les quatre fils vers le Pi (PWM, tachymètre, masse commune, commande de l'interrupteur) restent sur le dessus du toit, passent par-dessus la cassette sous la pente (2 mm au moins) et peuvent croiser les nappes et d'autres fils : à reprendre au cas par cas au montage. Limite du contrôle : les formes des pièces sont des boîtes, donc les trous et encoches ne sont pas pris en compte. Les composants sont dessinés à leur vraie taille même quand ils ne tiennent pas : les chevauchements restants (régulateur, batterie) sont à corriger en choisissant d'autres emplacements ou composants.
 
 ## Stratégie d'énergie (décision : on commence comme ça)
 

@@ -66,16 +66,33 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     for (const p of by(sc0, /^Cale Pi /)) expect(gap(seat, aabb(p, t)), p.name).toBeGreaterThan(4);
     for (const p of by(sc0, /^Fusible/)) expect(gap(seat, aabb(p, t)), p.name).toBeGreaterThan(9);
   });
-  it('aucun des fils du ventilateur ne traverse le siège, la cassette ou une nappe', () => {
-    const fanNames = /ventilateur|cassette|interrupteur/i;
+  it('aucun fil du ventilateur ne traverse le siège, la cassette ou une nappe (les quatre fils vers le Pi sont exemptés des croisements avec les nappes et les autres fils)', () => {
+    const fanNames = /ventilateur|cassette|interrupteur/i, toPi = /^Fil (PWM ventilateur|tachymètre ventilateur|masse commune ventilateur|commande interrupteur ventilateur)/;
     const walls = [...by(sc0, /^Goulotte ventilateur/), ...by(sc0, /^Cassette ventilateur [1-4]$/), one(sc0, /^Cassette ventilateur cadre du bas/)].map((p) => obb(p, t));
     for (const p of sc0.planks.filter((q) => q.special === 'wire' && fanNames.test(q.name))) {
       for (const pt of pathItems([p])[0].pts) for (const w of walls) expect(inside(pt, w, -0.1), p.name).toBe(false);
     }
     const items = pathItems(sc0.planks);
-    const bad = pathContacts(items).filter((c) => (fanNames.test(c.A) || fanNames.test(c.B)) && !c.shared && c.short > 0);
+    const bad = pathContacts(items).filter((c) => (fanNames.test(c.A) || fanNames.test(c.B)) && !toPi.test(c.A) && !toPi.test(c.B) && !c.shared && c.short > 0);
     expect(bad).toEqual([]);
     for (const n of sc0.planks.filter((q) => q.special === 'cable')) { const pts = ribbonPoints(n); for (const w of walls) expect(pts.some((v) => inside(v, w, 0.5)), n.name).toBe(false); }
+  });
+  it('les quatre fils vers le Pi restent sur le dessus du toit, sous la pente, sans traverser une pièce de bois ni un module', () => {
+    const toPi = by(sc0, /^Fil (PWM ventilateur|tachymètre ventilateur|masse commune ventilateur|commande interrupteur ventilateur)/);
+    expect(toPi).toHaveLength(4);
+    const front = one(sc0, /^Face avant toit/), back = one(sc0, /^Face arrière toit/), top = one(sc0, /^Dessus toit/);
+    const roofTop = top.pos[2] + t / 2, base = front.pos[2] - front.h / 2;
+    const plane = (y: number) => base + front.h + ((y - front.pos[1]) * (back.h - front.h)) / (back.pos[1] - front.pos[1]);
+    const solids = sc0.planks.filter((p) => !p.path && p.special !== 'doc' && p.special !== 'solar' && !/^(Dessus toit|Dessous toit|Face|Côté|Cadre|Isolant|Tasseau|Lambris|Toit en chêne|Grille anti|Grillage|Clapet|Entrée|Fixation|Clavette|Barre)/.test(p.name) && !/^Bloc isolant d'hiver|^Isolant bloc|^Poignée bloc/.test(p.name) && !/^Dessous ext|^Plancher int|^Conduit d.air|^Auvent|^Cale auvent|^Bouchon/.test(p.name) && p.pos[2] > roofTop - 20 && p.pos[2] < roofTop + 120);
+    for (const w of toPi) {
+      const pts = pathItems([w])[0].pts, end = new Vector3(...w.path![w.path!.length - 1]), start = new Vector3(...w.path![0]);
+      for (const pt of pts) {
+        expect(pt.z, w.name).toBeGreaterThanOrEqual(roofTop - 0.01);
+        expect(pt.z, w.name).toBeLessThanOrEqual(plane(pt.y) - 2 + 0.01);
+        if (pt.distanceTo(end) < 14 || pt.distanceTo(start) < 8) continue; // les bouts entrent dans la broche du Pi et le module
+        for (const s2 of solids) expect(inside(pt, obb(s2, t), -0.2), w.name + ' dans ' + s2.name).toBe(false);
+      }
+    }
   });
   it('les broches du Pi : 12 (PWM), 11 (tachymètre), 14 (masse), 13 (commande de l\'interrupteur) sont chacune utilisées une seule fois', () => {
     const names = ['Fil PWM ventilateur (bleu)', 'Fil tachymètre ventilateur (jaune)', 'Fil masse commune ventilateur (noir)', 'Fil commande interrupteur ventilateur (orange)'];
