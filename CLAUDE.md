@@ -20,6 +20,8 @@ Plusieurs outils dans la même app, choisis au démarrage (`src/tools.ts`, `src/
 ## Règle : le document suit le modèle
 **À chaque changement du nichoir (électronique, branchements, pièces, poids, prix, stratégie), mettre à jour `docs/schema-electronique.md`** (schéma mermaid, tableau des branchements, explication, paramètres par composant, vérification, poids, prix par groupe, liens) **en même temps que le code et que ce fichier** — demande de l'utilisateur. Le document est affiché dans l'app (pièce « Schéma électronique » du volet « Pièces », `DocModal`).
 
+**Grande aération arrière supprimée** (demande de l'utilisateur : « il y a une ouverture derrière le Pi pour la connectique, vire la partie ventilée du toit »). `VENT_XS` est vide : plus de grande ouverture de 170 × 19 dans la plaque arrière du toit, plus de « Grille anti-insectes » ni de fenêtre correspondante dans le lambris ; restent la fenêtre des prises du Pi et la fenêtre de sortie du ventilateur (`VENT_Z` / `VENT_H` servent encore à celle-ci). Le texte plus bas qui décrit « une grande ouverture d'aération (170 × 19…) » est **historique**. Conséquence : le grenier de l'électronique (Pi, convertisseur, batterie) n'a plus que la fenêtre des prises pour se renouveler : surveiller la température du Pi / de la batterie en été (idée : afficher la température du CPU du Pi sur la page).
+
 **Groupe « Ventilation »** (`VENT_PIECES` dans `src/birdhouse/model/nest/makeNest.ts`) : siège (goulotte), cassette amovible, plots, grille, ventilateur, connecteur, interrupteur 12 V et ses cales, clapet et grillage de sortie, fils du ventilateur, et la prise d'air basse (conduit, grillages, clapet, auvent, bouchon) sont regroupés dans un groupe à part, comme le « Bloc d'hiver » qui garde le sien.
 
 ## Dossiers

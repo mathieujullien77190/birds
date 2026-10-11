@@ -85,7 +85,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
   it('la sortie : fenêtre de la plaque arrière en face de celle de la cassette, jamais dans la zone du Pi ni de la batterie', () => {
     const back = one(sc0, /^Face arrière toit/), cass = one(sc0, /^Cassette ventilateur 2$/);
     const wins = back.holes.filter((h) => h.shape === 'square' && h.sh === 45);
-    expect(wins.length).toBeGreaterThanOrEqual(2); // la sortie du ventilateur et la grande aération de l'électronique
+    expect(wins.length).toBeGreaterThanOrEqual(1); // la sortie du ventilateur (la grande aération de l'électronique a été supprimée : la fenêtre des prises du Pi suffit)
     const winX = back.pos[0] + 0; void winX;
     const exit = wins.find((h) => Math.abs(h.x - (cass.pos[0] - back.pos[0])) < 0.1);
     expect(exit).toBeTruthy();

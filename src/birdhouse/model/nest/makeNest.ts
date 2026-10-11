@@ -113,7 +113,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // renfoncement des prises du Pi : les ports (USB, Ethernet, HDMI) regardent la plaque arrière, qui est percée en face d'eux ; un petit tunnel de contreplaqué (haut + deux côtés, le dessus du toit fait le fond)
   // relie les ports à cette fenêtre, pour brancher sans ouvrir le nichoir et sans ouvrir le grenier ; l'aération démarre juste à sa droite
   const PORT_X0 = piX - 30, PORT_X1 = piX + 30, PORT_Z0 = roofH + 3, PORT_Z1 = roofH + 27, VENT_L = r2(CND_X - CND_D / 2 - 4), VENT_R = W / 2 - 20; // l'aération démarre 26 mm à droite de la fenêtre des prises du Pi (20 de bois entre les deux : la lame d'habillage y est plus large)
-  const VENT_XS = [(VENT_L + VENT_R) / 2], VENT_W = VENT_R - VENT_L, VENT_Z0 = roofH + 4, VENT_H = Hb - 20 - VENT_Z0, VENT_Z = VENT_Z0 + VENT_H / 2;
+  const VENT_XS: number[] = [], VENT_W = VENT_R - VENT_L, VENT_Z0 = roofH + 4, VENT_H = Hb - 20 - VENT_Z0, VENT_Z = VENT_Z0 + VENT_H / 2;
   const GL_Y = 84; // le câble du panneau entre dans le toit par le côté droit, à cette ordonnée, 14 mm au-dessus du dessus du toit
   const tallRoof = (p: Plank): Plank => {
     if (!n.pente) return p;

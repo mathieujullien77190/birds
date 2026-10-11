@@ -351,15 +351,15 @@
  },
  "025 Lambris arrière 6": {
   "geo": {
-   "n": 156,
+   "n": 144,
    "idx": 0,
-   "pos": "34a5fc5960651139",
-   "col": "ed4a52704932f9fd"
+   "pos": "2c06b9a4854541c6",
+   "col": "db20a2926f1ee2d7"
   },
   "edges": {
-   "n": 100,
+   "n": 72,
    "idx": 0,
-   "pos": "c62691fed28b15a6",
+   "pos": "54214e79fee8776a",
    "col": null
   }
  },
@@ -379,15 +379,15 @@
  },
  "027 Lambris arrière 7": {
   "geo": {
-   "n": 84,
+   "n": 36,
    "idx": 0,
-   "pos": "31056a4cc70e6810",
-   "col": "678f7d5397366a95"
+   "pos": "df2154f97ec846c4",
+   "col": "dff38860b9a69b37"
   },
   "edges": {
-   "n": 48,
+   "n": 24,
    "idx": 0,
-   "pos": "3d4b74e2c758b38a",
+   "pos": "83ed48766c32407b",
    "col": null
   }
  },
@@ -2591,15 +2591,15 @@
  },
  "185 Face arrière toit": {
   "geo": {
-   "n": 960,
+   "n": 912,
    "idx": 0,
-   "pos": "c192b728a7ceaf0b",
-   "col": "1203c18c0559c2b6"
+   "pos": "60488130845fb8b1",
+   "col": "cb4df596ff7708c5"
   },
   "edges": {
-   "n": 344,
+   "n": 320,
    "idx": 0,
-   "pos": "a3f9cdd2ccf4e212",
+   "pos": "b08de75038c05438",
    "col": null
   }
  },
@@ -2729,21 +2729,7 @@
    "col": null
   }
  },
- "195 Grille anti-insectes": {
-  "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "011ede9d2ca98488",
-   "col": "844f8eb866736ef4"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "24d41619f25b4a0b",
-   "col": null
-  }
- },
- "196 Cadre toit haut": {
+ "195 Cadre toit haut": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -2757,7 +2743,7 @@
    "col": null
   }
  },
- "197 Cadre toit milieu": {
+ "196 Cadre toit milieu": {
   "geo": {
    "n": 672,
    "idx": 0,
@@ -2771,7 +2757,7 @@
    "col": null
   }
  },
- "198 Cadre toit bas": {
+ "197 Cadre toit bas": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -2785,7 +2771,7 @@
    "col": null
   }
  },
- "199 Barre avant gauche": {
+ "198 Barre avant gauche": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2799,7 +2785,7 @@
    "col": null
   }
  },
- "200 Barre avant droite": {
+ "199 Barre avant droite": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2813,7 +2799,7 @@
    "col": null
   }
  },
- "201 Barre arrière gauche": {
+ "200 Barre arrière gauche": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2827,7 +2813,7 @@
    "col": null
   }
  },
- "202 Barre arrière droite": {
+ "201 Barre arrière droite": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2841,7 +2827,7 @@
    "col": null
   }
  },
- "203 Face avant caméra 1": {
+ "202 Face avant caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2855,7 +2841,7 @@
    "col": null
   }
  },
- "204 Face arrière caméra 1": {
+ "203 Face arrière caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2869,7 +2855,7 @@
    "col": null
   }
  },
- "205 Côté droit caméra 1": {
+ "204 Côté droit caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2883,7 +2869,7 @@
    "col": null
   }
  },
- "206 Côté gauche caméra 1": {
+ "205 Côté gauche caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2897,7 +2883,7 @@
    "col": null
   }
  },
- "207 Caméra": {
+ "206 Caméra": {
   "geo": {
    "n": 396,
    "idx": 0,
@@ -2911,7 +2897,7 @@
    "col": null
   }
  },
- "208 LED infrarouges": {
+ "207 LED infrarouges": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2925,7 +2911,7 @@
    "col": null
   }
  },
- "209 Raspberry Pi": {
+ "208 Raspberry Pi": {
   "geo": {
    "n": 4104,
    "idx": 0,
@@ -2939,7 +2925,7 @@
    "col": null
   }
  },
- "210 Cale Pi 1": {
+ "209 Cale Pi 1": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2953,7 +2939,7 @@
    "col": null
   }
  },
- "211 Cale Pi 2": {
+ "210 Cale Pi 2": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2967,7 +2953,7 @@
    "col": null
   }
  },
- "212 Cale Pi 3": {
+ "211 Cale Pi 3": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2981,7 +2967,7 @@
    "col": null
   }
  },
- "213 Cale Pi 4": {
+ "212 Cale Pi 4": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2995,7 +2981,7 @@
    "col": null
   }
  },
- "214 Cale Pi 5": {
+ "213 Cale Pi 5": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3009,7 +2995,7 @@
    "col": null
   }
  },
- "215 Cale Pi 6": {
+ "214 Cale Pi 6": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3023,7 +3009,7 @@
    "col": null
   }
  },
- "216 Nappe caméra": {
+ "215 Nappe caméra": {
   "geo": {
    "n": 242,
    "idx": 720,
@@ -3037,7 +3023,7 @@
    "col": null
   }
  },
- "217 Fil 5 V (rouge)": {
+ "216 Fil 5 V (rouge)": {
   "geo": {
    "n": 1521,
    "idx": 8064,
@@ -3051,7 +3037,7 @@
    "col": null
   }
  },
- "218 Fil masse (noir)": {
+ "217 Fil masse (noir)": {
   "geo": {
    "n": 1305,
    "idx": 6912,
