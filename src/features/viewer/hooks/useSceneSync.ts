@@ -1,6 +1,6 @@
 import { useEffect, type MutableRefObject } from 'react';
 import { MathUtils, Plane } from 'three';
-import type { FaceAxis, PlankScene, Vec3 } from '@/birdhouse/model';
+import type { FaceAxis, PlankScene } from '@/birdhouse/model';
 import { EMISSIVE } from '@/birdhouse/three/constants';
 import { clearGroup, disposeObject3D } from '@/birdhouse/three/dispose';
 import { cutMarkObject, habillageDimensions, holeMarkObjects, pullMarkObject } from '@/birdhouse/three/factories/marks';
@@ -44,7 +44,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
         v.meshes.set(p.id, m);
       } else m.updateShape(p, sc.t); // la géométrie n'est refaite que si la forme a changé
       m.position.set(...p.pos);
-      m.rotation.set(...(p.rot.map(MathUtils.degToRad) as Vec3));
+      m.rotation.set(MathUtils.degToRad(p.rot[0]), MathUtils.degToRad(p.rot[1]), MathUtils.degToRad(p.rot[2]));
       const mat = m.material;
       if (p.name === 'Toit en chêne') { if (!mat.map) { mat.map = textures.oak(); mat.vertexColors = false; mat.color.set(PALETTE.white); mat.roughness = 0.7; mat.needsUpdate = true; } } // le pan de toit en chêne porte une texture de bois (le reste garde ses couleurs par sommets)
       mat.transparent = !!p.transparent;

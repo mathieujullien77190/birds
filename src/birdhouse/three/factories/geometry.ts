@@ -23,7 +23,9 @@ export function mergeColored(parts: Part[]): BufferGeometry {
     paintUniform(ni, c);
     return ni;
   });
-  return mergeGeometries(geos)!;
+  const merged = mergeGeometries(geos);
+  if (!merged) throw new Error('mergeColored : fusion impossible (attributs incompatibles)');
+  return merged;
 }
 
 /** Géométrie d'arêtes vide (rien à tracer). */

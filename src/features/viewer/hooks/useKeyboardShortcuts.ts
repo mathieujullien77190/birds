@@ -24,5 +24,5 @@ export function useKeyboardShortcuts(refs: {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- le gestionnaire lit tout par des refs (`refs`) ; `on` n'est lu qu'à l'appui d'une touche : l'écouteur n'est inscrit qu'une fois
 }

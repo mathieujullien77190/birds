@@ -9,9 +9,26 @@ import appCss from '../../pi/web/app.css?raw';
  *  (`fetch('/api/…')`) sont envoyés directement aux fonctions de routes du programme Python, sans réseau. Pyodide est téléchargé à l'ouverture (≈ 10 Mo). */
 const PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Py = any;
-let pyPromise: Promise<Py> | null = null;
+/** Une fonction Python exposée par Pyodide (définie dans `BOOT`) : arguments et résultat convertis par Pyodide, d'où `unknown`. */
+type PyFn = (...a: unknown[]) => unknown;
+/** La part de l'API Pyodide utilisée ici. */
+interface Pyodide {
+  globals: { get(name: string): PyFn; set(name: string, value: string): void };
+  setStdout(o: { batched: (line: string) => void }): void;
+  setStderr(o: { batched: (line: string) => void }): void;
+  runPython(code: string): unknown;
+}
+/** Réponse minimale de la doublure de `fetch` donnée à la page du Pi. */
+type PiFetch = (url: string, opts?: { method?: string; body?: string }) => Promise<{ json: () => Promise<unknown> }>;
+declare global {
+  interface Window {
+    /** Ajouté par le script `pyodide.js` une fois chargé. */
+    loadPyodide?: (opts: { indexURL: string }) => Promise<Pyodide>;
+    /** La page du Pi (cadre de même origine) appelle `parent.__piFetch` à la place de `fetch`. */
+    __piFetch?: PiFetch;
+  }
+}
+let pyPromise: Promise<Pyodide> | null = null;
 /** Où va la sortie standard de Python (print, erreurs) : le terminal du simulateur, rebranché à chaque ouverture. */
 let sink: (line: string) => void = () => {};
 
@@ -93,18 +110,18 @@ def surchauffe(v):
     nichoir.MOCK_SURCHAUFFE = float(v)
 `;
 
-function loadPy(): Promise<Py> {
-  pyPromise ??= new Promise<Py>((resolve, reject) => {
+function loadPy(): Promise<Pyodide> {
+  pyPromise ??= new Promise<Pyodide>((resolve, reject) => {
     const boot = async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const py = await (window as any).loadPyodide({ indexURL: PYODIDE });
+      if (!window.loadPyodide) throw new Error('Pyodide introuvable');
+      const py = await window.loadPyodide({ indexURL: PYODIDE });
       py.setStdout({ batched: (l: string) => sink(l) });
       py.setStderr({ batched: (l: string) => sink('! ' + l) });
       py.globals.set('SRC', nichoirPy);
       py.runPython(BOOT);
       return py;
     };
-    if ((window as unknown as { loadPyodide?: unknown }).loadPyodide) { boot().then(resolve, reject); return; }
+    if (window.loadPyodide) { boot().then(resolve, reject); return; }
     const s = document.createElement('script');
     s.src = PYODIDE + 'pyodide.js';
     s.onload = () => boot().then(resolve, reject);
@@ -169,7 +186,7 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
   const [menu, setMenu] = useState(false);
   const [accel, setAccel] = useState(1); // vitesse du temps de la batterie simulée (×1 = temps réel)
   const frameRef = useRef<HTMLIFrameElement>(null);
-  const pyRef = useRef<Py>(null);
+  const pyRef = useRef<Pyodide | null>(null);
 
   useEffect(() => {
     const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -187,9 +204,9 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
       if (dead) return;
       pyRef.current = py;
       const api = py.globals.get('api'), tick = py.globals.get('tick'), frame = py.globals.get('frame'), camOn = py.globals.get('cam_on'), ledOn = py.globals.get('led_on');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).__piFetch = async (url: string, opts?: { method?: string; body?: string }) => {
-        const out = api(url, opts?.body ?? '');
+      window.__piFetch = async (url, opts) => {
+        const raw = api(url, opts?.body ?? '');
+        const out = typeof raw === 'string' ? raw : undefined; // None côté Python : route inconnue
         const body = opts?.body ? ` ${opts.body}` : '';
         const d = new Date();
         say(`127.0.0.1 - - [${d.toLocaleDateString('fr-FR')} ${d.toLocaleTimeString('fr-FR')}] "${opts?.method ?? 'GET'} ${url} HTTP/1.1" ${out ? 200 : 404} -${body ? '  ← ' + body.trim() : ''}`); // ligne de journal façon Flask
@@ -202,7 +219,7 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
         const doc = frameRef.current?.contentDocument;
         if (!doc) return;
         n++;
-        doc.querySelectorAll<HTMLImageElement>('img.cam').forEach((img, i) => { img.src = !camOn(i) ? OFF : shoot?.(i, !!ledOn(i)) ?? 'data:image/png;base64,' + frame(i, n); }); // vue 3D depuis la caméra ; image de test du Python si la caméra n'existe pas
+        doc.querySelectorAll<HTMLImageElement>('img.cam').forEach((img, i) => { img.src = !camOn(i) ? OFF : shoot?.(i, !!ledOn(i)) ?? `data:image/png;base64,${String(frame(i, n))}`; }); // vue 3D depuis la caméra ; image de test du Python si la caméra n'existe pas
       }, 300));
       setState('prêt');
     }).catch((e: Error) => { setErr(String(e.message ?? e)); setState('erreur'); });
@@ -210,10 +227,9 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
       dead = true;
       sink = () => {};
       timers.forEach((t) => clearInterval(t));
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (window as any).__piFetch;
+      delete window.__piFetch;
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- volontaire : le simulateur garde la PREMIÈRE fonction `shoot` (elle lit l'état courant par une ref) ; la relancer redémarrerait Python
 
   useEffect(() => { // la scène 3D de nuit : le panneau solaire ne charge plus ; de jour, il recharge la batterie simulée
     if (state !== 'prêt') return;
@@ -225,8 +241,12 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
 
   useEffect(() => { if (state === 'prêt') pyRef.current?.globals.get('acceleration')(accel); }, [accel, state]);
 
-  const fn = (name: string) => pyRef.current!.globals.get(name) as (...a: unknown[]) => unknown;
-  const read = (): PiState => JSON.parse(fn('etat_json')() as string) as PiState;
+  const fn = (name: string): PyFn => {
+    const py = pyRef.current;
+    if (!py) throw new Error('Pyodide pas encore chargé');
+    return py.globals.get(name);
+  };
+  const read = (): PiState => JSON.parse(String(fn('etat_json')())) as PiState;
   const cmd = (url: string, body: object) => { fn('api')(url, JSON.stringify(body)); };
 
   const reset = () => { fn('restaurer')(); sink('# tout remis à zéro (pannes retirées, Peltier et LED éteints, batterie à 80 %)'); };

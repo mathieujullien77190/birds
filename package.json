@@ -9,7 +9,8 @@
     "build:pi": "npm --prefix pi/site run build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "node tools/lint/node_modules/eslint/bin/eslint.js ."
   },
   "dependencies": {
     "highlight.js": "^11.12.0",

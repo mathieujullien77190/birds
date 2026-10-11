@@ -72,7 +72,7 @@ export default function Planks() {
     if (selRef.current && !scene.planks.some((p) => p.id === selRef.current)) setSelectedId(null);
     setHoleEdit(null);
   });
-  useEffect(() => { saveScene(sc); saveHistory(history.current); }, [sc]); // la scène et l'historique sont enregistrés ensemble
+  useEffect(() => { saveScene(sc); saveHistory(history.current); }, [sc]); // eslint-disable-line react-hooks/exhaustive-deps -- `history` est une ref (stable) : la scène et l'historique sont enregistrés ensemble, quand la scène change
   const backRef = useRef(back);
   backRef.current = back;
   const update = (id: string, patch: Partial<Plank>, label = 'Réglage de la plaque') => commit(label, (s) => ({ ...s, planks: s.planks.map((p) => (p.id === id ? { ...p, ...patch } : p)) }));
@@ -96,7 +96,7 @@ export default function Planks() {
   const [nest, setNest] = useNestParams();
   const addNest = () => { const b = makeNest(nest, sc.t, sc.fit, sc.planks.length + 1); commit('Nichoir créé', (s) => ({ ...s, planks: [...s.planks, ...b.planks], groupNames: { ...(s.groupNames ?? {}), ...b.groupNames } })); setSelectedId(b.planks[0].id); setGroupSel(b.group); setOpenGroups((g) => new Set([...g, b.group])); setHidden((h) => new Set([...h, ...b.planks.filter((p) => HIDDEN_AT_CREATION.some((re) => re.test(p.name))).map((p) => p.id)])); /* l'isolant, les quatre barres du toit et le pan de toit en chêne sont cachés par défaut (l'œil de « Pièces » les affiche) */ };
   const autoNest = useRef(false);
-  useEffect(() => { if (!autoNest.current && sc.planks.length === 0) { autoNest.current = true; addNest(); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!autoNest.current && sc.planks.length === 0) { autoNest.current = true; addNest(); } }, []); // eslint-disable-line react-hooks/exhaustive-deps -- au montage seulement : un nichoir est créé d'office si la scène chargée est vide
   /** Membres d'un groupe (boîte). */
   const groupMembers = (g: string) => sc.planks.filter((p) => p.group === g);
   /** Copie une boîte entière (nouveau groupe), décalée vers la droite de sa largeur + 20 mm. */
@@ -131,7 +131,7 @@ export default function Planks() {
   useEffect(() => { // le groupe « Schéma électronique » est déplié d'office : on voit tout de suite le bouton qui ouvre le document
     const docs = Object.entries(sc.groupNames ?? {}).filter(([, nm]) => nm === 'Schéma électronique').map(([g]) => g);
     if (docs.some((g) => !openGroups.has(g))) setOpenGroups((s) => new Set([...s, ...docs]));
-  }, [sc.groupNames]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sc.groupNames]); // eslint-disable-line react-hooks/exhaustive-deps -- ne se relance que si les noms de groupes changent ; `openGroups` n'est lu que pour savoir s'il manque un groupe à déplier
   const addHole = (plankId: string, local: [number, number], openWindow = true) => { const pl = scRef.current.planks.find((p) => p.id === plankId); const h = pl ? fitHole(pl, newHole(local[0], local[1])) : newHole(local[0], local[1]); commit('Trou ajouté', (s) => ({ ...s, planks: s.planks.map((p) => (p.id === plankId ? { ...p, holes: [...p.holes, h] } : p)) })); if (openWindow) setHoleEdit({ plankId, holeId: h.id, fresh: true }); setCtx(null); };
   const setHole = (p: Plank, id: string, patch: Partial<Hole>) => {
     const fresh = !!holeEdit?.fresh && holeEdit.holeId === id; // un trou tout neuf : un seul Retour l'enlève avec ses réglages

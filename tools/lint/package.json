@@ -1,0 +1,11 @@
+{
+  "name": "lint-outils",
+  "private": true,
+  "description": "Outils de lint, isolés du projet : le projet utilise TypeScript 7 (sans API JavaScript), typescript-eslint a besoin de TypeScript 5. Installer une fois : npm --prefix tools/lint install",
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "typescript": "~5.9.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}
