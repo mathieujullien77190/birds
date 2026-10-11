@@ -94,6 +94,7 @@ def restaurer():
     nichoir.etat["auto"]["avertissements"] = []
     nichoir.ventilo(0)
     nichoir.sim["wh"] = 0.8 * nichoir.CAPACITE_WH
+    nichoir.etat["batterie"]["pourcent"] = 80.0  # sinon les caméras seraient encore refusées (batterie lue avant la remise)
     nichoir.leds(False, False)
     nichoir.camera(0, True)
     nichoir.camera(1, True)
