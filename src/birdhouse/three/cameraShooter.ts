@@ -1,5 +1,5 @@
-import { PerspectiveCamera, PointLight, SRGBColorSpace, Vector3, WebGLRenderTarget, type Object3D, type Scene, type WebGLRenderer } from 'three';
-import { CAMERA_SHOT } from './constants';
+import { Color, PerspectiveCamera, PointLight, SRGBColorSpace, Vector3, WebGLRenderTarget, type AmbientLight, type DirectionalLight, type Object3D, type Scene, type WebGLRenderer } from 'three';
+import { AMBIENCE, CAMERA_SHOT } from './constants';
 
 /** Options d'une prise de vue. */
 export interface ShotOptions {
@@ -38,6 +38,8 @@ export class CameraShooter {
   private target: WebGLRenderTarget | null = null;
   /** Faisceaux infrarouges visibles dans la vue : cachés (et projecteurs éteints) le temps d'une prise de vue, la lampe ci-dessus simule déjà cet éclairage. */
   beams?: { suspend(): () => void };
+  /** Lumières de la scène : la NUIT n'existe que pour les caméras (la vue 3D reste de jour) : le temps d'une prise de vue de nuit, on y met l'ambiance nocturne puis on remet la vue comme avant. */
+  lights?: { ambient: AmbientLight; sun: DirectionalLight };
 
   /** `overlays` : les repères de la vue (cotes, trou, face, coupe), cachés pendant la prise de vue. */
   constructor(private readonly scene: Scene, private readonly renderer: ShotRenderer, private readonly overlays: readonly Object3D[]) {
@@ -62,14 +64,17 @@ export class CameraShooter {
     // vision nocturne : les LED infrarouges de la caméra éclairent la scène (la lampe est posée à l'objectif et allumée le temps de la prise de vue)
     const lamp = this.lamp;
     const prev = r.getRenderTarget(), px = new Uint8Array(w * h * 4), resumeBeams = this.beams?.suspend();
+    const L = this.lights, saved = L && night ? { bg: scene.background, ac: L.ambient.color.clone(), ai: L.ambient.intensity, sc: L.sun.color.clone(), si: L.sun.intensity } : null;
     try {
+      if (L && saved) { const a = AMBIENCE.night; scene.background = new Color(a.background); L.ambient.color.set(a.ambient); L.ambient.intensity = a.ambientI; L.sun.color.set(a.sun); L.sun.intensity = a.sunI; }
       hide.forEach((o) => { o.visible = false; });
       lamp.position.copy(cam.position);
       lamp.intensity = ir ? CAMERA_SHOT.lamp.intensity : 0;
       r.setRenderTarget(target);
       r.render(scene, cam);
       r.readRenderTargetPixels(target, 0, 0, w, h, px);
-    } finally { // quoi qu'il arrive : la vue retrouve son état (cible de rendu, lampe, visibilités)
+    } finally { // quoi qu'il arrive : la vue retrouve son état (cible de rendu, lampe, visibilités, ambiance de jour)
+      if (L && saved) { scene.background = saved.bg; L.ambient.color.copy(saved.ac); L.ambient.intensity = saved.ai; L.sun.color.copy(saved.sc); L.sun.intensity = saved.si; }
       r.setRenderTarget(prev);
       resumeBeams?.();
       lamp.intensity = 0;

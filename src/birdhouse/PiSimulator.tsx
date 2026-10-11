@@ -182,7 +182,7 @@ const PI_TESTS: PiTest[] = [
     expect: (e) => !e.led_nid && !e.cam1 && !e.cam2 && !!e.erreurs.delestage && e.ventilo.mode === 'auto' && e.ventilo.pourcent >= 30, ok: (e) => `${e.erreurs.delestage} — ventilateur à ${e.ventilo.pourcent} %` },
 ];
 
-export function PiSimulator({ onClose, shoot, night = false, onToggleNight, onFanSpeed, onLeds }: { onClose: () => void; shoot?: (num: number, led?: boolean) => string | null; night?: boolean; onToggleNight?: () => void; /** Vitesse du ventilateur (0–100 %, 0 s'il est éteint ou coupé), à chaque seconde et à la fermeture. */ onFanSpeed?: (pct: number) => void; /** LED infrarouges allumées (nid, extérieur), à chaque seconde et à la fermeture (éteintes). */ onLeds?: (s: { nid: boolean; ext: boolean }) => void }) {
+export function PiSimulator({ open = true, onClose, shoot, night = false, onToggleNight, onFanSpeed, onLeds }: { /** Fenêtre affichée ou seulement cachée : cachée, le programme Python continue de tourner (le ventilateur, les LED et la batterie simulée ne s'arrêtent pas). */ open?: boolean; onClose: () => void; shoot?: (num: number, led?: boolean) => string | null; night?: boolean; onToggleNight?: () => void; /** Vitesse du ventilateur (0–100 %, 0 s'il est éteint ou coupé), à chaque seconde et à la fermeture. */ onFanSpeed?: (pct: number) => void; /** LED infrarouges allumées (nid, extérieur), à chaque seconde et à la fermeture (éteintes). */ onLeds?: (s: { nid: boolean; ext: boolean }) => void }) {
   const [state, setState] = useState<'chargement' | 'prêt' | 'erreur'>('chargement');
   const [err, setErr] = useState('');
   const [log, setLog] = useState<string[]>([]); // lignes du terminal, dans l'ordre d'arrivée
@@ -192,14 +192,17 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight, onFa
   const [accel, setAccel] = useState(1); // vitesse du temps de la batterie simulée (×1 = temps réel)
   const frameRef = useRef<HTMLIFrameElement>(null);
   const pyRef = useRef<Pyodide | null>(null);
+  const openRef = useRef(open);
+  openRef.current = open;
   const cbRef = useRef({ onFanSpeed, onLeds });
   cbRef.current = { onFanSpeed, onLeds }; // les fonctions de rappel du parent sans relancer Python
 
   useEffect(() => {
+    if (!open) return; // cachée : Échap ne la concerne plus
     const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
-  }, [onClose]);
+  }, [onClose, open]);
 
   useEffect(() => {
     let dead = false;
@@ -225,7 +228,8 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight, onFa
         try { const e = JSON.parse(String(py.globals.get('etat_json')())) as PiState; cbRef.current.onFanSpeed?.(e.ventilo.alimente ? e.ventilo.pourcent : 0); cbRef.current.onLeds?.({ nid: !!e.led_nid, ext: !!e.led_ext }); } catch { /* état pas encore lisible */ }
       };
       timers.push(window.setInterval(() => { tick(); publish(); }, 1000)); // la boucle de lecture du programme (toutes les secondes en mode simulé)
-      timers.push(window.setInterval(() => { // flux vidéo simulés
+      timers.push(window.setInterval(() => { // flux vidéo simulés (pas dessinés quand la fenêtre est cachée : le Python tourne quand même)
+        if (!openRef.current) return;
         const doc = frameRef.current?.contentDocument;
         if (!doc) return;
         n++;
@@ -281,7 +285,7 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight, onFa
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 p-4" style={{ display: open ? undefined : 'none' }} onClick={onClose}>
       <div className="flex h-full max-h-[52rem] w-full max-w-6xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3 border-b border-stone-200 px-4 py-2.5">
           <span aria-hidden className="text-lg">🐍</span>
