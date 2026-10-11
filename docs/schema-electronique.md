@@ -304,7 +304,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Entrées du − | batterie, convertisseur, ventilateur, masse de l'interrupteur : une entrée chacun, la 5ᵉ est libre | 4 sur 5 |
 | Courant | nous sommes à environ 1 A | — |
 | Précaution | enfoncer les fils jusqu'au fond ; pour un montage définitif, bornier à vis ou cosses serties | à droite du fusible |
-| Modèle exact / lien | [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413) ; [WAGO 221-415, borne à levier 5 conducteurs](https://www.wago.com/221-415) | — |
+| Modèle exact / lien | [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413) ; [WAGO 221-415, borne à levier 5 conducteurs](https://www.wago.com/221-415) ; en magasin : [Leroy Merlin, lot de 5 bornes automatiques 5 fils WAGO](https://www.leroymerlin.fr/produits/lot-de-5-bornes-automatiques-5-fils-wago-88899421.html) (fiche non lisible en ligne : vérifier « 32 A, fils souples ET rigides » et la référence 221-415, pas une borne « rigide seulement » 2273-205) | — |
 
 ### Câblage
 
@@ -322,7 +322,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 
 | Composant | À acheter (référence type) | Section de fil | Comment le brancher |
 | --- | --- | --- | --- |
-| Raspberry Pi 5 (GPIO) | cordons Dupont femelle-femelle de **30 cm**, lot de 40 (les fils du modèle mesurent de 20 à 28 cm vers le Pi ; la commande de l'interrupteur, GPIO27, fait environ 36 cm : prévoir un cordon de 40 cm pour celui-là) | fil du cordon (≈ 0,1 mm²) | un cordon par picot : PWM ventilateur GPIO18 (broche 12), tachymètre GPIO17 (broche 11), commande de l'interrupteur GPIO27 (broche 13), masse (broche 14), capteur (broches 1, 3, 5, 9), LED et module MOSFET (broches 2, 4, 6, 16, 18, 20) ; l'autre bout dans le bornier ou la broche du module |
+| Raspberry Pi 5 (GPIO) | cordons Dupont femelle-femelle de **40 cm**, lot de 40 (les fils du modèle mesurent de 20 à 36 cm vers le Pi, 36 cm pour la commande de l'interrupteur GPIO27 : 40 cm partout, on plie le surplus en S) | fil du cordon (≈ 0,1 mm²) | un cordon par picot : PWM ventilateur GPIO18 (broche 12), tachymètre GPIO17 (broche 11), commande de l'interrupteur GPIO27 (broche 13), masse (broche 14), capteur (broches 1, 3, 5, 9), LED et module MOSFET (broches 2, 4, 6, 16, 18, 20) ; l'autre bout dans le bornier ou la broche du module |
 | Capteur BME280 | Pimoroni BME280 Breakout (PIM472, Kubii) : rangée de 5 broches faite pour les broches 1, 3, 5, 7 et 9 du Pi (3,3 V, SDA, SCL, GPIO4 non utilisé, masse) | cordons Dupont | sur le modèle, 4 cordons Dupont vont de la rangée de broches de la carte aux broches 1, 3, 5 et 9 du Pi ; la fiche Kubii ne dit pas si les broches sont fournies ou à souder : à vérifier avant de commander |
 | Cartes de 4 LED infrarouges 850 nm | modèle à **fils pré-soudés** ou à **bornier à vis** | fils fournis (≈ 0,3 mm²) | 5 V sur la broche 2 ou 4 du Pi par un cordon Dupont ; l'autre fil dans le bornier du module MOSFET |
 | Module 2 × MOSFET (LED) et module interrupteur 12 V du ventilateur | cartes **avec borniers à vis** | 0,25 à 0,5 mm² | fil dénudé de 6 mm dans le bornier, vis serrée au tournevis plat de 2 mm ; commande par cordon Dupont sur le GPIO |
@@ -336,7 +336,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Module INA219 (facultatif) | version **avec broches soudées** | cordons Dupont F/F | I2C : 3,3 V, SDA, SCL, masse |
 | Passage des fils | passe-câbles, gaine annelée de Ø 16 | — | on enfile les fils dans la gaine avant de brancher |
 
-**Liste de courses sans soudure** (prix indicatifs) : [cordons Dupont F/F 30 cm, lot de 40 (Adafruit 793)](https://www.adafruit.com/product/793), 7 € (20 cm ne suffisent pas : les fils vers le Pi font 20 à 36 cm) ; embouts de câble assortis avec leur kit, 8 € ; tournevis plat de 2 mm, 4 € ; pince à dénuder, 8 € ; Wago 221-413 (déjà comptés dans le prix du rail 12 V) ; porte-fusible à fils tout fait (déjà compté) ; rallonge ventilateur Noctua 4 broches (déjà comptée). Ces achats sont ajoutés à la table des prix, groupe « Électronique ».
+**Liste de courses sans soudure** (prix indicatifs) : cordons Dupont F/F 40 cm, lot de 40 (lien à trouver), 8 € (20 cm ne suffisent pas : les fils vers le Pi font 20 à 36 cm) ; embouts de câble assortis avec leur kit, 8 € ; tournevis plat de 2 mm, 4 € ; pince à dénuder, 8 € ; Wago 221-413 (déjà comptés dans le prix du rail 12 V) ; porte-fusible à fils tout fait (déjà compté) ; rallonge ventilateur Noctua 4 broches (déjà comptée). Ces achats sont ajoutés à la table des prix, groupe « Électronique ».
 
 **Trois conseils.**
 
@@ -413,12 +413,12 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Convertisseur 12 V → 5 V 5 A USB-C | 15 € | lien à trouver — référence exacte : convertisseur DC-DC 12 V → 5 V, 5 A continus, sortie USB-C, entrée à bornier à vis |
 | Électronique | 4 cellules LiFePO4 32700 + BMS 4S + support | 40 € | [Cellule HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523) ; BMS 4S LiFePO4 et support : lien à trouver |
 | Électronique | Fusible + porte-fusible | 3 € | lien à trouver — référence exacte : fusible à lame 15 A + porte-fusible à fils tout fait (2,5 mm²) |
-| Électronique | Cordons Dupont F/F 30 cm, lot de 40 (+ 1 cordon de 40 cm pour la commande de l'interrupteur) | 7 € | [Adafruit 793, cordons F/F 300 mm × 40](https://www.adafruit.com/product/793) ; cordon de 40 cm : lien à trouver — référence exacte : cordon Dupont femelle-femelle 40 cm |
+| Électronique | Cordons Dupont F/F 40 cm, lot de 40 | 8 € | lien à trouver — référence exacte : cordons Dupont femelle-femelle 40 cm, lot de 40 |
 | Corps | Feuille de MDF 3 mm (quatre barres du toit de 60 × 10 mm, découpées au laser) | 3 € | lien à trouver — référence exacte : MDF 3 mm, feuille d'au moins 410 × 400 mm |
 | Électronique | Embouts de câble assortis (kit) | 8 € | lien à trouver — référence exacte : kit d'embouts de câble isolés 0,25 à 4 mm² |
 | Outils | Tournevis plat 2 mm | 4 € | lien à trouver — référence exacte : tournevis plat 2 mm (lame de 2,0 × 0,4 mm) |
 | Outils | Pince à dénuder | 8 € | lien à trouver — référence exacte : pince à dénuder automatique 0,2 à 6 mm² |
-| Électronique | Wago 221-413 (3 entrées) pour le + du rail 12 V | 1 € | [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413) |
+| Électronique | Wago 221-413 (3 entrées) pour le + du rail 12 V | 1 € | [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413) ; en magasin : [Leroy Merlin, lot de 10 bornes automatiques 3 fils WAGO, 6,69 €](https://www.leroymerlin.fr/produits/lot-de-10-bornes-automatiques-3-fils-wago-88899414.html) (fiche annoncée : 32 A, fils rigides et souples = série 221 ; la page n'était pas lisible en ligne, vérifier la référence 221-413 sur l'emballage) |
 | Électronique | Wago 221-415 (5 entrées) pour le − du rail 12 V | 1,5 € | [WAGO 221-415, borne à levier 5 conducteurs](https://www.wago.com/221-415) |
 | Électronique | Câbles (2,5 mm², 4 mm², signaux), gaine ICTA, presse-étoupe, cosses | 25 € | lien à trouver — référence exacte : fil souple 2,5 mm² et 4 mm² (rouge / noir), fil de signal 0,25 mm², gaine ICTA Ø 16, cosses isolées |
 | Solaire | Panneau solaire 100 W | 90 € | [Panneau 100 Wc monocristallin AST100-17M, 970 × 585 × 30 mm (Wattuneed)](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html) |
@@ -460,6 +460,5 @@ Chaque lien a été ouvert et vérifié (page et référence exacte). Les élém
 - [Régulateur Genasun GV-10-Li-14.2V-OEM (DigiKey)](https://www.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948)
 - [Capteur BME280 Pimoroni PIM472, I2C (Kubii)](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html)
 - [Capteur BME280, page Bosch Sensortec](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/)
-- [Cordons Dupont F/F 300 mm × 40 (Adafruit 793)](https://www.adafruit.com/product/793)
 - [Cellule LiFePO4 HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523)
 - [Panneau 100 Wc AST100-17M (Wattuneed)](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html)
