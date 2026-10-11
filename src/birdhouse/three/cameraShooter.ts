@@ -15,6 +15,15 @@ export interface ShotOptions {
 }
 
 /**
+ * Le « haut » de la caméra de la prise de vue. Avec `level` l'horizon est redressé (haut = +z) ; mais quand l'objectif regarde presque à la verticale,
+ * +z est parallèle à la direction et `lookAt` dégénère : on prend alors le haut de la carte (toujours perpendiculaire à la direction).
+ */
+export function shotUp(dir: Vector3, boardUp: Vector3, level: boolean): Vector3 {
+  if (!level || Math.abs(dir.z) > 0.9999) return boardUp.clone();
+  return new Vector3(0, 0, 1);
+}
+
+/**
  * Prises de vue « au niveau de la caméra » : rend la scène 3D depuis l'objectif d'une carte caméra (`special = 'camera'`), pour servir d'image au flux vidéo simulé du Pi.
  * Dans le repère de la carte l'objectif est à −z (voir `factories/part/camera.ts`) et le haut de l'image est +y : on lit donc direction et haut dans l'orientation de sa mesh.
  * Possède sa caméra et son render target (créé à la demande, libéré par `dispose()`), liés à UNE vue.
@@ -35,7 +44,7 @@ export class CameraShooter {
     const dir = new Vector3(0, 0, -1).applyQuaternion(q), up = new Vector3(0, 1, 0).applyQuaternion(q);
     cam.fov = fov; cam.aspect = w / h; cam.updateProjectionMatrix();
     cam.position.copy(board.position).addScaledVector(dir, CAMERA_SHOT.lensTip);
-    cam.up.copy(level ? new Vector3(0, 0, 1) : up);
+    cam.up.copy(shotUp(dir, up, level));
     cam.lookAt(cam.position.clone().add(dir));
 
     const target = this.targetFor(w, h);
