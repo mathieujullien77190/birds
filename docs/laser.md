@@ -1,5 +1,7 @@
 # Pilotage de la laser (Sculpfun S30 Pro)
 
+> Le logiciel de pilotage est un **projet autonome** : le dossier `laser-control/` (son `README.md` décrit l'installation, l'export et le format `LaserJob`). Il tourne seul (`npm install && npm run dev`, SVG ou G-code déposé sur la page) et l'app du nichoir l'utilise via l'alias `@laser` ; le mode d'emploi ci-dessous est le même dans les deux.
+
 L'app pilote la découpeuse directement depuis le navigateur (API **Web Serial**) : connexion USB, déplacements, cadre à vide, envoi du G-code planche par planche. Section « Découpe laser » du panneau de gauche, bloc « Machine » → « Ouvrir le pilotage de la laser ».
 
 ## Matériel et branchement
