@@ -14,6 +14,9 @@ export interface ShotOptions {
   night?: boolean;
 }
 
+/** Ce que la prise de vue demande au renderer (une doublure suffit pour les tests). */
+export type ShotRenderer = Pick<WebGLRenderer, 'getRenderTarget' | 'setRenderTarget' | 'render' | 'readRenderTargetPixels'>;
+
 /**
  * Le « haut » de la caméra de la prise de vue. Avec `level` l'horizon est redressé (haut = +z) ; mais quand l'objectif regarde presque à la verticale,
  * +z est parallèle à la direction et `lookAt` dégénère : on prend alors le haut de la carte (toujours perpendiculaire à la direction).
@@ -30,10 +33,14 @@ export function shotUp(dir: Vector3, boardUp: Vector3, level: boolean): Vector3 
  */
 export class CameraShooter {
   private readonly cam = new PerspectiveCamera(CAMERA_SHOT.defaultFov, 4 / 3, CAMERA_SHOT.near, CAMERA_SHOT.far);
+  /** Lampe des LED infrarouges : permanente (ajoutée puis retirée à chaque prise, elle faisait recompiler les shaders), éteinte (intensité 0) hors prise de vue infrarouge. */
+  private readonly lamp = new PointLight(CAMERA_SHOT.lamp.color, 0, CAMERA_SHOT.lamp.distance, CAMERA_SHOT.lamp.decay);
   private target: WebGLRenderTarget | null = null;
 
   /** `overlays` : les repères de la vue (cotes, trou, face, coupe), cachés pendant la prise de vue. */
-  constructor(private readonly scene: Scene, private readonly renderer: WebGLRenderer, private readonly overlays: readonly Object3D[]) {}
+  constructor(private readonly scene: Scene, private readonly renderer: ShotRenderer, private readonly overlays: readonly Object3D[]) {
+    scene.add(this.lamp);
+  }
 
   /** Image (data URL JPEG) vue par la caméra dont la carte est la mesh `board`. */
   shoot(board: Object3D, label: string, opts: ShotOptions = {}): string | null {
@@ -50,18 +57,19 @@ export class CameraShooter {
     const target = this.targetFor(w, h);
     const hide = [...this.overlays, board]; // ni cotes, ni repères, ni la carte elle-même
     const was = hide.map((o) => o.visible);
-    // vision nocturne : les LED infrarouges de la caméra éclairent la scène (lampe ponctuelle posée à l'objectif, le temps de la prise de vue)
-    const lamp = ir ? new PointLight(CAMERA_SHOT.lamp.color, CAMERA_SHOT.lamp.intensity, CAMERA_SHOT.lamp.distance, CAMERA_SHOT.lamp.decay) : null;
+    // vision nocturne : les LED infrarouges de la caméra éclairent la scène (la lampe est posée à l'objectif et allumée le temps de la prise de vue)
+    const lamp = this.lamp;
     const prev = r.getRenderTarget(), px = new Uint8Array(w * h * 4);
     try {
       hide.forEach((o) => { o.visible = false; });
-      if (lamp) { lamp.position.copy(cam.position); scene.add(lamp); }
+      lamp.position.copy(cam.position);
+      lamp.intensity = ir ? CAMERA_SHOT.lamp.intensity : 0;
       r.setRenderTarget(target);
       r.render(scene, cam);
       r.readRenderTargetPixels(target, 0, 0, w, h, px);
     } finally { // quoi qu'il arrive : la vue retrouve son état (cible de rendu, lampe, visibilités)
       r.setRenderTarget(prev);
-      if (lamp) scene.remove(lamp);
+      lamp.intensity = 0;
       hide.forEach((o, i) => { o.visible = was[i]; });
     }
 
@@ -81,6 +89,8 @@ export class CameraShooter {
 
   /** Libère le render target (à appeler à la fermeture de la vue). */
   dispose(): void {
+    this.scene.remove(this.lamp);
+    this.lamp.dispose();
     this.target?.dispose();
     this.target = null;
   }
