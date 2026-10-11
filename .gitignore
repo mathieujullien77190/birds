@@ -8,3 +8,6 @@ pi/reglages.json
 pi/historique*.json
 laser-control/node_modules/
 laser-control/dist/
+coverage/
+.coverage
+.pytest_cache/
