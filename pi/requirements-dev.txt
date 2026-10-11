@@ -1,0 +1,5 @@
+# Outils de test (sans gpiozero / lgpio, qui ne s'installent pas sous Windows : les tests utilisent des doublures).
+# Lancer :  cd pi && python -m pytest tests --cov=nichoir --cov-branch --cov-report=term-missing
+flask>=3.0
+pytest>=8.0
+pytest-cov>=5.0
