@@ -15,7 +15,7 @@ flowchart TB
   subgraph TOIT["Électronique dans le grenier"]
     FUSE["Fusible"]
     BAT["Batterie LiFePO4 12,8 V 6 Ah<br/>4 cellules 32700 en série + BMS"]
-    RAIL(("Rail 12 V<br/>2 Wago"))
+    RAIL(("Rail 12 V<br/>Wago 221-413 (+) et 221-415 (−)"))
     BUCK["Convertisseur 12 V → 5 V 5 A<br/>sortie USB-C"]
     PI["Raspberry Pi 5"]
     SW["Module 2 MOSFET<br/>LED on / off"]
@@ -99,7 +99,7 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 | --- | --- | --- | --- |
 | Câble 12 V | Panneau solaire | Régulateur de charge, sous le nichoir | Longe le sol et arrive sous le nichoir, à l'abri du lambris |
 | Charge | Régulateur | Batterie, via le fusible | Deux fils (rouge et noir) montent dans une gaine de Ø 16 mm, dans l'isolant du coin arrière droit (à 1 cm du mur arrière, pile sur le joint entre la plaque d'isolant du mur droit et celle du mur arrière) : ils traversent le fond, le plancher intérieur, le cadre du toit et le plancher du toit par des trous de 16 mm, pile le diamètre de la gaine, puis arrivent sur le dessus du toit. Le fusible protège la batterie et le câblage |
-| Rail 12 V | Batterie / fusible | Convertisseur 12 → 5 V et ventilateur (par son interrupteur) | Fils rouge (+) et noir (−), répartis par **deux Wago 221 à 3 entrées** (un pour le +, un pour le −, posés à droite du fusible) : un fil entre (le + par le fusible, le − par la borne de la batterie), deux repartent : un vers le convertisseur, un vers le ventilateur (le + par l'interrupteur, le − directement) |
+| Rail 12 V | Batterie / fusible | Convertisseur 12 → 5 V et ventilateur (par son interrupteur) | Fils rouge (+) et noir (−), répartis par un **Wago 221-413 à 3 entrées pour le +** (fusible, interrupteur du ventilateur, convertisseur) et un **Wago 221-415 à 5 entrées pour le −** (batterie, convertisseur, ventilateur, masse de l'interrupteur, une entrée de réserve), posés à droite du fusible : chaque fil a sa propre entrée |
 | Alimentation du Pi | Convertisseur 12 → 5 V | Prise USB-C du Pi 5 | 5 V, 5 A recommandés pour le Pi 5 |
 | Interrupteur du ventilateur | Wago + (12 V) ; Pi GPIO27 (broche 13) ; masse sur le Wago − | Entrée, commande 3,3 V et masse du module interrupteur 12 V (côté +) | Le Noctua ne s'arrête pas à 0 % de PWM (il tourne à environ 20 %) : on coupe son 12 V. Côté **+**, pas côté masse : une masse coupée ferait remonter jusqu'à 12 V dans les fils PWM et tachymètre vers les GPIO |
 | 12 V du ventilateur | Sortie de l'interrupteur (+, rouge) ; Wago − (−, noir) | Prise 4 broches d'origine du ventilateur (sur le couvercle de la cassette) + rallonge 4 broches | Fils de 1,6 mm de diamètre ; la prise de la rallonge se débranche à la main (cassette amovible), aucune soudure |
@@ -286,9 +286,11 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
-| Rôle | répartir le + et le − de la batterie vers l'interrupteur du ventilateur et le convertisseur (un fil entre, deux repartent) | deux blocs 20 × 13 × 11 mm |
-| Modèle | Wago 221-413, 3 entrées à levier, fil de 0,2 à 4 mm² | — |
-| Courant | 32 A annoncés, nous sommes à environ 1 A | — |
+| Rôle | répartir le + et le − de la batterie vers l'interrupteur du ventilateur et le convertisseur | 221-413 : 21 × 13 × 11 mm ; 221-415 : 35 × 13 × 11 mm (taille à vérifier sur la fiche WAGO) |
+| Modèle | Wago 221-413 (3 entrées) pour le + et 221-415 (5 entrées) pour le − : à levier, tension 12 V, courant ≤ 32 A, sections de 0,2 à 4 mm², fils souples sans embout acceptés | pas de 7 mm, entrées sur la face ouest |
+| Entrées du + | fusible, interrupteur du ventilateur, convertisseur : une entrée chacun | 3 sur 3 |
+| Entrées du − | batterie, convertisseur, ventilateur, masse de l'interrupteur : une entrée chacun, la 5ᵉ est libre | 4 sur 5 |
+| Courant | nous sommes à environ 1 A | — |
 | Précaution | enfoncer les fils jusqu'au fond ; pour un montage définitif, bornier à vis ou cosses serties | à droite du fusible |
 
 ### Câblage
@@ -313,7 +315,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Module 2 × MOSFET (LED) et module interrupteur 12 V du ventilateur | cartes **avec borniers à vis** | 0,25 à 0,5 mm² | fil dénudé de 6 mm dans le bornier, vis serrée au tournevis plat de 2 mm ; commande par cordon Dupont sur le GPIO |
 | Régulateur solaire Genasun | modèle d'origine à **borniers à vis** | 4 mm² côté panneau, 2,5 mm² côté batterie | fils dénudés de 8 mm avec embouts, vis serrées à fond |
 | Fusible | porte-fusible lame **avec fils déjà montés** | 2,5 mm² | on le met en série sur le fil + de la batterie, avec les Wago |
-| Rail 12 V | Wago 221-413 (3 entrées, sans outil), un pour le +, un pour le − | 0,2 à 4 mm² | on lève le levier, on glisse le fil dénudé de 11 mm (fil souple avec embout conseillé), on rabat le levier |
+| Rail 12 V | Wago 221-413 (3 entrées) pour le + et Wago 221-415 (5 entrées) pour le −, sans outil, aucune soudure | 0,2 à 4 mm² | on lève le levier, on glisse le fil dénudé de 11 mm (fil souple avec embout conseillé), on rabat le levier |
 | Convertisseur 12 V → 5 V | modèle avec **sortie USB-C** et entrée à bornier à vis | 2,5 mm² côté 12 V | sortie USB-C directement dans le Pi, pas de câble à confectionner |
 | Batterie LiFePO4 | batterie avec **bornes à visser** ou fils livrés | 2,5 mm² | cosses ou embouts vissés sur les bornes |
 | Caméras | caméras Camera Module 3 NoIR avec **nappes plates** | nappe 15 ou 22 broches | la nappe s'enfiche dans le connecteur à levier (CSI) du Pi, sans outil |
@@ -402,7 +404,8 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Embouts de câble assortis (kit) | 8 € |
 | Électronique | Tournevis plat 2 mm | 4 € |
 | Électronique | Pince à dénuder | 8 € |
-| Électronique | 2 × Wago 221 (3 entrées) pour le rail 12 V | 2 € |
+| Électronique | Wago 221-413 (3 entrées) pour le + du rail 12 V | 1 € |
+| Électronique | Wago 221-415 (5 entrées) pour le − du rail 12 V | 1,5 € |
 | Électronique | Câbles (2,5 mm², 4 mm², signaux), gaine ICTA, presse-étoupe, cosses | 25 € |
 | Solaire | Panneau solaire 100 W | 90 € |
 | Solaire | Régulateur de charge Genasun GV-10-Li | 120 € |

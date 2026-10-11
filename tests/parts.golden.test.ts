@@ -19,7 +19,7 @@ describe('une géométrie par type de pièce (golden)', () => {
       ['sensor', { special: 'sensor', w: 15, h: 11 }], ['block', { special: 'block', depth: 12 }], ['block percé', { special: 'block', depth: 12, holes: [{ id: 'h', shape: 'round', x: 0, y: 0, size: 10 }] }],
       ['block poly', { special: 'block', depth: 12, poly: [[-20, -15], [20, -15], [20, 15]], top: { z0: 6, bx: 0.1, by: 0.05 } }],
       ['cable', { special: 'cable', w: 16, path }], ['conduit', { special: 'conduit', w: 16, path }], ['wire', { special: 'wire', w: 2.4, path, color: '#ff0000' }],
-      ['pi', { special: 'pi', w: 85, h: 56 }], ['bar', { special: 'bar', w: 50, h: 10 }], ['ir', { special: 'ir', w: 12, h: 24 }], ['camera', { special: 'camera', w: 25, h: 24 }],
+      ['pi', { special: 'pi', w: 85, h: 56 }], ['bar', { special: 'bar', w: 50, h: 10 }], ['ir', { special: 'ir', w: 12, h: 24 }], ['camera', { special: 'camera', w: 25, h: 24 }], ['wago 3', { special: 'wago', w: 13, h: 21, depth: 11, color: '#dc2626' }], ['wago 5', { special: 'wago', w: 13, h: 35, depth: 11, color: '#111827' }],
     ];
     for (const [name, over] of cases) { const { geo, edges } = plankGeometry({ ...base, ...over }, 3); out[name] = { geo: fp(geo), edges: fp(edges) }; }
     expectGolden('parts', out);

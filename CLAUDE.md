@@ -23,6 +23,8 @@ Plusieurs outils dans la même app, choisis au démarrage (`src/tools.ts`, `src/
 
 **Fenêtres du lambris arrière alignées sur une bande commune** (`BAND_Z0` / `BAND_Z1` dans `makeNest` : fenêtre de sortie du ventilateur et fenêtre des prises du Pi, marge de 4 mm autour) : toutes les lames coupées s'arrêtent au même niveau et reprennent au même niveau (testé) ; les fenêtres de la plaque arrière du toit gardent leur taille.
 
+**Rail 12 V : Wago 221-413 (+, 3 entrées, 21 × 13 × 11) et 221-415 (−, 5 entrées, 35 × 13 × 11, taille à vérifier)** : `special = 'wago'` (`three/factories/part/wago.ts`, pas de 7 mm, face d'entrée à l'ouest, levier orange par entrée, orifices sombres, laiton visible, pastille de polarité) ; les fils entrent horizontalement dans des orifices distincts (`wgEnd`, `wgPort`), 2,5 mm dedans (les bouts qui entrent dans les orifices sont la seule exception aux traversées de pièces solides) ; le + : fusible, interrupteur, convertisseur ; le − : batterie, convertisseur, ventilateur, masse de l'interrupteur + 1 libre.
+
 **Montage sans soudure** (l'utilisateur ne peut pas souder) : le document décrit composant par composant les achats (cordons Dupont, borniers à vis, Wago 221, prises d'origine, composants à broches ou fils pré-soudés), une liste de courses et trois conseils ; voir la section « Montage sans soudure » de `docs/schema-electronique.md`.
 
 ## Règle : le document suit le modèle

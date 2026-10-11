@@ -202,5 +202,29 @@
    "pos": "bd88df8394e8ccbc",
    "col": null
   }
+ },
+ "wago 3": {
+  "geo": {
+   "n": 540,
+   "pos": "4a6c5292b3f1a3f3",
+   "col": "6b28b955ab4a7cdb"
+  },
+  "edges": {
+   "n": 360,
+   "pos": "8a62eee66ca5bd0a",
+   "col": null
+  }
+ },
+ "wago 5": {
+  "geo": {
+   "n": 828,
+   "pos": "3a1a6d5110c9c221",
+   "col": "02aac3b0fcdc5df9"
+  },
+  "edges": {
+   "n": 552,
+   "pos": "50e6f172c6f25517",
+   "col": null
+  }
  }
 }

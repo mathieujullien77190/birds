@@ -755,31 +755,31 @@
    "col": null
   }
  },
- "054 Wago 221 (3 entrées) rail 12 V +": {
+ "054 Wago 221-413 (3 entrées) rail 12 V +": {
   "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "1f0a14c061e4081a",
-   "col": "3a7329786fe9c757"
+   "n": 540,
+   "idx": 0,
+   "pos": "4a6c5292b3f1a3f3",
+   "col": "6b28b955ab4a7cdb"
   },
   "edges": {
-   "n": 24,
+   "n": 360,
    "idx": 0,
-   "pos": "c2cbdb6e6e1b4cd2",
+   "pos": "8a62eee66ca5bd0a",
    "col": null
   }
  },
- "055 Wago 221 (3 entrées) rail 12 V −": {
+ "055 Wago 221-415 (5 entrées) rail 12 V −": {
   "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "1f0a14c061e4081a",
-   "col": "f6b86af943148359"
+   "n": 828,
+   "idx": 0,
+   "pos": "3a1a6d5110c9c221",
+   "col": "02aac3b0fcdc5df9"
   },
   "edges": {
-   "n": 24,
+   "n": 552,
    "idx": 0,
-   "pos": "c2cbdb6e6e1b4cd2",
+   "pos": "50e6f172c6f25517",
    "col": null
   }
  },
@@ -883,10 +883,10 @@
  },
  "063 Fil fusible → Wago + (rouge)": {
   "geo": {
-   "n": 873,
-   "idx": 4608,
-   "pos": "e679bbd94679783f",
-   "col": "ff264462942275b5"
+   "n": 1089,
+   "idx": 5760,
+   "pos": "a328773fe779cbcf",
+   "col": "ea0ddf3a34463e9c"
   },
   "edges": {
    "n": 0,
@@ -897,10 +897,10 @@
  },
  "064 Fil batterie − → Wago − (noir)": {
   "geo": {
-   "n": 1521,
-   "idx": 8064,
-   "pos": "be8647a097ee199e",
-   "col": "4cebacff4b6fadee"
+   "n": 1737,
+   "idx": 9216,
+   "pos": "c8307dc8101f3497",
+   "col": "0325c749b13b8393"
   },
   "edges": {
    "n": 0,
@@ -911,10 +911,10 @@
  },
  "065 Fil rail → convertisseur + (rouge)": {
   "geo": {
-   "n": 1521,
-   "idx": 8064,
-   "pos": "169dd3905324c3c9",
-   "col": "9d6be67da6d54369"
+   "n": 1953,
+   "idx": 10368,
+   "pos": "a164f58306739418",
+   "col": "85c2de870f7dd74b"
   },
   "edges": {
    "n": 0,
@@ -925,10 +925,10 @@
  },
  "066 Fil rail → convertisseur − (noir)": {
   "geo": {
-   "n": 1521,
-   "idx": 8064,
-   "pos": "b8d8d7a04f700f35",
-   "col": "4cebacff4b6fadee"
+   "n": 1953,
+   "idx": 10368,
+   "pos": "cb3d807088de055b",
+   "col": "df3763041b185ab8"
   },
   "edges": {
    "n": 0,
@@ -1289,10 +1289,10 @@
  },
  "092 Fil Wago + → interrupteur ventilateur (rouge)": {
   "geo": {
-   "n": 873,
-   "idx": 4608,
-   "pos": "590cbad63bba0707",
-   "col": "ff264462942275b5"
+   "n": 1089,
+   "idx": 5760,
+   "pos": "6fdbfeb0e1678293",
+   "col": "ea0ddf3a34463e9c"
   },
   "edges": {
    "n": 0,
@@ -1319,7 +1319,7 @@
   "geo": {
    "n": 2169,
    "idx": 11520,
-   "pos": "d4e4b5bb6170e051",
+   "pos": "7f299dd2ab480a7a",
    "col": "8af7067d6e615856"
   },
   "edges": {
@@ -1331,10 +1331,10 @@
  },
  "095 Fil masse interrupteur → Wago − (noir)": {
   "geo": {
-   "n": 1089,
-   "idx": 5760,
-   "pos": "79b6c93d81a83065",
-   "col": "00dbc9b9658aa574"
+   "n": 1521,
+   "idx": 8064,
+   "pos": "14e556e70c8c39b8",
+   "col": "4cebacff4b6fadee"
   },
   "edges": {
    "n": 0,

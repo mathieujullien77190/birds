@@ -226,6 +226,32 @@ describe('poignées en U : sens de pose', () => {
   });
 });
 
+describe('Wago du rail 12 V : 221-413 (+) et 221-415 (−)', () => {
+  it('le + a 3 entrées, le − en a 5 ; une entrée distincte par fil, arrivée horizontale dans l axe', () => {
+    const plus = one(sc0, /^Wago 221-413 \(3 entrées\) rail 12 V \+$/), minus = one(sc0, /^Wago 221-415 \(5 entrées\) rail 12 V −$/);
+    expect(plus.special).toBe('wago'); expect(minus.special).toBe('wago'); expect(Math.round(plus.h / 7)).toBe(3); expect(Math.round(minus.h / 7)).toBe(5);
+    expect(minus.h).toBe(35); expect(minus.w).toBe(13); expect(minus.depth).toBe(11); // 221-415 : 35 × 13 × 11 mm (à vérifier sur la fiche WAGO)
+    for (const [w, n, names] of [[plus, 3, ['Fil fusible → Wago + (rouge)', 'Fil Wago + → interrupteur ventilateur (rouge)', 'Fil rail → convertisseur + (rouge)']], [minus, 4, ['Fil batterie − → Wago − (noir)', 'Fil rail → convertisseur − (noir)', 'Fil ventilateur − (noir)', 'Fil masse interrupteur → Wago − (noir)']]] as [Plank, number, string[]][]) {
+      const face = w.pos[0] - w.w / 2, ports = Array.from({ length: Math.round(w.h / 7) }, (_, i) => w.pos[1] + 7 * ((Math.round(w.h / 7) - 1) / 2 - i)), used: number[] = [];
+      expect(names).toHaveLength(n);
+      for (const nm of names) {
+        const wire = one(sc0, new RegExp('^' + nm.replace(/[()+→−]/g, '.') + '$')), pts = [wire.path![0], wire.path![wire.path!.length - 1]], end = pts.find((q) => Math.abs(q[2] - (w.pos[2] - 1.5)) < 0.6 && q[0] > face && q[0] < face + 4)!;
+        const k = ports.findIndex((y) => Math.abs(y - end[1]) < 0.01); expect(k, nm + ' : une entrée').toBeGreaterThanOrEqual(0);
+        expect(end[0], nm).toBeGreaterThan(face); expect(end[0], nm).toBeLessThan(face + 4); // 2,5 mm dans l'orifice
+        expect(Math.abs(end[2] - (w.pos[2] - 1.5)), nm + ' hauteur des orifices').toBeLessThan(0.6);
+        const before = wire.path![wire.path!.indexOf(end) === 0 ? 1 : wire.path!.length - 2]; expect(Math.abs(before[1] - end[1]) < 0.01 && Math.abs(before[2] - end[2]) < 0.01, nm + ' arrivée horizontale dans l axe').toBe(true);
+        used.push(k);
+      }
+      expect(new Set(used).size, 'entrées distinctes').toBe(used.length);
+    }
+    expect(minus.h / 7 - 4).toBeGreaterThanOrEqual(1); // une entrée de réserve
+  });
+  it('les deux Wago ne chevauchent ni leurs voisins ni l un l autre', () => {
+    const w = by(sc0, /^Wago 221/); expect(w).toHaveLength(2);
+    for (const a of w) for (const b of sc0.planks) { if (a === b || b.path || b.special === 'doc' || /^(Face|Côté|Dessus toit|Dessous|Cadre|Isolant|Tasseau|Toit en chêne|Lambris|Plancher|Habillage|Barre)/.test(b.name)) continue; expect(gap(aabb(a, t), aabb(b, t)), a.name + ' / ' + b.name).toBeGreaterThan(0.2); }
+  });
+});
+
 describe('habillage arrière : fenêtres sur une bande commune', () => {
   it("toutes les lames coupées par une fenêtre s'arrêtent au même niveau et reprennent au même niveau", () => {
     const lames = by(sc0, /^Lambris arrière/), bot = Math.min(...lames.map((l) => aabb(l, t).min.z)), top = Math.max(...lames.map((l) => aabb(l, t).max.z));
