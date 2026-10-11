@@ -1,0 +1,1222 @@
+{
+ "undefined": {
+  "t": 3,
+  "fit": 0,
+  "planks": [
+   {
+    "id": "id1",
+    "name": "Face avant 1",
+    "w": 120,
+    "h": 80,
+    "pos": [
+     10,
+     -30,
+     20
+    ],
+    "rot": [
+     123,
+     -47,
+     112
+    ],
+    "notches": [
+     {
+      "id": "id2",
+      "edge": "top",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id3",
+      "edge": "top",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id4",
+      "edge": "top",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id5",
+      "edge": "top",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id6",
+      "edge": "top",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id7",
+      "edge": "bottom",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id8",
+      "edge": "bottom",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id9",
+      "edge": "bottom",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id10",
+      "edge": "bottom",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id11",
+      "edge": "bottom",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id12",
+      "edge": "left",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id13",
+      "edge": "left",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id14",
+      "edge": "left",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id15",
+      "edge": "right",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id16",
+      "edge": "right",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id17",
+      "edge": "right",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     }
+    ],
+    "holes": [],
+    "cast": {
+     "top": {
+      "n": 9,
+      "phase": 0
+     },
+     "bottom": {
+      "n": 9,
+      "phase": 0
+     },
+     "left": {
+      "n": 5,
+      "phase": 0
+     },
+     "right": {
+      "n": 5,
+      "phase": 0
+     }
+    }
+   },
+   {
+    "id": "id18",
+    "name": "Face arrière 1",
+    "w": 120,
+    "h": 80,
+    "pos": [
+     5,
+     -7,
+     6
+    ],
+    "rot": [
+     180,
+     0,
+     0
+    ],
+    "notches": [
+     {
+      "id": "id19",
+      "edge": "top",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id20",
+      "edge": "top",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id21",
+      "edge": "top",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id22",
+      "edge": "top",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id23",
+      "edge": "top",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id24",
+      "edge": "bottom",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id25",
+      "edge": "bottom",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id26",
+      "edge": "bottom",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id27",
+      "edge": "bottom",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id28",
+      "edge": "bottom",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id29",
+      "edge": "left",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id30",
+      "edge": "left",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id31",
+      "edge": "left",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id32",
+      "edge": "right",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id33",
+      "edge": "right",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id34",
+      "edge": "right",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     }
+    ],
+    "holes": [],
+    "cast": {
+     "top": {
+      "n": 9,
+      "phase": 0
+     },
+     "bottom": {
+      "n": 9,
+      "phase": 0
+     },
+     "left": {
+      "n": 5,
+      "phase": 0
+     },
+     "right": {
+      "n": 5,
+      "phase": 0
+     }
+    }
+   }
+  ],
+  "up": "z2"
+ },
+ "z": {
+  "t": 3,
+  "fit": 0,
+  "planks": [
+   {
+    "id": "id1",
+    "name": "Face avant 1",
+    "w": 120,
+    "h": 80,
+    "pos": [
+     10,
+     20,
+     30
+    ],
+    "rot": [
+     4,
+     39,
+     109
+    ],
+    "notches": [
+     {
+      "id": "id2",
+      "edge": "top",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id3",
+      "edge": "top",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id4",
+      "edge": "top",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id5",
+      "edge": "top",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id6",
+      "edge": "top",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id7",
+      "edge": "bottom",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id8",
+      "edge": "bottom",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id9",
+      "edge": "bottom",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id10",
+      "edge": "bottom",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id11",
+      "edge": "bottom",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id12",
+      "edge": "left",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id13",
+      "edge": "left",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id14",
+      "edge": "left",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id15",
+      "edge": "right",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id16",
+      "edge": "right",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id17",
+      "edge": "right",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     }
+    ],
+    "holes": [],
+    "cast": {
+     "top": {
+      "n": 9,
+      "phase": 0
+     },
+     "bottom": {
+      "n": 9,
+      "phase": 0
+     },
+     "left": {
+      "n": 5,
+      "phase": 0
+     },
+     "right": {
+      "n": 5,
+      "phase": 0
+     }
+    }
+   },
+   {
+    "id": "id18",
+    "name": "Face arrière 1",
+    "w": 120,
+    "h": 80,
+    "pos": [
+     5,
+     6,
+     7
+    ],
+    "rot": [
+     180,
+     0,
+     0
+    ],
+    "notches": [
+     {
+      "id": "id19",
+      "edge": "top",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id20",
+      "edge": "top",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id21",
+      "edge": "top",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id22",
+      "edge": "top",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id23",
+      "edge": "top",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id24",
+      "edge": "bottom",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id25",
+      "edge": "bottom",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id26",
+      "edge": "bottom",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id27",
+      "edge": "bottom",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id28",
+      "edge": "bottom",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id29",
+      "edge": "left",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id30",
+      "edge": "left",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id31",
+      "edge": "left",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id32",
+      "edge": "right",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id33",
+      "edge": "right",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id34",
+      "edge": "right",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     }
+    ],
+    "holes": [],
+    "cast": {
+     "top": {
+      "n": 9,
+      "phase": 0
+     },
+     "bottom": {
+      "n": 9,
+      "phase": 0
+     },
+     "left": {
+      "n": 5,
+      "phase": 0
+     },
+     "right": {
+      "n": 5,
+      "phase": 0
+     }
+    }
+   }
+  ],
+  "up": "z2"
+ },
+ "z1": {
+  "t": 3,
+  "fit": 0,
+  "planks": [
+   {
+    "id": "id1",
+    "name": "Face avant 1",
+    "w": 120,
+    "h": 80,
+    "pos": [
+     10,
+     20,
+     30
+    ],
+    "rot": [
+     -86,
+     39,
+     109
+    ],
+    "notches": [
+     {
+      "id": "id2",
+      "edge": "top",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id3",
+      "edge": "top",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id4",
+      "edge": "top",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id5",
+      "edge": "top",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id6",
+      "edge": "top",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id7",
+      "edge": "bottom",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id8",
+      "edge": "bottom",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id9",
+      "edge": "bottom",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id10",
+      "edge": "bottom",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id11",
+      "edge": "bottom",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id12",
+      "edge": "left",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id13",
+      "edge": "left",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id14",
+      "edge": "left",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id15",
+      "edge": "right",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id16",
+      "edge": "right",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id17",
+      "edge": "right",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     }
+    ],
+    "holes": [],
+    "cast": {
+     "top": {
+      "n": 9,
+      "phase": 0
+     },
+     "bottom": {
+      "n": 9,
+      "phase": 0
+     },
+     "left": {
+      "n": 5,
+      "phase": 0
+     },
+     "right": {
+      "n": 5,
+      "phase": 0
+     }
+    }
+   },
+   {
+    "id": "id18",
+    "name": "Face arrière 1",
+    "w": 120,
+    "h": 80,
+    "pos": [
+     5,
+     6,
+     7
+    ],
+    "rot": [
+     90,
+     0,
+     0
+    ],
+    "notches": [
+     {
+      "id": "id19",
+      "edge": "top",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id20",
+      "edge": "top",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id21",
+      "edge": "top",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id22",
+      "edge": "top",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id23",
+      "edge": "top",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id24",
+      "edge": "bottom",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id25",
+      "edge": "bottom",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id26",
+      "edge": "bottom",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id27",
+      "edge": "bottom",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id28",
+      "edge": "bottom",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id29",
+      "edge": "left",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id30",
+      "edge": "left",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id31",
+      "edge": "left",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id32",
+      "edge": "right",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id33",
+      "edge": "right",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id34",
+      "edge": "right",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     }
+    ],
+    "holes": [],
+    "cast": {
+     "top": {
+      "n": 9,
+      "phase": 0
+     },
+     "bottom": {
+      "n": 9,
+      "phase": 0
+     },
+     "left": {
+      "n": 5,
+      "phase": 0
+     },
+     "right": {
+      "n": 5,
+      "phase": 0
+     }
+    }
+   }
+  ],
+  "up": "z2"
+ },
+ "z2": {
+  "t": 3,
+  "fit": 0,
+  "planks": [
+   {
+    "id": "id1",
+    "name": "Face avant 1",
+    "w": 120,
+    "h": 80,
+    "pos": [
+     10,
+     20,
+     30
+    ],
+    "rot": [
+     33,
+     -47,
+     112
+    ],
+    "notches": [
+     {
+      "id": "id2",
+      "edge": "top",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id3",
+      "edge": "top",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id4",
+      "edge": "top",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id5",
+      "edge": "top",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id6",
+      "edge": "top",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id7",
+      "edge": "bottom",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id8",
+      "edge": "bottom",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id9",
+      "edge": "bottom",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id10",
+      "edge": "bottom",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id11",
+      "edge": "bottom",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id12",
+      "edge": "left",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id13",
+      "edge": "left",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id14",
+      "edge": "left",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id15",
+      "edge": "right",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id16",
+      "edge": "right",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id17",
+      "edge": "right",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     }
+    ],
+    "holes": [],
+    "cast": {
+     "top": {
+      "n": 9,
+      "phase": 0
+     },
+     "bottom": {
+      "n": 9,
+      "phase": 0
+     },
+     "left": {
+      "n": 5,
+      "phase": 0
+     },
+     "right": {
+      "n": 5,
+      "phase": 0
+     }
+    }
+   },
+   {
+    "id": "id18",
+    "name": "Face arrière 1",
+    "w": 120,
+    "h": 80,
+    "pos": [
+     5,
+     6,
+     7
+    ],
+    "rot": [
+     90,
+     0,
+     0
+    ],
+    "notches": [
+     {
+      "id": "id19",
+      "edge": "top",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id20",
+      "edge": "top",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id21",
+      "edge": "top",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id22",
+      "edge": "top",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id23",
+      "edge": "top",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id24",
+      "edge": "bottom",
+      "pos": 6.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id25",
+      "edge": "bottom",
+      "pos": 33.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id26",
+      "edge": "bottom",
+      "pos": 60,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id27",
+      "edge": "bottom",
+      "pos": 86.67,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id28",
+      "edge": "bottom",
+      "pos": 113.33,
+      "width": 13.33,
+      "depth": 3
+     },
+     {
+      "id": "id29",
+      "edge": "left",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id30",
+      "edge": "left",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id31",
+      "edge": "left",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id32",
+      "edge": "right",
+      "pos": 8,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id33",
+      "edge": "right",
+      "pos": 40,
+      "width": 16,
+      "depth": 3
+     },
+     {
+      "id": "id34",
+      "edge": "right",
+      "pos": 72,
+      "width": 16,
+      "depth": 3
+     }
+    ],
+    "holes": [],
+    "cast": {
+     "top": {
+      "n": 9,
+      "phase": 0
+     },
+     "bottom": {
+      "n": 9,
+      "phase": 0
+     },
+     "left": {
+      "n": 5,
+      "phase": 0
+     },
+     "right": {
+      "n": 5,
+      "phase": 0
+     }
+    }
+   }
+  ],
+  "up": "z2"
+ }
+}
