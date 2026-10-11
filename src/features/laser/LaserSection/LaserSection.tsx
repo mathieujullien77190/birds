@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { Btn, Chip, Section, Slider } from '@/ui';
 import { saveSvg } from '@/lib';
-import { sheetSvg } from '@/planks/model';
+import { sheetSvg } from '@/birdhouse/model';
 import type { CutCfg, Sheets } from '../types';
 import type { LaserMachine } from '../hooks/useLaserMachine';
 import { MachineSection } from '../components/MachineSection';

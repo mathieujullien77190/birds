@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { marked } from 'marked';
 import { IconButton, PanelHeader } from '@/ui';
 import { DOC_CSS } from '@/features/docs';
-import type { Plank } from '@/planks/model';
+import type { Plank } from '@/birdhouse/model';
 import type { Hover } from '@/types';
 import { CSS } from './constants';
 import { buildSchema, edgeKey, ficheOf, nodeKey, schemaKeys } from './helpers';

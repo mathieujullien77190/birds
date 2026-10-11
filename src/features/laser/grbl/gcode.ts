@@ -1,4 +1,4 @@
-import type { NestSheet } from '@/planks/model';
+import type { NestSheet } from '@/birdhouse/model';
 
 /**
  * Génération du G-code pour une planche de `nestSheets`. Fonctions pures (sans React ni DOM).

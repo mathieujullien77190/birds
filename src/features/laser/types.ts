@@ -1,4 +1,4 @@
-import type { nestSheets } from '@/planks/model';
+import type { nestSheets } from '@/birdhouse/model';
 import type { PassMode } from './grbl';
 
 /** Planche de découpe laser : largeur, hauteur et espace entre les pièces (mm). */

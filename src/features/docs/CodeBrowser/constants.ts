@@ -7,8 +7,8 @@ export const SOURCES = import.meta.glob(
 export const LANG: Record<string, string> = { ts: 'typescript', tsx: 'typescript', js: 'javascript', py: 'python', html: 'xml', css: 'css', json: 'json', md: 'markdown', service: 'ini', yml: 'yaml', txt: 'ini' };
 /** Ce que fait chaque fichier ou dossier, en une ligne (affiché dans l'arborescence). */
 export const NOTE: Record<string, string> = {
-  'src/planks/model.ts': 'le modèle : génération du nichoir, plaques, crans, découpe',
-  'src/features/planks/Planks/Planks.tsx': "l'écran : vue 3D, menus, volet « Pièces », découpe laser",
+  'src/birdhouse/model.ts': 'le modèle : génération du nichoir, plaques, crans, découpe',
+  'src/features/viewer/Planks/Planks.tsx': "l'écran : vue 3D, menus, volet « Pièces », découpe laser",
   'src/features/docs/DocModal/DocModal.tsx': 'fenêtre des documents (Markdown, schéma, prix)',
   'src/features/schema/SchemaPanel/SchemaPanel.tsx': 'schéma électrique à côté de la 3D',
   'src/features/docs/CodeBrowser/CodeBrowser.tsx': 'cet explorateur de code',

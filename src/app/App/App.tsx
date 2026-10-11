@@ -1,4 +1,4 @@
-import { Planks } from '@/features/planks';
+import { Planks } from '@/features/viewer';
 
 /** Coquille de l'application : un seul outil, le nichoir mésange (« Plaques »). Les providers globaux viendraient ici. */
 export function App() {

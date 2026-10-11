@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { nestSheets, sheetsPreviewSvg, type PlankScene } from '@/planks/model';
+import { nestSheets, sheetsPreviewSvg, type PlankScene } from '@/birdhouse/model';
 import { usePersistentState } from '@/hooks';
 import { CUT_CFG_KEY } from '../constants';
 import { parseCutCfg } from '../helpers';
