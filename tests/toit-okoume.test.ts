@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Vector3 } from 'three';
 import { nestSheets, OKOUME_COLOR, OKOUME_NATURAL, OKOUME_T, type Hole, type Plank } from '@/birdhouse/model';
-import { VARIANTS, buildNest } from './helpers';
+import { VARIANTS, buildNest, withoutBagSlots } from './helpers';
 import { obb, overlap } from './geomChecks';
 
 /** Rectangle [x0, y0, x1, y1] d'un trou carré (repère de la plaque). */
@@ -75,7 +75,7 @@ describe('toit en okoumé : deux plaques de 5 mm (crénelée dessous, pleine des
         expect(chan).toHaveLength(1);
         expect(chan[0].size).toBeGreaterThanOrEqual(24); expect(chan[0].size).toBeLessThanOrEqual(30);
         const cam = sc.planks.find((p) => p.name === 'Caméra 2')!, front = sc.planks.find((p) => p.name === 'Face avant toit')!;
-        expect(front.holes).toHaveLength(0);
+        expect(withoutBagSlots(front.holes)).toHaveLength(0);
         expect(sc.planks.filter((p) => /^Lambris avant/.test(p.name) && p.holes.some((h) => h.shape === 'square' && Math.abs(h.size - 24) < 0.1 && Math.abs((h.sh ?? 0) - 12) < 0.1))).toEqual([]);
         const nA = obb(A, t), c = new Vector3(...cam.pos).sub(nA.c), camX = c.dot(nA.ax[0]), camY = c.dot(nA.ax[1]), [x0, y0, x1, y1] = rect(chan[0]);
         expect(camX).toBeGreaterThan(x0); expect(camX).toBeLessThan(x1); expect(camY).toBeGreaterThan(y0 - 12); // la carte est inclinée : son centre est un peu en avant du connecteur, sous lequel le canal commence

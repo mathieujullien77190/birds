@@ -71,6 +71,18 @@
    "col": null
   }
  },
+ "guard": {
+  "geo": {
+   "n": 11088,
+   "pos": "d72bbf1122348953",
+   "col": "322a69331629e053"
+  },
+  "edges": {
+   "n": 3720,
+   "pos": "bef2c1785ef29346",
+   "col": null
+  }
+ },
  "sensor": {
   "geo": {
    "n": 252,

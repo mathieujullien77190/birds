@@ -17,7 +17,7 @@ export interface Plank {
   /** Élément spécial (pas du bois) : dessiné par son propre modèle 3D, exclu de la découpe laser. « camera » (carte caméra) ou « ir » (carte de LED infrarouges). */
   /** Contour libre (repère de la plaque, sens trigonométrique) : remplace le rectangle (crans et trous restent possibles). */
   poly?: [number, number][];
-  special?: 'camera' | 'ir' | 'bar' | 'pi' | 'cable' | 'wire' | 'case' | 'block' | 'sensor' | 'fan' | 'driver' | 'solar' | 'doc' | 'conduit';
+  special?: 'camera' | 'ir' | 'bar' | 'pi' | 'cable' | 'wire' | 'case' | 'block' | 'sensor' | 'fan' | 'driver' | 'solar' | 'doc' | 'conduit' | 'guard';
   /** « block » (pavé) ou plaque d'un autre matériau (`material`) : épaisseur réelle selon z, au lieu de l'épaisseur du bois. */
   depth?: number;
   /** Caméra, LED infrarouges, capteur : épaisseur de bois que traverse leur corps (lentille, LED, puce). La carte s'appuie sur une face du bois, le bout du corps affleure l'autre face. */
@@ -42,6 +42,8 @@ export interface Plank {
   group?: string;
   /** Lien vers la fiche du composant (site de référence ou revendeur) : affiché dans « Pièces ». */
   url?: string;
+  /** Pièce fine de rechange : identifiant de la plaque dont elle est un exemplaire identique ; elle porte le même code de numérotation que son original. */
+  spareOf?: string;
 }
 
 export interface PlankScene { t: number; fit: number; planks: Plank[]; /** Nom des groupes (boîtes…) par identifiant. */ groupNames?: Record<string, string>; /** 'z2' : scène en Z = hauteur. (Vide : ancienne scène Y = hauteur ; 'z' / 'z1' : converties par des versions intermédiaires fautives ; toutes réparées au chargement.) */ up?: 'z' | 'z1' | 'z2' }

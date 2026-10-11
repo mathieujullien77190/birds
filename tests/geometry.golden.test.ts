@@ -1,7 +1,7 @@
 import { describe, it } from 'vitest';
 import type { BufferGeometry } from 'three';
 import { plankGeometry } from '@/birdhouse/three/factories/plank';
-import { VARIANTS, buildNest, expectGolden, hashNumbers } from './helpers';
+import { VARIANTS, buildNestFull, expectGolden, hashNumbers } from './helpers';
 
 /** Empreinte d'une géométrie : nombre de sommets, hash des positions et des couleurs (arrondies à 1e-4). */
 function fingerprint(g: BufferGeometry) {
@@ -13,7 +13,7 @@ function fingerprint(g: BufferGeometry) {
 describe('géométrie 3D de chaque plaque (golden)', () => {
   for (const [name, over] of Object.entries(VARIANTS)) {
     it(name, () => {
-      const sc = buildNest(over);
+      const sc = buildNestFull(over);
       const out: Record<string, unknown> = {};
       sc.planks.forEach((p, i) => {
         if (p.special === 'doc') return;

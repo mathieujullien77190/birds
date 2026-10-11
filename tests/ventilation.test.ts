@@ -43,7 +43,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     one(sc0, /^Module interrupteur 12 V ventilateur \(côté \+, commande 3,3 V\)/);
     expect(by(sc0, /^Cale /)).toEqual([]); // plus de cales de bois : des baguettes de contreplaqué à couper au montage (tests/wedge-strips.test.ts)
     const guard = one(sc0, /^Grille de protection ventilateur 60 mm \(fil d'acier\)/);
-    expect(guard.special).toBe('block'); expect(guard.holes).toEqual([]); // composant acheté, pas une plaque de contreplaqué percée
+    expect(guard.special).toBe('guard'); expect(guard.holes).toEqual([]); // composant acheté, pas une plaque de contreplaqué percée
     expect(by(sc0, /^Grille ventilateur$/)).toEqual([]);
     const cass = union(by(sc0, /^Cassette ventilateur [1-4]$|^Cassette ventilateur cadre/), t), gb = aabb(guard, t); // la grille fait partie de la cassette
     expect(gb.min.x).toBeGreaterThanOrEqual(cass.min.x); expect(gb.max.x).toBeLessThanOrEqual(cass.max.x); expect(gb.min.y).toBeGreaterThanOrEqual(cass.min.y); expect(gb.max.y).toBeLessThanOrEqual(cass.max.y);
@@ -372,7 +372,7 @@ describe("prise d'air basse", () => {
     const floor = one(sc0, /^Dessous toit/), open = floor.holes.find((h) => h.size === 56)!;
     expect(Math.hypot(sx - (floor.pos[0] + open.x), sy - (floor.pos[1] + open.y))).toBeGreaterThan(l / 2);
     expect(inner.pos[2] + slot.y).toBeGreaterThan(one(sc0, /^Plancher int/).pos[2]); // au-dessus du fond du nid
-    expect(one(sc0, /^Clapet prise d'air/)); expect(by(sc0, /^Grille d'aération du corps/)).toEqual([]); expect(by(sc0, /^Grillage inox maille 5 mm — prise/)).toEqual([]); expect(by(sc0, /^Auvent|^Cale auvent/)).toEqual([]);
+    expect(by(sc0, /^Clapet prise d'air/)).toEqual([]); // clapet supprimé : la prise d'air reste ouverte (la sous-boîte isolante la bouche en hiver) expect(by(sc0, /^Grille d'aération du corps/)).toEqual([]); expect(by(sc0, /^Grillage inox maille 5 mm — prise/)).toEqual([]); expect(by(sc0, /^Auvent|^Cale auvent/)).toEqual([]);
   });
   it("l'ouverture est dans « Dessous ext » (le fond intérieur n'a que le passage du conduit) et rien ne la bouche dessous", () => {
     const bottom = one(sc0, /^Dessous ext/), opening = bottom.holes.find((h) => h.shape === 'square' && Math.abs(h.x - one(sc0, /^Conduit d'air 5/).pos[0]) < 0.1)!;
@@ -432,7 +432,7 @@ describe("conduit de la prise d'air : boîte crénelée", () => {
   const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
   const solid = (p: Plank, pt: Vector3, m = 0): boolean => { const b = obb(p, t), d = pt.clone().sub(b.c), lx = d.dot(b.ax[0]), ly = d.dot(b.ax[1]), lz = d.dot(b.ax[2]); return Math.abs(lz) <= t / 2 - m && inPoly([lx, ly], outline(p)) && !p.holes.some((h) => Math.abs(lx - h.x) <= h.size / 2 && Math.abs(ly - h.y) <= (h.sh ?? h.size) / 2); };
   it('quatre parois à dents verticales et un couvercle : chaque arête réunit un bord de phase 0 et un bord de phase 1', () => {
-    for (const p of w) { expect(p.cast?.left?.n, p.name).toBeGreaterThan(1); expect(p.cast?.right?.n).toBe(p.cast?.left?.n); expect(p.cast?.top?.phase).toBe(0); expect(p.cast?.bottom?.phase).toBe(0); expect(p.notches.length, p.name).toBeGreaterThan(3); } // ouvert en dessous, dents du bas dans le fond
+    for (const p of w) { expect(p.cast?.left?.n, p.name).toBeGreaterThan(1); expect(p.cast?.right?.n).toBe(p.cast?.left?.n); expect(p.cast?.top?.phase).toBe(0); expect(p.cast?.bottom, p.name + ' : bas droit, sans dents').toBeUndefined(); expect(p.notches.some((x) => x.edge === 'bottom'), p.name).toBe(false); expect(p.notches.length, p.name).toBeGreaterThan(3); } // ouvert en dessous, bas droit posé sur le fond (aucune dent dans le fond)
     expect(w[0].cast!.left!.phase).toBe(1); expect(w[1].cast!.left!.phase).toBe(1); expect(w[2].cast!.left!.phase).toBe(0); expect(w[3].cast!.left!.phase).toBe(0); // côtés (1, 2) contre faces (3, 4)
     expect(w[0].cast!.left!.n).toBe(w[2].cast!.left!.n);
     for (const e of ['top', 'bottom', 'left', 'right'] as const) expect(cover.cast![e]!.phase).toBe(1); // le couvercle s'emboîte dans le haut des parois
@@ -457,27 +457,18 @@ describe("conduit de la prise d'air : boîte crénelée", () => {
 });
 
 describe("prise d'air basse : incrustée dans le fond, ligaments de bois", () => {
-  const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
-  it('les dents du bas des parois traversent des fentes du fond (même position, affleurent z = 0)', () => {
-    const bottom = one(sc0, /^Dessous ext/), comb = bottom.holes.find((h) => h.poly)!, walls = [1, 2, 3, 4].map((i) => one(sc0, new RegExp(`^Conduit d'air ${i}$`)));
-    expect(comb).toBeTruthy(); expect(comb.poly!.length).toBeGreaterThan(12); // un trou en peigne : ouverture + fentes
-    for (const w of walls) {
-      const b = obb(w, t), down = b.ax[1].z < 0 ? -1 : 1; // sens « bas » du repère de la paroi
-      expect(Math.abs(Math.abs(w.pos[2] - w.h / 2) - 0)).toBeLessThan(0.01); // le bas des dents est à z = 0
-      let n = 0;
-      for (let x = -w.w / 2 + t + 0.5; x < w.w / 2 - t; x += 0.7) { // hors des bouts (les coins appartiennent aux parois voisines)
-        const local: [number, number] = [x, -w.h / 2 * Math.abs(down) + 0.5], matter = inPoly(local, outline(w));
-        const world = b.c.clone().addScaledVector(b.ax[0], x).addScaledVector(b.ax[1], local[1]);
-        const inHole = inPoly([world.x - bottom.pos[0], world.y - bottom.pos[1]], comb.poly!);
-        expect(inHole, `${w.name} x=${x.toFixed(1)}`).toBe(matter); n += matter ? 1 : 0; // dent ⇒ fente, cran ⇒ bois du fond
-      }
-      expect(n).toBeGreaterThan(5);
-    }
+  it('le bas des parois est droit, posé sur le dessus du fond ; le fond a une seule ouverture rectangulaire (son intérieur), plus de fentes', () => {
+    const bottom = one(sc0, /^Dessous ext/), walls = [1, 2, 3, 4].map((i) => one(sc0, new RegExp(`^Conduit d'air ${i}$`)));
+    const lid = one(sc0, /^Conduit d'air 5/), outerX = Math.max(...walls.map((w) => aabb(w, t).max.x)) - Math.min(...walls.map((w) => aabb(w, t).min.x));
+    const opening = bottom.holes.find((h) => h.shape === 'square' && Math.abs(h.x - lid.pos[0]) < 0.1 && Math.abs(h.size - (outerX - 2 * t)) < 0.1)!;
+    expect(opening).toBeTruthy(); expect(opening.poly).toBeUndefined(); // un rectangle simple : l'intérieur du conduit
+    expect(bottom.holes.some((h) => Math.abs(h.x - lid.pos[0]) < 20 && Math.abs(h.y - lid.pos[1]) < 40 && h !== opening && h.size <= 8)).toBe(false); // plus de fentes de dents autour
+    for (const w of walls) expect(Math.abs(w.pos[2] - w.h / 2 - t), w.name).toBeLessThan(0.01); // le bas des parois est à z = t : sur le fond (dessus de « Dessous ext »), sans dent en dessous
   });
   it('ligaments de bois ≥ 4,5 mm autour du conduit, de la fente et du passage dans le fond intérieur', () => {
     const mins: Record<string, number> = {};
     const check = (nom: string, p: Plank, pick: (h: Plank['holes'][number]) => boolean) => { const h = p.holes.find(pick)!; expect(h, nom).toBeTruthy(); mins[nom] = ligament(p, h).min; expect(mins[nom], nom).toBeGreaterThanOrEqual(4.5 - 1e-6); };
-    check('Dessous ext (ouverture + fentes)', one(sc0, /^Dessous ext/), (h) => !!h.poly);
+    const lidX = one(sc0, /^Conduit d'air 5/).pos[0]; check('Dessous ext (ouverture)', one(sc0, /^Dessous ext/), (h) => h.shape === 'square' && !h.poly && Math.abs(h.x - lidX) < 0.1 && (h.sh ?? 0) > 40);
     check('Plancher int (passage + fentes des dents)', one(sc0, /^Plancher int/), (h) => !!h.poly && h.size > 29 && h.sh! > 46);
     const inner = one(sc0, /^Côté gauche int/), env = airSlot(inner)!; // la grille (6 fentes de 4 mm, barreaux de 2 mm) : on mesure le ligament autour de son enveloppe 34 × 30
     check('Côté gauche int (grille)', { ...inner, holes: [...inner.holes.filter((q) => !(q.size === 4 && q.sh === 30)), env] }, (h) => h === env);
@@ -572,29 +563,29 @@ describe('grilles percées dans les plaques', () => {
     expect(ligament({ ...back, holes: [...back.holes.filter((h) => !g.includes(h)), env] }, env).min).toBeGreaterThanOrEqual(4.5 - 1e-6); // bois autour de la grille
     expect(nestSheets(sc0, 410, 400).filter((s) => !s.material).flatMap((s) => s.items.map((i) => i.plank.name))).toContain(back.name);
   });
-  it('corps : la fente de la paroi intérieure est une grille de 6 fentes de 4 mm (barreaux de 2 mm) ; le clapet reste côté nid contre la paroi', () => {
+  it('corps : la fente de la paroi intérieure est une grille de 6 fentes de 4 mm (barreaux de 2 mm) ; plus de clapet', () => {
     const inner = one(sc0, /^Côté gauche int/), { g, x0, x1 } = grid(inner, 0.6, 'corps');
     expect(g).toHaveLength(6); expect(x1 - x0).toBeCloseTo(34, 1); expect(g[0].sh).toBe(30);
     expect(one(sc0, /^Conduit d'air 2$/).holes.some((h) => h.size === 34)).toBe(true); // « Conduit d'air 2 » garde sa grande ouverture
-    const clapet = one(sc0, /^Clapet prise d'air/), face = inner.pos[0] + t / 2; // face côté nid de la paroi
-    expect(clapet.pos[0] - clapet.w / 2).toBeGreaterThan(face - 1e-6); expect(clapet.pos[0] - clapet.w / 2 - face).toBeLessThan(0.5); // contre la paroi, sans la traverser
+    expect(by(sc0, /^Clapet prise d'air/)).toEqual([]);
     expect(by(sc0, /^Grille d'aération du corps/)).toEqual([]);
   });
-  it('le conduit de sortie fait corps avec la cassette : deux dents de sa plaque du bas dans les fentes de la paroi arrière, ≥ 4,5 mm de bois autour', () => {
-    const duct = one(sc0, /^Conduit de sortie 4$/), cassB = one(sc0, /^Cassette ventilateur 2$/), comb = cassB.holes.find((h) => !!h.poly)!;
-    expect(duct.group).toBe(cassB.group); // groupe de la cassette
-    expect(by(sc0, /^Conduit de sortie/).every((p) => p.group === cassB.group)).toBe(true);
+  it('le conduit de sortie fait corps avec la cassette : deux dents sur chacune de ses QUATRE plaques dans les fentes de la paroi arrière, ≥ 4,5 mm de bois autour', () => {
+    const cassB = one(sc0, /^Cassette ventilateur 2$/), comb = cassB.holes.find((h) => !!h.poly)!, ducts = by(sc0, /^Conduit de sortie/);
+    expect(ducts).toHaveLength(4);
+    expect(ducts.every((p) => p.group === cassB.group)).toBe(true); // groupe de la cassette
     const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
-    const ys = duct.poly!.map((q) => q[1]), minY = Math.min(...ys), body = Math.min(...ys.filter((y) => y > minY + 0.01));
-    expect(body - minY).toBeCloseTo(t, 2); // les dents dépassent de t côté cassette
-    const teeth = duct.poly!.filter((q) => Math.abs(q[1] - minY) < 1e-6).map((q) => q[0]).sort((a, b) => a - b); expect(teeth).toHaveLength(4); // deux dents
-    for (const [a, b] of [[teeth[0], teeth[1]], [teeth[2], teeth[3]]]) {
-      const px = duct.pos[0] + (a + b) / 2, pz = duct.pos[2]; // le milieu de la dent, dans le plan de la paroi
-      expect(inPoly([px - cassB.pos[0], pz - cassB.pos[2]], comb.poly!), 'dent dans sa fente').toBe(true);
+    for (const duct of ducts) {
+      const side = /sortie [12]$/.test(duct.name), ax = side ? 0 : 1, c = 1 - ax, pts = duct.poly!;
+      const edge = Math.min(...pts.map((q) => q[ax])), body = Math.min(...pts.map((q) => q[ax]).filter((v) => v > edge + 0.01));
+      expect(body - edge, duct.name).toBeCloseTo(t, 2); // les dents dépassent de t côté cassette
+      const tips = pts.filter((q) => Math.abs(q[ax] - edge) < 1e-6).map((q) => q[c]).sort((p, q) => p - q); expect(tips, duct.name).toHaveLength(4); // deux dents
+      for (const [lo, hi] of [[tips[0], tips[1]], [tips[2], tips[3]]]) {
+        const m = (lo + hi) / 2, wx = side ? duct.pos[0] : duct.pos[0] + m, wz = side ? duct.pos[2] + m : duct.pos[2]; // milieu de la dent, dans le plan de la paroi
+        expect(inPoly([wx - cassB.pos[0], wz - cassB.pos[2]], comb.poly!), duct.name + ' : dent dans sa fente').toBe(true);
+      }
     }
-    expect(inPoly([duct.pos[0] - cassB.pos[0], duct.pos[2] - cassB.pos[2]], comb.poly!), 'entre les dents : bois de la paroi').toBe(false);
     expect(ligament(cassB, comb).min).toBeGreaterThanOrEqual(4.5 - 1e-6);
-    expect(Math.abs(duct.pos[1] - t / 2 + 0.01) > 0).toBe(true);
     // le conduit ne touche pas le siège et se retire par le haut avec la cassette
     for (const d of by(sc0, /^Conduit de sortie/)) for (const q of by(sc0, /^Goulotte ventilateur (gauche|droite)/)) expect(gap(aabb(d, t), aabb(q, t)), d.name + ' / ' + q.name).toBeGreaterThan(0.5);
   });
@@ -605,5 +596,40 @@ describe('grilles percées dans les plaques', () => {
     expect(Math.abs(w2.pos[1] + slot.x - (inner.pos[1] + env.x))).toBeLessThan(0.01); expect(Math.abs(w2.pos[2] + slot.y - (inner.pos[2] + env.y))).toBeLessThan(0.01); // fentes face à face
     expect(env.size).toBeCloseTo(slot.size, 1); expect(slot.sh).toBe(env.sh);
     expect(ligament(w2, slot).min).toBeGreaterThanOrEqual(4.5 - 1e-6);
+  });
+});
+
+describe("évacuation de l'eau : ouverture rectangulaire au ras du plancher, en face du conduit d'air", () => {
+  const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
+  const inner = one(sc0, /^Côté gauche int/), duct = one(sc0, /^Conduit d'air 2$/), floor = one(sc0, /^Plancher int/), floorTop = floor.pos[2] + t / 2;
+  const hole = duct.holes.find((h) => h.size === 34 && h.sh === 6)!;
+  it('« Conduit d\'air 2 » : trou de 34 × 6 dont le bas est le dessus de « Plancher int », ligaments ≥ 4,5 mm, à l\'écart de la fente d\'aération', () => {
+    expect(hole).toBeTruthy(); expect(hole.poly).toBeUndefined();
+    expect(duct.pos[2] + hole.y - 3).toBeCloseTo(floorTop, 5); expect(duct.pos[2] + hole.y + 3).toBeCloseTo(floorTop + 6, 5);
+    expect(ligament(duct, hole).min).toBeGreaterThanOrEqual(4.5 - 1e-6);
+    const slot = duct.holes.find((h) => h.size === 34 && h.sh === 30)!; expect(duct.pos[2] + slot.y - 15).toBeGreaterThan(floorTop + 6 + 4.5); // deux trous distincts, jamais en recoupement
+    expect(duct.holes.filter((h) => h.poly)).toEqual([]);
+  });
+  it('« Côté gauche int » : cran du bord bas de 6 mm de haut au-dessus du plancher, qui couvre la largeur du trou du conduit (aligné), sans seuil', () => {
+    const o = outline(inner), b = obb(inner, t); // x local = y du monde, y local = z du monde
+    const wy0 = duct.pos[1] + hole.x - hole.size / 2, wy1 = duct.pos[1] + hole.x + hole.size / 2;
+    for (const y of [wy0 + 0.5, duct.pos[1], wy1 - 0.5]) {
+      const lx = y - b.c.y;
+      expect(inPoly([lx, floorTop + 0.3 - b.c.z], o), `bas du cran à y = ${y.toFixed(1)}`).toBe(false); // vide dès le dessus du plancher
+      expect(inPoly([lx, floorTop + 5.7 - b.c.z], o), 'haut du cran').toBe(false);
+      expect(inPoly([lx, floorTop + 6.3 - b.c.z], o), 'au-dessus du cran : la paroi').toBe(true);
+    }
+    expect(inner.holes.filter((h) => h.size === 4 && h.sh === 30)).toHaveLength(6);
+  });
+  it("l'eau tombe dans le conduit : le plancher intérieur est ouvert sous le trou, le fond extérieur aussi, et rien n'est posé dans le trou", () => {
+    const comb = floor.holes.find((h) => h.poly && h.size > 29 && h.sh! > 46)!, bottom = one(sc0, /^Dessous ext/);
+    const y = duct.pos[1], x = duct.pos[0] - 6; // à l'intérieur du conduit, sous le trou
+    expect(inPoly([x - floor.pos[0], y - floor.pos[1]], comb.poly!)).toBe(true);
+    expect(bottom.holes.some((h) => !h.poly && Math.abs(h.x - (x - bottom.pos[0])) < 12 && Math.abs(h.y - (y - bottom.pos[1])) < 24 && h.size > 20 && (h.sh ?? 0) > 40)).toBe(true);
+    const x0 = duct.pos[0] - t / 2, x1 = inner.pos[0] + t / 2, z0 = floorTop + 0.1, z1 = floorTop + 5.9;
+    for (const p of sc0.planks) {
+      if (p.path || p.special === 'doc' || p === inner || p === duct || p === floor || /^Isolant/.test(p.name)) continue;
+      const a = aabb(p, t); expect(a.max.x <= x0 || a.min.x >= x1 || a.max.y <= y - 17 || a.min.y >= y + 17 || a.max.z <= z0 || a.min.z >= z1, `${p.name} dans le trou d'évacuation`).toBe(true);
+    }
   });
 });

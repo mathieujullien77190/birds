@@ -37,10 +37,20 @@ export function normalizeIds(value: unknown): unknown {
   return JSON.parse(json);
 }
 
+/** Nichoir SANS les pièces fines de rechange (les tests de pièces cherchent par nom : une rechange « X (rechange 1) » ne doit pas les perturber). */
 export function buildNest(over: Partial<NestParams>): PlankScene {
+  const full = buildNestFull(over);
+  return { ...full, planks: full.planks.filter((p) => !p.spareOf) };
+}
+
+/** Nichoir complet, avec les pièces fines de rechange (goldens, tests des rechanges). */
+export function buildNestFull(over: Partial<NestParams>): PlankScene {
   const b = makeNest({ ...NEST_DEFAULT, ...over }, 3, 0, 1);
   return { t: 3, fit: 0, planks: b.planks, groupNames: b.groupNames, up: 'z2' };
 }
+
+/** Trous d'une plaque sans les fentes de 3 mm des dents des baguettes (baguettes du dessus du toit). */
+export const withoutBagSlots = <H extends { size: number; sh?: number }>(holes: H[]): H[] => holes.filter((h) => Math.min(h.size, h.sh ?? h.size) > 3.01);
 
 /** Compare à tests/golden/<name>.json (le crée si UPDATE_GOLDEN=1). */
 export function expectGolden(name: string, value: unknown): void {

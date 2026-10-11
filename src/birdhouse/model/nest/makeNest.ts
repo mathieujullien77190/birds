@@ -9,6 +9,7 @@ import { slotsForTeeth } from '../geometry/face';
 import { makeBox } from './box';
 import { CAMERA_NAMES } from './cameras';
 import { summerLayout, PLUG_HANDLE, SPARE_GAP } from './winter';
+import { thinSpares } from './spares';
 import { fromAxisAngle, multiply, invert, rotate } from '../math/rotation';
 
 /**
@@ -35,7 +36,10 @@ export function carveRects(r: [number, number, number, number], holes: [number, 
 }
 
 /** Pièces de la ventilation (noms avant `unnumber`) : regroupées dans le groupe « Ventilation ». */
-const VENT_PIECES = /^(Goulotte ventilateur|Conduit de sortie|Cassette ventilateur|Poignée cassette|Plot caoutchouc ventilateur|Ventilateur Noctua|Grille de protection ventilateur|Prise 4 broches du ventilateur|Rallonge ventilateur 4 broches|Module interrupteur 12 V ventilateur|Fil (PWM|tachymètre|commande interrupteur|masse commune|interrupteur →|Wago \+ → interrupteur|masse interrupteur|ventilateur)|Conduit d'air|Clapet prise d'air)/;
+/** Baguettes qui portent le dessus du toit : largeur du corps (appui) en mm ; la plaque a en plus les dents de t. */
+const BAG_BODY = 5;
+
+const VENT_PIECES = /^(Goulotte ventilateur|Conduit de sortie|Cassette ventilateur|Poignée cassette|Plot caoutchouc ventilateur|Ventilateur Noctua|Grille de protection ventilateur|Prise 4 broches du ventilateur|Rallonge ventilateur 4 broches|Module interrupteur 12 V ventilateur|Fil (PWM|tachymètre|commande interrupteur|masse commune|interrupteur →|Wago \+ → interrupteur|masse interrupteur|ventilateur)|Conduit d'air)/;
 
 export function makeNest(n0: NestParams, t: number, fit: number, start: number): { planks: Plank[]; group: string; name: string; groupNames: Record<string, string> } {
   const n: NestParams = { ...n0, l: Math.max(120, n0.l), L: Math.max(120, n0.l), hole: Math.min(n0.hole, Math.max(120, n0.l) - 26), cam: 38, ins: 39, pente: true, lambris: true, solar: true }; // toit TOUJOURS en pente, habillage TOUJOURS présent, système solaire TOUJOURS présent (puce retirée : réglage ancien ignoré en silence) (puces retirées : le régulateur sous le nichoir est protégé par l'habillage) ; // intérieur TOUJOURS CARRÉ (un seul curseur), 120 mm au minimum (le fond) ; trou plafonné pour que le bloc d'entrée (trou + 16) tienne dans la paroi intérieure ; compartiment caméra fixe à 38 (curseur retiré) ; // isolant TOUJOURS 39 (le curseur a été retiré à la demande de l'utilisateur) ; compartiment caméra plafonné à 38 // le compartiment caméra est limité à 38 : la batterie (et sa cale) est posée juste à côté, sur le dessus du toit
@@ -75,7 +79,16 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // bras de 8 dont les 3 mm du haut (= t) sont des tenons qui traversent le fond par des fentes 8 × 3 et AFFLEURENT son dessus : rien ne dépasse dans l'isolant
   const U_W = 78, U_ARM = 8, U_H = 46, U_TEN = t, U_YS = [-55, -22, 15, 52].map((d) => RGY + d); // gaine dans le coin arrière droit : à 1 cm du mur arrière, PILE sur le joint entre l'isolant du mur droit et celui du mur arrière (x = l/2 + t), à gauche de la barre du toit (x = 77,5…87,5) // régulateur de charge SOUS le nichoir (à plat, protégé par le lambris qui descend) ; les fils montent dans l'isolant du côté droit, dans une gaine (tuyau multicouche ou gaine électrique ICTA de diamètre minimal, 16)
   const outerParts = outerBox.planks.filter((p) => !/^Dessus/.test(p.name)).map((p) => { let q = isWall(p) ? noTop(p) : p; if (n.solar && /^Dessous/.test(p.name)) q = { ...q, holes: [...q.holes, ...U_YS.flatMap((y) => [RGX - U_W / 2 + U_ARM / 2, RGX + U_W / 2 - U_ARM / 2].map((x) => fitHole(q, { id: uid(), shape: 'square' as const, x: r2(x), y: r2(y), size: U_ARM, sh: t })))] };/* fentes des tenons des étriers du régulateur */ if (/^Face arrière/.test(p.name)) q = { ...q, holes: [...q.holes, ...RIB_XS.flatMap((x) => RIB_TEETH_Z.slice(0, 2).map(([za, zb]) => fitHole(q, { id: uid(), shape: 'square' as const, x, y: r2((za + zb) / 2 - q.pos[2]), size: RIB_T + 0.5, sh: zb - za })))] }; /* fentes 9,5 × 32 des deux dents basses des nervures de fixation */ return /^Face avant/.test(p.name) ? hole(q) : q; });
-  const innerParts = innerBox.planks.filter(isWall).map((p) => { let q = noTop({ ...p, pos: [p.pos[0], p.pos[1], p.pos[2] + e] as Vec3, group }); return /^Face avant/.test(p.name) ? hole(q) : q; });
+  const AIR_CY = r2(-n.L / 2 + 25), AIR_ZS = Math.round((e + t + bodyH) / 2), AIR_SH = 30, AIR_SW = 34; // centre en y, hauteur de la fente (mi-hauteur du nid), taille de la fente
+  const DRAIN_Z = e + t, DRAIN_H = 6; // évacuation de l'eau : ouverture rectangulaire (AIR_SW de large, DRAIN_H de haut), dont le bas est au dessus du plancher intérieur, dans « Côté gauche int » et « Conduit d'air 2 » : l'eau coule du plancher dans le conduit, ouvert en bas
+  // évacuation de l'eau dans le mur intérieur gauche : un cran dans son bord bas, AIR_SW de large, centré sur le conduit d'air, jusqu'à DRAIN_H au-dessus du plancher (bas à fleur du plancher : pas de seuil) ;
+  // il absorbe les dents (et crans) du bord bas qu'il touche, en un seul cran : les fentes de ces dents ne sont plus percées dans le plancher
+  const drain = (q: Plank): Plank => {
+    const c = r2(AIR_CY - q.pos[1] + q.w / 2); let s0 = c - AIR_SW / 2, s1 = c + AIR_SW / 2, rest = q.notches.filter((x) => x.edge === 'bottom');
+    for (let again = true; again;) { again = false; for (const x of rest) if (x.pos - x.width / 2 <= s1 + 0.01 && x.pos + x.width / 2 >= s0 - 0.01) { s0 = Math.min(s0, x.pos - x.width / 2); s1 = Math.max(s1, x.pos + x.width / 2); rest = rest.filter((y) => y !== x); again = true; break; } }
+    return { ...q, notches: [...q.notches.filter((x) => x.edge !== 'bottom'), ...rest, { id: uid(), edge: 'bottom' as const, pos: r2((s0 + s1) / 2), width: r2(s1 - s0), depth: r2(t + DRAIN_H) }] };
+  };
+  const innerParts = innerBox.planks.filter(isWall).map((p) => { let q = noTop({ ...p, pos: [p.pos[0], p.pos[1], p.pos[2] + e] as Vec3, group }); return /^Face avant/.test(p.name) ? hole(q) : /^Côté gauche/.test(p.name) ? drain(q) : q; });
   // fentes (le temps du calcul, tout est « hors groupe ») : dents du plancher dans les murs extérieurs, dents du bas des murs intérieurs dans le plancher
   const free = (p: Plank): Plank => ({ ...p, group: undefined });
   const slotted = outerParts.map((p) => (isWall(p) ? slotsForTeeth({ t, fit, planks: [free(p), free(floor)] }, p.id).scene.planks[0] : p));
@@ -129,7 +142,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // renfoncement des prises du Pi : les ports (USB, Ethernet, HDMI) regardent la plaque arrière, qui est percée en face d'eux ; un petit tunnel de contreplaqué (haut + deux côtés, le dessus du toit fait le fond)
   // relie les ports à cette fenêtre, pour brancher sans ouvrir le nichoir et sans ouvrir le grenier ; l'aération démarre juste à sa droite
   const PORT_X0 = piX - 30, PORT_X1 = piX + 30, PORT_Z0 = roofH + 3, PORT_Z1 = roofH + 27, VENT_L = r2(CND_X - CND_D / 2 - 4), VENT_R = W / 2 - 20; // l'aération démarre 26 mm à droite de la fenêtre des prises du Pi (20 de bois entre les deux : la lame d'habillage y est plus large)
-  const VENT_GAP = 4.5;
+  const VENT_GAP = t + 4.5; // 7,5 : entre le haut de la fenêtre et le haut de la paroi de la cassette (le conduit a des dents sur ses quatre plaques : fente de t au-dessus de la fenêtre + 4,5 mm de bois avant les crans du couvercle (t))
   const VENT_XS: number[] = [], VENT_W = VENT_R - VENT_L, VENT_Z0 = roofH + 4, VENT_H = Hb - 22 - VENT_Z0 - VENT_GAP, VENT_Z = VENT_Z0 + VENT_H / 2; // la fenêtre de sortie s'arrête VENT_GAP sous le haut de la cassette (les dents du couvercle ne doivent pas être coupées)
   const GL_Y = 84; // le câble du panneau entre dans le toit par le côté droit, à cette ordonnée, 14 mm au-dessus du dessus du toit
   const tallRoof = (p: Plank): Plank => {
@@ -153,7 +166,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // VENTILATEUR d'extraction (Noctua NF-A6x25 PWM, 60 × 60 × 25, 12 V) : une CASSETTE amovible à la main (le ventilateur dans un cadre de contreplaqué, sans outil ni vis) posée dans un SIÈGE fixe (la goulotte,
   // collée sur le plancher du toit) ; il aspire l'air chaud du nid par une ouverture du plafond (grille côté nid) et le pousse, par une fenêtre de la cassette, vers la fenêtre de la plaque arrière (grillage + clapet à gravité).
   // En hiver on remplace la cassette par un bloc isolant de même empreinte. Le siège est à l'ARRIÈRE du toit, contre la gaine, derrière la nappe de la caméra.
-  const FI = FAN + 0.4, CO = FI + 2 * t, SI = CO, FO = SI + 2 * t; const EXW = r2(CO - 2 * t - 9); // fenêtre de sortie : la largeur de la cassette moins 4,5 mm de bois de chaque côté des crans // cassette : intérieur (0,2 mm de jeu autour du ventilateur), extérieur ; siège : intérieur = extérieur de la cassette (ajustée pile, jeu 0), extérieur
+  const FI = FAN + 0.4, CO = FI + 2 * t, SI = CO, FO = SI + 2 * t; const EXW = r2(CO - 4 * t - 9); // fenêtre de sortie : la largeur de la cassette moins, de chaque côté, les crans verticaux (t), la fente des dents du conduit (t) et 4,5 mm de bois // cassette : intérieur (0,2 mm de jeu autour du ventilateur), extérieur ; siège : intérieur = extérieur de la cassette (ajustée pile, jeu 0), extérieur
   const GR_SLOT = 4, GR_BAR = 2, GR_N = Math.floor((EXW + GR_BAR) / (GR_SLOT + GR_BAR)), GR_SPAN = GR_N * GR_SLOT + (GR_N - 1) * GR_BAR; // grilles percées dans la plaque (sortie du ventilateur, paroi intérieure du corps) : fentes de 4 mm (aucune > 5 mm), barreaux de 2 mm
   const YREAR = D / 2 - t; // face intérieure de la plaque arrière du toit
   const FANX = r2(CND_X - CND_D / 2 - 8 - FO / 2); // contre la gaine (8 mm) ; les cales du Pi restent à ≈ 5 mm à gauche
@@ -169,7 +182,6 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const CONX = r2(FANX + FO / 2 + 4), SWX = r2(W / 2 - t - 13.5), SWY = r2(D / 2 - t - 18); // connecteur de la cassette, module interrupteur
   // PRISE D'AIR BASSE : un conduit de contreplaqué (4 parois + couvercle) dans l'isolant du mur GAUCHE, à l'AVANT, du dessous de la boîte à mi-hauteur du nid, puis une fente dans la paroi intérieure
   const AIR_X0 = r2(-(W / 2 - t) + 4.7), AIR_X1 = r2(-(n.l / 2 + t)), AIR_CX = r2((AIR_X0 + AIR_X1) / 2), AIR_LX = r2(AIR_X1 - AIR_X0), AIR_LY = 52; // ≥ 4,5 mm de bois entre le conduit et les fentes de dents voisines (mur extérieur à l'ouest, mur intérieur à l'est) ; plus long vers l'AVANT // empreinte extérieure du conduit
-  const AIR_CY = r2(-n.L / 2 + 25), AIR_ZS = Math.round((e + t + bodyH) / 2), AIR_SH = 30, AIR_SW = 34; // centre en y, hauteur de la fente (mi-hauteur du nid), taille de la fente
   const AIR_ZT = AIR_ZS + AIR_SH / 2, AIR_ZTOP = AIR_ZT + 8; // haut de la fente ; haut du conduit (≥ 4,5 mm de bois entre la fente et les crans du haut)
   // compartiment de la caméra (intérieur) : agrandi vers l'est pour contenir le capteur BME280 (logement 19,5 × 19,5), avec 4,5 mm de bois autour de son logement
   const CAMX0 = -n.cam / 2, CAMX1 = r2(SENSOR_X + 19.5 / 2 + 4.5), CAMW = r2(CAMX1 - CAMX0), CAMCX = r2((CAMX0 + CAMX1) / 2);
@@ -185,21 +197,32 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const roofParts = (() => {
     if (!n.pente) return roofParts0;
     // les plaques du toit montent (avant, arrière, côtés en trapèze) ; le DESSUS du toit, celui qui porte les composants, n'est plus crénelé : c'est une plaque simple posée sur
-    // des TASSEAUX (3 mm de large × 5 de haut) collés sur la face intérieure des quatre côtés, juste sous elle
+    // des BAGUETTES de contreplaqué (3 mm, découpées au laser, à plat sous lui) : chacune s'insère par des dents de t dans des fentes de la plaque du toit qui la porte
     const top = roofParts0.find((p) => /^Dessus/.test(p.name));
     const walls = roofParts0.filter((p) => !/^Dessus|^Dessous/.test(p.name)).map((p) => ({ ...tallRoof(p), group: roofGroup }));
     const xr = W / 2 - t, yr = D / 2 - t; // intérieur des plaques du toit
     const plain: Plank[] = top ? [{ ...top, w: r2(2 * xr - 0.5), h: r2(2 * yr - 0.5), notches: [{ id: uid(), edge: 'top' as const, pos: r2(FANX + (2 * xr - 0.5) / 2), width: r2(FO + 0.8), depth: r2((2 * yr - 0.5) / 2 - (FY0 - 0.4)) }], cast: undefined }] : []; // encoche à l'arrière : le siège du ventilateur traverse le dessus du toit
-    const zt = bodyH + roofH - t; // dessous de la plaque du dessus
-    const TAS_W = 3, TAS_H = 5;
-    const tas = (name: string, x0: number, x1: number, y0: number, y1: number): Plank[] => (x1 - x0 > 0.01 && y1 - y0 > 0.01
-      ? [{ id: uid(), name, w: r2(x1 - x0), h: r2(y1 - y0), depth: TAS_H, pos: [r2((x0 + x1) / 2), r2((y0 + y1) / 2), r2(zt - TAS_H / 2)] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: roofGroup, special: 'block' as const, color: '#a16207' }]
-      : []);
+    const zt = bodyH + roofH - t; // dessous de la plaque du dessus : le dessus des baguettes y affleure (z de repos inchangé)
+    // baguette = plaque plate de t d'épaisseur : corps de BAG_BODY de large (appui du dessus du toit) + dents de t qui traversent la plaque porteuse ; dents impaires (≈ 16 mm), bouts = corps (phase 0) : aucune fente près des coins
+    const bag = (name: string, side: 'left' | 'right' | 'front' | 'back', a0: number, a1: number): Plank[] => {
+      const len = r2(a1 - a0), mid = r2((a0 + a1) / 2), off = r2((BAG_BODY - t) / 2);
+      if (len < 2 * BAG_BODY) return [];
+      const spec = { left: { pos: [-xr + off, mid], rot: 90 }, right: { pos: [xr - off, mid], rot: -90 }, front: { pos: [mid, -yr + off], rot: 180 }, back: { pos: [mid, yr - off], rot: 0 } }[side]; // le bord « haut » de la plaque regarde la plaque du toit qui la porte
+      return [recastAll({ id: uid(), name, w: len, h: BAG_BODY + t, pos: [r2(spec.pos[0]), r2(spec.pos[1]), r2(zt - t / 2)] as Vec3, rot: [0, 0, spec.rot] as Vec3, notches: [], holes: [], group: roofGroup, cast: { top: { n: teethFor(len), phase: 0 } } }, t, fit)];
+    };
     const tasseaux: Plank[] = [
-      ...tas('Tasseau gauche', -xr, -xr + TAS_W, -yr, yr), ...tas('Tasseau droite', xr - TAS_W, xr, -yr, yr), // sur toute la profondeur
-      ...tas('Tasseau avant', -xr + TAS_W, xr - TAS_W, -yr, -yr + TAS_W), // entre les deux
-      ...carveRects([-xr + TAS_W, yr - TAS_W, xr - TAS_W, yr], [[FANX - FO / 2 - 0.5, 0, FANX + FO / 2 + 0.5, yr]]).flatMap(([x0, y0, x1, y1], k) => tas(`Tasseau arrière ${k + 1}`, x0, x1, y0, y1)), // l'arrière contourne le siège du ventilateur, dont les parois le remplacent
+      ...bag('Baguette dessus toit gauche', 'left', -yr, yr), ...bag('Baguette dessus toit droite', 'right', -yr, yr), // sur toute la profondeur
+      ...bag('Baguette dessus toit avant', 'front', -xr + BAG_BODY, xr - BAG_BODY), // entre les deux
+      ...carveRects([-xr + BAG_BODY, yr - BAG_BODY, xr - BAG_BODY, yr], [[FANX - FO / 2 - 0.5, 0, FANX + FO / 2 + 0.5, yr]]).flatMap(([x0, , x1], k) => bag(`Baguette dessus toit arrière ${k + 1}`, 'back', x0, x1)), // l'arrière contourne le siège du ventilateur, dont les parois le remplacent
     ];
+    const carriers: [RegExp, string][] = [[/^Côté gauche toit/, 'gauche'], [/^Côté droit toit/, 'droite'], [/^Face avant toit/, 'avant'], [/^Face arrière toit/, 'arrière']];
+    for (const [re, side] of carriers) { // fentes des dents dans la plaque du toit qui porte chaque baguette (scène réduite : seulement la plaque et ses baguettes)
+      const w = walls.find((p) => re.test(p.name)); if (!w) continue;
+      const mine = tasseaux.filter((q) => q.name.startsWith(`Baguette dessus toit ${side}`));
+      const tmp: PlankScene = { t, fit, planks: [{ ...w, group: undefined }, ...mine.map((q) => ({ ...q, group: '__baguettes' }))] };
+      const slotted = slotsForTeeth(tmp, w.id).scene.planks[0];
+      w.holes = [...w.holes, ...slotted.holes.filter((h) => !w.holes.some((o) => o.id === h.id))];
+    }
     const grilles: Plank[] = VENT_XS.map((x, k): Plank => ({ id: uid(), name: `Grille anti-insectes ${k + 1}`, w: VENT_W + 4, h: 0.8, depth: VENT_H + 4, pos: [x, D / 2 + 0.4, bodyH + VENT_Z] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: roofGroup, special: 'block' as const, color: '#475569', transparent: true })); // maille fine collée sur la face extérieure, un peu plus grande que l'ouverture
     return [...walls, ...plain, ...(roofParts0.filter((p) => /^Dessous/.test(p.name))), ...tasseaux, ...grilles];
   })();
@@ -420,16 +443,23 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const EXZ = bodyH + VENT_Z; // centre de la fenêtre de sortie
   const cbH = r2(DUCT_Z1 + t - ZB), CASS_OPEN = r2(CO - 2 * t - 9); // l'ouverture du cadre laisse 4,5 mm de bois au-delà des crans
   const cassKey: Record<string, string> = { 'Face avant': 'Cassette ventilateur 1', 'Face arrière': 'Cassette ventilateur 2', 'Côté gauche': 'Cassette ventilateur 3', 'Côté droit': 'Cassette ventilateur 4', Dessous: 'Cassette ventilateur cadre du bas', Dessus: 'Cassette ventilateur couvercle' };
-  // le CONDUIT DE SORTIE fait corps avec la cassette : sa plaque du bas porte des dents (deux, aux deux tiers extérieurs de la fenêtre) qui s'enfoncent dans des fentes de la paroi arrière, SOUS la fenêtre
-  // (là il reste ≥ 40 mm de bois ; des fentes sur les côtés ne laisseraient que 1,5 mm devant les crans verticaux de la paroi) : un seul trou « en peigne » (fenêtre + fentes, elles se touchent)
-  const DUCT_TEETH_W = r2(EXW / 3), WIN_BOT = r2(EXZ - VENT_H / 2 - (ZB + cbH / 2)); // largeur d'une dent ; bas de la fenêtre, dans le repère de la paroi
-  const DUCT_TEETH: [number, number][] = [[-EXW / 2, -EXW / 2 + DUCT_TEETH_W], [EXW / 2 - DUCT_TEETH_W, EXW / 2]].map(([a, b]) => [r2(a), r2(b)] as [number, number]);
-  const exitComb = (): Hole => ({ id: uid(), shape: 'square' as const, x: 0, y: 0, size: EXW, sh: VENT_H, poly: rectUnion([[-EXW / 2, WIN_BOT, EXW / 2, WIN_BOT + VENT_H], ...DUCT_TEETH.map(([a, b]): [number, number, number, number] => [a, WIN_BOT - t, b, WIN_BOT])]) });
+  // le CONDUIT DE SORTIE fait corps avec la cassette : ses QUATRE plaques (haut, bas, gauche, droite) portent chacune deux dents de t (aux deux tiers extérieurs de leur bord côté cassette) qui s'enfoncent dans des fentes
+  // de la paroi arrière, contre la fenêtre : un seul trou « en peigne » (fenêtre + les huit fentes, elles touchent la fenêtre) ; la fenêtre est assez étroite pour laisser ≥ 4,5 mm de bois entre toute fente et les crans de la paroi
+  const DUCT_TEETH_W = r2(EXW / 3), WIN_BOT = r2(EXZ - VENT_H / 2 - (ZB + cbH / 2)); // largeur d'une dent (haut, bas) ; bas de la fenêtre, dans le repère de la paroi
+  const DUCT_TEETH: [number, number][] = [[-EXW / 2, -EXW / 2 + DUCT_TEETH_W], [EXW / 2 - DUCT_TEETH_W, EXW / 2]].map(([a, b]) => [r2(a), r2(b)] as [number, number]); // haut et bas : abscisses depuis le centre de la fenêtre
+  const DUCT_SIDE_W = r2(VENT_H / 3), DUCT_SIDE_TEETH: [number, number][] = [[-VENT_H / 2, -VENT_H / 2 + DUCT_SIDE_W], [VENT_H / 2 - DUCT_SIDE_W, VENT_H / 2]].map(([a, b]) => [r2(a), r2(b)] as [number, number]); // gauche, droite : hauteurs depuis le centre de la fenêtre
+  const exitComb = (): Hole => {
+    const w: [number, number, number, number] = [-EXW / 2, WIN_BOT, EXW / 2, WIN_BOT + VENT_H], zc = WIN_BOT + VENT_H / 2;
+    return { id: uid(), shape: 'square' as const, x: 0, y: 0, size: EXW, sh: VENT_H, poly: rectUnion([w,
+      ...DUCT_TEETH.map(([a, b]): [number, number, number, number] => [a, WIN_BOT - t, b, WIN_BOT]), // plaque du bas
+      ...DUCT_TEETH.map(([a, b]): [number, number, number, number] => [a, WIN_BOT + VENT_H, b, WIN_BOT + VENT_H + t]), // plaque du haut
+      ...DUCT_SIDE_TEETH.flatMap(([a, b]): [number, number, number, number][] => [[-EXW / 2 - t, zc + a, -EXW / 2, zc + b], [EXW / 2, zc + a, EXW / 2 + t, zc + b]])]) }; // plaques gauche et droite
+  };
   const cassHoles = (key: string): Hole[] => key === 'Face arrière' ? [exitComb()] : key === 'Dessous' ? [{ id: uid(), shape: 'square' as const, x: 0, y: 0, size: CASS_OPEN, sh: CASS_OPEN }] : key === 'Dessus' ? [{ id: uid(), shape: 'square' as const, x: -20, y: 16, size: 6, sh: 12 }, ...uSlots()] : [];
   const cassette: Plank[] = [
     ...makeBox(CO, CO, cbH, t, fit, start).planks.map((p) => { const key = p.name.replace(/ \d+$/, ''); return { ...p, name: cassKey[key], pos: [r2(p.pos[0] + FANX), r2(p.pos[1] + FANY), r2(p.pos[2] + ZB)] as Vec3, group: elecGroup, holes: cassHoles(key) }; }),
     ...uHandle('Poignée cassette', elecGroup),
-    blk("Grille de protection ventilateur 60 mm (fil d'acier)", FAN, FAN, GUARD_T, [FANX, FANY, ZB + t + GUARD_T / 2], elecGroup, '#9ca3af', { transparent: true }), // grille à doigts, ≈ 90 % ouverte, sur la face d'aspiration (côté nid) : elle sort avec la cassette ; le plafond du nid reste une ouverture nue
+    blk("Grille de protection ventilateur 60 mm (fil d'acier)", FAN, FAN, GUARD_T, [FANX, FANY, ZB + t + GUARD_T / 2], elecGroup, '#9ca3af', { special: 'guard' as const }), // grille à doigts, ≈ 90 % ouverte, sur la face d'aspiration (côté nid) : elle sort avec la cassette ; le plafond du nid reste une ouverture nue
   ];
   const plotsAt: [number, number, number, number][] = [[FANX, FANY - FAN / 2 + 1, 12, 2], [FANX, FANY + FAN / 2 - 1, 12, 2], [FANX - FAN / 2 + 1, FANY, 2, 12], [FANX + FAN / 2 - 1, FANY, 2, 12]]; // sur le bord du cadre, hors de l'ouverture
   const plots: Plank[] = plotsAt.map(([x, y, w, h], k) => blk(`Plot caoutchouc ventilateur ${k + 1}`, w, h, FAN_PLOT, [x, y, ZB + t + GUARD_T + FAN_PLOT / 2], elecGroup, '#6b7280'));
@@ -487,12 +517,19 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     const cast = Object.fromEntries(Object.entries(p.cast ?? {}).filter(([e]) => (/^Côté/.test(p.name) ? e === 'top' || e === 'bottom' : e === 'left' || e === 'right'))); // les arêtes qui touchaient les faces retirées restent droites
     const key = /^Côté droit/.test(p.name) ? 'Conduit de sortie 1' : /^Côté gauche/.test(p.name) ? 'Conduit de sortie 2' : /^Dessus/.test(p.name) ? 'Conduit de sortie 3' : 'Conduit de sortie 4';
     const q = recastAll({ ...p, name: key, cast, notches: [], pos: [r2(p.pos[0] + FANX), r2(p.pos[1] + (CASS_Y1 + YREAR) / 2), r2(p.pos[2] + EXZ - VENT_H / 2 - t)] as Vec3, group: elecGroup, holes: [] }, t, fit); // groupe de la cassette : le conduit sort avec elle
-    if (key !== 'Conduit de sortie 4') return q;
-    // plaque du bas : deux dents de t qui dépassent du bord côté cassette et entrent dans les fentes de la paroi arrière de la cassette (« exitComb »)
-    const pts = outline(q), minY = Math.min(...pts.map((pt) => pt[1])), poly: Pt[] = [];
+    // dents de t qui dépassent du bord côté cassette (le plus près de −y) et entrent dans les fentes de la paroi arrière de la cassette (« exitComb ») : haut / bas = bord le plus bas du contour (axe y), côtés = bord le plus à gauche (axe x, la plaque est couchée : x local = y du monde)
+    const side = key === 'Conduit de sortie 1' || key === 'Conduit de sortie 2', axis = side ? 0 : 1, c = 1 - axis, pts = outline(q), edge = Math.min(...pts.map((pt) => pt[axis])), poly: Pt[] = [];
+    const teeth = side ? DUCT_SIDE_TEETH : DUCT_TEETH;
     pts.forEach((a, i) => {
       const b = pts[(i + 1) % pts.length]; poly.push(a);
-      if (Math.abs(a[1] - minY) < 1e-6 && Math.abs(b[1] - minY) < 1e-6 && b[0] > a[0]) for (const [x0, x1] of DUCT_TEETH) if (x0 >= a[0] - 1e-6 && x1 <= b[0] + 1e-6) poly.push([x0, minY], [x0, minY - t], [x1, minY - t], [x1, minY]);
+      if (Math.abs(a[axis] - edge) < 1e-6 && Math.abs(b[axis] - edge) < 1e-6 && Math.abs(b[c] - a[c]) > 1e-6) {
+        const up = b[c] > a[c], lo = Math.min(a[c], b[c]), hi = Math.max(a[c], b[c]);
+        for (const [t0, t1] of (up ? teeth : [...teeth].reverse())) {
+          if (t0 < lo - 1e-6 || t1 > hi + 1e-6) continue;
+          const [p0, p1] = up ? [t0, t1] : [t1, t0], at = (cv: number, ax: number): Pt => (axis === 1 ? [cv, ax] : [ax, cv]);
+          poly.push(at(p0, edge), at(p0, edge - t), at(p1, edge - t), at(p1, edge));
+        }
+      }
     });
     return { ...q, poly: poly.map(([x, y]) => [r2(x), r2(y)] as Pt) };
   }) : [];
@@ -500,12 +537,12 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const fanWood: Plank[] = [...seat, ...exitDuct, ...cassette.filter((p) => p.group === roofGroup)];
   // ===== PRISE D'AIR BASSE =====
   // le conduit est une vraie BOÎTE crénelée comme celles du nichoir (`makeBox`), ouverte en dessous : quatre parois qui s'emboîtent par des dents verticales et un couvercle qui s'emboîte dans leur haut
-  const ZB0 = 0, airHt = r2(AIR_ZTOP - ZB0); // le bas des parois (les dents) affleure la face extérieure du fond
+  const ZB0 = t, airHt = r2(AIR_ZTOP - ZB0); // le bas des parois (droit, sans dents) est posé sur le dessus du fond (« Dessous ext ») ; pas de crénelage avec le fond
   const airKey: Record<string, string> = { 'Côté gauche': "Conduit d'air 1", 'Côté droit': "Conduit d'air 2", 'Face avant': "Conduit d'air 3", 'Face arrière': "Conduit d'air 4", Dessus: "Conduit d'air 5 (couvercle)" };
   const airWood: Plank[] = [...makeBox(AIR_LX, AIR_LY, airHt, t, fit, start).planks.filter((p) => !/^Dessous/.test(p.name)).map((p) => {
-    const key = airKey[p.name.replace(/ \d+$/, '')], cast = { ...(p.cast ?? {}) }; // ouvert en dessous ; les dents du bas des parois traversent des fentes du fond (« Dessous ext »)
-    let q = recastAll({ ...p, name: key, pos: [r2(p.pos[0] + AIR_CX), r2(p.pos[1] + AIR_CY), r2(p.pos[2] + ZB0)] as Vec3, group, cast }, t, fit);
-    if (key === "Conduit d'air 2") q = { ...q, holes: [fitHole(q, { id: uid(), shape: 'square' as const, x: 0, y: r2(AIR_ZS - q.pos[2]), size: AIR_SW, sh: AIR_SH })] }; // côté nid : la fente, en face de la grille de la paroi intérieure
+    const key = airKey[p.name.replace(/ \d+$/, '')], cast = { ...(p.cast ?? {}) }, wall = key !== "Conduit d'air 5 (couvercle)"; if (wall) delete cast.bottom; // ouvert en dessous, bas droit : aucune dent dans le fond (« Dessous ext » n'a qu'une ouverture)
+    let q = recastAll({ ...p, name: key, pos: [r2(p.pos[0] + AIR_CX), r2(p.pos[1] + AIR_CY), r2(p.pos[2] + ZB0)] as Vec3, group, cast, notches: wall ? p.notches.filter((x) => x.edge !== 'bottom') : p.notches }, t, fit);
+    if (key === "Conduit d'air 2") q = { ...q, holes: [fitHole(q, { id: uid(), shape: 'square' as const, x: 0, y: r2(AIR_ZS - q.pos[2]), size: AIR_SW, sh: AIR_SH }), fitHole(q, { id: uid(), shape: 'square' as const, x: 0, y: r2(DRAIN_Z + DRAIN_H / 2 - q.pos[2]), size: AIR_SW, sh: DRAIN_H })] }; // côté nid : la fente, en face de la grille de la paroi intérieure, et l'ouverture d'évacuation de l'eau, au ras du plancher intérieur (rien dedans)
     return q;
   }),
   ];
@@ -520,10 +557,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const woolH = r2(PB_TOP - 2 * t - 0.4);
   const plugBox: Plank[] = [...pbWalls, ...[0, 1, 2].map((i) => ({ ...wood(`Poignée bouchon prise d'air ${i + 1}`, PB_UW, PLUG_HANDLE + t, [AIR_CX + (i - 1) * t, AIR_CY, (t - PLUG_HANDLE) / 2], sideRot, wGroup), poly: uPoly(PB_UW, PLUG_HANDLE + t).map(([x, y]): Pt => [x, -y]).reverse() })), blk("Laine bouchon prise d'air", PB_W - 2 * t, PB_L - 2 * t, woolH, [AIR_CX, AIR_CY, t + 0.2 + woolH / 2], wGroup, '#f59e0b', { transparent: true })];
   // le conduit est COLLÉ au nid (demande de l'utilisateur : la bouche basse sert aussi d'évacuation) : sa paroi côté nid touche la face extérieure de « Côté gauche int » (jeu 0), sa fente 34 × 30 tombe en face de la grille de la paroi : il débouche dans le nid ; plus de manchon
-  const airBlocks: Plank[] = [
-    // la grille d'aération du corps est percée dans la paroi intérieure elle-même (« Côté gauche int » : fentes verticales de 4 mm, barreaux de 2 mm) ; le clapet léger reste côté nid, contre la paroi
-    blk("Clapet prise d'air", 0.6, AIR_SW + 2, AIR_SH + 4, [-n.l / 2 + 0.4, AIR_CY, AIR_ZS - 1], group, '#fca5a5', { transparent: true }),
-  ];
+  // la grille d'aération du corps est percée dans la paroi intérieure elle-même (« Côté gauche int » : fentes verticales de 4 mm, barreaux de 2 mm) ; plus de clapet (supprimé à la demande de l'utilisateur) : la prise d'air reste ouverte, la sous-boîte isolante la bouche en hiver
   // système solaire (groupe « Solaire ») : un panneau de 100 W DÉPORTÉ à côté du nichoir, sans piquet en bois (support métallique non dessiné), incliné de 35° et tourné vers l'avant (« le sud »),
   // et un câble qui rejoint le régulateur dans le toit (la batterie et le régulateur sont dans le toit)
   const solGroup = n.solar ? solGroupId : undefined;
@@ -677,7 +711,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     ...solar, ...brackets, ...mounts, ...keys,
     ...camBox, ...cable2, ...wires2, ...ledSwitch,
     ...power, ...solarElec,
-    ...sensorSet, ...fanSet, ...fanWood, ...airWood, ...airBlocks, ...plugBox,
+    ...sensorSet, ...fanSet, ...fanWood, ...airWood, ...plugBox,
     ...insulation,
     ...entry,
     ...strips,
@@ -691,12 +725,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     for (const p of planks) if (/^(Dessous ext|Plancher int|Cadre toit (bas|milieu|haut)|Dessous toit|Dessus toit)/.test(p.name)) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: r2(CND_X - p.pos[0]), y: r2(CND_Y - p.pos[1]), size: CND_D })]; // pile le diamètre de la gaine, serrée (plus de jeu : elle nageait)
   }
   for (const p of planks) { // prise d'air basse : l'ouverture du dessous, le passage du conduit dans le fond intérieur et la fente de la paroi intérieure gauche
-    if (/^Dessous ext/.test(p.name)) { // ouverture du conduit + fentes des dents de ses parois : un seul trou « en peigne » (les fentes touchent l'ouverture)
-      const tmpScene: PlankScene = { t, fit, planks: [{ ...p, group: undefined }, ...airWood.map((w) => ({ ...w, group: '__air' }))] };
-      const slots = slotsForTeeth(tmpScene, p.id).scene.planks[0].holes.filter((h) => !p.holes.some((o) => o.id === h.id));
-      const rects = [...slots.map((h): [number, number, number, number] => [h.x - h.size / 2, h.y - (h.sh ?? h.size) / 2, h.x + h.size / 2, h.y + (h.sh ?? h.size) / 2]), [AIR_CX - AIR_LX / 2 + t, AIR_CY - AIR_LY / 2 + t, AIR_CX + AIR_LX / 2 - t, AIR_CY + AIR_LY / 2 - t] as [number, number, number, number]];
-      p.holes = [...p.holes, { id: uid(), shape: 'square' as const, x: AIR_CX, y: AIR_CY, size: AIR_LX, sh: AIR_LY, poly: rectUnion(rects) }];
-    }
+    if (/^Dessous ext/.test(p.name)) p.holes = [...p.holes, { id: uid(), shape: 'square' as const, x: AIR_CX, y: AIR_CY, size: r2(AIR_LX - 2 * t), sh: r2(AIR_LY - 2 * t) }]; // ouverture du conduit : son intérieur, rectangle simple (les parois reposent sur le fond autour)
     if (/^Plancher int/.test(p.name)) { // passage du conduit (collé à la paroi intérieure) : les fentes des dents du bas de « Côté gauche int » qui le touchent ou le recoupent sont fondues avec lui en UN trou « en peigne » (deux trous qui se recoupent casseraient la triangulation)
       const pass: [number, number, number, number] = [AIR_CX - (AIR_LX + 0.4) / 2, AIR_CY - (AIR_LY + 0.4) / 2, AIR_CX + (AIR_LX + 0.4) / 2, AIR_CY + (AIR_LY + 0.4) / 2];
       const box = (h: Hole): [number, number, number, number] => [h.x - h.size / 2, h.y - (h.sh ?? h.size) / 2, h.x + h.size / 2, h.y + (h.sh ?? h.size) / 2];
@@ -732,5 +761,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const unnumber = (nm: string) => (start === 1 ? nm.replace(/^((?:Face avant|Face arrière|Côté droit|Côté gauche|Dessus|Dessous)(?: (?:ext|int|toit|compartiment))?|Grille anti-insectes) 1$/, "$1") : nm); // un seul nichoir : plus de « 1 » derrière les plaques des boîtes (les numéros des séries — lambris, cales, isolant… — restent)
   const ventGroup = uid(); // groupe « Ventilation » : tout ce qui sert à ventiler (cassette du ventilateur, siège, grilles, clapets, interrupteur 12 V, fils, prise d'air basse) ; le bloc isolant d'hiver garde son groupe
   const finalPlanks = planks.map((p) => { let q = p.group && merged.has(p.group) ? { ...p, group: elecGroup, name: unnumber(p.name) } : { ...p, name: unnumber(p.name) }; if (q.path && q.special !== 'solar' && q.name !== 'Câble 12 V vers le toit') if (!/LED extérieures|^Nappe caméra 2/.test(q.name)) q = { ...q, path: q.path.map(underRoof) }; /* la nappe et les fils de la caméra 2 passent DANS le toit (canal du pan) : pas ramenés sous la pente */ const l = LINKS.find(([re]) => re.test(q.name)); if (VENT_PIECES.test(q.name)) q = { ...q, group: ventGroup }; return l ? { ...q, url: l[1] } : q; });
-  return { planks: summerLayout({ t, fit, planks: finalPlanks }).planks, group, name: 'Corps', groupNames: { [group]: 'Corps', [roofGroup]: 'Toit', [elecGroup]: 'Électronique', [docGroupId]: 'Schéma électronique', ...(n.lambris && n.pente ? { [coverGroup]: 'Couvercle' } : {}), [entryGroup]: 'Entrée', [isoGroup]: 'Isolant', [wGroup]: "Pièces d'hiver (rechange)", [stripGroup]: 'Baguettes de cale (à couper)', [ventGroup]: 'Ventilation', [lamGroup]: 'Habillage' } }; // un seul nichoir : groupes sans numéro, le corps s'appelle « Corps »
+  const spareGroup = uid(); // « Pièces fines de rechange » : THIN.copies exemplaires de chaque plaque fine, à plat derrière les pièces d'hiver et les baguettes de cale (à gauche du nichoir, à l'arrière : jamais sur eux)
+  const spares = thinSpares(finalPlanks, t, spareGroup, r2(-W / 2 - SPARE_GAP), r2(D / 2 + SPARE_GAP + 100));
+  return { planks: [...summerLayout({ t, fit, planks: finalPlanks }).planks, ...spares], group, name: 'Corps', groupNames: { [group]: 'Corps', [roofGroup]: 'Toit', [elecGroup]: 'Électronique', [docGroupId]: 'Schéma électronique', ...(n.lambris && n.pente ? { [coverGroup]: 'Couvercle' } : {}), [entryGroup]: 'Entrée', [isoGroup]: 'Isolant', [wGroup]: "Pièces d'hiver (rechange)", [stripGroup]: 'Baguettes de cale (à couper)', ...(spares.length ? { [spareGroup]: 'Pièces fines de rechange' } : {}), [ventGroup]: 'Ventilation', [lamGroup]: 'Habillage' } }; // un seul nichoir : groupes sans numéro, le corps s'appelle « Corps »
 }

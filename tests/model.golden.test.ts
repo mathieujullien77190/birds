@@ -1,8 +1,8 @@
 import { describe, it } from 'vitest';
-import { VARIANTS, buildNest, expectGolden, normalizeIds } from './helpers';
+import { VARIANTS, buildNestFull, expectGolden, normalizeIds } from './helpers';
 
 describe('makeNest : scène complète (golden)', () => {
   for (const [name, over] of Object.entries(VARIANTS)) {
-    it(name, () => { expectGolden(`nest-${name}`, normalizeIds(buildNest(over))); });
+    it(name, () => { expectGolden(`nest-${name}`, normalizeIds(buildNestFull(over))); });
   }
 });

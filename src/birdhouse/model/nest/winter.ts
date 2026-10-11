@@ -1,5 +1,6 @@
 import { type Plank, type PlankScene, type Vec3 } from '../types';
 import { r2 } from '../util';
+import { SPARE_RE } from './spares';
 
 /**
  * Pièces d'hiver : la cassette du ventilateur (été) et le bloc isolant (hiver) s'échangent dans le siège ; la sous-boîte isolante entre ou sort du conduit de la prise d'air basse.
@@ -15,7 +16,7 @@ export const SPARE_GAP = 150, PLUG_HANDLE = 15;
 
 const BLOCK_FRONT = /^Bloc isolant d'hiver 1$/; // paroi avant du bloc : alignée sur celle de la cassette
 const by = (s: PlankScene, re: RegExp) => s.planks.find((p) => re.test(p.name));
-const isIn = (p: Plank, res: RegExp[]) => res.some((re) => re.test(p.name));
+const isIn = (p: Plank, res: RegExp[]) => !SPARE_RE.test(p.name) && res.some((re) => re.test(p.name)); // une rechange (« … (rechange 1) ») reste où elle est, même si son nom commence comme une pièce d'hiver
 
 interface Layout { seat: [number, number]; co: number; floorTop: number; slotA: [number, number]; slotB: [number, number]; duct: [number, number]; lipBottom: number }
 

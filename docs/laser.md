@@ -40,7 +40,7 @@ Chaque plaque découpée au laser porte un **code** pour la retrouver au montage
 - **Plaques trop petites** : si 3,4 mm de texte (4,5 puis 5,6 mm si la place le permet) avec 1,2 mm de marge ne tiennent nulle part, la plaque a son code dans la liste mais **rien n'est gravé** (les poignées de la cassette et du bouchon) : on la reconnaît à sa forme.
 
 ### Plaques à découper (nichoir par défaut)
-Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la scène.
+Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la scène. La quantité compte aussi les **pièces fines de rechange** (3 exemplaires de chaque plaque fine, groupe « Pièces fines de rechange », même numéro que l'original ; seuil : plus petit côté ou largeur moyenne ≤ 12 mm).
 
 | Code | Pièce(s) | Groupe | Matériau | Quantité |
 | --- | --- | --- | --- | --- |
@@ -57,39 +57,38 @@ Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la sc
 | H-11 | Lambris arrière 3.1 | Habillage | okoumé | 1 |
 | H-12 | Lambris arrière 4 | Habillage | okoumé | 1 |
 | H-13 | Lambris arrière 5 | Habillage | okoumé | 1 |
-| COU-01 | Baguette couvercle avant | Couvercle | contreplaqué | 1 |
-| COU-02 | Baguette couvercle arrière | Couvercle | contreplaqué | 1 |
-| COU-03 | Baguette couvercle gauche, Baguette couvercle droite | Couvercle | contreplaqué | 2 |
+| COU-01 | Baguette couvercle avant | Couvercle | contreplaqué | 4 |
+| COU-02 | Baguette couvercle arrière | Couvercle | contreplaqué | 4 |
+| COU-03 | Baguette couvercle gauche, Baguette couvercle droite | Couvercle | contreplaqué | 8 |
 | COU-04 | Toit en okoumé (plaque crénelée) | Couvercle | okoumé | 1 |
 | COU-05 | Toit en okoumé (plaque pleine) | Couvercle | okoumé | 1 |
-| COR-01 | Étrier régulateur 1, Étrier régulateur 2… (4 noms) | Corps | contreplaqué | 4 |
+| COR-01 | Étrier régulateur 1, Étrier régulateur 2… (4 noms) | Corps | contreplaqué | 16 |
 | COR-02 | Fixation arbre 1.1, Fixation arbre 1.2… (6 noms) | Corps | contreplaqué | 6 |
-| COR-03 | Clavette fixation 1.1, Clavette fixation 1.2… (4 noms) | Corps | contreplaqué | 4 |
+| COR-03 | Clavette fixation 1.1, Clavette fixation 1.2… (4 noms) | Corps | contreplaqué | 16 |
 | V-01 | Cassette ventilateur 1 | Ventilation | contreplaqué | 1 |
 | V-02 | Cassette ventilateur 2 | Ventilation | contreplaqué | 1 |
 | V-03 | Cassette ventilateur 4, Cassette ventilateur 3 | Ventilation | contreplaqué | 2 |
 | V-04 | Cassette ventilateur couvercle | Ventilation | contreplaqué | 1 |
 | V-05 | Cassette ventilateur cadre du bas | Ventilation | contreplaqué | 1 |
-| V-06 | Poignée cassette 1, Poignée cassette 2, Poignée cassette 3 | Ventilation | contreplaqué | 3 |
+| V-06 | Poignée cassette 1, Poignée cassette 2, Poignée cassette 3 | Ventilation | contreplaqué | 12 |
 | P-01 | Bloc isolant d'hiver 1, Bloc isolant d'hiver 2 | Pièces d'hiver (rechange) | contreplaqué | 2 |
 | P-02 | Bloc isolant d'hiver 3, Bloc isolant d'hiver 4 | Pièces d'hiver (rechange) | contreplaqué | 2 |
 | P-03 | Bloc isolant d'hiver couvercle | Pièces d'hiver (rechange) | contreplaqué | 1 |
 | P-04 | Bloc isolant d'hiver fond | Pièces d'hiver (rechange) | contreplaqué | 1 |
-| P-05 | Poignée bloc d'hiver 1, Poignée bloc d'hiver 2, Poignée bloc d'hiver 3 | Pièces d'hiver (rechange) | contreplaqué | 3 |
+| P-05 | Poignée bloc d'hiver 1, Poignée bloc d'hiver 2, Poignée bloc d'hiver 3 | Pièces d'hiver (rechange) | contreplaqué | 12 |
 | V-07 | Goulotte ventilateur gauche, Goulotte ventilateur droite | Ventilation | contreplaqué | 2 |
 | V-08 | Goulotte ventilateur avant | Ventilation | contreplaqué | 1 |
-| V-09 | Conduit de sortie 1, Conduit de sortie 2 | Ventilation | contreplaqué | 2 |
-| V-10 | Conduit de sortie 3 | Ventilation | contreplaqué | 1 |
-| V-11 | Conduit de sortie 4 | Ventilation | contreplaqué | 1 |
-| V-12 | Conduit d'air 3, Conduit d'air 4 | Ventilation | contreplaqué | 2 |
-| V-13 | Conduit d'air 2 | Ventilation | contreplaqué | 1 |
-| V-14 | Conduit d'air 1 | Ventilation | contreplaqué | 1 |
-| V-15 | Conduit d'air 5 (couvercle) | Ventilation | contreplaqué | 1 |
+| V-09 | Conduit de sortie 1, Conduit de sortie 2 | Ventilation | contreplaqué | 8 |
+| V-10 | Conduit de sortie 3, Conduit de sortie 4 | Ventilation | contreplaqué | 8 |
+| V-11 | Conduit d'air 3, Conduit d'air 4 | Ventilation | contreplaqué | 2 |
+| V-12 | Conduit d'air 2 | Ventilation | contreplaqué | 1 |
+| V-13 | Conduit d'air 1 | Ventilation | contreplaqué | 1 |
+| V-14 | Conduit d'air 5 (couvercle) | Ventilation | contreplaqué | 1 |
 | P-06 | Bouchon-boîte prise d'air 3, Bouchon-boîte prise d'air 4 | Pièces d'hiver (rechange) | contreplaqué | 2 |
 | P-07 | Bouchon-boîte prise d'air 2, Bouchon-boîte prise d'air 1 | Pièces d'hiver (rechange) | contreplaqué | 2 |
 | P-08 | Bouchon-boîte prise d'air couvercle | Pièces d'hiver (rechange) | contreplaqué | 1 |
 | P-09 | Bouchon-boîte prise d'air fond | Pièces d'hiver (rechange) | contreplaqué | 1 |
-| P-10 | Poignée bouchon prise d'air 1, Poignée bouchon prise d'air 2, Poignée bouchon prise d'air 3 | Pièces d'hiver (rechange) | contreplaqué | 3 |
+| P-10 | Poignée bouchon prise d'air 1, Poignée bouchon prise d'air 2, Poignée bouchon prise d'air 3 | Pièces d'hiver (rechange) | contreplaqué | 12 |
 | E-01 | Entrée 1, Entrée 15 | Entrée | contreplaqué | 2 |
 | E-02 | Entrée 2, Entrée 3… (13 noms) | Entrée | contreplaqué | 13 |
 | B-01 | Baguette de cale 1, Baguette de cale 2… (6 noms) | Baguettes de cale (à couper) | contreplaqué | 6 |
@@ -108,11 +107,15 @@ Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la sc
 | T-03 | Côté droit toit, Côté gauche toit | Toit | contreplaqué | 2 |
 | T-04 | Dessus toit | Toit | contreplaqué | 1 |
 | T-05 | Dessous toit | Toit | contreplaqué | 1 |
-| T-06 | Cadre toit haut, Cadre toit milieu, Cadre toit bas | Toit | contreplaqué | 3 |
-| T-07 | Face avant caméra 1, Face arrière caméra 1 | Toit | contreplaqué | 2 |
-| T-08 | Côté droit caméra 1, Côté gauche caméra 1 | Toit | contreplaqué | 2 |
+| T-06 | Baguette dessus toit gauche, Baguette dessus toit droite | Toit | contreplaqué | 8 |
+| T-07 | Baguette dessus toit avant | Toit | contreplaqué | 4 |
+| T-08 | Baguette dessus toit arrière 1 | Toit | contreplaqué | 4 |
+| T-09 | Baguette dessus toit arrière 2 | Toit | contreplaqué | 4 |
+| T-10 | Cadre toit haut, Cadre toit milieu, Cadre toit bas | Toit | contreplaqué | 3 |
+| T-11 | Face avant caméra 1, Face arrière caméra 1 | Toit | contreplaqué | 2 |
+| T-12 | Côté droit caméra 1, Côté gauche caméra 1 | Toit | contreplaqué | 2 |
 
-Total : 125 plaques, 67 codes.
+Total : 220 plaques, 70 codes.
 
 ## Réglages à calibrer
 Valeurs de départ prudentes : 300 mm/min, 60 %, 3 passes, plafond de puissance 80 %. Elles dépendent du contreplaqué, de la focale et de l'air assist : la **planche d'essai** découpe une grille de petits carrés (colonnes = vitesses, lignes = puissances) ; le tableau à l'écran donne la position de chaque carré. Retenir le couple qui détache le carré proprement avec le moins de brûlure.

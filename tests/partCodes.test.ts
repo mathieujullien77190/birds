@@ -215,7 +215,7 @@ describe('nichoir par défaut : tous les codes gravés', () => {
     expect(items.filter((it) => /^Lambris/.test(it.plank.name)).every((it) => it.code!.startsWith('H'))).toBe(true);
   });
   it('des pièces identiques ont le même code (4 étriers du régulateur)', () => {
-    const e = items.filter((it) => /^Étrier régulateur/.test(it.plank.name)).map((it) => it.code);
+    const e = items.filter((it) => /^Étrier régulateur/.test(it.plank.name) && !it.plank.spareOf).map((it) => it.code);
     expect(e).toHaveLength(4);
     expect(new Set(e).size).toBe(1);
   });

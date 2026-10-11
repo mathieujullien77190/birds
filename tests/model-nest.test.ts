@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { NEST_DEFAULT, bounds, findCameraPlank, makeNest, nestSheets, outline, sheetLabel, sheetSvg, sheetsPreviewSvg, setAirPlug, setWinterCassette, summerLayout, winterState, CAMERA_NAMES, carveRects, type NestParams, type Plank, type PlankScene } from '@/birdhouse/model';
-import { buildNest, normalizeIds } from './helpers';
+import { buildNest, normalizeIds, withoutBagSlots } from './helpers';
 
 const T = 3;
 const build = (over: Partial<NestParams> = {}, start = 1) => {
   const b = makeNest({ ...NEST_DEFAULT, ...over }, T, 0, start);
-  const s: PlankScene = { t: T, fit: 0, planks: b.planks, groupNames: b.groupNames, up: 'z2' };
-  return { ...b, s };
+  const s: PlankScene = { t: T, fit: 0, planks: b.planks.filter((p) => !p.spareOf), groupNames: b.groupNames, up: 'z2' };
+  return { ...b, planks: s.planks, s };
 };
 const byName = (planks: Plank[], re: RegExp): Plank => { const p = planks.find((x) => re.test(x.name)); if (!p) throw new Error(`pièce introuvable : ${re}`); return p; };
 const names = (planks: Plank[]): string[] => planks.map((p) => p.name);
@@ -81,7 +81,7 @@ describe('makeNest : pièces présentes / absentes selon les options', () => {
     }
     expect(CAMERA_NAMES[1]).toBe('Caméra 2');
     // plus de fente dans la plaque avant du toit : la nappe passe par le canal du pan en okoumé
-    expect(byName(on, /^Face avant toit$/).holes).toHaveLength(0);
+    expect(withoutBagSlots(byName(on, /^Face avant toit$/).holes)).toHaveLength(0);
     expect(byName(on, /^Toit en okoumé \(plaque crénelée\)$/).holes.some((h) => h.r === 8)).toBe(true);
     expect(byName(off, /^Toit en okoumé \(plaque crénelée\)$/).holes.some((h) => h.r === 8)).toBe(false);
   });
@@ -118,7 +118,7 @@ describe('makeNest : pièces présentes / absentes selon les options', () => {
   });
   it('groupes : les pièces ont un groupe connu et nommé ; l\'habillage et l\'électronique existent', () => {
     const { planks, groupNames } = build();
-    expect(Object.values(groupNames).sort()).toEqual(['Baguettes de cale (à couper)', 'Corps', 'Couvercle', 'Entrée', 'Habillage', 'Isolant', 'Pièces d\'hiver (rechange)', 'Schéma électronique', 'Toit', 'Ventilation', 'Électronique'].sort());
+    expect(Object.values(groupNames).sort()).toEqual(['Baguettes de cale (à couper)', 'Corps', 'Couvercle', 'Entrée', 'Habillage', 'Isolant', 'Pièces d\'hiver (rechange)', 'Pièces fines de rechange', 'Schéma électronique', 'Toit', 'Ventilation', 'Électronique'].sort());
     for (const p of planks) if (p.group) expect(groupNames[p.group], p.name).toBeDefined();
     expect(planks.some((p) => /^Lambris/.test(p.name))).toBe(true);
     expect(byName(planks, /^Schéma électronique$/).special).toBe('doc');
@@ -241,7 +241,7 @@ describe("habillage : trou d'envol dans la façade", () => {
 
 describe('plaque avant du toit', () => {
   it('aucune fente pour la nappe de la 2ᵉ caméra, quelle que soit la taille (elle passe par le canal du pan)', () => {
-    for (const l of [120, 200, 250, 300]) expect(byName(build({ l, L: l }).planks, /^Face avant toit$/).holes).toHaveLength(0);
+    for (const l of [120, 200, 250, 300]) expect(withoutBagSlots(byName(build({ l, L: l }).planks, /^Face avant toit$/).holes)).toHaveLength(0);
   });
 });
 

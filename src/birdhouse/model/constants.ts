@@ -47,3 +47,10 @@ export const SENSOR_CHIP_DX = -1.5; // décalage de la puce par rapport au centr
 export const DEFAULT_SHEET = { W: 410, H: 400, margin: 8 };
 /** Baguettes de cale (contreplaqué 3 mm) : longueur MAX qui tient sur la planche (plus grande dimension utile = 394), largeur, écart de rangement au sol, et facteur du besoin (on en fait le triple). */
 export const STRIP = { length: Math.max(DEFAULT_SHEET.W, DEFAULT_SHEET.H) - 2 * DEFAULT_SHEET.margin, width: 5, pitch: 15, spare: 3 };
+
+/**
+ * Pièces fines de rechange : une plaque découpée (contreplaqué, MDF ou okoumé ; jamais un composant `special`) est FINE quand son plus petit côté (boîte englobante du contour)
+ * ou sa « largeur moyenne » (2 × aire / périmètre du contour, trous exclus) est au plus `maxWidth` mm : baguettes, poignées en U, étriers, clavettes, parois du conduit de sortie…
+ * Chacune a `copies` exemplaires de rechange identiques, rangés à plat à côté du nichoir (carrés de `gap` mm entre eux, rangées de `rowWidth` mm au plus).
+ */
+export const THIN = { maxWidth: 12, copies: 3, gap: 6, rowWidth: 400 };

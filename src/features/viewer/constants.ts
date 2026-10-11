@@ -11,4 +11,4 @@ export const STORAGE = {
 } as const;
 
 /** Types de pièces cachées d'office quand on crée un nichoir : isolant, pan de toit en okoumé et ses quatre baguettes (l'œil de « Pièces » les affiche). */
-export const HIDDEN_AT_CREATION = [/^Isolant(?! bloc d'hiver)/, /^Toit en okoumé/, /^Baguette couvercle/];
+export const HIDDEN_AT_CREATION = [/^Isolant(?! bloc d'hiver)/, /^Toit en okoumé/, /^Baguette couvercle(?!.* [(]rechange)/]; // les pièces fines de rechange (« … (rechange k) ») restent visibles

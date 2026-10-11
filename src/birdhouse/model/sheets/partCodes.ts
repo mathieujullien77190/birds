@@ -1,4 +1,5 @@
 import type { Hole, Plank, PlankScene } from '../types';
+import { SPARE_RE } from '../nest/spares';
 
 /**
  * Codes des plaques découpées au laser, pour les retrouver au montage : le préfixe de la catégorie (le groupe) + un numéro à deux chiffres
@@ -71,7 +72,7 @@ export function categoryPrefixes(names: string[]): Map<string, string> {
 
 /** Code (« T01 ») de chaque plaque découpée de la scène, par identifiant de plaque. Les plaques non découpées n'en ont pas. */
 export function plankCodes(s: PlankScene): Map<string, string> {
-  const laser = s.planks.filter(isLaserPlank);
+  const laser = s.planks.filter((p) => isLaserPlank(p) && !p.spareOf); // une rechange prend le code de son original (voir plus bas)
   const prefixes = categoryPrefixes(laser.map((p) => categoryOf(s, p)));
   const numbers = new Map<string, Map<string, number>>(); // catégorie → empreinte → numéro
   const codes = new Map<string, string>();
@@ -84,6 +85,7 @@ export function plankCodes(s: PlankScene): Map<string, string> {
     if (n === undefined) { n = byShape.size + 1; byShape.set(sig, n); }
     codes.set(p.id, `${prefixes.get(cat)}-${String(n).padStart(2, '0')}`);
   }
+  for (const p of s.planks) if (isLaserPlank(p) && p.spareOf) { const c = codes.get(p.spareOf); if (c) codes.set(p.id, c); }
   return codes;
 }
 
@@ -100,7 +102,8 @@ export function partTable(s: PlankScene): PartRow[] {
     let row = rows.get(code);
     if (!row) { row = { code, names: [], group: categoryOf(s, p) || '—', material: p.material === 'mdf' ? 'MDF' : p.material === 'okoume' ? 'okoumé' : 'contreplaqué', qty: 0 }; rows.set(code, row); }
     row.qty++;
-    if (!row.names.includes(p.name)) row.names.push(p.name);
+    const nm = p.spareOf ? p.name.replace(SPARE_RE, () => '') : p.name; // les rechanges comptent dans la quantité, leur nom est celui de l'original
+    if (!row.names.includes(nm)) row.names.push(nm);
   }
   return [...rows.values()];
 }
