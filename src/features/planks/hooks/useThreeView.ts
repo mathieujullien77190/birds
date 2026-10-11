@@ -28,7 +28,8 @@ export function useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickR
     const el = host.current!;
     const scene = new Scene();
     scene.background = new Color('#eef2f1');
-    scene.add(new AmbientLight('#ffffff', 1.1));
+    const ambient = new AmbientLight('#ffffff', 1.1);
+    scene.add(ambient);
     const sun = new DirectionalLight('#ffffff', 1.8);
     sun.position.set(300, -400, 500);
     scene.add(sun);
@@ -53,7 +54,7 @@ export function useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickR
     scene.add(cutMark);
     const pullMark = new Group(); // la face double-cliquée, en pointillés bleus : on la tire ou on la pousse
     scene.add(holeMark, pullMark);
-    const v: View = { scene, camera, renderer, orbit, meshes: new Map(), labels, handles, targets, holeMark, pullMark, cutMark, dragging: false };
+    const v: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, handles, targets, holeMark, pullMark, cutMark, dragging: false };
     // glissé de la face : le long de sa normale
     let pullDrag: { total: number; s0: number; P0: Vector3; N: Vector3 } | null = null;
     const lineParam = (P0: Vector3, N: Vector3): number | null => { // paramètre du point de la droite (P0, N) le plus proche du rayon souris

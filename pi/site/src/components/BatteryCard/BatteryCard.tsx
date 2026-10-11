@@ -18,6 +18,7 @@ export function BatteryCard({ state }: BatteryCardProps) {
       </div>
       {pct === null && <div className="muted">Niveau inconnu : pas de mesure de batterie.</div>}
       <ErrorLine message={state?.erreurs.batterie} />
+      <ErrorLine message={state?.erreurs.delestage} />
     </Card>
   );
 }

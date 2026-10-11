@@ -47,8 +47,29 @@ def tick():
 def frame(num, n):
     return base64.b64encode(nichoir.cameras[num].image(n, 160, 120)).decode()
 
+def led_on(num):
+    return bool(nichoir.etat["led_nid" if num == 0 else "led_ext"])
+
 def cam_on(num):
     return bool(nichoir.etat["cam" + str(num + 1)])
+
+def panne(nom, on):
+    nichoir.MOCK_PANNES[nom] = bool(on)
+
+def batterie(pct):
+    nichoir.sim["wh"] = pct / 100 * nichoir.CAPACITE_WH
+
+def etat_json():
+    return json.dumps(nichoir.etat)
+
+def restaurer():
+    nichoir.MOCK_SURCHAUFFE = 0.0
+    nichoir.MOCK_PANNES["bme"] = nichoir.MOCK_PANNES["sonde"] = False
+    nichoir.sim["wh"] = 0.8 * nichoir.CAPACITE_WH
+    nichoir.peltier("arrêt", 0)
+    nichoir.leds(False, False)
+    for k in ("securite", "delestage", "ds18b20", "bme280"):
+        nichoir.etat["erreurs"].pop(k, None)
 
 def surchauffe(v):
     nichoir.MOCK_SURCHAUFFE = float(v)
@@ -88,12 +109,34 @@ const PAGE = indexHtml
     () => `<script>window.fetch = (u, o) => parent.__piFetch(u, o);</script><script>${appJs.replace(/<\/script/gi, '<\\/script')}</script>`,
   );
 
-export function PiSimulator({ onClose, shoot }: { onClose: () => void; shoot?: (num: number) => string | null }) {
+/** État renvoyé par `/api/etat` (seulement ce que les essais lisent). */
+interface PiState { peltier: string; puissance: number; t_dissipateur: number | null; t_nid: number | null; led_nid: boolean; led_ext: boolean; erreurs: Record<string, string>; batterie: { pourcent: number | null } }
+type PyFns = Record<'restaurer' | 'surchauffe' | 'panne' | 'batterie', (...a: unknown[]) => unknown>;
+
+/** Essais automatiques : on provoque un cas limite dans le Python simulé, puis on attend que le programme réagisse comme prévu (sinon l'essai échoue au bout de `timeout` secondes). */
+interface PiTest { id: string; label: string; hint: string; timeout: number; setup: (f: PyFns, cmd: (url: string, body: object) => void) => void; expect: (e: PiState) => boolean; ok: (e: PiState, maxT: number) => string }
+const PI_TESTS: PiTest[] = [
+  { id: 'surchauffe', label: 'Surchauffe du Peltier (> 60 °C)', hint: 'Peltier en froid à 60 %, le dissipateur monte vers 65 °C : la sécurité doit couper à 55 °C', timeout: 20,
+    setup: (f, cmd) => { f.restaurer(); cmd('/api/peltier', { sens: 'froid', puissance: 0.6 }); f.surchauffe(65); },
+    expect: (e) => e.peltier === 'arrêt' && !!e.erreurs.securite, ok: (e, m) => `dissipateur monté à ${m} °C, Peltier coupé : ${e.erreurs.securite}` },
+  { id: 'sonde', label: 'Sonde du dissipateur en panne', hint: 'Peltier en chaud, la sonde ne répond plus : sans mesure, le Peltier doit être coupé', timeout: 10,
+    setup: (f, cmd) => { f.restaurer(); cmd('/api/peltier', { sens: 'chaud', puissance: 0.4 }); f.panne('sonde', true); },
+    expect: (e) => e.peltier === 'arrêt' && !!e.erreurs.ds18b20, ok: (e) => `Peltier coupé : ${e.erreurs.securite ?? e.erreurs.ds18b20}` },
+  { id: 'nid', label: 'Capteur du nid en panne', hint: "Le BME280 ne répond plus : la page doit afficher « — » et l'erreur, sans planter", timeout: 10,
+    setup: (f) => { f.restaurer(); f.panne('bme', true); },
+    expect: (e) => e.t_nid === null && !!e.erreurs.bme280, ok: (e) => e.erreurs.bme280 },
+  { id: 'batterie', label: 'Batterie presque vide (8 %)', hint: 'Peltier et LED allumés, batterie à 8 % : le délestage doit tout couper', timeout: 10,
+    setup: (f, cmd) => { f.restaurer(); cmd('/api/peltier', { sens: 'froid', puissance: 0.5 }); cmd('/api/led', { nid: true }); f.batterie(8); },
+    expect: (e) => e.peltier === 'arrêt' && !e.led_nid && !!e.erreurs.delestage, ok: (e) => e.erreurs.delestage },
+];
+
+export function PiSimulator({ onClose, shoot }: { onClose: () => void; shoot?: (num: number, led?: boolean) => string | null }) {
   const [state, setState] = useState<'chargement' | 'prêt' | 'erreur'>('chargement');
   const [err, setErr] = useState('');
   const [log, setLog] = useState<string[]>([]); // lignes du terminal, dans l'ordre d'arrivée
   const termRef = useRef<HTMLPreElement>(null);
-  const [hot, setHot] = useState(false);
+  const [running, setRunning] = useState<string | null>(null); // essai en cours
+  const [menu, setMenu] = useState(false);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const pyRef = useRef<Py>(null);
 
@@ -112,7 +155,7 @@ export function PiSimulator({ onClose, shoot }: { onClose: () => void; shoot?: (
     loadPy().then((py) => {
       if (dead) return;
       pyRef.current = py;
-      const api = py.globals.get('api'), tick = py.globals.get('tick'), frame = py.globals.get('frame'), camOn = py.globals.get('cam_on');
+      const api = py.globals.get('api'), tick = py.globals.get('tick'), frame = py.globals.get('frame'), camOn = py.globals.get('cam_on'), ledOn = py.globals.get('led_on');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).__piFetch = async (url: string, opts?: { method?: string; body?: string }) => {
         const out = api(url, opts?.body ?? '');
@@ -128,7 +171,7 @@ export function PiSimulator({ onClose, shoot }: { onClose: () => void; shoot?: (
         const doc = frameRef.current?.contentDocument;
         if (!doc) return;
         n++;
-        doc.querySelectorAll<HTMLImageElement>('img.cam').forEach((img, i) => { img.src = !camOn(i) ? OFF : shoot?.(i) ?? 'data:image/png;base64,' + frame(i, n); }); // vue 3D depuis la caméra ; image de test du Python si la caméra n'existe pas
+        doc.querySelectorAll<HTMLImageElement>('img.cam').forEach((img, i) => { img.src = !camOn(i) ? OFF : shoot?.(i, !!ledOn(i)) ?? 'data:image/png;base64,' + frame(i, n); }); // vue 3D depuis la caméra ; image de test du Python si la caméra n'existe pas
       }, 300));
       setState('prêt');
     }).catch((e: Error) => { setErr(String(e.message ?? e)); setState('erreur'); });
@@ -143,11 +186,29 @@ export function PiSimulator({ onClose, shoot }: { onClose: () => void; shoot?: (
 
   useEffect(() => { const el = termRef.current; if (el) el.scrollTop = el.scrollHeight; }, [log]);
 
-  const toggleHot = () => {
-    const v = !hot;
-    setHot(v);
-    pyRef.current?.globals.get('surchauffe')(v ? 60 : 0);
-    sink(`# NICHOIR_MOCK_SURCHAUFFE=${v ? 60 : 0} : le dissipateur monte à ${v ? 60 : 0} °C quand le Peltier tourne (coupure à 55 °C)`);
+  const fn = (name: string) => pyRef.current!.globals.get(name) as (...a: unknown[]) => unknown;
+  const read = (): PiState => JSON.parse(fn('etat_json')() as string) as PiState;
+  const cmd = (url: string, body: object) => { fn('api')(url, JSON.stringify(body)); };
+
+  const reset = () => { fn('restaurer')(); sink('# tout remis à zéro (pannes retirées, Peltier et LED éteints, batterie à 80 %)'); };
+
+  const runTest = async (t: PiTest) => {
+    if (running || state !== 'prêt') return;
+    setMenu(false); setRunning(t.id);
+    sink(`# ESSAI : ${t.label}`); sink(`# ${t.hint}`);
+    const f: PyFns = { restaurer: fn('restaurer'), surchauffe: fn('surchauffe'), panne: fn('panne'), batterie: fn('batterie') };
+    t.setup(f, cmd);
+    let maxT = 0, verdict = '';
+    for (let i = 0; i < t.timeout * 4 && !verdict; i++) {
+      await new Promise((res) => setTimeout(res, 250));
+      if (!pyRef.current) return; // fenêtre fermée
+      const e = read();
+      maxT = Math.max(maxT, e.t_dissipateur ?? 0);
+      if (t.expect(e)) verdict = t.ok(e, Math.round(maxT * 10) / 10);
+    }
+    sink(verdict ? `✔ TEST OK : ${verdict}` : `✘ TEST ÉCHEC : rien ne s'est produit en ${t.timeout} s`);
+    fn('surchauffe')(0); // l'état final reste visible sur la page ; seule la force du test est retirée
+    setRunning(null);
   };
 
   return (
@@ -159,7 +220,20 @@ export function PiSimulator({ onClose, shoot }: { onClose: () => void; shoot?: (
             <div className="text-sm font-semibold text-stone-800">Interface web du Pi — simulateur</div>
             <div className="truncate text-[11px] text-stone-500">Le vrai <code>pi/nichoir.py</code> (mode simulé) tourne dans ton navigateur (Pyodide) ; la page est le vrai <code>pi/web/index.html</code>.</div>
           </div>
-          <button onClick={toggleHot} disabled={state !== 'prêt'} aria-pressed={hot} title="Force le dissipateur à 60 °C dès que le Peltier tourne : essai de la coupure de sécurité à 55 °C" className={`rounded px-2.5 py-1 text-xs font-semibold disabled:opacity-40 ${hot ? 'bg-red-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}>🔥 Surchauffe 60 °C</button>
+          <div className="relative">
+            <button onClick={() => setMenu((m) => !m)} disabled={state !== 'prêt' || !!running} aria-expanded={menu} title="Essais automatiques : on provoque une panne ou un cas limite et on vérifie que le programme réagit" className="rounded bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-200 disabled:opacity-40">{running ? 'Essai en cours…' : '🧪 Tests'}</button>
+            {menu && (
+              <div className="absolute top-full right-0 z-10 mt-1 w-80 rounded-lg border border-stone-200 bg-white p-1 shadow-lg">
+                {PI_TESTS.map((t) => (
+                  <button key={t.id} onClick={() => runTest(t)} className="block w-full rounded px-2.5 py-1.5 text-left hover:bg-stone-100">
+                    <div className="text-xs font-semibold text-stone-800">{t.label}</div>
+                    <div className="text-[11px] leading-snug text-stone-500">{t.hint}</div>
+                  </button>
+                ))}
+                <button onClick={() => { setMenu(false); reset(); }} className="mt-1 block w-full rounded border-t border-stone-100 px-2.5 py-1.5 text-left text-xs font-semibold text-stone-600 hover:bg-stone-100">↺ Tout remettre à zéro</button>
+              </div>
+            )}
+          </div>
           <button onClick={onClose} className="rounded px-2 text-xl leading-none text-stone-500 hover:bg-stone-100" title="Fermer (Échap)">×</button>
         </div>
         <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[1fr_20rem]">
@@ -175,7 +249,7 @@ export function PiSimulator({ onClose, shoot }: { onClose: () => void; shoot?: (
               <button onClick={() => setLog([])} className="rounded px-1.5 text-[10px] text-stone-400 hover:bg-stone-800" title="Effacer le terminal">effacer</button>
             </div>
             <pre ref={termRef} className="min-h-0 flex-1 overflow-auto p-3 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">
-              {log.length ? log.map((l, i) => <div key={i} className={l.includes('SÉCURITÉ') || l.startsWith('! ') ? 'text-red-400' : l.startsWith('127.0.0.1') ? 'text-stone-500' : l.startsWith('$') || l.startsWith('#') ? 'text-sky-300' : l.includes('Peltier :') || l.includes('LED') ? 'text-amber-300' : 'text-emerald-300'}>{l}</div>) : <span className="text-stone-600">—</span>}
+              {log.length ? log.map((l, i) => <div key={i} className={l.startsWith('✘') || l.includes('SÉCURITÉ') || l.includes('DÉLESTAGE') || l.startsWith('! ') ? 'text-red-400' : l.startsWith('✔') ? 'font-bold text-lime-300' : l.startsWith('127.0.0.1') ? 'text-stone-500' : l.startsWith('$') || l.startsWith('#') ? 'text-sky-300' : l.includes('Peltier :') || l.includes('LED') ? 'text-amber-300' : 'text-emerald-300'}>{l}</div>) : <span className="text-stone-600">—</span>}
             </pre>
           </div>
         </div>

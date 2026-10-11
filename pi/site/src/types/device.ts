@@ -8,6 +8,7 @@ export interface DeviceErrors {
   bme280?: string;
   ds18b20?: string;
   securite?: string;
+  delestage?: string;
   picamera2?: string;
   batterie?: string;
   camera1?: string;

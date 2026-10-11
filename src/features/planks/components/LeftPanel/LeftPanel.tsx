@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { CollapseButton, SidePanel } from '@/ui';
-import { LaserSection, type CutCfg, type Sheets } from '@/features/laser';
+import { LaserSection, type CutCfg, type LaserMachine, type Sheets } from '@/features/laser';
 import type { NestParams, PlankScene } from '@/planks/model';
 import type { Commit } from '../../types';
 import { NestSection } from '../NestSection';
@@ -19,10 +19,11 @@ export interface LeftPanelProps {
   cutView: boolean;
   setCutView: (v: boolean) => void;
   sheets: Sheets;
+  machine: LaserMachine;
 }
 
 /** Panneau de gauche : « Bois », « Nichoir mésange », « Découpe laser » ; replié, il ne reste qu'une languette ▸ sur la tranche. */
-export function LeftPanel({ open, setOpen, sc, commit, nest, setNest, addNest, cutCfg, setCutCfg, cutView, setCutView, sheets }: LeftPanelProps) {
+export function LeftPanel({ open, setOpen, sc, commit, nest, setNest, addNest, cutCfg, setCutCfg, cutView, setCutView, sheets, machine }: LeftPanelProps) {
   return (
     <SidePanel side="left" open={open} onOpen={() => setOpen(true)} openTitle="Ouvrir le menu" width="w-[22rem]" className="gap-3 overflow-y-auto p-3">
       <header className="flex items-start justify-between gap-2">
@@ -35,7 +36,7 @@ export function LeftPanel({ open, setOpen, sc, commit, nest, setNest, addNest, c
       </header>
       <WoodSection sc={sc} commit={commit} />
       <NestSection sc={sc} nest={nest} setNest={setNest} addNest={addNest} />
-      <LaserSection cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} />
+      <LaserSection cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} />
     </SidePanel>
   );
 }

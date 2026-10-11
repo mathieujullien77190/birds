@@ -3,7 +3,7 @@ import { Hint } from '@/ui';
 import { usePersistentFlag } from '@/hooks';
 import { randomId } from '@/lib';
 import { DocModal, DOCS } from '@/features/docs';
-import { LaserPreview, useLaser } from '@/features/laser';
+import { LaserMachineModal, LaserPreview, useLaser } from '@/features/laser';
 import { SchemaPanel } from '@/features/schema';
 import { makeNest, moveWithGroup, extents, fitHole, newHole, saveHistory, saveScene, loadScene, type Hole, type Plank, type PlankScene, type Vec3 } from '@/planks/model';
 import { PiSimulator } from '@/planks/PiSimulator';
@@ -11,7 +11,7 @@ import { loadPiModel, piModel } from '@/planks/three/piModel';
 import type { View } from '@/planks/three/types';
 import { ContextMenu, CutPanel, HistoryList, HoleWindow, LeftPanel, PiecesList, PullBar, RightPanel, SelectionBar, UndoBar, ViewToolbar } from '../components';
 import { HIDDEN_AT_CREATION, STORAGE } from '../constants';
-import { useCutPlane, useDrawer, useHiddenPlanks, useHistory, useKeyboardShortcuts, useNestParams, usePiCameraShot, useSceneSync, useThreeView } from '../hooks';
+import { useCutPlane, useDrawer, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useThreeView } from '../hooks';
 import type { ContextMenuState, Hover, HoleEdit, PullState } from '../types';
 
 /** Écran du nichoir : vue 3D (Three.js), panneaux gauche / droite, schéma, documents, simulateur du Pi. Garde la scène, la sélection et l'historique. */
@@ -21,13 +21,14 @@ export default function Planks() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [extra, setExtra] = useState<Set<string>>(new Set()); // sélection multiple (Ctrl + clic) en plus de la plaque principale
   const [hover, setHover] = useState<Hover | null>(null); // survol dans le volet « Pièces » : surbrillance dans la 3D
-  const { cutCfg, setCutCfg, cutView, setCutView, sheets, preview } = useLaser(sc);
+  const { cutCfg, setCutCfg, cutView, setCutView, sheets, preview, machine } = useLaser(sc);
   const [pull, setPull] = useState<PullState | null>(null); // face double-cliquée, à tirer
   const pullRef = useRef(pull);
   pullRef.current = pull;
   const [leftOpen, setLeftOpen] = usePersistentFlag(STORAGE.leftOpen); // panneau de gauche replié ou non
   const [rightOpen, setRightOpen] = usePersistentFlag(STORAGE.rightOpen); // panneau de droite (« Pièces » / « Historique ») replié ou non
   const [piOpen, setPiOpen] = useState(false); // simulateur de la page web du Pi (Python exécuté dans le navigateur)
+  const [night, setNight] = usePersistentFlag(STORAGE.night, false); // vue 3D de nuit (la clé n'est pas ouverte par défaut)
   const [schemaOn, setSchemaOn] = usePersistentFlag(STORAGE.schema); // ouvert par défaut ; schéma électrique à côté de la 3D
   const { cut, setCut, cutRef, midOf } = useCutPlane(scRef);
   const { hidden, setHidden, toggleHidden } = useHiddenPlanks(); // pièces cachées dans la 3D (œil du volet « Pièces »)
@@ -63,7 +64,7 @@ export default function Planks() {
   const holeHover = null as { plankId: string; holeId: string } | null; // plus de section « Trous » : plus de trou survolé // trou survolé dans la section « Trous »
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<View | null>(null);
-  const shoot = usePiCameraShot(view, scRef);
+  const shoot = usePiCameraShot(view, scRef, night);
   scRef.current = sc;
   const selRef = useRef(selectedId);
   selRef.current = selectedId;
@@ -86,6 +87,7 @@ export default function Planks() {
   });
 
   useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickRef, setSc, setCut, setCtx, setSelectedId, setHover, pushEntry });
+  useDayNight(view, night); // après useThreeView : la vue existe au montage
   useSceneSync(view, { sc, selectedId, extra, hover, groupSel, holeEdit, holeHover, pull, cut, hidden, piReady });
 
   // ----- actions -----
@@ -156,13 +158,13 @@ export default function Planks() {
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-stone-100 text-stone-800">
-      <LeftPanel open={leftOpen} setOpen={setLeftOpen} sc={sc} commit={commit} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} />
+      <LeftPanel open={leftOpen} setOpen={setLeftOpen} sc={sc} commit={commit} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} />
 
       <main className="relative min-w-0 flex-1" onClick={() => setCtx(null)}>
         <div ref={host} className="h-full w-full" />
         {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
         <UndoBar backLabel={backLabel} onBack={back} />
-        <ViewToolbar schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={() => setPiOpen(true)} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
+        <ViewToolbar schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={() => setPiOpen(true)} night={night} onToggleNight={() => setNight((v) => !v)} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
         {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
         {pull && <PullBar cutOn={cut.on} onDone={() => setPull(null)} />}
         {extra.size > 0 && <SelectionBar count={extra.size + (selectedId ? 1 : 0)} onLink={linkSelection} onUnlink={unlinkSelection} onCancel={() => setExtra(new Set())} />}
@@ -171,6 +173,7 @@ export default function Planks() {
         {editingHole && editingPlank && <HoleWindow plank={editingPlank} hole={editingHole} onChange={(patch) => setHole(editingPlank, editingHole.id, patch)} onClose={() => setHoleEdit(null)} onRemove={() => removeHole(editingPlank, editingHole.id)} />}
       </main>
 
+      {machine.open && <LaserMachineModal m={machine} />}
       {piOpen && <PiSimulator onClose={() => setPiOpen(false)} shoot={shoot} />}
       {docOpen && DOCS.find((d) => d.id === docOpen) && <DocModal doc={DOCS.find((d) => d.id === docOpen)!} onClose={() => setDocOpen(null)} />}
       {schemaOn && <SchemaPanel hover={hover} planks={sc.planks} onHover={(id) => setHover(id ? { plank: id } : null)} />}

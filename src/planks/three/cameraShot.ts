@@ -1,4 +1,4 @@
-import { PerspectiveCamera, SRGBColorSpace, Vector3, WebGLRenderTarget, type Object3D } from 'three';
+import { PerspectiveCamera, PointLight, SRGBColorSpace, Vector3, WebGLRenderTarget, type Object3D } from 'three';
 import type { View } from './types';
 
 /** Vue « au niveau de la caméra » : on rend la scène 3D depuis l'objectif d'une carte caméra (`special = 'camera'`), pour servir d'image au flux vidéo simulé du Pi.
@@ -8,8 +8,8 @@ const cam = new PerspectiveCamera(70, 4 / 3, 1, 5000);
 let target: WebGLRenderTarget | null = null;
 
 /** Image (data URL JPEG) vue par la caméra dont la carte est la mesh `board`. `gray` : rendu infrarouge (NoIR, LED), en niveaux de gris. */
-export function shootCamera(v: View, board: Object3D, label: string, opts: { w?: number; h?: number; fov?: number; gray?: boolean; level?: boolean } = {}): string | null {
-  const { w = 320, h = 240, fov = 70, gray = false, level = false } = opts; // level : horizon redressé (la carte peut être posée de travers, l'image non)
+export function shootCamera(v: View, board: Object3D, label: string, opts: { w?: number; h?: number; fov?: number; gray?: boolean; level?: boolean; ir?: boolean; night?: boolean } = {}): string | null {
+  const { w = 320, h = 240, fov = 70, gray = false, level = false, ir = false, night = false } = opts; // level : horizon redressé (la carte peut être posée de travers, l'image non)
   board.updateMatrixWorld(true);
   const q = board.quaternion;
   const dir = new Vector3(0, 0, -1).applyQuaternion(q), up = new Vector3(0, 1, 0).applyQuaternion(q);
@@ -26,6 +26,9 @@ export function shootCamera(v: View, board: Object3D, label: string, opts: { w?:
   const hide = [v.labels, v.handles, v.targets, v.holeMark, v.pullMark, v.cutMark, board]; // ni cotes, ni poignées, ni la carte elle-même
   const was = hide.map((o) => o.visible);
   hide.forEach((o) => { o.visible = false; });
+  // vision nocturne : les LED infrarouges de la caméra éclairent la scène (lampe ponctuelle posée à l'objectif, le temps de la prise de vue)
+  const lamp = ir ? new PointLight('#ffffff', 2.6, 900, 0) : null;
+  if (lamp) { lamp.position.copy(cam.position); v.scene.add(lamp); }
   const r = v.renderer;
   const prev = r.getRenderTarget();
   r.setRenderTarget(target);
@@ -33,6 +36,7 @@ export function shootCamera(v: View, board: Object3D, label: string, opts: { w?:
   const px = new Uint8Array(w * h * 4);
   r.readRenderTargetPixels(target, 0, 0, w, h, px);
   r.setRenderTarget(prev);
+  if (lamp) v.scene.remove(lamp);
   hide.forEach((o, i) => { o.visible = was[i]; });
 
   const c = document.createElement('canvas');
@@ -41,7 +45,8 @@ export function shootCamera(v: View, board: Object3D, label: string, opts: { w?:
   if (!ctx) return null;
   const img = ctx.createImageData(w, h);
   for (let y = 0; y < h; y++) img.data.set(px.subarray((h - 1 - y) * w * 4, (h - y) * w * 4), y * w * 4); // la lecture WebGL est à l'envers
-  if (gray) for (let i = 0; i < img.data.length; i += 4) { const g = 0.3 * img.data[i] + 0.59 * img.data[i + 1] + 0.11 * img.data[i + 2]; img.data[i] = g * 0.85; img.data[i + 1] = g; img.data[i + 2] = g * 0.85; }
+  if (gray) for (let i = 0; i < img.data.length; i += 4) { const g = 0.3 * img.data[i] + 0.59 * img.data[i + 1] + 0.11 * img.data[i + 2]; img.data[i] = g; img.data[i + 1] = g; img.data[i + 2] = g; }
+  if (night) for (let i = 0; i < img.data.length; i += 4) { const n = (Math.random() - 0.5) * (ir ? 26 : 14); img.data[i] += n; img.data[i + 1] += n; img.data[i + 2] += n; } // grain du capteur la nuit
   ctx.putImageData(img, 0, 0);
   ctx.font = '11px monospace'; ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(0, h - 16, w, 16);
   ctx.fillStyle = '#fff'; ctx.fillText(`${label}  ${new Date().toLocaleTimeString('fr-FR')}`, 6, h - 4);

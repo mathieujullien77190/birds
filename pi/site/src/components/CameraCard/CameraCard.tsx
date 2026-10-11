@@ -11,7 +11,10 @@ export function CameraCard({ title, num, cameraOn, ledOn, errors, onCamera, onLe
         <ToggleButton id={num === 1 ? 'l_nid' : 'l_ext'} on={ledOn} onClick={() => onLed(!ledOn)}>LED infrarouges</ToggleButton>
       </div>
       {/* src constant : le simulateur de l'app remplace l'image par img.src sans que React la réécrive */}
-      <img className="cam" src={`/video/${num}`} alt={`caméra ${num}`} style={{ visibility: cameraOn ? 'visible' : 'hidden' }} />
+      <div className="cam-frame">
+        <img className="cam" src={`/video/${num}`} alt={`caméra ${num}`} style={{ visibility: cameraOn ? 'visible' : 'hidden' }} />
+        {!cameraOn && <div className="cam-off">éteinte</div>}
+      </div>
       <ErrorLine message={cameraError(errors, num)} />
     </Card>
   );

@@ -1,1 +1,4 @@
 img.cam { width: 100%; aspect-ratio: 4 / 3; background: #d6d3d1; border-radius: 8px; object-fit: cover; margin-top: 8px; }
+.cam-frame { position: relative; margin-top: 8px; }
+.cam-frame img.cam { display: block; margin-top: 0; }
+.cam-off { position: absolute; inset: 0; display: grid; place-items: center; background: #000; border-radius: 8px; color: #6b7280; font: 0.95rem ui-monospace, Consolas, monospace; letter-spacing: 0.05em; }

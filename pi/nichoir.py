@@ -36,6 +36,8 @@ def log(msg):
 HOT_MAX = 55.0      # °C sur le dissipateur : au-dessus, le Peltier est coupé
 PWM_MAX = 0.6       # puissance maximale du Peltier (batterie de 6 Ah)
 PERIODE = 5.0       # secondes entre deux lectures
+BATTERIE_BASSE = 20      # % : en dessous, le Peltier est coupé (et refusé) pour économiser l'énergie
+BATTERIE_CRITIQUE = 10   # % : en dessous, les LED infrarouges sont aussi coupées
 CAPACITE_WH = 76.8  # batterie LiFePO4 12,8 V × 6 Ah
 # Consommation estimée (W) de chaque élément quand il est allumé : valeurs usuelles, à remplacer par des mesures (INA219) dès que possible.
 CONSO_W = {"pi": 3.5, "camera": 0.7, "led": 1.2, "peltier_max": 72.0}  # Peltier : 72 W à pleine tension, proportionnel au carré du rapport cyclique (TEC1-12706, ~2 Ω)
@@ -45,6 +47,7 @@ COURBE_LIFEPO4 = [(0, 10.0), (10, 12.0), (20, 12.8), (30, 12.9), (40, 13.0), (70
 # FACULTATIF : mode simulé, pour tester la page sans matériel (ordinateur). Jamais actif par défaut.
 MOCK = os.environ.get("NICHOIR_MOCK") == "1" or "--mock" in sys.argv
 SIM_ACCEL = float(os.environ.get("NICHOIR_MOCK_ACCEL", "10"))  # le temps passe 10 fois plus vite sur la batterie simulée (pour voir le niveau bouger)
+MOCK_PANNES = {"bme": False, "sonde": False}  # pannes simulées (essais depuis le simulateur de l'app)
 MOCK_SURCHAUFFE = float(os.environ.get("NICHOIR_MOCK_SURCHAUFFE", "0"))  # °C : force le dissipateur à cette température quand le Peltier tourne (essai de la coupure)
 
 # ---------------------------------------------------------------- matériel (chaque bloc est optionnel)
@@ -227,8 +230,13 @@ if MOCK:
         if p > 0 and MOCK_SURCHAUFFE:
             cible = max(cible, MOCK_SURCHAUFFE)
         sim["diss"] += (cible - sim["diss"]) * 0.3
-        etat["t_nid"] = round(15 + 3 * math.sin(time.time() / 600 * 2 * math.pi) + sim["decalage"] + random.uniform(-0.2, 0.2), 1)
-        etat["hum_nid"] = round(70 + 10 * math.sin(time.time() / 900 * 2 * math.pi) + random.uniform(-1, 1), 0)
+        if MOCK_PANNES["bme"]:
+            etat["t_nid"] = etat["hum_nid"] = None
+            etat["erreurs"]["bme280"] = "lecture du capteur du nid : pas de réponse (panne simulée)"
+        else:
+            etat["erreurs"].pop("bme280", None)
+            etat["t_nid"] = round(15 + 3 * math.sin(time.time() / 600 * 2 * math.pi) + sim["decalage"] + random.uniform(-0.2, 0.2), 1)
+            etat["hum_nid"] = round(70 + 10 * math.sin(time.time() / 900 * 2 * math.pi) + random.uniform(-1, 1), 0)
         etat["t_dissipateur"] = round(sim["diss"] + random.uniform(-0.2, 0.2), 1)
         # batterie simulée : décharge de la consommation, recharge solaire selon l'heure (0 la nuit, jusqu'à 60 W vers midi)
         h = time.localtime().tm_hour + time.localtime().tm_min / 60
@@ -243,6 +251,10 @@ if MOCK:
 def peltier(sens: str, puissance: float):
     """sens : 'froid' (refroidit le nid), 'chaud' (le réchauffe) ou 'arrêt' ; puissance 0..1 (plafonnée à PWM_MAX)."""
     puissance = max(0.0, min(PWM_MAX, puissance))
+    bas = etat["batterie"]["pourcent"]
+    if sens != "arrêt" and bas is not None and bas < BATTERIE_BASSE:
+        log(f"Peltier refusé : batterie à {bas} % (< {BATTERIE_BASSE} %)")
+        sens = "arrêt"
     if sens not in ("froid", "chaud", "arrêt"):
         sens = "arrêt"
     if sens == "arrêt":
@@ -298,6 +310,8 @@ def lecture():
             etat["erreurs"]["bme280"] = f"lecture du capteur du nid : {e}"
     if SONDE_OK:
         try:
+            if MOCK and MOCK_PANNES["sonde"]:
+                raise OSError("la sonde ne répond pas (panne simulée)")
             if not MOCK:
                 etat["t_dissipateur"] = round(sonde.get_temperature(), 1)
             etat["erreurs"].pop("ds18b20", None)
@@ -307,6 +321,10 @@ def lecture():
                 log("SÉCURITÉ : " + etat["erreurs"]["securite"])
         except Exception as e:
             etat["erreurs"]["ds18b20"] = f"lecture de la sonde : {e}"
+            if etat["peltier"] != "arrêt":  # sans mesure de température le Peltier ne doit pas continuer : on le coupe
+                peltier("arrêt", 0)
+                etat["erreurs"]["securite"] = "Peltier coupé : la sonde du dissipateur ne répond plus"
+                log("SÉCURITÉ : " + etat["erreurs"]["securite"])
     if BAT_OK and not MOCK:
         try:
             v = ina_bat.voltage()
@@ -314,6 +332,18 @@ def lecture():
             etat["erreurs"].pop("batterie", None)
         except Exception as e:
             etat["erreurs"]["batterie"] = f"lecture de la batterie : {e}"
+    pc = etat["batterie"]["pourcent"]  # délestage : on coupe d'abord le Peltier (le plus gourmand), puis les LED
+    if pc is not None and pc < BATTERIE_BASSE:
+        if etat["peltier"] != "arrêt":
+            peltier("arrêt", 0)
+        if pc < BATTERIE_CRITIQUE and (etat["led_nid"] or etat["led_ext"]):
+            leds(False, False)
+        niveau = "Peltier et LED coupés" if pc < BATTERIE_CRITIQUE else "Peltier coupé"
+        if etat["erreurs"].get("delestage") is None:
+            log(f"DÉLESTAGE : batterie à {pc} % : {niveau}")
+        etat["erreurs"]["delestage"] = f"Batterie à {pc} % : {niveau} pour économiser l'énergie"
+    else:
+        etat["erreurs"].pop("delestage", None)
     etat["conso"] = consommation()
     etat["derniere_lecture"] = time.strftime("%H:%M:%S")
     log(f"nid {etat['t_nid']} °C, {etat['hum_nid']} % · dissipateur {etat['t_dissipateur']} °C · Peltier {etat['peltier']} {round(etat['puissance'] * 100)} %" + (f" · conso {etat['conso']['total_w']} W · batterie {etat['batterie']['pourcent']} %" if etat["batterie"]["pourcent"] is not None else f" · conso {etat['conso']['total_w']} W"))
