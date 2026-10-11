@@ -38,7 +38,7 @@ export function plankGeometry(p: Plank, scene_t: number): PartGeometry {
  * Tout ce qui change la forme ou la couleur d'une plaque : dimensions, crans, trous, épaisseur, chemin, profondeur, couleur, contour libre, haut incliné, type spécial,
  * et la présence du modèle 3D du Pi. Clé de cache de la géométrie d'une `PlankMesh`.
  */
-export const plankShapeKey = (p: Plank, t: number): string => JSON.stringify([p.w, p.h, p.notches, p.holes, t, p.path, p.depth, p.color, p.poly, p.special, p.special === 'pi' && !!piModel, p.material]);
+export const plankShapeKey = (p: Plank, t: number): string => JSON.stringify([p.w, p.h, p.notches, p.holes, t, p.path, p.depth, p.wood, p.color, p.poly, p.special, p.special === 'pi' && !!piModel, p.material]);
 
 const PLANK_ROUGHNESS = 0.85;
 

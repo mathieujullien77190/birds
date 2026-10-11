@@ -20,6 +20,8 @@ export interface Plank {
   special?: 'camera' | 'ir' | 'bar' | 'pi' | 'cable' | 'wire' | 'case' | 'block' | 'sensor' | 'fan' | 'driver' | 'solar' | 'doc' | 'conduit';
   /** « block » (pavé) ou plaque d'un autre matériau (`material`) : épaisseur réelle selon z, au lieu de l'épaisseur du bois. */
   depth?: number;
+  /** Caméra, LED infrarouges, capteur : épaisseur de bois que traverse leur corps (lentille, LED, puce). La carte s'appuie sur une face du bois, le bout du corps affleure l'autre face. */
+  wood?: number;
   /** « wire » : couleur du fil (CSS). */
   color?: string;
   /** « cable » : chemin de la nappe (points, dans le repère local de la plaque, posée en pos = 0) ; w = largeur de la nappe. */

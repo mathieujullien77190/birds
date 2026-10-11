@@ -6,7 +6,7 @@ export const STORAGE = {
   schema: 'plaques-schema', // schéma électrique à côté de la 3D
   cut: 'plaques-coupe', // axe et côté du plan de coupe
   hidden: 'plaques-caches', // pièces cachées dans la 3D
-  nest: 'plaques-nichoir-2', // réglages du nichoir
+  nest: 'plaques-nichoir-3', // réglages du nichoir
 } as const;
 
 /** Types de pièces cachées d'office quand on crée un nichoir : isolant, barres du toit, pan de toit en chêne (l'œil de « Pièces » les affiche). */

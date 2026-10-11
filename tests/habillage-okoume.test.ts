@@ -43,11 +43,12 @@ describe('habillage en contreplaqué okoumé extérieur 5 mm, peint en blanc, d�
 
 describe('boîte carrée crénelée de la caméra 2 (okoumé 5 mm peint)', () => {
   const sc = buildNest({}), t = sc.t, box = sc.planks.filter((p) => /^Boîte caméra 2/.test(p.name));
-  it('six plaques crénelées en okoumé, avec trou d\'objectif, fenêtre des LED et fente du dessus ; carrée en plan', () => {
+  it('six plaques crénelées en okoumé, avec trou d\'objectif, fenêtre des LED et fente latérale ; carrée en plan', () => {
     expect(box).toHaveLength(6);
     for (const p of box) { expect(p.material).toBe('okoume'); expect(p.depth).toBe(5); expect(p.color).toBe('#f5f5f4'); expect(p.notches.length, p.name).toBeGreaterThan(2); expect(p.notches.every((n) => n.depth === 5), p.name).toBe(true); }
     const f = box.find((p) => /face avant/.test(p.name))!, top = box.find((p) => /dessus/.test(p.name))!;
-    expect(f.holes.map((h) => h.size).sort((a, b) => a - b)).toEqual([6, 12]); expect(top.holes).toHaveLength(1);
+    expect(f.holes.map((h) => h.size).sort((a, b) => a - b)).toEqual([10, 12]); expect(top.holes).toHaveLength(0); // plus de fente au-dessus : nappe et fils passent par le côté
+    expect(box.filter((p) => p.holes.length === 1 && /côté/.test(p.name))).toHaveLength(1);
     expect(top.w).toBe(top.h);
   });
   it('contient la caméra 2 et la carte de LED, sans toucher l\'habillage ni le pan de chêne', () => {
@@ -61,6 +62,30 @@ describe('boîte carrée crénelée de la caméra 2 (okoumé 5 mm peint)', () =>
       for (const l of lames) { const A = aabb(l, t); expect(c.x > A.min.x && c.x < A.max.x && c.y > A.min.y && c.y < A.max.y && c.z > A.min.z && c.z < A.max.z, `${p.name} dans ${l.name}`).toBe(false); }
     }
     const front = Math.min(...lames.filter((l) => /avant/.test(l.name)).map((l) => aabb(l, t).min.y));
-    expect(mx.y, 'jeu avec la façade').toBeLessThanOrEqual(front - 2.5);
+    expect(mx.y, 'collée à la façade : contact, sans pénétration').toBeLessThanOrEqual(front + 1e-6); expect(mx.y, 'collée à la façade').toBeGreaterThanOrEqual(front - 0.3);
+    // contact aussi sur les autres tailles de nichoir
+    for (const over of [{ hole: 120 }, { l: 200, L: 200 }]) {
+      const s2 = buildNest(over), b2 = s2.planks.filter((p) => /^Boîte caméra 2/.test(p.name)), f2 = Math.min(...s2.planks.filter((l) => /^Lambris avant/.test(l.name)).map((l) => aabb(l, s2.t).min.y));
+      const m2 = Math.max(...b2.flatMap((p) => corners(p, s2.t).map((c) => c.y)));
+      expect(m2).toBeLessThanOrEqual(f2 + 1e-6); expect(m2).toBeGreaterThanOrEqual(f2 - 0.3);
+    }
+  });
+});
+
+describe('lames de l\'habillage : aucun petit bout de bois au-dessus d\'une fenêtre', () => {
+  const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if ((yi > pt[1]) !== (yj > pt[1]) && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
+  for (const [nom, over] of Object.entries(VARIANTS)) it(`(${nom}) le bois au-dessus de la fenêtre la plus haute fait au moins 15 mm, ou la lame s'arrête au bas de la fenêtre`, () => {
+    const sc = buildNest(over);
+    for (const l of sc.planks.filter((p) => /^Lambris (avant|arrière)/.test(p.name))) {
+      const poly = l.poly ?? [], solid = (x: number, y: number) => inPoly([x, y], poly) && !l.holes.some((h) => h.shape === 'round' ? Math.hypot(x - h.x, y - h.y) < h.size / 2 : Math.abs(x - h.x) < h.size / 2 && Math.abs(y - (h.y)) < (h.sh ?? h.size) / 2);
+      for (let x = -l.w / 2 + 0.5; x < l.w / 2; x += 1) {
+        // du haut vers le bas : longueur de la première coulée de bois qui sort du haut de la lame, puis y a-t-il du vide en dessous (une fenêtre) ?
+        let top = l.h / 2, y = top - 0.25, run = 0;
+        while (y > -l.h / 2 && solid(x, y)) { run += 0.5; y -= 0.5; }
+        const gapBelow = y > -l.h / 2 + 0.5;
+        let wv = 1; for (const dir of [-1, 1]) for (let xx = x + dir; Math.abs(xx) < l.w / 2 && !solid(xx, y - 0.25); xx += dir) wv++; // largeur du vide : une fente étroite (nervure, barre) laisse un pont qui tient, pas une languette
+        if (gapBelow && run > 0.25 && wv >= 15) expect(run, `${l.name} x=${x.toFixed(1)} : bout de ${run} mm au-dessus d'un vide`).toBeGreaterThanOrEqual(15);
+      }
+    }
   });
 });

@@ -1,6 +1,6 @@
 import { type Vec3, type Pt, type Edge, type Notch, type Hole, type Plank, type PlankScene, type NestParams } from '../types';
 import { r2, uid } from '../util';
-import { SENSOR_X, LENS_HOLE, CAM_W, IR_W, CAM_X, PI_CSI2, PI_W, PI_CSI, PI_PIN_Y, PI_PIN_X0, CAM_Y, SENSOR_Y, CAM_H, IR_H, IR_X, CAM2_L, CAM2_D, CAM2_H, CAM2_CX, CAM2_IX, CAM2_GAP, OKOUME_T, OKOUME_COLOR, PI_H, FAN, FAN_T, FAN_OPEN, FAN_PLOT } from '../constants';
+import { SENSOR_CHIP_DX, SENSOR_X, LENS_HOLE, CAM_W, IR_W, CAM_X, PI_CSI2, PI_W, PI_CSI, PI_PIN_Y, PI_PIN_X0, CAM_Y, SENSOR_Y, CAM_H, IR_H, IR_X, CAM2_L, CAM2_D, CAM2_H, CAM2_CX, CAM2_IX, CAM2_GAP, OKOUME_T, OKOUME_COLOR, PI_H, FAN, FAN_T, FAN_OPEN, FAN_PLOT } from '../constants';
 import { fitHole, rectUnion } from '../geometry/holes';
 import { teethFor, recastAll } from '../geometry/castellation';
 import { outline } from '../geometry/outline';
@@ -9,7 +9,7 @@ import { slotsForTeeth } from '../geometry/face';
 import { makeBox } from './box';
 import { CAMERA_NAMES } from './cameras';
 import { summerLayout, PLUG_HANDLE } from './winter';
-import { fromAxisAngle, multiply, rotate } from '../math/rotation';
+import { fromAxisAngle, fromEulerDeg, multiply, rotate } from '../math/rotation';
 
 /**
  * Nichoir à double paroi en deux modules :
@@ -155,7 +155,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const CAMX0 = -n.cam / 2, CAMX1 = r2(SENSOR_X + 19.5 / 2 + 4.5), CAMW = r2(CAMX1 - CAMX0), CAMCX = r2((CAMX0 + CAMX1) / 2);
   const roofParts0 = roofBox.planks.map((p) => {
     const q: Plank = { ...p, name: p.name.replace(/ (\d+)$/, ' toit $1'), pos: [p.pos[0], p.pos[1], p.pos[2] + bodyH] as Vec3, group: roofGroup };
-    if (/^Dessous/.test(p.name)) q.holes = [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: SENSOR_X, y: SENSOR_Y, size: 19.5, sh: 19.5 }), // logement du capteur (PIM472 : 19 × 19), incrusté à fleur du plafond (ses broches sortent dans l'isolant)
+    if (/^Dessous/.test(p.name)) q.holes = [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: r2(SENSOR_X + SENSOR_CHIP_DX), y: SENSOR_Y, size: 9, sh: 9 }), // logement de la PUCE seule (6 × 6, jeu 1,5) : la carte (19 × 19) s'appuie sur le plafond, la puce traverse et affleure le dessous
       fitHole(q, { id: uid(), shape: 'square' as const, x: FANX, y: FOP_YC, size: FAN_OPEN, sh: FOP_H })]; // ouverture du ventilateur dans le plafond du nid (56 de large)
     if (n.cam <= 0) return q;
     if (/^Dessus/.test(p.name)) return { ...q, holes: [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: CAMCX, y: CAM_Y, size: CAMW, sh: n.cam })] }; // on accède au compartiment par le haut
@@ -205,19 +205,28 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     cam2Y = -D / 2 - lamT - CAM2_GAP - yMax; cam2Cz = underside(cam2Y + yMin) - zMax - 2;
   }
   const cam2Pt = (lx: number, ly: number, lz: number): Vec3 => { const v = rotate([lx, ly, lz], cam2Q); return [r2(cam2X + v[0]), r2(cam2Y + v[1]), r2(cam2Cz + v[2])]; }; // repère de la boîte, centré
-  const CAM2_YC = -CAM2_D / 2 + OKOUME_T + 10; // la carte de la caméra et celle des LED : debout, à 10 mm de la face avant (l'objectif est devant)
+  const CAM2_YC = r2(-CAM2_D / 2 + OKOUME_T + 0.8); // la carte de la caméra et celle des LED : debout, CONTRE la face intérieure de la face avant (leur corps traverse le bois et affleure la face extérieure)
+  // côté de la boîte qui regarde l'habillage (normale vers +y) : la nappe et les fils y entrent par une fente, juste en face de la fente de la plaque avant du toit
+  const slitSide = rotate([1, 0, 0], cam2Q)[1] >= 0 ? 1 : -1, SLIT_Z = 11;
+  const lyForX = (xt: number, lz: number): number => { const a = cam2Pt(slitSide * (CAM2_L / 2 + 6), 0, lz)[0], b = cam2Pt(slitSide * (CAM2_L / 2 + 6), 10, lz)[0], k = (b - a) / 10; return Math.abs(k) < 0.15 ? 0 : r2(Math.max(-12, Math.min(16, (xt - a) / k))); }; // ordonnée (repère de la boîte) pour que le point de la fente tombe à l'abscisse monde xt
+  const slitYs = { r: lyForX(cam2X - 10, 12.5), w: [lyForX(cam2X - 10 - 10.5, 9), lyForX(cam2X - 10 - 13, 9)] };
+  const slitLo = Math.min(slitYs.r - 9, ...slitYs.w.map((y) => y - 2.5)), slitHi = Math.max(slitYs.r + 9, ...slitYs.w.map((y) => y + 2.5));
   const camBox: Plank[] = n.cam2 ? (() => {
     const bx = makeBox(CAM2_L, CAM2_D, CAM2_H, OKOUME_T, fit, start);
     const planksBox: Plank[] = bx.planks.map((q0) => {
       const q: Plank = { ...q0, name: 'Boîte caméra 2 : ' + q0.name.replace(/ \d+$/, '').replace(/^F/, 'f').replace(/^C/, 'c').replace(/^D/, 'd'), pos: [q0.pos[0], q0.pos[1], r2(q0.pos[2] - CAM2_H / 2)] as Vec3, group: elecGroup, depth: OKOUME_T, material: 'okoume' as const, color: OKOUME_COLOR };
-      if (/^Face avant/.test(q0.name)) return { ...q, holes: [...q.holes, { id: uid(), shape: 'round' as const, x: CAM2_CX, y: 0, size: 12 }, { id: uid(), shape: 'square' as const, x: CAM2_IX, y: 0, size: 6, sh: 20 }] }; // trou d'objectif Ø 12 et fenêtre des 4 LED infrarouges (6 × 20)
-      if (/^Dessus/.test(q0.name)) return { ...q, holes: [...q.holes, { id: uid(), shape: 'square' as const, x: 0, y: CAM2_YC, size: 34, sh: 9 }] }; // fente de la nappe (16 de large) et des deux fils des LED
+      if (/^Face avant/.test(q0.name)) return { ...q, holes: [...q.holes, { id: uid(), shape: 'round' as const, x: CAM2_CX, y: 0, size: 12 }, { id: uid(), shape: 'square' as const, x: CAM2_IX, y: 0, size: 10, sh: 17 }] }; // trou d'objectif Ø 12 (objectif Ø 7,4 : jeu 2,3) et fenêtre des 4 LED infrarouges 10 × 17 (LED à ± 4,6 × ± 7,6 : jeu 0,4 / 0,9)
+      if (slitSide > 0 ? /^Côté droit/.test(q0.name) : /^Côté gauche/.test(q0.name)) return { ...q, holes: [...q.holes, { id: uid(), shape: 'square' as const, x: r2((slitLo + slitHi) / 2), y: SLIT_Z - 0, size: r2(slitHi - slitLo), sh: 6.4 }] }; // fente de la nappe (16 de large) et des deux fils des LED, dans le CÔTÉ qui touche l'habillage (≥ 3 mm de bois en haut)
       return q;
     });
-    const cam2: Plank = { id: uid(), name: CAMERA_NAMES[1], w: CAM_W, h: CAM_H, pos: [CAM2_CX, CAM2_YC, 0] as Vec3, rot: [-90, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'camera' };
-    const ir2: Plank = { id: uid(), name: 'LED infrarouges extérieures', w: IR_W, h: IR_H, pos: [CAM2_IX, CAM2_YC, 0] as Vec3, rot: [-90, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir' }; // à côté de la caméra 2, tournée comme elle
+    const cam2: Plank = { id: uid(), name: CAMERA_NAMES[1], w: CAM_W, h: CAM_H, pos: [CAM2_CX, CAM2_YC, 0] as Vec3, rot: [-90, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'camera', wood: OKOUME_T };
+    const ir2: Plank = { id: uid(), name: 'LED infrarouges extérieures', w: IR_W, h: IR_H, pos: [CAM2_IX, CAM2_YC, 0] as Vec3, rot: [-90, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir', wood: OKOUME_T }; // à côté de la caméra 2, tournée comme elle
     const all = [...planksBox, cam2, ir2], ids = new Set(all.map((q) => q.id));
-    return transformPlanks({ t, fit, planks: all }, ids, [cam2X, cam2Y, cam2Cz], cam2Q, [0, 0, 0]).planks;
+    const moved = transformPlanks({ t, fit, planks: all }, ids, [cam2X, cam2Y, cam2Cz], cam2Q, [0, 0, 0]).planks;
+    // les rotations sont arrondies au degré : on mesure les vrais coins de la boîte et on la recule en y pour qu'elle TOUCHE l'habillage (contact à CAM2_GAP près, jamais dedans)
+    const boxMaxY = Math.max(...moved.filter((q) => /^Boîte caméra 2/.test(q.name)).flatMap((q) => { const qr = fromEulerDeg(q.rot); return ([-1, 1] as const).flatMap((a) => ([-1, 1] as const).flatMap((b) => ([-1, 1] as const).map((c) => q.pos[1] + rotate([a * q.w / 2, b * q.h / 2, c * (q.depth ?? t) / 2], qr)[1]))); }));
+    const dy = r2(-D / 2 - lamT - CAM2_GAP - boxMaxY);
+    return moved.map((q) => ({ ...q, pos: [q.pos[0], r2(q.pos[1] + dy), q.pos[2]] as Vec3 }));
   })() : [];
   const brackets: Plank[] = n.solar ? U_YS.map((y, k): Plank => ({ id: uid(), name: `Étrier régulateur ${k + 1}`, w: U_W, h: U_H, pos: [RGX, r2(y), r2(U_TEN - U_H / 2)] as Vec3, rot: rotFromBasis([1, 0, 0], [0, 0, 1]), notches: [{ id: uid(), edge: 'top' as const, pos: U_W / 2, width: U_W - 2 * U_ARM, depth: U_H - 9 }], holes: [], group })) : []; // les tenons (3 mm du haut des bras) affleurent le dessus du fond (z = +3), le fond de l'encoche est 1 mm sous le régulateur
   const LAM_T = OKOUME_T, LAM_W = 46, LAM_DOWN = n.solar ? 45 : 10, LAM_FRONT_GAP = 1.5; // habillage en contreplaqué okoumé extérieur de 5 mm, peint en blanc, découpé au laser : lames de ~46 (largeur exacte (W + 2·LAM_T) / k), toutes de la même largeur ; LAM_FRONT_GAP = jeu (mm) sous le pan de chêne devant
@@ -238,8 +247,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   }));
   const keys: Plank[] = RIB_XS.flatMap((x, k) => RIB_TEETH_Z.slice(0, 2).map(([za, zb], j): Plank => ({ id: uid(), name: `Clavette fixation ${k + 1}.${j + 1}`, w: r2(RIB_T + 6), h: r2(zb - za - 12 - 0.5), pos: [x, r2(D / 2 - t - RIB_KEY / 2), r2((za + zb) / 2)] as Vec3, rot: rotFromBasis([1, 0, 0], [0, 0, 1]), notches: [], holes: [], group }))); // clavette de 3, contre la face intérieure du mur : traverse les trois plaques par leur trou, dépasse de 3 de chaque côté seulement, contre la face intérieure du mur
   const camera: Plank[] = n.cam > 0 ? [
-    { id: uid(), name: CAMERA_NAMES[0], w: CAM_W, h: CAM_H, pos: [CAM_X, CAM_Y, floorTop + 6.6] as Vec3, rot: [0, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'camera' },
-    { id: uid(), name: 'LED infrarouges', w: IR_W, h: IR_H, pos: [IR_X, CAM_Y, floorTop + 0.8] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir' },
+    { id: uid(), name: CAMERA_NAMES[0], w: CAM_W, h: CAM_H, pos: [CAM_X, CAM_Y, floorTop + 0.8] as Vec3, rot: [0, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'camera', wood: t }, // carte posée sur le plafond, l'objectif traverse le trou et affleure le dessous
+    { id: uid(), name: 'LED infrarouges', w: IR_W, h: IR_H, pos: [IR_X, CAM_Y, floorTop + 0.8] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir', wood: t },
   ] : [];
   // cadre sous le toit, en trois planches collées : une planche haute et une basse, et entre elles une planche percée de fentes rectangulaires
   // (de chaque côté, d'avant en arrière) où passent les barres de bois qui traversent aussi les murs avant et arrière : le toit tient ;
@@ -272,7 +281,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // la nappe de la caméra (câble plat) : du connecteur de la caméra, elle monte par l'ouverture du toit puis court sur le toit jusqu'au connecteur du Pi
   // la nappe sort à l'HORIZONTALE du connecteur de la caméra (côté arrière), monte par l'ouverture, puis arrive à l'horizontale dans le connecteur du Pi par le côté gauche
   // (le jack audio bouche le côté droit) ; sa largeur (16) est dans l'axe de chaque connecteur
-  const camZc = floorTop + 6.6 + 2.1; // hauteur du connecteur de la caméra
+  const camZc = floorTop + 0.8 + 2.1; // hauteur du connecteur de la caméra
   const piZc = piZ + PI_CSI[2] - 2.6; // hauteur moyenne du connecteur du Pi (0,8 à 6,1 au-dessus du centre de la carte)
   // la nappe de la caméra 2 : LONGUE (la caméra est dehors) ; elle part du 2ᵉ port du Pi, court sur le dessus du toit, SORT par le trou de la plaque avant du toit et redescend jusqu'au connecteur de la caméra
   const MX = -50, MY = -16, MZ = topZ + 3; // module 2 × MOSFET des LED (20 × 14 × 6), posé sur le dessus du toit devant le Pi
@@ -287,19 +296,20 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   ] : [];
   const wires2: Plank[] = n.cam2 ? ([['Fil 5 V LED extérieures (rouge)', '#dc2626', 0, 0, -10.5], ['Fil masse LED extérieures (noir)', '#111827', 9, 0, -13]] as const).map(([nm, color, pinIdx, _r, dx]): Plank => {
     const [xt, yt] = pw(PI_PIN_X0 + pinIdx * 2.54, PI_PIN_Y), sx = cam2X - 10 + dx, yw = -D / 2, zs = topZ + 28; // tous les deux à GAUCHE de la nappe (à 10,5 et 13 mm de son axe ; elle fait 16 de large, la fente 28) : jamais dessus, jamais croisée
-    const end = cam2Pt(CAM2_IX + dx / 8, CAM2_YC, IR_H / 2 + 2), above = cam2Pt(CAM2_IX + dx / 8, CAM2_YC, CAM2_H / 2 + 8), high = cam2Pt(CAM2_IX + dx / 8, CAM2_YC, CAM2_H / 2 + 30); // les fils entrent par la fente du dessus de la boîte, au-dessus de la carte de LED
+    const ys = slitYs.w[dx === -10.5 ? 0 : 1], other = slitYs.w[dx === -10.5 ? 1 : 0], ex = CAM2_IX + slitSide * (ys > other ? -1.5 : 1.5); // les fils entrent par la fente du CÔTÉ de la boîte (celui qui touche l'habillage), puis rejoignent le haut de la carte de LED sans se croiser
+    const sOut = cam2Pt(slitSide * (CAM2_L / 2 + 6), ys, 9), sIn = cam2Pt(slitSide * (CAM2_L / 2 - 6), ys, 9), turn = cam2Pt(ex, ys, 9), back = cam2Pt(ex, CAM2_YC + 4, 9), end = cam2Pt(ex, CAM2_YC + 2, IR_H / 2 + 1.5);
     return { id: uid(), name: nm, w: 1.2, h: 1.2, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'wire' as const, color,
-      path: [...(pinIdx === 9 ? [[MX + 4, MY - 7, MZ + 4], [MX + 4, MY - 12, MZ + 10], [sx + 10, -34, topZ + 24]] as Vec3[] : [[xt, yt, piZ + 3.5], [xt, yt, piZ + 10], [xt + dx, yt - 10, topZ + 27]] as Vec3[]), [sx, -46, zs + 1], [sx, yw + 12, zs], [sx, yw, zs], [sx, yw - 5, zs], [sx - 2, (yw + cam2Y) / 2, (zs + high[2]) / 2 + 2], high, above, end] as Vec3[] };
+      path: [...(pinIdx === 9 ? [[MX + 4, MY - 7, MZ + 4], [MX + 4, MY - 12, MZ + 10], [sx + 10, -34, topZ + 24]] as Vec3[] : [[xt, yt, piZ + 3.5], [xt, yt, piZ + 10], [xt + dx, yt - 10, topZ + 27]] as Vec3[]), [sx, -46, zs + 1], [sx, yw + 12, zs], [sx, yw, zs], [sx, yw - 5, zs], sOut, sIn, turn, back, end] as Vec3[] };
   }) : [];
   const cable2: Plank[] = n.cam2 ? [{
     id: uid(), name: 'Nappe caméra 2 (longue, vers l\'extérieur)', w: 16, h: 0.3, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'cable' as const,
     path: (() => {
       const [xt, yt] = pw(PI_CSI2[0], PI_CSI2[1]);
-      const con = cam2Pt(CAM2_CX, CAM2_YC, CAM_H / 2), up = cam2Pt(CAM2_CX, CAM2_YC, CAM2_H / 2 + 8); // connecteur en haut de la caméra, qui pend dehors sous le débord
+      const con = cam2Pt(CAM2_CX, CAM2_YC + 2.1, 11), s3 = cam2Pt(CAM2_CX, CAM2_YC + 2.1, 13.5); // connecteur en haut de la caméra : la nappe entre dans la boîte par la fente du CÔTÉ qui touche l'habillage, passe derrière la carte de LED et descend dans le connecteur
+      const sOut = cam2Pt(slitSide * (CAM2_L / 2 + 6), slitYs.r, 12.5), sIn = cam2Pt(slitSide * (CAM2_L / 2 - 6), slitYs.r, 12.5), sMid = cam2Pt(CAM2_CX + slitSide * 8, -17, 13.5);
       const yw = -D / 2, zs = topZ + 28; // la fente de la plaque avant : la nappe la traverse bien à plat, perpendiculaire à la plaque
-      const yo = Math.max(yw - 8, (yw + cam2Y) / 2); // deuxième point dehors : elle s'écarte du mur avant de plonger
       const sx = cam2X - 10; // la fente est dans la première lame de l'habillage, loin du joint ; la nappe monte tout de suite et passe AU-DESSUS de tout (convertisseur compris) jusqu'à la fente, haute, de la plaque avant
-      return [[xt, yt, piZ + 1], [xt, yt - 6, piZ + 3], [xt, yt - 14, piZ + 10], [xt - 4, -8, topZ + 26], [sx, -46, zs + 1], [sx, yw + 12, zs], [sx, yw, zs], [sx, yw - 5, zs], [sx, yo, (zs + up[2]) / 2 + 2], [up[0], up[1], up[2]], con] as Vec3[];
+      return [[xt, yt, piZ + 1], [xt, yt - 6, piZ + 3], [xt, yt - 14, piZ + 10], [xt - 4, -8, topZ + 26], [sx, -46, zs + 1], [sx, yw + 12, zs], [sx, yw, zs], [sx, yw - 5, zs], sOut, sIn, sMid, s3, con] as Vec3[];
     })(),
   }] : [];
   const cable: Plank[] = n.cam > 0 ? [{
@@ -406,7 +416,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   ] : [];
   // CAPTEUR température / humidité (BME280) : toujours présent, incrusté à fleur du plafond du nid (puce vers le bas), quatre fils vers le GPIO du Pi (par une fente du dessus du toit, dans l'isolant)
   const sensorSet: Plank[] = [
-    { id: uid(), name: 'Capteur température / humidité (BME280, 19 × 19)', w: 19, h: 19, pos: [SENSOR_X, SENSOR_Y, bodyH + 2.2] as Vec3, rot: [180, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'sensor' as const },
+    { id: uid(), name: 'Capteur température / humidité (BME280, 19 × 19)', w: 19, h: 19, pos: [SENSOR_X, SENSOR_Y, floorTop + 0.8] as Vec3, rot: [180, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'sensor' as const, wood: t },
     ...([['Fil 3,3 V (rouge)', '#dc2626', 0, 0], ['Fil SDA (jaune)', '#eab308', 1, 1], ['Fil SCL (vert)', '#16a34a', 2, 2], ['Fil masse (noir)', '#111827', 4, 3]] as const).map(([nm, color, pinIdx, k]): Plank => {
       const sx = SENSOR_X - 3.75 + k * 2.5, px = PI_PIN_X0 + pinIdx * 2.54, hh = topZ + 24 + k * 2;
       return wire(nm, color, [[sx, SENSOR_Y - 7.5, bodyH + 6], [sx, SENSOR_Y - 4, bodyH + 12], [sx, SENSOR_Y + 2, bodyH + 22], [sx, SENSOR_Y + 2, topZ + 6], [sx, SENSOR_Y + 2, hh], [...pw(px, PI_PIN_Y - 2.54), hh], [...pw(px, PI_PIN_Y - 2.54), piZ + 3.5]] as Vec3[]);
@@ -582,8 +592,12 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     // façade et arrière : CHAQUE LAME EST UNE SEULE PLANCHE de largeur fixe (sx), percée de ses fenêtres (trous rectangulaires) ; une fenêtre qui mord sur le bord d'une lame
     // devient une encoche de ce bord ; seule une fenêtre qui traverse TOUTE la largeur d'une lame (la grande aération) la coupe en deux planches (dessous / dessus)
     type R = [number, number, number, number];
-    const lame = (name: string, xa: number, xb: number, yFace: number, zBot: number, zTop: number, wins: R[], round: { x: number; z: number; d: number } | null) => {
+    const LAM_STUB = 15; // hauteur minimale du bois laissé au-dessus d'une fenêtre
+    const lame = (name: string, xa: number, xb: number, yFace: number, zBot: number, zTop0: number, wins: R[], round: { x: number; z: number; d: number } | null) => {
       const E = 0.01;
+      // une fenêtre qui laisserait au-dessus d'elle un bout de bois de moins de LAM_STUB mm de haut : la lame s'arrête au BAS de la fenêtre (haut plat sur toute la largeur, plus de languette ni de lambeau)
+      const stubs = wins.filter(([wa, za, wb, zb]) => Math.min(wb, xb) - Math.max(wa, xa) >= 15 && za > zBot + 1 && za < zTop0 && zTop0 - zb > E && zTop0 - zb < LAM_STUB);
+      const zTop = stubs.length ? Math.min(...stubs.map((w) => w[1])) : zTop0;
       const clipped: R[] = wins.map(([wa, za, wb, zb]): R => [Math.max(wa, xa), Math.max(za, zBot), Math.min(wb, xb), Math.min(zb, zTop)]).filter(([wa, za, wb, zb]) => wb - wa > E && zb - za > E);
       const full = clipped.filter(([wa, , wb]) => wa <= xa + E && wb >= xb - E).sort((p, q) => p[1] - q[1]); // traversent toute la lame : la coupent en morceaux selon z
       const zs: [number, number][] = []; let z = zBot;

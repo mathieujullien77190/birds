@@ -36,7 +36,7 @@ describe('makeNest : dimensions déduites des réglages', () => {
     const ins = 39, roofH = 2 * t + ins, e = t + ins;
     const W = 120 + 2 * (2 * t + ins);
     expect(W).toBe(210);
-    const bodyH = 130 + 28 + 20 + 2 * t + 2 * e - roofH;
+    const bodyH = 130 + 32 + 20 + 2 * t + 2 * e - roofH;
     const front = byName(planks, /^Face avant ext$/);
     expect(front.w).toBe(W);
     expect(front.h).toBe(bodyH);
@@ -223,7 +223,7 @@ describe("habillage : trou d'envol dans la façade", () => {
       const e = entry({ l, L: l });
       expect(e, `l = ${l}`).toHaveLength(1);
       expect(e[0].name.endsWith('(percé)')).toBe(true);
-      expect(e[0].holes.find((h) => h.shape === 'round')).toMatchObject({ x: 0, size: 28 });
+      expect(e[0].holes.find((h) => h.shape === 'round')).toMatchObject({ x: 0, size: 32 });
       expect(e[0].pos[0]).toBeCloseTo(0, 9);
     }
   });

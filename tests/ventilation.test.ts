@@ -465,7 +465,7 @@ describe('capteur BME280 dans le compartiment de la caméra', () => {
     const cb = union(walls, t); // empreinte extérieure du compartiment
     const x0 = cb.min.x + t, x1 = cb.max.x - t, y0 = cb.min.y + t, y1 = cb.max.y - t; // intérieur
     expect(sensor.pos[0] - 9.75).toBeGreaterThan(x0); expect(sensor.pos[0] + 9.75).toBeLessThan(x1); expect(sensor.pos[1] - 9.25).toBeGreaterThan(y0); expect(sensor.pos[1] + 9.25).toBeLessThan(y1);
-    const hole = floor.holes.find((h) => h.shape === 'square' && Math.abs(h.x - sensor.pos[0]) < 0.01 && Math.abs(h.size - 19.5) < 0.01)!;
+    const hole = floor.holes.find((h) => h.shape === 'square' && Math.abs(h.x - (sensor.pos[0] - 1.5)) < 0.01 && Math.abs(h.size - 9) < 0.01)!; // logement de la puce seule (la carte s'appuie sur le plafond)
     expect(hole).toBeTruthy(); expect(ligament(floor, hole).min).toBeGreaterThanOrEqual(4.5 - 1e-6);
     // l'ouverture du dessus couvre tout l'intérieur du compartiment ; plus de fente à part pour les fils du capteur
     const open = top.holes.find((h) => h.shape === 'square' && Math.abs(h.size - (x1 - x0)) < 0.5 && Math.abs((h.sh ?? 0) - (y1 - y0)) < 0.5);

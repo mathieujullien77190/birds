@@ -125,7 +125,7 @@ Les liens doivent être **vérifiés** (ouvrir la page) : un lien mort connu est
 | Logique d'un composant : dans un `helpers.ts` ou un hook, pas dans le JSX (c'est ce qui se teste) | `src/features/viewer/hooks/`, `*/helpers.ts` | `npm run coverage` |
 | Brique partagée | `src/ui/` **et** la copie de `laser-control/src/ui/` si elle y existe | **auto** : `tests/coherence.test.ts` |
 | **Clé `localStorage` : ne jamais la renommer sans migration** (ce sont les réglages déjà enregistrés de l'utilisateur) | `STORAGE` de `src/features/viewer/constants.ts` | **auto** : `tests/coherence.test.ts` (valeurs figées) |
-| Réglages par défaut du nichoir (si le défaut change, changer la clé `plaques-nichoir-2` change aussi les réglages enregistrés : migration) | `NEST_DEFAULT` de `src/birdhouse/model/constants.ts` | `tests/model.golden.test.ts` |
+| Réglages par défaut du nichoir (si le défaut change, changer la clé `plaques-nichoir-3` change aussi les réglages enregistrés : migration) | `NEST_DEFAULT` de `src/birdhouse/model/constants.ts` | `tests/model.golden.test.ts` |
 
 ## 10. Renommer, déplacer, ajouter un fichier
 

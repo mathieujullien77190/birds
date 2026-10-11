@@ -101,8 +101,8 @@ describe('renderDoc : Markdown → HTML', () => {
 
 describe('petits calculs de l\'interface', () => {
   it('nestOuterSize : extérieur = utile + 2 × (2t + isolant) ; hauteur totale', () => {
-    expect(nestOuterSize(NEST_DEFAULT, 3)).toEqual([120 + 2 * (6 + 39), 120 + 2 * (6 + 39), 130 + 28 + 20 + 6 + 2 * (3 + 39)]);
-    expect(nestOuterSize({ ...NEST_DEFAULT, l: 200, L: 150, ins: 20 }, 4)).toEqual([200 + 2 * 28, 150 + 2 * 28, 130 + 28 + 20 + 8 + 2 * 24]);
+    expect(nestOuterSize(NEST_DEFAULT, 3)).toEqual([120 + 2 * (6 + 39), 120 + 2 * (6 + 39), 130 + 32 + 20 + 6 + 2 * (3 + 39)]);
+    expect(nestOuterSize({ ...NEST_DEFAULT, l: 200, L: 150, ins: 20 }, 4)).toEqual([200 + 2 * 28, 150 + 2 * 28, 130 + 32 + 20 + 8 + 2 * 24]);
   });
   it('cardScale : la plus large plaque tient dans 216 px, jamais au-delà de 1,2', () => {
     const pl = (w: number) => ({ w } as Plank);

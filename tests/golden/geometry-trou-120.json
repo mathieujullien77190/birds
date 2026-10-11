@@ -141,15 +141,15 @@
  },
  "010 Lambris avant 1": {
   "geo": {
-   "n": 144,
+   "n": 96,
    "idx": 0,
-   "pos": "42b041d04b91d23d",
-   "col": "db20a2926f1ee2d7"
+   "pos": "a566fa55ed6c0be1",
+   "col": "e3e5857c12dcccd8"
   },
   "edges": {
-   "n": 72,
+   "n": 48,
    "idx": 0,
-   "pos": "23bc4cf849dc7283",
+   "pos": "afd3602f787a028e",
    "col": null
   }
  },
@@ -547,99 +547,99 @@
  },
  "039 Boîte caméra 2 : face avant": {
   "geo": {
-   "n": 684,
+   "n": 780,
    "idx": 0,
-   "pos": "77fa50936ca7e964",
-   "col": "4595be0d7c2d54c0"
+   "pos": "03c3842b709a75ca",
+   "col": "5dc6ed585ccb3c1e"
   },
   "edges": {
-   "n": 232,
+   "n": 264,
    "idx": 0,
-   "pos": "05ddbb6722a0771f",
+   "pos": "9a61644ca815f1b6",
    "col": null
   }
  },
  "040 Boîte caméra 2 : face arrière": {
   "geo": {
-   "n": 228,
+   "n": 324,
    "idx": 0,
-   "pos": "a37ccbd1a53694b4",
-   "col": "b7eed9db5d3bdd2f"
+   "pos": "1c2813dc39ab5905",
+   "col": "8e14bbb8f34c29ac"
   },
   "edges": {
-   "n": 80,
+   "n": 112,
    "idx": 0,
-   "pos": "3b8438a22732707c",
+   "pos": "7f779e4ef20a7da3",
    "col": null
   }
  },
  "041 Boîte caméra 2 : côté droit": {
   "geo": {
-   "n": 228,
+   "n": 384,
    "idx": 0,
-   "pos": "a433eafc96c1fd44",
-   "col": "b7eed9db5d3bdd2f"
+   "pos": "d8d5871d0c772471",
+   "col": "a52019fc7e5b30bb"
   },
   "edges": {
-   "n": 80,
+   "n": 136,
    "idx": 0,
-   "pos": "e692d3dbd110d35d",
+   "pos": "3874df019f5bcf6c",
    "col": null
   }
  },
  "042 Boîte caméra 2 : côté gauche": {
   "geo": {
-   "n": 228,
+   "n": 324,
    "idx": 0,
-   "pos": "a433eafc96c1fd44",
-   "col": "b7eed9db5d3bdd2f"
+   "pos": "8bdfed779585975d",
+   "col": "8e14bbb8f34c29ac"
   },
   "edges": {
-   "n": 80,
+   "n": 112,
    "idx": 0,
-   "pos": "e692d3dbd110d35d",
+   "pos": "0370ee09dc3933d9",
    "col": null
   }
  },
  "043 Boîte caméra 2 : dessus": {
   "geo": {
-   "n": 288,
+   "n": 420,
    "idx": 0,
-   "pos": "0c46fa6b78445259",
-   "col": "0df09bec86856a20"
+   "pos": "fcf88513742dbae2",
+   "col": "e3a5f6f5dae734d4"
   },
   "edges": {
-   "n": 104,
+   "n": 144,
    "idx": 0,
-   "pos": "35a48f71aad5ace1",
+   "pos": "75f5eecf5c325e73",
    "col": null
   }
  },
  "044 Boîte caméra 2 : dessous": {
   "geo": {
-   "n": 228,
+   "n": 420,
    "idx": 0,
-   "pos": "b788f6add56f84ed",
-   "col": "b7eed9db5d3bdd2f"
+   "pos": "fcf88513742dbae2",
+   "col": "e3a5f6f5dae734d4"
   },
   "edges": {
-   "n": 80,
+   "n": 144,
    "idx": 0,
-   "pos": "696bc23135830f47",
+   "pos": "75f5eecf5c325e73",
    "col": null
   }
  },
  "045 Caméra 2": {
   "geo": {
-   "n": 396,
+   "n": 648,
    "idx": 0,
-   "pos": "2f26543b4de06d83",
-   "col": "b05f6a4520bef5ec"
+   "pos": "af59b8ec989f5beb",
+   "col": "fe824d958e0479b3"
   },
   "edges": {
-   "n": 168,
+   "n": 240,
    "idx": 0,
-   "pos": "bd88df8394e8ccbc",
+   "pos": "44bc56a378be9a51",
    "col": null
   }
  },
@@ -647,13 +647,13 @@
   "geo": {
    "n": 180,
    "idx": 0,
-   "pos": "6d9f9d26cefece60",
+   "pos": "de9777a5afff3906",
    "col": "b4d7a7cd4ae45ad9"
   },
   "edges": {
    "n": 120,
    "idx": 0,
-   "pos": "d637e1a5fe9173d9",
+   "pos": "40497e7da3306612",
    "col": null
   }
  },
@@ -661,7 +661,7 @@
   "geo": {
    "n": 242,
    "idx": 720,
-   "pos": "2b2bdec3d9f164b9",
+   "pos": "ea91f9b28b1b4ccc",
    "col": "a39afae55a0bdf16"
   },
   "edges": {
@@ -673,10 +673,10 @@
  },
  "048 Fil 5 V LED extérieures (rouge)": {
   "geo": {
-   "n": 2385,
-   "idx": 12672,
-   "pos": "989e214d8f0a6953",
-   "col": "7d67a685316a0783"
+   "n": 2601,
+   "idx": 13824,
+   "pos": "60da8dc2cc470dc4",
+   "col": "94be05aa005c6853"
   },
   "edges": {
    "n": 0,
@@ -687,10 +687,10 @@
  },
  "049 Fil masse LED extérieures (noir)": {
   "geo": {
-   "n": 2385,
-   "idx": 12672,
-   "pos": "25d073a2e5f55c9f",
-   "col": "0e21f6686bf790cd"
+   "n": 2601,
+   "idx": 13824,
+   "pos": "1cb26230f92cfc65",
+   "col": "1248e75dfe6881a9"
   },
   "edges": {
    "n": 0,
@@ -1081,13 +1081,13 @@
   "geo": {
    "n": 252,
    "idx": 0,
-   "pos": "65df2cd887e0a7c8",
+   "pos": "262e6ee80e98bba7",
    "col": "56984f29790a67ba"
   },
   "edges": {
    "n": 168,
    "idx": 0,
-   "pos": "da17751cf6ad352c",
+   "pos": "54a092d1b9862f54",
    "col": null
   }
  },
@@ -2873,13 +2873,13 @@
   "geo": {
    "n": 2832,
    "idx": 0,
-   "pos": "0f0850c6d1da6523",
+   "pos": "2086ecc6fa793acb",
    "col": "5f956b0c4869f528"
   },
   "edges": {
    "n": 1016,
    "idx": 0,
-   "pos": "3161c44d07cc7d9b",
+   "pos": "9161b865dde1cbed",
    "col": null
   }
  },
@@ -3109,15 +3109,15 @@
  },
  "222 Caméra": {
   "geo": {
-   "n": 396,
+   "n": 648,
    "idx": 0,
-   "pos": "2f26543b4de06d83",
-   "col": "b05f6a4520bef5ec"
+   "pos": "af11a364ac68cf25",
+   "col": "fe824d958e0479b3"
   },
   "edges": {
-   "n": 168,
+   "n": 240,
    "idx": 0,
-   "pos": "bd88df8394e8ccbc",
+   "pos": "513f225289e839b7",
    "col": null
   }
  },
@@ -3125,13 +3125,13 @@
   "geo": {
    "n": 180,
    "idx": 0,
-   "pos": "6d9f9d26cefece60",
+   "pos": "b09725df065c486b",
    "col": "b4d7a7cd4ae45ad9"
   },
   "edges": {
    "n": 120,
    "idx": 0,
-   "pos": "d637e1a5fe9173d9",
+   "pos": "0ae5e9e0eaa1d0c6",
    "col": null
   }
  },
@@ -3237,7 +3237,7 @@
   "geo": {
    "n": 242,
    "idx": 720,
-   "pos": "27be02c27f1b59f8",
+   "pos": "6dba23baae841fd4",
    "col": "a39afae55a0bdf16"
   },
   "edges": {
