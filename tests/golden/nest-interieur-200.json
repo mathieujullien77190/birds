@@ -5269,7 +5269,7 @@
   },
   {
    "id": "id204",
-   "name": "Grillage sortie ventilation",
+   "name": "Grillage inox maille 5 mm — sortie ventilation",
    "w": 64,
    "h": 0.8,
    "depth": 53,
@@ -5287,7 +5287,7 @@
    "holes": [],
    "group": "id8",
    "special": "block",
-   "color": "#475569",
+   "color": "#b6bcc6",
    "transparent": true
   },
   {
@@ -5544,7 +5544,7 @@
   },
   {
    "id": "id219",
-   "name": "Grillage prise d'air",
+   "name": "Grillage inox maille 5 mm — prise d'air",
    "w": 31,
    "h": 42,
    "depth": 0.8,
@@ -5562,7 +5562,7 @@
    "holes": [],
    "group": "id8",
    "special": "block",
-   "color": "#475569",
+   "color": "#b6bcc6",
    "transparent": true
   },
   {
@@ -5633,7 +5633,7 @@
   },
   {
    "id": "id223",
-   "name": "Grillage fente prise d'air",
+   "name": "Grillage inox maille 5 mm — fente",
    "w": 0.8,
    "h": 38,
    "depth": 32,
@@ -5651,7 +5651,7 @@
    "holes": [],
    "group": "id8",
    "special": "block",
-   "color": "#475569",
+   "color": "#b6bcc6",
    "transparent": true
   },
   {

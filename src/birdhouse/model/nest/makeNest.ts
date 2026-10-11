@@ -34,7 +34,7 @@ export function carveRects(r: [number, number, number, number], holes: [number, 
 }
 
 /** Pièces de la ventilation (noms avant `unnumber`) : regroupées dans le groupe « Ventilation ». */
-const VENT_PIECES = /^(Goulotte ventilateur|Cassette ventilateur|Poignée cassette|Joint cassette|Plot caoutchouc ventilateur|Ventilateur Noctua|Grille de protection ventilateur|Grillage sortie ventilation|Joue grillage sortie|Clapet de ventilation|Plaque de connexion cassette|Entretoise plaque de connexion|Barrette 4 broches plaque de connexion|Fiche 4 broches toit|Soudure plaque de connexion|Module interrupteur 12 V ventilateur|Cale interrupteur|Fil (PWM|tachymètre|commande interrupteur|masse commune|interrupteur →|Wago \+ → interrupteur|masse interrupteur|ventilateur)|Conduit d'air|Auvent prise d'air|Cale auvent|Bouchon prise d'air|Clapet prise d'air|Grillage (fente )?prise d'air)/;
+const VENT_PIECES = /^(Goulotte ventilateur|Cassette ventilateur|Poignée cassette|Joint cassette|Plot caoutchouc ventilateur|Ventilateur Noctua|Grille de protection ventilateur|Grillage inox maille 5 mm|Joue grillage sortie|Clapet de ventilation|Plaque de connexion cassette|Entretoise plaque de connexion|Barrette 4 broches plaque de connexion|Fiche 4 broches toit|Soudure plaque de connexion|Module interrupteur 12 V ventilateur|Cale interrupteur|Fil (PWM|tachymètre|commande interrupteur|masse commune|interrupteur →|Wago \+ → interrupteur|masse interrupteur|ventilateur)|Conduit d'air|Auvent prise d'air|Cale auvent|Bouchon prise d'air|Clapet prise d'air)/;
 
 export function makeNest(n0: NestParams, t: number, fit: number, start: number): { planks: Plank[]; group: string; name: string; groupNames: Record<string, string> } {
   const n: NestParams = { ...n0, l: Math.max(120, n0.l), L: Math.max(120, n0.l), hole: Math.min(n0.hole, Math.max(120, n0.l) - 26), cam: 38, ins: 39, pente: true, lambris: true }; // toit TOUJOURS en pente, habillage TOUJOURS présent (puces retirées : le régulateur sous le nichoir est protégé par l'habillage) ; // intérieur TOUJOURS CARRÉ (un seul curseur), 120 mm au minimum (le fond) ; trou plafonné pour que le bloc d'entrée (trou + 16) tienne dans la paroi intérieure ; compartiment caméra fixe à 38 (curseur retiré) ; // isolant TOUJOURS 39 (le curseur a été retiré à la demande de l'utilisateur) ; compartiment caméra plafonné à 38 // le compartiment caméra est limité à 38 : la batterie (et sa cale) est posée juste à côté, sur le dessus du toit
@@ -119,7 +119,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     if (!n.pente) return p;
     const base = p.notches.filter((x) => x.edge === 'bottom');
     if (/^Face avant/.test(p.name)) return { ...p, holes: n.cam2 ? [{ id: uid(), shape: 'square' as const, x: cam2X - 10, y: r2(roofH + 28 - Hf / 2), size: 28, sh: 4 }] : p.holes, h: Hf, pos: [p.pos[0], p.pos[1], bodyH + Hf / 2] as Vec3, cast: undefined, notches: [...base, ...verticalTeeth('left', Hf, 0), ...verticalTeeth('right', Hf, 0)] };
-    if (/^Face arrière/.test(p.name)) { // deux ouvertures d'aération au-dessus du dessus du toit (grilles anti-insectes dessus)
+    if (/^Face arrière/.test(p.name)) { // deux ouvertures d'aération au-dessus du dessus du toit (grilles dessus)
       const q: Plank = { ...p, h: Hb, pos: [p.pos[0], p.pos[1], bodyH + Hb / 2] as Vec3, cast: undefined, notches: [...base, ...verticalTeeth('left', Hb, 0), ...verticalTeeth('right', Hb, 0)] };
       const portWin = n.cam > 0 ? [fitHole(q, { id: uid(), shape: 'square' as const, x: r2(piX), y: r2((PORT_Z0 + PORT_Z1) / 2 - Hb / 2), size: PORT_X1 - PORT_X0, sh: PORT_Z1 - PORT_Z0 })] : []; // fenêtre des prises du Pi
       return { ...q, holes: [...q.holes, ...portWin, fitHole(q, { id: uid(), shape: 'square' as const, x: FANX, y: r2(VENT_Z - Hb / 2), size: r2(FI - 0.4), sh: VENT_H }), ...VENT_XS.map((x) => fitHole(q, { id: uid(), shape: 'square' as const, x, y: r2(VENT_Z - Hb / 2), size: VENT_W, sh: VENT_H }))] };
@@ -421,10 +421,10 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const plotsAt: [number, number, number, number][] = [[FANX, FANY - FAN / 2 + 1, 12, 2], [FANX, FANY + FAN / 2 - 1, 12, 2], [FANX - FAN / 2 + 1, FANY, 2, 12], [FANX + FAN / 2 - 1, FANY, 2, 12]]; // sur le bord du cadre, hors de l'ouverture
   const plots: Plank[] = plotsAt.map(([x, y, w, h], k) => blk(`Plot caoutchouc ventilateur ${k + 1}`, w, h, FAN_PLOT, [x, y, ZB + t + GUARD_T + FAN_PLOT / 2], elecGroup, '#6b7280'));
   const fanPart: Plank = { id: uid(), name: 'Ventilateur Noctua NF-A6x25 PWM (60 × 60 × 25)', w: FAN, h: FAN, depth: FAN_T, pos: [FANX, FANY, FAN_Z] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'fan' as const, color: '#8b5a2b' };
-  // sortie : grillage anti-insectes et clapet à gravité (film léger articulé en haut), dehors, sous le débord du toit en chêne
-  // caisson de sortie : le grillage anti-insectes est porté à 20 mm de la plaque arrière par quatre joues de contreplaqué ; le clapet (contre la plaque, charnière en haut) y a la place de s'ouvrir d'environ 15° (bas écarté de ≈ 12 mm)
+  // sortie : grillage inox à grosses mailles et clapet à gravité (film léger articulé en haut), dehors, sous le débord du toit en chêne
+  // caisson de sortie : le grillage inox (maille 5 mm) est porté à 20 mm de la plaque arrière par quatre joues de contreplaqué ; le clapet (contre la plaque, charnière en haut) y a la place de s'ouvrir d'environ 15° (bas écarté de ≈ 12 mm)
   const NET_D = 20, NET_IW = EXW + 4, NET_IH = VENT_H + 3; // profondeur, largeur et hauteur intérieures
-  const exitNet = blk('Grillage sortie ventilation', NET_IW, 0.8, NET_IH, [FANX, D / 2 + NET_D + 0.4, EXZ], roofGroup, '#475569', { transparent: true });
+  const exitNet = blk('Grillage inox maille 5 mm — sortie ventilation', NET_IW, 0.8, NET_IH, [FANX, D / 2 + NET_D + 0.4, EXZ], roofGroup, '#b6bcc6', { transparent: true });
   const cheeks: Plank[] = [
     wood('Joue grillage sortie 1 (haut)', NET_IW + 2 * t, NET_D, [FANX, D / 2 + NET_D / 2, EXZ + NET_IH / 2 + t / 2], [0, 0, 0], roofGroup),
     wood('Joue grillage sortie 2 (bas)', NET_IW + 2 * t, NET_D, [FANX, D / 2 + NET_D / 2, EXZ - NET_IH / 2 - t / 2], [0, 0, 0], roofGroup),
@@ -500,11 +500,11 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     wood("Auvent prise d'air", AIR_LX + 12, AIR_LY + 10, [AIR_CX, AIR_CY, -9.5], [0, 0, 0], group), // chicane : la pluie ne monte pas droit dans l'ouverture
   ];
   const airBlocks: Plank[] = [
-    blk("Grillage prise d'air", AIR_LX - 2 * t + 2, AIR_LY - 2 * t + 2, 0.8, [AIR_CX, AIR_CY, -0.4], group, '#475569', { transparent: true }),
+    blk("Grillage inox maille 5 mm — prise d'air", AIR_LX - 2 * t + 2, AIR_LY - 2 * t + 2, 0.8, [AIR_CX, AIR_CY, -0.4], group, '#b6bcc6', { transparent: true }),
     blk('Cale auvent gauche', 3, AIR_LY + 10, 8, [AIR_CX - (AIR_LX + 12) / 2 + 1.5, AIR_CY, -4], group, '#a16207'),
     blk('Cale auvent droite', 3, AIR_LY + 10, 8, [AIR_CX + (AIR_LX + 12) / 2 - 1.5, AIR_CY, -4], group, '#a16207'),
     blk("Bouchon prise d'air (à enfoncer dans l'ouverture pour la condamner)", AIR_LX - 2 * t - 0.6, AIR_LY - 2 * t - 0.6, 7, [AIR_CX, AIR_CY, -4.4], group, '#d97706'),
-    blk("Grillage fente prise d'air", 0.8, AIR_SW + 2, AIR_SH + 2, [-n.l / 2 + 0.4, AIR_CY, AIR_ZS], group, '#475569', { transparent: true }),
+    blk("Grillage inox maille 5 mm — fente", 0.8, AIR_SW + 2, AIR_SH + 2, [-n.l / 2 + 0.4, AIR_CY, AIR_ZS], group, '#b6bcc6', { transparent: true }),
     blk("Clapet prise d'air", 0.6, AIR_SW + 2, AIR_SH + 4, [-n.l / 2 + 1.1, AIR_CY, AIR_ZS - 1], group, '#fca5a5', { transparent: true }),
   ];
   // système solaire (groupe « Solaire ») : un panneau de 100 W DÉPORTÉ à côté du nichoir, sans piquet en bois (support métallique non dessiné), incliné de 35° et tourné vers l'avant (« le sud »),

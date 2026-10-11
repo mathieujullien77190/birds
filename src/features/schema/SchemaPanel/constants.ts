@@ -15,7 +15,7 @@ export const MAP: [RegExp, Keys][] = [
   [/^LED infrarouges extérieures/, { nodes: ['IR2'], edges: [] }],
   [/^LED infrarouges$/, { nodes: ['IR'], edges: [] }],
   [/^Capteur température/, { nodes: ['SENS'], edges: [] }],
-  [/^(Ventilateur|Cassette ventilateur|Goulotte ventilateur|Grille ventilateur|Plot caoutchouc|Joint cassette|Poignée cassette|Connecteur ventilateur|Clapet de ventilation|Grillage sortie|Bloc isolant d'hiver|Isolant bloc d'hiver|Poignée bloc d'hiver)/, { nodes: ['FAN'], edges: [] }],
+  [/^(Ventilateur|Cassette ventilateur|Goulotte ventilateur|Grille ventilateur|Plot caoutchouc|Joint cassette|Poignée cassette|Connecteur ventilateur|Clapet de ventilation|Grillage inox maille 5 mm|Bloc isolant d'hiver|Isolant bloc d'hiver|Poignée bloc d'hiver)/, { nodes: ['FAN'], edges: [] }],
   [/^(Module interrupteur 12 V|Cale interrupteur)/, { nodes: ['SWF'], edges: [] }],
   [/^Module 2 MOSFET/, { nodes: ['SW'], edges: [] }],
   [/^Convertisseur/, { nodes: ['BUCK'], edges: [] }],

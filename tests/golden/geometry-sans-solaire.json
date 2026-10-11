@@ -1623,12 +1623,12 @@
    "col": null
   }
  },
- "116 Grillage sortie ventilation": {
+ "116 Grillage inox maille 5 mm — sortie ventilation": {
   "geo": {
    "n": 24,
    "idx": 36,
    "pos": "c23c5bf4a26da2cf",
-   "col": "844f8eb866736ef4"
+   "col": "6fdb65fc39eb0796"
   },
   "edges": {
    "n": 24,
@@ -1805,12 +1805,12 @@
    "col": null
   }
  },
- "129 Grillage prise d'air": {
+ "129 Grillage inox maille 5 mm — prise d'air": {
   "geo": {
    "n": 24,
    "idx": 36,
    "pos": "f59f2571b6fc56db",
-   "col": "844f8eb866736ef4"
+   "col": "6fdb65fc39eb0796"
   },
   "edges": {
    "n": 24,
@@ -1861,12 +1861,12 @@
    "col": null
   }
  },
- "133 Grillage fente prise d'air": {
+ "133 Grillage inox maille 5 mm — fente": {
   "geo": {
    "n": 24,
    "idx": 36,
    "pos": "6106612a8c86b7e7",
-   "col": "844f8eb866736ef4"
+   "col": "6fdb65fc39eb0796"
   },
   "edges": {
    "n": 24,
