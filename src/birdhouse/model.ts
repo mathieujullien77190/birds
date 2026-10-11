@@ -16,5 +16,6 @@ export * from './model/geometry';
 export * from './model/persistence';
 export * from './model/sheets';
 export * from './model/nest';
+export * from './model/wires';
 export type { Rotation, V3 } from './model/math/rotation';
 export { fromAxisAngle, fromEulerDeg } from './model/math/rotation';

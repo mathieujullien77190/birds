@@ -1,9 +1,8 @@
 import { BufferGeometry, CatmullRomCurve3, Color, Float32BufferAttribute, Quaternion, TubeGeometry, Vector3 } from 'three';
-import type { Plank } from '../../model';
+import { roundPoints, type Plank } from '../../model';
 import { PALETTE } from '../registry/palette';
 import { emptyEdges, paintUniform, type PartGeometry } from './geometry';
 
-/** Fil électrique : tube lissé le long de p.path, diamètre p.w, couleur p.color. */
 /** Gaine annelée (ICTA) : un tube dont le rayon ondule le long de la courbe (anneaux tous les 3 mm, ± 8 %), noir. */
 export function conduitGeometry(p: Plank): PartGeometry {
   const curve = new CatmullRomCurve3((p.path ?? []).map((q) => new Vector3(...q)), false, 'catmullrom', 0.5);
@@ -20,25 +19,10 @@ export function conduitGeometry(p: Plank): PartGeometry {
   return { geo, edges: emptyEdges() };
 }
 
-/** Arrondit les angles d'un chemin : à chaque sommet intermédiaire, le coude est remplacé par un arc (Bézier quadratique) de rayon r — un vrai fil ne fait pas d'angle vif,
- *  il tourne en courbe. r est limité à la moitié des deux segments voisins pour que les arcs ne se chevauchent pas. */
-function roundPath(pts: Vector3[], r: number): Vector3[] {
-  if (pts.length < 3) return pts;
-  const out: Vector3[] = [pts[0]];
-  for (let i = 1; i < pts.length - 1; i++) {
-    const A = pts[i - 1], P = pts[i], B = pts[i + 1];
-    const da = A.clone().sub(P), db = B.clone().sub(P), la = da.length(), lb = db.length();
-    if (la < 1e-6 || lb < 1e-6) continue;
-    const rr = Math.min(r, la / 2, lb / 2);
-    const p0 = P.clone().addScaledVector(da, rr / la), p2 = P.clone().addScaledVector(db, rr / lb);
-    for (let k = 0; k <= 6; k++) { const u = k / 6; out.push(p0.clone().multiplyScalar((1 - u) * (1 - u)).addScaledVector(P, 2 * (1 - u) * u).addScaledVector(p2, u * u)); }
-  }
-  out.push(pts[pts.length - 1]);
-  return out;
-}
+/** Fil électrique : tube lissé le long de p.path (coudes arrondis par `roundPoints`), diamètre p.w, couleur p.color. */
 export function wireGeometry(p: Plank): PartGeometry {
   const raw = (p.path ?? []).map((q) => new Vector3(...q));
-  const curve = new CatmullRomCurve3(roundPath(raw, Math.max(10, 4 * p.w)), false, 'centripetal'); // coudes arrondis (rayon 10 mm, plus pour les gros fils), puis lissage sans dépassement
+  const curve = new CatmullRomCurve3(roundPoints(p.path ?? [], Math.max(10, 4 * p.w)).map((q) => new Vector3(...q)), false, 'centripetal'); // coudes arrondis (rayon 10 mm, plus pour les gros fils), puis lissage sans dépassement
   const geo = new TubeGeometry(curve, Math.max(64, raw.length * 24), p.w / 2, 8, false);
   paintUniform(geo, new Color(p.color ?? PALETTE.slate));
   return { geo, edges: emptyEdges() };

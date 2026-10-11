@@ -2,11 +2,12 @@ import type { Dispatch, MouseEvent, SetStateAction } from 'react';
 import { Eye, IconButton, NameEdit } from '@/ui';
 import { plankSvg, type Plank } from '@/birdhouse/model';
 import type { Hover } from '../../types';
+import { wireSummary } from '../WireSheet';
 import type { DropTarget } from './types';
 
 /** Carte d'une plaque dans « Pièces » : nom (renommable), œil, dupliquer, supprimer, dessin à plat (ou bouton du document), glisser-déposer. */
-export function PlankCard({ p, scale, selectedId, groupSel, extra, hidden, dropOn, setDropOn, setHover, setDocOpen, setGroupSel, pick, update, toggleHidden, duplicate, remove, dropPlank }: {
-  p: Plank; scale: number; selectedId: string | null; groupSel: string | null; extra: Set<string>; hidden: Set<string>;
+export function PlankCard({ p, planks, scale, selectedId, groupSel, extra, hidden, dropOn, setDropOn, setHover, setDocOpen, setGroupSel, pick, update, toggleHidden, duplicate, remove, dropPlank }: {
+  p: Plank; planks: Plank[]; scale: number; selectedId: string | null; groupSel: string | null; extra: Set<string>; hidden: Set<string>;
   dropOn: string | null; setDropOn: Dispatch<SetStateAction<string | null>>; setHover: (h: Hover | null) => void;
   setDocOpen: (d: string | null) => void; setGroupSel: (g: string | null) => void;
   pick: (id: string | null, ctrl: boolean) => void;
@@ -39,7 +40,7 @@ export function PlankCard({ p, scale, selectedId, groupSel, extra, hidden, dropO
       {p.special === 'doc'
         ? <button onClick={() => setDocOpen('schema')} className="flex w-full items-center gap-2 rounded border border-sky-200 bg-sky-50 px-2 py-1.5 text-left text-[11px] font-semibold text-sky-900 hover:bg-sky-100">📄 Ouvrir le document <span className="ml-auto rounded bg-white px-1.5 py-0.5 text-[10px] font-normal text-sky-700">Document</span></button>
         : p.special
-          ? <div className="py-2 text-center text-[11px] text-stone-500">Élément spécial : pas découpé (modèle 3D)</div>
+          ? <div className="py-2 text-center text-[11px] text-stone-500">{wireSummary(p, planks) ?? 'Élément spécial : pas découpé (modèle 3D)'}</div>
           : <button onClick={pickPlank} className="flex w-full justify-center" dangerouslySetInnerHTML={{ __html: plankSvg(p, scale) }} />}
     </div>
   );

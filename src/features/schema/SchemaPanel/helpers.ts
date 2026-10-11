@@ -1,3 +1,5 @@
+import { isWirePlank, type Plank } from '@/birdhouse/model';
+import type { Hover } from '@/types';
 import { MAP, FICHES, MERMAID_SRC, OPTION_NODES, SECTIONS } from './constants';
 import type { Keys, SchemaOptions } from './types';
 
@@ -48,3 +50,10 @@ export function schemaKeys(name: string): Keys | null { const m = MAP.find(([re]
 export const nodeKey = (id: string): string | null => { const m = /flowchart-([A-Za-z0-9]+)-\d+$/.exec(id); return m ? m[1] : null; }; // mermaid préfixe l'id par celui du rendu (`schema-cote-3d-flowchart-PI-12`)
 /** Identifiant de flèche mermaid (`…-L_PI_HB_0`) → [de, vers]. */
 export const edgeKey = (id: string): [string, string] | null => { const m = /L[-_]([A-Za-z0-9]+)[-_]([A-Za-z0-9]+)[-_]\d+$/.exec(id); return m ? [m[1], m[2]] : null; };
+
+/** Pièce à mettre en surbrillance dans le schéma : celle qui est survolée ; sinon, le fil (nappe, gaine) choisi, dont la fiche est ouverte. */
+export function schemaFocus(hover: Hover | null, planks: Plank[], selectedId: string | null): Hover | null {
+  if (hover) return hover;
+  const sel = selectedId ? planks.find((p) => p.id === selectedId) : undefined;
+  return sel && isWirePlank(sel) ? { plank: sel.id } : null;
+}

@@ -12,7 +12,7 @@ export function PiecesList(props: PiecesListProps) {
   if (!sc.planks.length) return <Hint>Aucune plaque.</Hint>;
   const scale = cardScale(sc.planks);
   const card = (p: Plank) => (
-    <PlankCard key={p.id} p={p} scale={scale} selectedId={props.selectedId} groupSel={groupSel} extra={props.extra} hidden={props.hidden} dropOn={dropOn} setDropOn={props.setDropOn} setHover={props.setHover}
+    <PlankCard key={p.id} p={p} planks={props.sc.planks} scale={scale} selectedId={props.selectedId} groupSel={groupSel} extra={props.extra} hidden={props.hidden} dropOn={dropOn} setDropOn={props.setDropOn} setHover={props.setHover}
       setDocOpen={props.setDocOpen} setGroupSel={props.setGroupSel} pick={props.pick} update={props.update} toggleHidden={props.toggleHidden} duplicate={props.duplicate} remove={props.remove} dropPlank={props.dropPlank} />
   );
   // les plaques liées sont rangées sous une seule ligne (boîte, groupe) qui se déplie

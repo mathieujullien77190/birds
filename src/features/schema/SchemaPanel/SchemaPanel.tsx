@@ -6,7 +6,7 @@ import { colorArrowheads } from '@/lib';
 import type { Plank } from '@/birdhouse/model';
 import type { Hover } from '@/types';
 import { CSS } from './constants';
-import { buildSchema, edgeKey, ficheOf, nodeKey, schemaKeys } from './helpers';
+import { buildSchema, edgeKey, ficheOf, nodeKey, schemaFocus, schemaKeys } from './helpers';
 import type { Keys, SchemaOptions } from './types';
 
 /** Le schéma électrique (bloc mermaid du document) affiché à côté de la 3D : survoler un fil ou un composant dans la 3D (ou dans « Pièces ») met en
@@ -15,7 +15,7 @@ import type { Keys, SchemaOptions } from './types';
 
 
 
-export function SchemaPanel({ hover, planks, onHover }: { hover: Hover | null; planks: Plank[]; onHover: (id: string | null) => void }) {
+export function SchemaPanel({ hover, selectedId = null, planks, onHover }: { hover: Hover | null; selectedId?: string | null; planks: Plank[]; onHover: (id: string | null) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const fromSchema = useRef(false); // vrai quand c'est le schéma lui-même qui est survolé : pas de défilement dans ce cas
   const [svg, setSvg] = useState<string>('');
@@ -36,12 +36,13 @@ export function SchemaPanel({ hover, planks, onHover }: { hover: Hover | null; p
   useEffect(() => { if (ref.current) colorArrowheads(ref.current); }, [svg]); // pointes de flèche de la couleur de leur trait
   // surbrillance d'après la pièce survolée dans la 3D / « Pièces »
   const keys = useMemo(() => {
-    if (!hover) { fromSchema.current = false; return null; }
-    const list = hover.plank ? planks.filter((p) => p.id === hover.plank) : planks.filter((p) => p.group === hover.group);
+    const focus = schemaFocus(hover, planks, selectedId); // le survol, sinon le fil choisi (sa flèche reste allumée tant que sa fiche est ouverte)
+    if (!focus) { fromSchema.current = false; return null; }
+    const list = focus.plank ? planks.filter((p) => p.id === focus.plank) : planks.filter((p) => p.group === focus.group);
     const acc: Keys = { nodes: [], edges: [] };
     for (const p of list) { const k = schemaKeys(p.name); if (k) { acc.nodes.push(...k.nodes); acc.edges.push(...k.edges); } }
     return acc;
-  }, [hover, planks]);
+  }, [hover, selectedId, planks]);
   useEffect(() => {
     const root = ref.current; if (!root) return;
     for (const el of Array.from(root.querySelectorAll('.hl'))) el.classList.remove('hl');

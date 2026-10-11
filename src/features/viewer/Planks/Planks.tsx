@@ -9,7 +9,7 @@ import { makeNest, moveWithGroup, setAirPlug, setWinterCassette, winterState, ex
 import { PiSimulator } from '@/birdhouse/PiSimulator';
 import { loadPiModel, piModel } from '@/birdhouse/three/piModel';
 import type { View } from '@/birdhouse/three/types';
-import { ContextMenu, CutPanel, LeftPanel, MobileBar, PartsSheet, PiecesList, PullBar, RightPanel, SelectionBar, UndoBar, ViewToolbar } from '../components';
+import { ContextMenu, CutPanel, LeftPanel, MobileBar, PartsSheet, PiecesList, PullBar, RightPanel, SelectionBar, UndoBar, ViewToolbar, WireSheet, wireSheetFor } from '../components';
 import { HIDDEN_AT_CREATION, STORAGE } from '../constants';
 import { useCutPlane, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useThreeView, useFanSpeed, useIrBeams } from '../hooks';
 import type { ContextMenuState, Hover, PullState } from '../types';
@@ -40,6 +40,7 @@ export default function Planks() {
   const { hidden, setHidden, toggleHidden } = useHiddenPlanks(); // pièces cachées dans la 3D (œil du volet « Pièces »)
   const [piReady, setPiReady] = useState(!!piModel); // le modèle 3D du Pi est chargé : on redessine les Pi
   useEffect(() => { if (!piModel) void loadPiModel().then(() => setPiReady(!!piModel)); }, []);
+  const [wireClosed, setWireClosed] = useState<string | null>(null); // fil dont la fiche flottante a été fermée (elle revient dès qu'on choisit une pièce)
   const [groupSel, setGroupSel] = useState<string | null>(null); // la sélection est toute une boîte (groupe) : clic dans la 3D ou sur la ligne du groupe
   const groupSelRef = useRef(groupSel);
   groupSelRef.current = groupSel;
@@ -47,6 +48,7 @@ export default function Planks() {
   extraRef.current = extra;
   /** Clic sur une plaque : Ctrl = ajoute / retire de la sélection multiple, sinon la choisit seule. */
   const pick = (id: string | null, ctrl: boolean) => {
+    setWireClosed(null);
     if (!ctrl && id) { // un composant électronique : choisi seul, son groupe est déplié dans « Pièces » et la carte affichée
       const pl = scRef.current.planks.find((p) => p.id === id);
       if (pl) { // n'importe quelle pièce (plus seulement l'électronique) : choisie seule, son groupe déplié dans « Pièces », la carte affichée
@@ -80,6 +82,8 @@ export default function Planks() {
   backRef.current = back;
   const update = (id: string, patch: Partial<Plank>, label = 'Réglage de la plaque') => commit(label, (s) => ({ ...s, planks: s.planks.map((p) => (p.id === id ? { ...p, ...patch } : p)) }));
   const selected = sc.planks.find((p) => p.id === selectedId) ?? null;
+  const wireSheet = wireSheetFor(selected, sc.planks, groupSel, wireClosed); // fiche du fil, de la nappe ou de la gaine choisi (clic dans la 3D ou sur son nom dans « Pièces »)
+  const wireSheetEl = wireSheet && <WireSheet info={wireSheet} onClose={() => setWireClosed(selectedId)} />;
   const wState = useMemo(() => winterState(sc), [sc]); // pièces d'hiver : cassette ventilateur / isolante, prise d'air ouverte / bouchée (état déduit des positions)
   const toggleCassette = () => { const w = wState.cassette === 'summer'; commit(w ? 'Cassette isolante posée' : 'Cassette ventilateur posée', (s) => setWinterCassette(s, w)); };
   const togglePlug = () => { const p = wState.plug === 'open'; commit(p ? "Prise d'air bouchée" : "Prise d'air ouverte", (s) => setAirPlug(s, p)); };
@@ -89,7 +93,7 @@ export default function Planks() {
   moveRef.current = moveWithGroup;
   useKeyboardShortcuts({ back: backRef, commit: commitRef, selectedId: selRef, groupSel: groupSelRef }, {
     clearSelection: () => { setSelectedId(null); setGroupSel(null); },
-    escape: () => { setCtx(null); setExtra(new Set()); setPull(null); },
+    escape: () => { setCtx(null); setWireClosed(selRef.current); setExtra(new Set()); setPull(null); },
   });
 
   useThreeView({ host, view, scRef, cutRef, pullRef, pickRef, setSc, setCut, setCtx, setSelectedId, setHover, pushEntry });
@@ -175,6 +179,7 @@ export default function Planks() {
           <div ref={host} className="h-full w-full touch-none" />
           {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
           {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
+          {!mSettings && !mParts && wireSheetEl}
           {mSettings && (
             <div className="absolute inset-0 z-20 flex flex-col bg-stone-50 [&>aside]:!w-full [&>aside]:flex-1">
               <LeftPanel open setOpen={(o) => setMSettings(o)} sc={sc} commit={commit} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} hideMachine />
@@ -198,6 +203,7 @@ export default function Planks() {
         <UndoBar backLabel={backLabel} onBack={back} />
         <ViewToolbar winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={openPi} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
         {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
+        {wireSheetEl}
         {pull && <PullBar cutOn={cut.on} onDone={() => setPull(null)} />}
         {extra.size > 0 && <SelectionBar count={extra.size + (selectedId ? 1 : 0)} onLink={linkSelection} onUnlink={unlinkSelection} onCancel={() => setExtra(new Set())} />}
 
@@ -205,7 +211,7 @@ export default function Planks() {
       </main>
 
       {modals}
-      {schemaOn && <SchemaPanel hover={hover} planks={sc.planks} onHover={(id) => setHover(id ? { plank: id } : null)} />}
+      {schemaOn && <SchemaPanel hover={hover} selectedId={selectedId} planks={sc.planks} onHover={(id) => setHover(id ? { plank: id } : null)} />}
       <RightPanel
         open={rightOpen} setOpen={setRightOpen} piecesCount={sc.planks.length}
         pieces={sc.planks.length ? <PiecesList sc={sc} selectedId={selectedId} selected={selected} groupSel={groupSel} extra={extra} hidden={hidden} openGroups={openGroups} setOpenGroups={setOpenGroups} dropOn={dropOn} setDropOn={setDropOn} setHover={setHover} confirmAll={confirmAll} docOpen={docOpen} setDocOpen={setDocOpen} setSelectedId={setSelectedId} setGroupSel={setGroupSel} setExtra={setExtra} pick={pick} update={update} commit={commit} toggleHidden={toggleHidden} duplicate={duplicate} remove={remove} duplicateGroup={duplicateGroup} removeGroup={removeGroup} removeAll={removeAll} dropPlank={dropPlank} /> : <Hint>Aucune plaque.</Hint>}
