@@ -2,11 +2,13 @@ import { useEffect, type MutableRefObject } from 'react';
 import { BufferGeometry, DoubleSide, Float32BufferAttribute, Line, LineBasicMaterial, LineLoop, LineSegments, MathUtils, Mesh, MeshStandardMaterial, Plane, PlaneGeometry, Sprite, Vector3 } from 'three';
 import { bounds, extents, holeOutline, outline, type PlankScene, type Vec3 } from '@/birdhouse/model';
 import { EMISSIVE, MARK } from '@/birdhouse/three/constants';
+import { materials } from '@/birdhouse/three/registry/materials';
+import { PALETTE } from '@/birdhouse/three/registry/palette';
 import { dimension } from '@/birdhouse/three/dimensions';
 import { oakTexture } from '@/birdhouse/three/oakTexture';
 import { piModel } from '@/birdhouse/three/piModel';
 import { plankGeometry } from '@/birdhouse/three/plankGeometry';
-import { AXIS_I, AXIS_N, CUT_MAT, HOLE_MARK, PULL_MARK, type Cut, type View } from '@/birdhouse/three/types';
+import { AXIS_I, AXIS_N, type Cut, type View } from '@/birdhouse/three/types';
 import type { FaceAxis } from '@/birdhouse/model';
 
 export interface SceneSyncState {
@@ -37,9 +39,9 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       let m = v.meshes.get(p.id);
       const key = JSON.stringify([p.w, p.h, p.notches, p.holes, sc.t, p.path, p.depth, p.special === 'pi' && !!piModel]); // tout ce qui change la forme : dimensions, crans, trous, épaisseur
       if (!m) {
-        m = new Mesh(new BufferGeometry(), new MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: 0.85, side: DoubleSide }));
+        m = new Mesh(new BufferGeometry(), new MeshStandardMaterial({ color: PALETTE.white, vertexColors: true, roughness: 0.85, side: DoubleSide }));
         m.userData.id = p.id;
-        m.add(new LineSegments(new BufferGeometry(), new LineBasicMaterial({ color: '#4a3014' })));
+        m.add(new LineSegments(new BufferGeometry(), materials.edge()));
         v.scene.add(m);
         v.meshes.set(p.id, m);
       }
@@ -59,7 +61,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       const chosen = groupSel ? p.group === groupSel : p.id === selectedId; // boîte choisie : toutes ses plaques
       mat.emissive.set(hovered ? EMISSIVE.hover : chosen ? EMISSIVE.chosen : extra.has(p.id) ? EMISSIVE.extra : EMISSIVE.none); // survolé dans la liste : ambre
       mat.emissiveIntensity = hovered ? EMISSIVE.hoverIntensity : EMISSIVE.baseIntensity;
-      if (p.name === 'Toit en chêne') { if (!mat.map) { mat.map = oakTexture(); mat.vertexColors = false; mat.color.set('#ffffff'); mat.roughness = 0.7; mat.needsUpdate = true; } } // le pan de toit en chêne porte une texture de bois (le reste garde ses couleurs par sommets)
+      if (p.name === 'Toit en chêne') { if (!mat.map) { mat.map = oakTexture(); mat.vertexColors = false; mat.color.set(PALETTE.white); mat.roughness = 0.7; mat.needsUpdate = true; } } // le pan de toit en chêne porte une texture de bois (le reste garde ses couleurs par sommets)
       mat.transparent = !!p.transparent;
       mat.opacity = p.transparent ? 0.3 : 1;
       mat.depthWrite = !p.transparent;
@@ -84,7 +86,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       const loop = holeOutline(mh);
       for (const z of [-sc.t / 2 - MARK.holeOffset, sc.t / 2 + MARK.holeOffset]) {
         const geo = new BufferGeometry().setAttribute('position', new Float32BufferAttribute(loop.flatMap(([x, y]) => [x, y, z]), 3));
-        const line = new LineLoop(geo, HOLE_MARK);
+        const line = new LineLoop(geo, materials.holeMark());
         line.computeLineDistances();
         line.renderOrder = MARK.holeRenderOrder;
         v.holeMark.add(line);
@@ -112,7 +114,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       if (pull.axis === 'z') { const z = pull.sign * t2; loop = outline(pp).flatMap(([x, y]) => [x, y, z]); }
       else if (pull.axis === 'x') { const x = pull.sign * w2; loop = [x, -h2, -t2, x, h2, -t2, x, h2, t2, x, -h2, t2]; }
       else { const y = pull.sign * h2; loop = [-w2, y, -t2, w2, y, -t2, w2, y, t2, -w2, y, t2]; }
-      const line = new LineLoop(new BufferGeometry().setAttribute('position', new Float32BufferAttribute(loop, 3)), PULL_MARK);
+      const line = new LineLoop(new BufferGeometry().setAttribute('position', new Float32BufferAttribute(loop, 3)), materials.pullMark());
       line.computeLineDistances();
       line.renderOrder = MARK.pullRenderOrder;
       v.pullMark.add(line);
@@ -124,7 +126,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
     if (cut.on && sc.planks.length) {
       const { min, max } = bounds(sc.planks, sc.t);
       const size = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2], MARK.cutMinSize) * MARK.cutScale;
-      const quad = new Mesh(new PlaneGeometry(size, size), CUT_MAT);
+      const quad = new Mesh(new PlaneGeometry(size, size), materials.cut());
       const n = AXIS_N[cut.axis];
       quad.quaternion.setFromUnitVectors(new Vector3(0, 0, 1), n);
       quad.position.set((min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2);

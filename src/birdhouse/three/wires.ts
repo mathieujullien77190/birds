@@ -1,5 +1,6 @@
 import { BufferGeometry, CatmullRomCurve3, Color, Float32BufferAttribute, Quaternion, TubeGeometry, Vector3 } from 'three';
 import type { Plank } from '../model';
+import { PALETTE } from './registry/palette';
 
 /** Fil électrique : tube lissé le long de p.path, diamètre p.w, couleur p.color. */
 /** Gaine annelée (ICTA) : un tube dont le rayon ondule le long de la courbe (anneaux tous les 3 mm, ± 8 %), noir. */
@@ -14,7 +15,7 @@ export function conduitGeometry(p: Plank): { geo: BufferGeometry; edges: BufferG
     pos.setXYZ(i, pos.getX(i) + nrm.getX(i) * r * (k - 1), pos.getY(i) + nrm.getY(i) * r * (k - 1), pos.getZ(i) + nrm.getZ(i) * r * (k - 1));
   }
   geo.computeVertexNormals();
-  const c = new Color(p.color ?? '#1c1917'), n = pos.count, col = new Float32Array(n * 3);
+  const c = new Color(p.color ?? PALETTE.conduit), n = pos.count, col = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) { col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b; }
   geo.setAttribute('color', new Float32BufferAttribute(col, 3));
   return { geo, edges: new BufferGeometry().setAttribute('position', new Float32BufferAttribute([], 3)) };
@@ -40,7 +41,7 @@ export function wireGeometry(p: Plank): { geo: BufferGeometry; edges: BufferGeom
   const raw = (p.path ?? []).map((q) => new Vector3(...q));
   const curve = new CatmullRomCurve3(roundPath(raw, Math.max(10, 4 * p.w)), false, 'centripetal'); // coudes arrondis (rayon 10 mm, plus pour les gros fils), puis lissage sans dépassement
   const geo = new TubeGeometry(curve, Math.max(64, raw.length * 24), p.w / 2, 8, false);
-  const c = new Color(p.color ?? '#111827'), n = geo.attributes.position.count, col = new Float32Array(n * 3);
+  const c = new Color(p.color ?? PALETTE.slate), n = geo.attributes.position.count, col = new Float32Array(n * 3);
   for (let i = 0; i < n; i++) { col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b; }
   geo.setAttribute('color', new Float32BufferAttribute(col, 3));
   return { geo, edges: new BufferGeometry().setAttribute('position', new Float32BufferAttribute([], 3)) };
@@ -50,7 +51,7 @@ export function wireGeometry(p: Plank): { geo: BufferGeometry; edges: BufferGeom
 export function ribbonGeometry(p: Plank): { geo: BufferGeometry; edges: BufferGeometry } {
   const curve = new CatmullRomCurve3((p.path ?? []).map((q) => new Vector3(...q)), false, 'centripetal'); // centripète : pas de boucle ni de dépassement entre les points
   const N = 120, pts = curve.getPoints(N), pos: number[] = [], idx: number[] = [], col: number[] = [];
-  const c = new Color('#e08a1e'), tip = new Color('#5b8def'); // ruban orange, embouts bleus (renforts des connecteurs)
+  const c = new Color(PALETTE.ribbon), tip = new Color(PALETTE.ribbonTip); // ruban orange, embouts bleus (renforts des connecteurs)
   // repère transporté sans torsion, puis torsion répartie sur la fin pour que la largeur de la nappe tombe dans l'axe du connecteur d'arrivée :
   // la nappe arrive à l'horizontale, sa largeur horizontale et perpendiculaire à sa direction
   const tans: Vector3[] = [], sides: Vector3[] = [];

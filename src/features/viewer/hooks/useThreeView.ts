@@ -2,6 +2,7 @@ import { useEffect, type Dispatch, type MutableRefObject, type RefObject, type S
 import { AmbientLight, Color, DirectionalLight, Group, MOUSE, PerspectiveCamera, Plane, Raycaster, Scene, Vector2, Vector3, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { pullFace, moveWithGroup, r2, type FaceAxis, type PlankScene, type Vec3 } from '@/birdhouse/model';
+import { disposeAll } from '@/birdhouse/three/registry/materials';
 import { AMBIENCE, SUN_POSITION, VIEW } from '@/birdhouse/three/constants';
 import { AXIS_N, SNAP, type Cut, type View } from '@/birdhouse/three/types';
 
@@ -226,6 +227,6 @@ export function useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickR
     };
     loop();
     view.current = v;
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); orbit.dispose(); renderer.dispose(); renderer.domElement.remove(); view.current = null; };
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); orbit.dispose(); renderer.dispose(); renderer.domElement.remove(); disposeAll(); view.current = null; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 }

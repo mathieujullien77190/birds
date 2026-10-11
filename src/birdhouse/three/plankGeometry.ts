@@ -1,9 +1,10 @@
 import { BufferGeometry, Color, ExtrudeGeometry, Float32BufferAttribute, Path, Shape, Vector2 } from 'three';
 import { holeOutline, outline, type Plank } from '../model';
+import { PALETTE } from './registry/palette';
 import { cameraGeometry } from './partGeometry';
 
 /** Dessus (face +z de la plaque) clair, dessous un peu plus foncé, tranche (épaisseur) marron foncé : on voit tout de suite le sens et l'épaisseur. */
-const TOP = new Color('#e2c79a'), BOTTOM = new Color('#c9a874'), SIDE = new Color('#6f4a22');
+const TOP = new Color(PALETTE.plywoodTop), BOTTOM = new Color(PALETTE.plywoodBottom), SIDE = new Color(PALETTE.plywoodSide);
 export function plankGeometry(p: Plank, t: number): { geo: BufferGeometry; edges: BufferGeometry } {
   if (p.special && p.special !== 'alu') return cameraGeometry(p, t);
   const pts = outline(p);
@@ -17,7 +18,7 @@ export function plankGeometry(p: Plank, t: number): { geo: BufferGeometry; edges
     const z = nrm.getZ(i), c = z > 0.5 ? TOP : z < -0.5 ? BOTTOM : SIDE;
     col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b;
   }
-  if (p.special === 'alu') { const c = new Color(p.color ?? '#cbd5e1'); for (let i = 0; i < nrm.count; i++) { const k = nrm.getZ(i) < -0.5 ? 0.9 : Math.abs(nrm.getZ(i)) <= 0.5 ? 0.8 : 1; col[3 * i] = c.r * k; col[3 * i + 1] = c.g * k; col[3 * i + 2] = c.b * k; } } // aluminium : une seule teinte
+  if (p.special === 'alu') { const c = new Color(p.color ?? PALETTE.aluminium); for (let i = 0; i < nrm.count; i++) { const k = nrm.getZ(i) < -0.5 ? 0.9 : Math.abs(nrm.getZ(i)) <= 0.5 ? 0.8 : 1; col[3 * i] = c.r * k; col[3 * i + 1] = c.g * k; col[3 * i + 2] = c.b * k; } } // aluminium : une seule teinte
   geo.setAttribute('color', new Float32BufferAttribute(col, 3));
   const pos: number[] = [];
   for (const loop of [pts, ...p.holes.map(holeOutline)]) for (let i = 0; i < loop.length; i++) {
