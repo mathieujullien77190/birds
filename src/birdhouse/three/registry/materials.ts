@@ -28,7 +28,6 @@ export const materials = {
   /** Contour de la face à tirer : pointillés bleus. */
   pullMark: lazy(() => new LineDashedMaterial({ color: PALETTE.pullMark, dashSize: 3, gapSize: 2, depthTest: false })),
   /** Contour du trou en cours de réglage : pointillés ambre. */
-  holeMark: lazy(() => new LineDashedMaterial({ color: PALETTE.holeMark, dashSize: 2.5, gapSize: 1.5, depthTest: false })),
   /** Arêtes de toutes les plaques (marron foncé). */
   edge: lazy(() => new LineBasicMaterial({ color: PALETTE.plywoodEdge })),
   /** Cotes, testées en profondeur : trait de cote et traits de rappel. */

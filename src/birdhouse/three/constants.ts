@@ -23,12 +23,7 @@ export const SUN_POSITION = [300, -400, 500] as const;
 export const MARK = {
   cutRenderOrder: 5,
   dimensionRenderOrder: 20,
-  holeRenderOrder: 25,
   pullRenderOrder: 26,
-  /** Les contours de trou sont dessinés 0,3 mm au-dessus des deux faces (z = ± t/2 ± 0,3). */
-  holeOffset: 0.3,
-  /** Les cotes du trou sont dans le plan de la face avant, 0,6 mm au-dessus. */
-  holeDimensionOffset: 0.6,
   /** Le contour de la face tirée dépasse la plaque de 0,3 mm. */
   pullOffset: 0.3,
   /** Plan de coupe : le carré dépasse l'encombrement de 40 %, 50 mm au minimum. */

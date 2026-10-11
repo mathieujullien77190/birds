@@ -1,5 +1,5 @@
 import { BufferGeometry, Float32BufferAttribute, LineLoop, Mesh, PlaneGeometry, Vector3, type Object3D } from 'three';
-import { bounds, extents, holeHalf, holeOutline, outline, type FaceAxis, type Hole, type Plank, type PlankScene } from '../../model';
+import { bounds, extents, outline, type FaceAxis, type Plank, type PlankScene } from '../../model';
 import { MARK } from '../constants';
 import { materials } from '../registry/materials';
 import { AXIS_I, AXIS_N, type Cut } from '../types';
@@ -7,32 +7,6 @@ import { dimension } from './dimension';
 
 /** Une face de plaque à tirer : l'axe de sa normale (repère de la plaque) et son sens. */
 export interface PullTarget { plankId: string; axis: FaceAxis; sign: 1 | -1 }
-
-/**
- * Repère du trou en cours de réglage : son contour en pointillés ambre sur les deux faces de la plaque, et quatre cotes
- * (du bord de la plaque au bord du trou) dans le plan de la face avant. Coordonnées du repère de la plaque : le groupe qui les porte est posé sur la mesh.
- */
-export function holeMarkObjects(p: Plank, h: Hole, t: number): Object3D[] {
-  const out: Object3D[] = [];
-  const loop = holeOutline(h);
-  for (const z of [-t / 2 - MARK.holeOffset, t / 2 + MARK.holeOffset]) {
-    const geo = new BufferGeometry().setAttribute('position', new Float32BufferAttribute(loop.flatMap(([x, y]) => [x, y, z]), 3));
-    const line = new LineLoop(geo, materials.holeMark());
-    line.computeLineDistances();
-    line.renderOrder = MARK.holeRenderOrder;
-    out.push(line);
-  }
-  const [hw, hh] = holeHalf(h); // rond : size / 2 des deux côtés ; rectangle : size / 2 en largeur (x), sh / 2 en hauteur (y), comme le contour du trou
-  const z = t / 2 + MARK.holeDimensionOffset, X = new Vector3(1, 0, 0), Yv = new Vector3(0, 1, 0), none = new Vector3();
-  const r1 = (v: number) => `${+v.toFixed(2)}`; // valeur exacte au centième, sans zéros inutiles
-  out.push(
-    dimension(new Vector3(-p.w / 2, h.y, z), new Vector3(h.x - hw, h.y, z), Yv, none, r1(h.x - hw + p.w / 2)), // gauche
-    dimension(new Vector3(h.x + hw, h.y, z), new Vector3(p.w / 2, h.y, z), Yv, none, r1(p.w / 2 - h.x - hw)), // droite
-    dimension(new Vector3(h.x, h.y + hh, z), new Vector3(h.x, p.h / 2, z), X, none, r1(p.h / 2 - h.y - hh)), // haut
-    dimension(new Vector3(h.x, -p.h / 2, z), new Vector3(h.x, h.y - hh, z), X, none, r1(h.y - hh + p.h / 2)), // bas
-  );
-  return out;
-}
 
 /** Repère de la face à tirer : son contour en pointillés bleus (repère de la plaque). */
 export function pullMarkObject(p: Plank, pull: PullTarget, t: number): LineLoop {

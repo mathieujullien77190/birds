@@ -24,7 +24,7 @@ src/birdhouse/
 
 src/features/viewer/hooks/
   useThreeView            createScene + les contrôleurs d'interaction
-  useSceneSync            l'état React -> la scène (7 effets)
+  useSceneSync            l'état React -> la scène (6 effets)
   useDayNight, usePiCameraShot
 ```
 

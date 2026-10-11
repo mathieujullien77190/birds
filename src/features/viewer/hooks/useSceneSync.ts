@@ -3,7 +3,7 @@ import { MathUtils, Plane } from 'three';
 import type { FaceAxis, PlankScene } from '@/birdhouse/model';
 import { EMISSIVE } from '@/birdhouse/three/constants';
 import { clearGroup, disposeObject3D } from '@/birdhouse/three/dispose';
-import { cutMarkObject, habillageDimensions, holeMarkObjects, pullMarkObject } from '@/birdhouse/three/factories/marks';
+import { cutMarkObject, habillageDimensions, pullMarkObject } from '@/birdhouse/three/factories/marks';
 import { isGhostPart } from '@/birdhouse/three/ghost';
 import { createPlankMesh } from '@/birdhouse/three/factories/plank';
 import { AXIS_N, type Cut, type View } from '@/birdhouse/three/types';
@@ -14,8 +14,6 @@ export interface SceneSyncState {
   extra: Set<string>;
   hover: { plank?: string; group?: string } | null;
   groupSel: string | null;
-  holeEdit: { plankId: string; holeId: string; fresh?: boolean } | null;
-  holeHover: { plankId: string; holeId: string } | null;
   pull: { plankId: string; axis: FaceAxis; sign: 1 | -1 } | null;
   cut: Cut;
   hidden: Set<string>;
@@ -27,7 +25,7 @@ export interface SceneSyncState {
  * 1. les meshes (une par plaque : forme, position, rotation, transparence ; les plaques supprimées sont libérées) ;
  * 2. la surbrillance (sélection, survol) ; 3. la coupe et la visibilité ; 4–7. les repères (trou, face tirée, plan de coupe) et les cotes de l'habillage.
  */
-export function useSceneSync(view: MutableRefObject<View | null>, { sc, selectedId, extra, hover, groupSel, holeEdit, holeHover, pull, cut, hidden, piReady }: SceneSyncState) {
+export function useSceneSync(view: MutableRefObject<View | null>, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady }: SceneSyncState) {
   // 1. une mesh par plaque, géométrie refaite si la forme change, position / rotation recopiées
   useEffect(() => {
     const v = view.current;
@@ -87,22 +85,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
     }
   }, [view, sc, cut, hidden]);
 
-  // 4. trou en cours de réglage (ou survolé) : son contour en pointillés et ses cotes, sur la plaque
-  useEffect(() => {
-    const v = view.current;
-    if (!v) return;
-    clearGroup(v.holeMark);
-    const mark = holeEdit ?? holeHover;
-    const mp = mark ? sc.planks.find((p) => p.id === mark.plankId) : undefined;
-    const mh = mark ? mp?.holes.find((h) => h.id === mark.holeId) : undefined;
-    const mm = mp ? v.meshes.get(mp.id) : undefined;
-    if (!mp || !mh || !mm) return;
-    v.holeMark.add(...holeMarkObjects(mp, mh, sc.t));
-    v.holeMark.position.copy(mm.position);
-    v.holeMark.quaternion.copy(mm.quaternion);
-  }, [view, sc, holeEdit, holeHover]);
-
-  // 5. face à tirer : son contour en pointillés bleus
+  // 4. face à tirer : son contour en pointillés bleus
   useEffect(() => {
     const v = view.current;
     if (!v) return;
@@ -115,7 +98,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
     v.pullMark.quaternion.copy(pm.quaternion);
   }, [view, sc, pull]);
 
-  // 6. plan de coupe : un grand carré bleu transparent, à la position réglée
+  // 5. plan de coupe : un grand carré bleu transparent, à la position réglée
   useEffect(() => {
     const v = view.current;
     if (!v) return;
@@ -124,7 +107,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
     if (quad) v.cutMark.add(quad);
   }, [view, sc, cut]);
 
-  // 7. cotes de l'habillage
+  // 6. cotes de l'habillage
   useEffect(() => {
     const v = view.current;
     if (!v) return;

@@ -7,7 +7,7 @@ export interface ClickDeps {
   view: View;
   picker: Picker;
   pickRef: MutableRefObject<(id: string | null, ctrl: boolean) => void>;
-  setCtx: (c: { x: number; y: number; plankId: string; local: [number, number] } | null) => void;
+  setCtx: (c: { x: number; y: number; plankId: string } | null) => void;
   setSelectedId: (id: string | null) => void;
 }
 
@@ -29,8 +29,8 @@ export function attachClick({ view: v, picker, pickRef, setCtx, setSelectedId }:
     picker.rayAt(e);
     const first = picker.firstPlank();
     const id = first ? first.mesh.plankId : null;
-    if (e.button === 2) { // clic droit sur une plaque : menu, avec le point touché en coordonnées de la plaque
-      if (first && id) { const local = first.mesh.worldToLocal(first.hit.point.clone()); setSelectedId(id); setCtx({ x: e.clientX - r.left, y: e.clientY - r.top, plankId: id, local: [local.x, local.y] }); }
+    if (e.button === 2) { // clic droit sur une plaque : menu (cacher / voir)
+      if (first && id) { setSelectedId(id); setCtx({ x: e.clientX - r.left, y: e.clientY - r.top, plankId: id }); }
       else setCtx(null);
       return;
     }

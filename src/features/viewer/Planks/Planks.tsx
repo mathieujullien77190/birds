@@ -5,14 +5,14 @@ import { randomId } from '@/lib';
 import { DocModal, DOCS } from '@/features/docs';
 import { LaserMachineModal, LaserPreview, useLaser } from '@/features/laser';
 import { SchemaPanel } from '@/features/schema';
-import { makeNest, moveWithGroup, setAirPlug, setWinterCassette, winterState, extents, fitHole, newHole, saveHistory, saveScene, loadScene, type Hole, type Plank, type PlankScene, type Vec3 } from '@/birdhouse/model';
+import { makeNest, moveWithGroup, setAirPlug, setWinterCassette, winterState, extents, saveHistory, saveScene, loadScene, type Plank, type PlankScene, type Vec3 } from '@/birdhouse/model';
 import { PiSimulator } from '@/birdhouse/PiSimulator';
 import { loadPiModel, piModel } from '@/birdhouse/three/piModel';
 import type { View } from '@/birdhouse/three/types';
-import { ContextMenu, CutPanel, HistoryList, HoleWindow, LeftPanel, PiecesList, PullBar, RightPanel, SelectionBar, UndoBar, ViewToolbar } from '../components';
+import { ContextMenu, CutPanel, HistoryList, LeftPanel, PiecesList, PullBar, RightPanel, SelectionBar, UndoBar, ViewToolbar } from '../components';
 import { HIDDEN_AT_CREATION, STORAGE } from '../constants';
 import { useCutPlane, useDrawer, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useThreeView, useFanSpeed, useIrBeams } from '../hooks';
-import type { ContextMenuState, Hover, HoleEdit, PullState } from '../types';
+import type { ContextMenuState, Hover, PullState } from '../types';
 
 /** Écran du nichoir : vue 3D (Three.js), panneaux gauche / droite, schéma, documents, simulateur du Pi. Garde la scène, la sélection et l'historique. */
 export default function Planks() {
@@ -61,8 +61,6 @@ export default function Planks() {
   pickRef.current = pick;
   const [drawer, setDrawer] = useDrawer(); // volet ouvert à droite
   const [ctx, setCtx] = useState<ContextMenuState | null>(null); // menu du clic droit
-  const [holeEdit, setHoleEdit] = useState<HoleEdit | null>(null); // fenêtre de réglage d'un trou ; `fresh` : trou qui vient d'être créé, ses réglages se fondent dans « Trou ajouté »
-  const holeHover = null as { plankId: string; holeId: string } | null; // plus de section « Trous » : plus de trou survolé // trou survolé dans la section « Trous »
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<View | null>(null);
   const shoot = usePiCameraShot(view, scRef, night);
@@ -71,7 +69,6 @@ export default function Planks() {
   selRef.current = selectedId;
   const { history, backLabel, histN, commit, pushEntry, undoTo, back, clearHistory } = useHistory(scRef, setSc, (scene) => {
     if (selRef.current && !scene.planks.some((p) => p.id === selRef.current)) setSelectedId(null);
-    setHoleEdit(null);
   });
   useEffect(() => { saveScene(sc); saveHistory(history.current); }, [sc]); // eslint-disable-line react-hooks/exhaustive-deps -- `history` est une ref (stable) : la scène et l'historique sont enregistrés ensemble, quand la scène change
   const backRef = useRef(back);
@@ -86,8 +83,8 @@ export default function Planks() {
   const moveRef = useRef(moveWithGroup);
   moveRef.current = moveWithGroup;
   useKeyboardShortcuts({ back: backRef, commit: commitRef, selectedId: selRef, groupSel: groupSelRef }, {
-    clearSelection: () => { setSelectedId(null); setGroupSel(null); setHoleEdit(null); },
-    escape: () => { setCtx(null); setHoleEdit(null); setExtra(new Set()); setPull(null); },
+    clearSelection: () => { setSelectedId(null); setGroupSel(null); },
+    escape: () => { setCtx(null); setExtra(new Set()); setPull(null); },
   });
 
   useThreeView({ host, view, scRef, cutRef, pullRef, pickRef, setSc, setCut, setCtx, setSelectedId, setHover, pushEntry });
@@ -95,12 +92,12 @@ export default function Planks() {
   const [fanPct, setFanPct] = useState(0); // vitesse du ventilateur lue dans le simulateur du Pi (le rotor de la 3D tourne)
   useFanSpeed(view, fanPct);
   const [leds, setLeds] = useState({ nid: false, ext: false }); // LED infrarouges allumées dans le simulateur du Pi (faisceaux visibles dans la 3D)
-  useSceneSync(view, { sc, selectedId, extra, hover, groupSel, holeEdit, holeHover, pull, cut, hidden, piReady });
+  useSceneSync(view, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady });
   useIrBeams(view, sc, leds); // après useSceneSync : les meshes des cartes de LED existent
 
   // ----- actions -----
   const duplicate = (p: Plank) => { const c: Plank = { ...p, id: randomId(), name: p.name + ' bis', pos: [p.pos[0] + 30, p.pos[1], p.pos[2] + 30], notches: p.notches.map((n) => ({ ...n, id: randomId() })), holes: p.holes.map((h) => ({ ...h, id: randomId() })) }; commit('Plaque dupliquée', (s) => ({ ...s, planks: [...s.planks, c] })); setSelectedId(c.id); };
-  const remove = (id: string) => { commit('Plaque supprimée', (s) => ({ ...s, planks: s.planks.filter((p) => p.id !== id) })); if (selectedId === id) setSelectedId(null); setHoleEdit(null); };
+  const remove = (id: string) => { commit('Plaque supprimée', (s) => ({ ...s, planks: s.planks.filter((p) => p.id !== id) })); if (selectedId === id) setSelectedId(null); };
   const [nest, setNest] = useNestParams();
   const addNest = () => { const b = makeNest(nest, sc.t, sc.fit, sc.planks.length + 1); commit('Nichoir créé', (s) => ({ ...s, planks: [...s.planks, ...b.planks], groupNames: { ...(s.groupNames ?? {}), ...b.groupNames } })); setSelectedId(b.planks[0].id); setGroupSel(b.group); setOpenGroups((g) => new Set([...g, b.group])); setHidden((h) => new Set([...h, ...b.planks.filter((p) => HIDDEN_AT_CREATION.some((re) => re.test(p.name))).map((p) => p.id)])); /* l'isolant, les quatre barres du toit et le pan de toit en chêne sont cachés par défaut (l'œil de « Pièces » les affiche) */ };
   const autoNest = useRef(false);
@@ -140,15 +137,6 @@ export default function Planks() {
     const docs = Object.entries(sc.groupNames ?? {}).filter(([, nm]) => nm === 'Schéma électronique').map(([g]) => g);
     if (docs.some((g) => !openGroups.has(g))) setOpenGroups((s) => new Set([...s, ...docs]));
   }, [sc.groupNames]); // eslint-disable-line react-hooks/exhaustive-deps -- ne se relance que si les noms de groupes changent ; `openGroups` n'est lu que pour savoir s'il manque un groupe à déplier
-  const addHole = (plankId: string, local: [number, number], openWindow = true) => { const pl = scRef.current.planks.find((p) => p.id === plankId); const h = pl ? fitHole(pl, newHole(local[0], local[1])) : newHole(local[0], local[1]); commit('Trou ajouté', (s) => ({ ...s, planks: s.planks.map((p) => (p.id === plankId ? { ...p, holes: [...p.holes, h] } : p)) })); if (openWindow) setHoleEdit({ plankId, holeId: h.id, fresh: true }); setCtx(null); };
-  const setHole = (p: Plank, id: string, patch: Partial<Hole>) => {
-    const fresh = !!holeEdit?.fresh && holeEdit.holeId === id; // un trou tout neuf : un seul Retour l'enlève avec ses réglages
-    commit(fresh ? 'Trou ajouté' : 'Réglage du trou', (s) => ({ ...s, planks: s.planks.map((x) => (x.id === p.id ? { ...x, holes: x.holes.map((h) => (h.id === id ? fitHole(x, { ...h, ...patch }) : h)) } : x)) }), fresh);
-  };
-  /** Bouton magique : perce les fentes partout où la plaque en traverse d'autres. */
-  const removeHole = (p: Plank, id: string) => { update(p.id, { holes: p.holes.filter((h) => h.id !== id) }, 'Trou retiré'); setHoleEdit(null); };
-  const editingHole = holeEdit ? sc.planks.find((p) => p.id === holeEdit.plankId)?.holes.find((h) => h.id === holeEdit.holeId) : undefined;
-  const editingPlank = holeEdit ? sc.planks.find((p) => p.id === holeEdit.plankId) : undefined;
   /** Lie toutes les plaques sélectionnées (principale + Ctrl + clic) dans un seul groupe (les groupes existants fusionnent). */
   const linkSelection = () => {
     const ids = new Set([selectedId, ...extra].filter(Boolean) as string[]);
@@ -177,8 +165,7 @@ export default function Planks() {
         {pull && <PullBar cutOn={cut.on} onDone={() => setPull(null)} />}
         {extra.size > 0 && <SelectionBar count={extra.size + (selectedId ? 1 : 0)} onLink={linkSelection} onUnlink={unlinkSelection} onCancel={() => setExtra(new Set())} />}
 
-        {ctx && <ContextMenu ctx={ctx} sc={sc} hidden={hidden} groupSel={groupSel} addHole={addHole} toggleHidden={toggleHidden} update={update} setGroupSel={setGroupSel} close={() => setCtx(null)} />}
-        {editingHole && editingPlank && <HoleWindow plank={editingPlank} hole={editingHole} onChange={(patch) => setHole(editingPlank, editingHole.id, patch)} onClose={() => setHoleEdit(null)} onRemove={() => removeHole(editingPlank, editingHole.id)} />}
+        {ctx && <ContextMenu ctx={ctx} sc={sc} hidden={hidden} toggleHidden={toggleHidden} close={() => setCtx(null)} />}
       </main>
 
       {machine.open && <LaserMachineModal m={machine} />}

@@ -3,11 +3,8 @@ import type { Hover } from '@/types';
 
 export type { Hover };
 
-/** Menu du clic droit : position écran, plaque touchée et point touché dans son repère local. */
-export interface ContextMenuState { x: number; y: number; plankId: string; local: [number, number] }
-
-/** Fenêtre de réglage d'un trou ; `fresh` : trou qui vient d'être créé, ses réglages se fondent dans « Trou ajouté ». */
-export interface HoleEdit { plankId: string; holeId: string; fresh?: boolean }
+/** Menu du clic droit : position écran et plaque touchée. */
+export interface ContextMenuState { x: number; y: number; plankId: string }
 
 /** Face double-cliquée, à tirer (fonction retirée de l'interface, état gardé par le modèle). */
 export interface PullState { plankId: string; axis: FaceAxis; sign: 1 | -1 }

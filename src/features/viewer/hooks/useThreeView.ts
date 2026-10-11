@@ -18,7 +18,7 @@ export interface ThreeViewDeps {
   pickRef: MutableRefObject<(id: string | null, ctrl: boolean) => void>;
   setSc: Dispatch<SetStateAction<PlankScene>>;
   setCut: Dispatch<SetStateAction<Cut>>;
-  setCtx: (c: { x: number; y: number; plankId: string; local: [number, number] } | null) => void;
+  setCtx: (c: { x: number; y: number; plankId: string } | null) => void;
   setSelectedId: (id: string | null) => void;
   setHover: (h: { plank?: string; group?: string } | null) => void;
   pushEntry: (label: string) => void;

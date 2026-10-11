@@ -51,7 +51,6 @@ export const PALETTE = {
   // repères et cotes
   cutPlane: '#2563eb',
   pullMark: '#0284c7',
-  holeMark: '#d97706',
   dimLine: '#1c1917',
   dimExt: '#a8a29e',
 } as const;
