@@ -1,13 +1,13 @@
 import { useEffect, type MutableRefObject } from 'react';
-import { BufferGeometry, Float32BufferAttribute, Line, LineLoop, MathUtils, Mesh, Plane, PlaneGeometry, Sprite, Vector3 } from 'three';
-import { bounds, extents, holeOutline, outline, type PlankScene, type Vec3 } from '@/birdhouse/model';
-import { EMISSIVE, MARK } from '@/birdhouse/three/constants';
-import { materials, textures } from '@/birdhouse/three/registry/materials';
-import { PALETTE } from '@/birdhouse/three/registry/palette';
-import { dimension } from '@/birdhouse/three/factories/dimension';
+import { MathUtils, Plane } from 'three';
+import type { FaceAxis, PlankScene, Vec3 } from '@/birdhouse/model';
+import { EMISSIVE } from '@/birdhouse/three/constants';
+import { clearGroup, disposeObject3D } from '@/birdhouse/three/dispose';
+import { cutMarkObject, habillageDimensions, holeMarkObjects, pullMarkObject } from '@/birdhouse/three/factories/marks';
 import { createPlankMesh } from '@/birdhouse/three/factories/plank';
-import { AXIS_I, AXIS_N, type Cut, type View } from '@/birdhouse/three/types';
-import type { FaceAxis } from '@/birdhouse/model';
+import { textures } from '@/birdhouse/three/registry/materials';
+import { PALETTE } from '@/birdhouse/three/registry/palette';
+import { AXIS_N, type Cut, type View } from '@/birdhouse/three/types';
 
 export interface SceneSyncState {
   sc: PlankScene;
@@ -23,14 +23,17 @@ export interface SceneSyncState {
   piReady: boolean;
 }
 
-/** L'état → la scène : une mesh par plaque, géométrie refaite si la forme change, position / rotation recopiées, repères (trou, face tirée, plan de coupe, cotes de l'habillage). */
+/**
+ * L'état → la scène, en effets séparés (chacun ne se refait que si SES entrées changent, dans cet ordre) :
+ * 1. les meshes (une par plaque : forme, position, rotation, transparence ; les plaques supprimées sont libérées) ;
+ * 2. la surbrillance (sélection, survol) ; 3. la coupe et la visibilité ; 4–7. les repères (trou, face tirée, plan de coupe) et les cotes de l'habillage.
+ */
 export function useSceneSync(view: MutableRefObject<View | null>, { sc, selectedId, extra, hover, groupSel, holeEdit, holeHover, pull, cut, hidden, piReady }: SceneSyncState) {
-  // l'état → la scène : une mesh par plaque, géométrie refaite si la forme change, position / rotation recopiées (sauf pendant un glissé)
+  // 1. une mesh par plaque, géométrie refaite si la forme change, position / rotation recopiées
   useEffect(() => {
     const v = view.current;
     if (!v) return;
     const seen = new Set<string>();
-    const clipPlanes = cut.on ? [new Plane(AXIS_N[cut.axis].clone().multiplyScalar(cut.flip ? -1 : 1), cut.flip ? cut.pos : -cut.pos)] : null; // le côté « devant » est gardé, l'autre devient invisible
     for (const p of sc.planks) {
       if (p.special === 'doc') continue; // document : rien à dessiner dans la 3D
       seen.add(p.id);
@@ -43,101 +46,89 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       m.position.set(...p.pos);
       m.rotation.set(...(p.rot.map(MathUtils.degToRad) as Vec3));
       const mat = m.material;
-      const hovered = !!hover && (hover.plank === p.id || (!!hover.group && hover.group === p.group));
-      const chosen = groupSel ? p.group === groupSel : p.id === selectedId; // boîte choisie : toutes ses plaques
-      mat.emissive.set(hovered ? EMISSIVE.hover : chosen ? EMISSIVE.chosen : extra.has(p.id) ? EMISSIVE.extra : EMISSIVE.none); // survolé dans la liste : ambre
-      mat.emissiveIntensity = hovered ? EMISSIVE.hoverIntensity : EMISSIVE.baseIntensity;
       if (p.name === 'Toit en chêne') { if (!mat.map) { mat.map = textures.oak(); mat.vertexColors = false; mat.color.set(PALETTE.white); mat.roughness = 0.7; mat.needsUpdate = true; } } // le pan de toit en chêne porte une texture de bois (le reste garde ses couleurs par sommets)
       mat.transparent = !!p.transparent;
       mat.opacity = p.transparent ? 0.3 : 1;
       mat.depthWrite = !p.transparent;
       mat.needsUpdate = true;
-      mat.clippingPlanes = clipPlanes;
+    }
+    for (const [id, m] of v.meshes) if (!seen.has(id)) { v.scene.remove(m); disposeObject3D(m); v.meshes.delete(id); } // plaque supprimée : géométrie, arêtes et matériau libérés
+  }, [view, sc, piReady]);
+
+  // 2. surbrillance : survolé (ambre), choisi (vert), sélection multiple (bleu)
+  useEffect(() => {
+    const v = view.current;
+    if (!v) return;
+    for (const p of sc.planks) {
+      const m = v.meshes.get(p.id);
+      if (!m) continue;
+      const mat = m.material;
+      const hovered = !!hover && (hover.plank === p.id || (!!hover.group && hover.group === p.group));
+      const chosen = groupSel ? p.group === groupSel : p.id === selectedId; // boîte choisie : toutes ses plaques
+      mat.emissive.set(hovered ? EMISSIVE.hover : chosen ? EMISSIVE.chosen : extra.has(p.id) ? EMISSIVE.extra : EMISSIVE.none); // survolé dans la liste : ambre
+      mat.emissiveIntensity = hovered ? EMISSIVE.hoverIntensity : EMISSIVE.baseIntensity;
+    }
+  }, [view, sc, selectedId, extra, hover, groupSel]);
+
+  // 3. plan de coupe (le côté « devant » est gardé, l'autre devient invisible) et plaques cachées (hors de la couche 0 : ni dessinées ni touchées par les clics)
+  useEffect(() => {
+    const v = view.current;
+    if (!v) return;
+    const clipPlanes = cut.on ? [new Plane(AXIS_N[cut.axis].clone().multiplyScalar(cut.flip ? -1 : 1), cut.flip ? cut.pos : -cut.pos)] : null;
+    for (const p of sc.planks) {
+      const m = v.meshes.get(p.id);
+      if (!m) continue;
+      m.material.clippingPlanes = clipPlanes;
+      m.material.needsUpdate = true;
       const isHidden = hidden.has(p.id);
       m.visible = !isHidden;
-      m.layers.set(isHidden ? 1 : 0); // hors de la couche 0 : ni dessinée ni touchée par les clics
+      m.layers.set(isHidden ? 1 : 0);
       m.edges.material.clippingPlanes = clipPlanes;
     }
-    for (const [id, m] of v.meshes) if (!seen.has(id)) { v.scene.remove(m); m.geometry.dispose(); v.meshes.delete(id); }
-    // trou en cours de réglage (ou survolé) : son contour en pointillés sur les deux faces de la plaque
-    for (const o of [...v.holeMark.children]) { v.holeMark.remove(o); o.traverse((c) => { const sp = c as Sprite; if (sp.isSprite) { sp.material.map?.dispose(); sp.material.dispose(); } else (c as Line).geometry?.dispose(); }); }
+  }, [view, sc, cut, hidden]);
+
+  // 4. trou en cours de réglage (ou survolé) : son contour en pointillés et ses cotes, sur la plaque
+  useEffect(() => {
+    const v = view.current;
+    if (!v) return;
+    clearGroup(v.holeMark);
     const mark = holeEdit ?? holeHover;
     const mp = mark ? sc.planks.find((p) => p.id === mark.plankId) : undefined;
-    const mh = mp?.holes.find((h) => h.id === mark!.holeId);
+    const mh = mark ? mp?.holes.find((h) => h.id === mark.holeId) : undefined;
     const mm = mp ? v.meshes.get(mp.id) : undefined;
-    if (mp && mh && mm) {
-      const loop = holeOutline(mh);
-      for (const z of [-sc.t / 2 - MARK.holeOffset, sc.t / 2 + MARK.holeOffset]) {
-        const geo = new BufferGeometry().setAttribute('position', new Float32BufferAttribute(loop.flatMap(([x, y]) => [x, y, z]), 3));
-        const line = new LineLoop(geo, materials.holeMark());
-        line.computeLineDistances();
-        line.renderOrder = MARK.holeRenderOrder;
-        v.holeMark.add(line);
-      }
-      // cotes : du bord de la plaque au bord du trou, des quatre côtés, dans le plan de la face avant
-      const hw = mh.shape === 'square' ? mh.size / 2 : mh.size / 2, hh = mh.shape === 'square' ? (mh.sh ?? mh.size) / 2 : mh.size / 2;
-      const z = sc.t / 2 + MARK.holeDimensionOffset, X = new Vector3(1, 0, 0), Yv = new Vector3(0, 1, 0), none = new Vector3();
-      const r1 = (v: number) => `${+v.toFixed(2)}`; // valeur exacte au centième, sans zéros inutiles
-      v.holeMark.add(
-        dimension(new Vector3(-mp.w / 2, mh.y, z), new Vector3(mh.x - hw, mh.y, z), Yv, none, r1(mh.x - hw + mp.w / 2)), // gauche
-        dimension(new Vector3(mh.x + hw, mh.y, z), new Vector3(mp.w / 2, mh.y, z), Yv, none, r1(mp.w / 2 - mh.x - hw)), // droite
-        dimension(new Vector3(mh.x, mh.y + hh, z), new Vector3(mh.x, mp.h / 2, z), X, none, r1(mp.h / 2 - mh.y - hh)), // haut
-        dimension(new Vector3(mh.x, -mp.h / 2, z), new Vector3(mh.x, mh.y - hh, z), X, none, r1(mh.y - hh + mp.h / 2)), // bas
-      );
-      v.holeMark.position.copy(mm.position);
-      v.holeMark.quaternion.copy(mm.quaternion);
-    }
-    // face à tirer : son contour en pointillés bleus
-    for (const o of [...v.pullMark.children]) { v.pullMark.remove(o); (o as Line).geometry.dispose(); }
+    if (!mp || !mh || !mm) return;
+    v.holeMark.add(...holeMarkObjects(mp, mh, sc.t));
+    v.holeMark.position.copy(mm.position);
+    v.holeMark.quaternion.copy(mm.quaternion);
+  }, [view, sc, holeEdit, holeHover]);
+
+  // 5. face à tirer : son contour en pointillés bleus
+  useEffect(() => {
+    const v = view.current;
+    if (!v) return;
+    clearGroup(v.pullMark);
     const pp = pull ? sc.planks.find((x) => x.id === pull.plankId) : undefined;
     const pm = pp ? v.meshes.get(pp.id) : undefined;
-    if (pp && pm && pull) {
-      const t2 = sc.t / 2 + MARK.pullOffset, w2 = pp.w / 2 + MARK.pullOffset, h2 = pp.h / 2 + MARK.pullOffset;
-      let loop: number[];
-      if (pull.axis === 'z') { const z = pull.sign * t2; loop = outline(pp).flatMap(([x, y]) => [x, y, z]); }
-      else if (pull.axis === 'x') { const x = pull.sign * w2; loop = [x, -h2, -t2, x, h2, -t2, x, h2, t2, x, -h2, t2]; }
-      else { const y = pull.sign * h2; loop = [-w2, y, -t2, w2, y, -t2, w2, y, t2, -w2, y, t2]; }
-      const line = new LineLoop(new BufferGeometry().setAttribute('position', new Float32BufferAttribute(loop, 3)), materials.pullMark());
-      line.computeLineDistances();
-      line.renderOrder = MARK.pullRenderOrder;
-      v.pullMark.add(line);
-      v.pullMark.position.copy(pm.position);
-      v.pullMark.quaternion.copy(pm.quaternion);
-    }
-    // plan de coupe : un grand carré bleu transparent, à la position réglée
-    for (const o of [...v.cutMark.children]) { v.cutMark.remove(o); (o as Mesh).geometry.dispose(); }
-    if (cut.on && sc.planks.length) {
-      const { min, max } = bounds(sc.planks, sc.t);
-      const size = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2], MARK.cutMinSize) * MARK.cutScale;
-      const quad = new Mesh(new PlaneGeometry(size, size), materials.cut());
-      const n = AXIS_N[cut.axis];
-      quad.quaternion.setFromUnitVectors(new Vector3(0, 0, 1), n);
-      quad.position.set((min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2);
-      quad.position.setComponent(AXIS_I[cut.axis], cut.pos);
-      quad.renderOrder = MARK.cutRenderOrder;
-      v.cutMark.add(quad);
-    }
-    // cotes : traits le long des côtés de chaque composant de plus haut niveau (plaque seule : largeur et hauteur dans son plan ; groupe : l, L, H de son encombrement)
-    for (const o of [...v.labels.children]) { v.labels.remove(o); o.traverse((c) => { const sp = c as Sprite; if (sp.isSprite) { sp.material.map?.dispose(); sp.material.dispose(); } else (c as Mesh).geometry?.dispose(); }); }
-    { // cotes de l'HABILLAGE seulement (demande de l'utilisateur : plus de bouton « Mesures », plus de cotes sur les autres pièces) : l × L × H de son encombrement
-      const O = MARK.dimensionGap; // écart entre l'objet et la cote
-      const done = new Set<string>();
-      for (const p of sc.planks) {
-        if (p.group && (sc.groupNames?.[p.group] ?? '').startsWith('Habillage')) {
-          if (done.has(p.group)) continue;
-          done.add(p.group);
-          const members = sc.planks.filter((x) => x.group === p.group && !hidden.has(x.id));
-          if (!members.length) continue;
-          const { min, max } = bounds(members, sc.t);
-          const [l, L, H] = extents(members, sc.t);
-          const X = new Vector3(1, 0, 0), Yn = new Vector3(0, -1, 0);
-          v.labels.add(
-            dimension(new Vector3(min[0], min[1] - O, min[2]), new Vector3(max[0], min[1] - O, min[2]), Yn, Yn.clone().multiplyScalar(O), `${l}`), // largeur, devant (−y), au sol
-            dimension(new Vector3(max[0] + O, min[1], min[2]), new Vector3(max[0] + O, max[1], min[2]), X, X.clone().multiplyScalar(O), `${L}`), // profondeur, à droite, au sol
-            dimension(new Vector3(max[0] + O, min[1] - O, min[2]), new Vector3(max[0] + O, min[1] - O, max[2]), X, new Vector3(O, -O, 0), `${H}`), // hauteur, sur l'arête avant droite
-          );
-        }
-      }
-    }
-  }, [sc, selectedId, extra, hover, groupSel, holeEdit, holeHover, pull, cut, hidden, piReady]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!pp || !pm || !pull) return;
+    v.pullMark.add(pullMarkObject(pp, pull, sc.t));
+    v.pullMark.position.copy(pm.position);
+    v.pullMark.quaternion.copy(pm.quaternion);
+  }, [view, sc, pull]);
+
+  // 6. plan de coupe : un grand carré bleu transparent, à la position réglée
+  useEffect(() => {
+    const v = view.current;
+    if (!v) return;
+    clearGroup(v.cutMark);
+    const quad = cutMarkObject(sc.planks, sc.t, cut);
+    if (quad) v.cutMark.add(quad);
+  }, [view, sc, cut]);
+
+  // 7. cotes de l'habillage
+  useEffect(() => {
+    const v = view.current;
+    if (!v) return;
+    clearGroup(v.labels);
+    v.labels.add(...habillageDimensions(sc, hidden));
+  }, [view, sc, hidden]);
 }
