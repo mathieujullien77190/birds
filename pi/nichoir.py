@@ -13,7 +13,7 @@ Mode simulé : `NICHOIR_MOCK=1 python nichoir.py` (ou `--mock`) remplace capteur
 pour essayer la page sur un ordinateur sans rien de branché (voir README).
 
 Brochage (voir docs/schema-electronique.md) :
-  Ventilateur (Noctua NF-A6x25 PWM, 12 V) : PWM GPIO18 (broche 12), tachymètre GPIO17 (broche 11, pull-up), masse commune broche 14
+  Ventilateur (Noctua NF-A6x25 PWM, 12 V) : interrupteur 12 V côté + GPIO27 (broche 13), PWM GPIO18 (broche 12), tachymètre GPIO17 (broche 11, pull-up), masse commune broche 14
   LED du nid : GPIO23 (module MOSFET IN1)   LED extérieures : GPIO24 (IN2)
   BME280 : I2C adresse 0x76 (ou 0x77)        INA219 (batterie) : I2C adresse 0x41
 """
@@ -41,9 +41,10 @@ def log(msg):
 #   démarre  : le nid dépasse `seuil_marche` ET (dehors inconnu OU le nid dépasse dehors d'au moins `ecart_ext`) ;
 #   vitesse  : de `vitesse_min` à `vitesse_max`, proportionnelle sur `plage` °C au-dessus du seuil ;
 #   s'arrête : le nid repasse sous `seuil_marche` − `hysteresis`, OU le nid n'est plus plus chaud que dehors (aspirer l'air de dehors ne refroidirait plus) ;
+#   `hiver` : « mode hiver » (cassette du ventilateur retirée, bloc isolant à sa place, bouchon de la prise d'air du dessous posé) : l'automatique ne démarre jamais le ventilateur (la commande manuelle reste possible) ;
 #   `alerte_chaleur` : au-dessus, une alerte (et une notification) même si l'automatique est éteint.
 # Sécurités prioritaires : voir regler_auto().
-AUTO_DEFAUT = {"actif": False, "seuil_marche": 28.0, "ecart_ext": 2.0, "hysteresis": 2.0, "vitesse_min": 30.0, "vitesse_max": 100.0, "plage": 5.0, "alerte_chaleur": 35.0}
+AUTO_DEFAUT = {"actif": False, "hiver": False, "seuil_marche": 28.0, "ecart_ext": 2.0, "hysteresis": 2.0, "vitesse_min": 30.0, "vitesse_max": 100.0, "plage": 5.0, "alerte_chaleur": 35.0}
 AUTO_LIMITES = {"seuil_marche": (15.0, 45.0), "ecart_ext": (0.0, 15.0), "hysteresis": (0.2, 10.0), "vitesse_min": (30.0, 100.0), "vitesse_max": (30.0, 100.0),
                 "plage": (1.0, 20.0), "alerte_chaleur": (31.0, 50.0)}
 NID_PLAUSIBLE = (-40.0, 60.0)   # hors de ces bornes une mesure du nid est jugée aberrante (capteur défaillant)
@@ -82,7 +83,7 @@ MOCK_PANNES = {"bme": False, "ventilo": False}  # pannes simulées (essais depui
 # ---------------------------------------------------------------- matériel (chaque bloc est optionnel)
 etat = {
     "t_nid": None, "hum_nid": None,
-    "ventilo": {"pourcent": 0, "rpm": None, "mode": "arret", "raison": "arrêté"},   # mode : arret / manuel / auto ; rpm : null sans tachymètre
+    "ventilo": {"pourcent": 0, "rpm": None, "mode": "arret", "raison": "arrêté", "alimente": False},   # mode : arret / manuel / auto ; rpm : null sans tachymètre ; alimente : 12 V présent (interrupteur GPIO27)
     "led_nid": False, "led_ext": False,
     "batterie": {"pourcent": None, "tension": None, "source": None},   # niveau de charge (mesuré par l'INA219 si présent, sinon simulé)
     "conso": {"total_w": None, "detail": {}},                          # consommation estimée selon ce qui est allumé
@@ -101,10 +102,11 @@ def _impulsion():
 
 
 # FACULTATIF : sans les GPIO (ordinateur, Pi non câblé) le programme tourne quand même, la page signale seulement « GPIO indisponible ».
-# REQUIS pour piloter les LED : le module MOSFET sur GPIO23 / 24.
+# REQUIS pour piloter les LED : le module MOSFET sur GPIO23 / 24 ; pour couper vraiment le ventilateur : l'interrupteur 12 V sur GPIO27.
 try:
     from gpiozero import DigitalInputDevice, DigitalOutputDevice, PWMOutputDevice
     led_nid, led_ext = DigitalOutputDevice(23), DigitalOutputDevice(24)
+    ventilo_12v = DigitalOutputDevice(27)   # interrupteur (MOSFET) du 12 V du ventilateur : bas au démarrage = ventilateur coupé
     LED_OK = True
 except Exception as e:  # pas sur un Pi, ou gpiozero absent
     etat["erreurs"]["gpio"] = f"GPIO indisponible : {e}"
@@ -218,7 +220,7 @@ if MOCK:
         """Sortie GPIO factice : accepte .value = … sans rien piloter."""
         value = 0
 
-    ventilo_pwm, led_nid, led_ext = Faux(), Faux(), Faux()
+    ventilo_pwm, ventilo_12v, led_nid, led_ext = Faux(), Faux(), Faux(), Faux()
     LED_OK = VENT_OK = TACHO_OK = BME_OK = BAT_OK = True
     _vent["tacho_vu"] = True   # le tachymètre simulé « est branché » : une panne simulée est donc détectée
     etat["erreurs"].clear()
@@ -312,7 +314,7 @@ if MOCK:
 # REQUIS si le ventilateur est monté : c'est la seule fonction qui commande le PWM.
 def ventilo(pourcent, mode="manuel", raison="", silencieux=False):
     """Vitesse du ventilateur en % (0 = arrêt). Un Noctua tourne mal en dessous de VENTILO_MIN : sous ce seuil on l'arrête.
-    NB : un ventilateur PWM à 0 % de rapport cyclique tourne au minimum (il ne s'arrête vraiment que si son 12 V est coupé)."""
+    L'arrêt COUPE le 12 V (interrupteur GPIO27) : un ventilateur PWM à 0 % tournerait encore à ~20 %. Le 12 V n'est jamais coupé quand une vitesse est demandée."""
     try:
         p = int(round(max(0.0, min(100.0, float(pourcent)))))
     except (TypeError, ValueError):
@@ -327,8 +329,21 @@ def ventilo(pourcent, mode="manuel", raison="", silencieux=False):
         mode, raison = "arret", raison or "arrêté"
     changement = (p, mode) != (v["pourcent"], v["mode"])
     v["pourcent"], v["mode"], v["raison"] = p, mode, raison or "commande manuelle"
-    if VENT_OK:
-        ventilo_pwm.value = p / 100
+    if p > 0:   # 12 V d'abord, un instant pour que le ventilateur démarre, puis le PWM
+        if not v["alimente"]:
+            if LED_OK:
+                ventilo_12v.value = 1
+                if not MOCK:
+                    time.sleep(0.5)
+            v["alimente"] = True
+        if VENT_OK:
+            ventilo_pwm.value = p / 100
+    else:       # PWM à 0 (fil de commande bas : il n'alimente pas le ventilateur par son entrée), puis 12 V coupé
+        if VENT_OK:
+            ventilo_pwm.value = 0
+        if LED_OK:
+            ventilo_12v.value = 0
+        v["alimente"] = False
     if changement and not silencieux:
         log(f"Ventilateur : {p} % ({mode}) — {v['raison']}" if p else f"Ventilateur : arrêt — {v['raison']}")
 
@@ -382,6 +397,7 @@ def charger_reglages():
                 etat["auto"][k] = max(lo, min(hi, float(d[k])))
         etat["auto"]["vitesse_max"] = max(etat["auto"]["vitesse_max"], etat["auto"]["vitesse_min"])
         etat["auto"]["actif"] = bool(d.get("actif", False))
+        etat["auto"]["hiver"] = bool(d.get("hiver", d.get("bouche", False)))   # « bouche » : ancien nom du réglage
     except Exception:
         pass  # pas de fichier, ou environnement sans disque (simulateur du navigateur)
 
@@ -458,7 +474,7 @@ def mesurer_ventilo():
     """Vitesse réelle (tr/min) d'après les impulsions du tachymètre, sur une fenêtre de ~15 s (2 impulsions par tour). Sans tachymètre : rpm = None."""
     v = etat["ventilo"]
     if MOCK:
-        v["rpm"] = 0 if (v["pourcent"] == 0 or MOCK_PANNES["ventilo"]) else round(300 + 27 * v["pourcent"])
+        v["rpm"] = 0 if (not v["alimente"] or v["pourcent"] == 0 or MOCK_PANNES["ventilo"]) else round(300 + 27 * v["pourcent"])
         return
     if not TACHO_OK:
         v["rpm"] = None
@@ -478,7 +494,7 @@ def mesurer_ventilo():
 def verifier_ventilo():
     """Panne : commandé à 30 % ou plus depuis plus de VENTILO_PANNE_S secondes mais 0 tr/min (seulement si le tachymètre a déjà donné des impulsions : il est branché)."""
     v, e = etat["ventilo"], etat["erreurs"]
-    if v["pourcent"] >= VENTILO_MIN and _vent["depuis"] and time.time() - _vent["depuis"] > VENTILO_PANNE_S and v["rpm"] == 0 and _vent["tacho_vu"]:
+    if v["alimente"] and v["pourcent"] >= VENTILO_MIN and _vent["depuis"] and time.time() - _vent["depuis"] > VENTILO_PANNE_S and v["rpm"] == 0 and _vent["tacho_vu"]:
         e["ventilo"] = f"Le ventilateur est commandé à {v['pourcent']} % mais ne tourne pas (0 tr/min) : câblage, alimentation 12 V ou hélice bloquée ?"
         if time.time() - _auto["alerte_vent"] > 3600:
             _auto["alerte_vent"] = time.time()
@@ -506,6 +522,11 @@ def regler_auto():
         return
     t, t_ext, e = etat["t_nid"], etat["meteo"]["t_ext"], etat["erreurs"]
     marche = v["mode"] == "auto" and v["pourcent"] > 0
+    if a["hiver"]:   # mode hiver : le ventilateur est retiré, rien à démarrer
+        if marche:
+            ventilo(0, "arret", "mode hiver : ventilateur retiré")
+        a["etat"], a["raison"] = "veille", "mode hiver : ventilateur retiré"
+        return
     blocage = None
     if "bme280" in e or t is None:
         blocage = "capteur du nid absent ou muet : on ne sait pas s'il fait chaud"
@@ -670,7 +691,7 @@ def api_ventilo():
 
 @app.post("/api/auto")
 def api_auto():
-    """Active ou règle la ventilation automatique : {actif, seuil_marche, ecart_ext, hysteresis, vitesse_min, vitesse_max, plage, alerte_chaleur} (tout est facultatif)."""
+    """Active ou règle la ventilation automatique : {actif, hiver, seuil_marche, ecart_ext, hysteresis, vitesse_min, vitesse_max, plage, alerte_chaleur} (tout est facultatif)."""
     d = request.get_json(force=True) or {}
     a = etat["auto"]
     for k, (lo, hi) in AUTO_LIMITES.items():
@@ -680,6 +701,8 @@ def api_auto():
             except (TypeError, ValueError):
                 pass
     a["vitesse_max"] = max(a["vitesse_max"], a["vitesse_min"])
+    if "hiver" in d:
+        a["hiver"] = bool(d["hiver"])
     if "actif" in d:
         voulu = bool(d["actif"])
         if voulu and not a["actif"]:
@@ -739,7 +762,12 @@ def video2():
     return mjpeg(1)
 
 
+import atexit
+atexit.register(lambda: ventilo(0, "arret", "arrêt du programme", silencieux=True))   # le 12 V du ventilateur est coupé quand le programme s'arrête
+
+
 if __name__ == "__main__":
+    ventilo(0, "arret", "démarrage du programme", silencieux=True)   # 12 V coupé au démarrage
     charger_reglages()
     charger_historique()
     log("Nichoir mésange : page sur http://0.0.0.0:8080" + (" (mode simulé)" if MOCK else ""))

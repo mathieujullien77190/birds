@@ -25,6 +25,8 @@ export function AutoFan({ state, onAuto }: AutoFanProps) {
       <div className={`muted auto-etat auto-${a.etat}`} id="auto_etat">{describeAuto(a)}</div>
       {a.avertissements.map((w) => <div key={w} className="muted">⚠ {w}</div>)}
       <ErrorLine message={state?.erreurs.alerte_chaleur} />
+      <div className="row"><label className="auto-check" title="ventilateur retiré et remplacé par le bloc isolant, bouchon du dessous posé : le ventilateur ne démarre pas en automatique (la commande manuelle reste possible)"><input id="auto_hiver" type="checkbox" checked={a.hiver} onChange={(e) => onAuto({ hiver: e.target.checked })} /> Mode hiver</label></div>
+      {a.hiver && <div className="muted" id="auto_hiver_rappel">⚠ Au printemps : remettre la cassette du ventilateur (connecteur 4 broches), ôter le bloc isolant et le bouchon du dessous, puis décocher.</div>}
       <details>
         <summary>Réglages</summary>
         <div className="auto-fields">

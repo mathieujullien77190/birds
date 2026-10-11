@@ -40,6 +40,8 @@ export interface Fan {
   rpm: number | null;
   mode: 'arret' | 'manuel' | 'auto';
   raison: string;
+  /** 12 V présent (interrupteur GPIO27) ; faux = ventilateur vraiment coupé. */
+  alimente: boolean;
 }
 
 /** Niveau de la batterie (mesuré par l'INA219, sinon simulé) ; `pourcent` est null quand on ne sait pas. */
@@ -64,12 +66,14 @@ export type AutoSettingKey = keyof AutoSettings;
 /** Ventilation automatique : réglages, interrupteur, ce qu'elle fait (`etat`) et pourquoi (`raison`). */
 export interface AutoState extends AutoSettings {
   actif: boolean;
+  /** Mode hiver (ventilateur retiré, bloc isolant à sa place) : l'automatique ne démarre pas le ventilateur. */
+  hiver: boolean;
   etat: 'inactif' | 'veille' | 'ventile' | 'securite';
   raison: string;
   avertissements: string[];
 }
 /** Ce que la page envoie à POST /api/auto (tout est facultatif). */
-export type AutoPatch = Partial<AutoSettings> & { actif?: boolean };
+export type AutoPatch = Partial<AutoSettings> & { actif?: boolean; hiver?: boolean };
 
 /** Un point de l'historique (GET /api/historique) : un toutes les 5 min sur le Pi, 288 au plus (24 h). */
 export interface HistoryPoint {

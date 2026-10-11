@@ -43,14 +43,14 @@ Dans l'app 3D, le bouton « 🐍 Pi » fait la même chose **sans installer Pyth
 
 ## Brochage
 
-Voir le document « Schéma électronique » de l'application. En résumé : ventilateur Noctua NF-A6x25 PWM, PWM 25 kHz sur GPIO18 (broche 12), tachymètre GPIO17 (broche 11, pull-up), masse commune broche 14, 12 V du rail ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; INA219 (batterie) I2C 0x41 ; caméras sur CAM0 et CAM1.
+Voir le document « Schéma électronique » de l'application. En résumé : ventilateur Noctua NF-A6x25 PWM : **GPIO27 (broche 13) = interrupteur 12 V (MOSFET côté +)**, **GPIO18 (broche 12) = PWM 25 kHz**, **GPIO17 (broche 11) = tachymètre** (pull-up), masse commune broche 14, 12 V du rail ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; INA219 (batterie) I2C 0x41 ; caméras sur CAM0 et CAM1.
 
-**À valider sur le Pi 5** : gpiozero / lgpio limite peut-être le PWM à 10 kHz ; le programme essaie 25 kHz et retombe sur 10 kHz en le signalant. Un ventilateur PWM à 0 % tourne au minimum (il ne s'arrête que si son 12 V est coupé).
+**À valider sur le Pi 5** : gpiozero / lgpio limite peut-être le PWM à 10 kHz ; le programme essaie 25 kHz et retombe sur 10 kHz en le signalant. « Arrêt » coupe vraiment le 12 V (GPIO27 bas, PWM à 0), car un Noctua tourne encore à ~20 % à 0 % de PWM ; à la mise en marche : 12 V, 0,5 s, puis PWM.
 
 ## Ce que fait la page
 
 - Toutes les 5 s : température et humidité du nid (et écart avec dehors), météo extérieure (Open-Meteo), batterie, consommation estimée.
-- Carte Ventilateur : vitesse, tr/min, boutons Arrêt / Marche, curseur de 30 à 100 %, **ventilation automatique** (réglages modifiables, gardés dans `reglages.json`).
+- Carte Ventilateur : vitesse, tr/min, boutons Arrêt / Marche, curseur de 30 à 100 %, **ventilation automatique** (réglages modifiables et case « Mode hiver » (cassette retirée, bloc isolant, bouchon du dessous), gardés dans `reglages.json`).
 - Graphique des températures sur 24 h (un point toutes les 5 min dans `historique.json`).
 - Deux flux vidéo MJPEG (640 × 480) et boutons caméras / LED infrarouges.
 - Si un capteur, une caméra ou les GPIO manquent, la page l'écrit à côté du bloc concerné et le reste continue de marcher.

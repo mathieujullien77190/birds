@@ -16,6 +16,7 @@ export function FanCard({ state, onFan, onAuto }: FanCardProps) {
       <Stat id="ventilo_pct" value={f ? String(f.pourcent) : '—'} unit="%" />
       <div className="muted" id="ventilo_etat">{describeFan(f)}</div>
       <ErrorLine message={e?.ventilo} />
+      {state?.auto.hiver && f && f.pourcent > 0 && <div className="err" id="hiver_alerte">Mode hiver actif : le ventilateur est censé être retiré.</div>}
       <ErrorLine message={e?.ventilo_gpio} />
       <ErrorLine message={e?.ventilo_pwm} />
       <ErrorLine message={e?.tachymetre} />

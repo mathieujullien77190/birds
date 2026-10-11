@@ -144,7 +144,7 @@ const PAGE = indexHtml
   );
 
 /** État renvoyé par `/api/etat` (seulement ce que les essais lisent). */
-interface PiState { t_nid: number | null; ventilo: { pourcent: number; rpm: number | null; mode: string; raison: string }; led_nid: boolean; led_ext: boolean; cam1: boolean; cam2: boolean; erreurs: Record<string, string>; batterie: { pourcent: number | null }; auto: { actif: boolean; etat: string; raison: string } }
+interface PiState { t_nid: number | null; ventilo: { pourcent: number; rpm: number | null; mode: string; raison: string; alimente: boolean }; led_nid: boolean; led_ext: boolean; cam1: boolean; cam2: boolean; erreurs: Record<string, string>; batterie: { pourcent: number | null }; auto: { actif: boolean; etat: string; raison: string } }
 type PyFns = Record<'restaurer' | 'panne' | 'batterie' | 'forcer', (...a: unknown[]) => unknown>;
 
 /** Essais automatiques : on provoque un cas limite dans le Python simulé, puis on attend que le programme réagisse comme prévu (sinon l'essai échoue au bout de `timeout` secondes). */
@@ -161,7 +161,13 @@ const PI_TESTS: PiTest[] = [
     expect: (e) => e.ventilo.pourcent === 0 && e.auto.etat === 'veille' && e.auto.raison.includes('dehors'), ok: (e) => `ventilateur arrêté — ${e.auto.raison}` },
   { id: 'panne-ventilo', label: 'Ventilateur en panne', hint: 'Ventilateur commandé à 60 % mais le tachymètre compte 0 tr/min : après 10 s une erreur doit apparaître', timeout: 25,
     setup: (f, cmd) => { f.restaurer(); f.panne('ventilo', true); cmd('/api/ventilo', { pourcent: 60 }); },
-    expect: (e) => !!e.erreurs.ventilo, ok: (e) => e.erreurs.ventilo },
+    expect: (e) => !!e.erreurs.ventilo && e.ventilo.alimente, ok: (e) => e.erreurs.ventilo },
+  { id: 'arret-12v', label: 'Arrêt = 12 V coupé', hint: "Ventilateur lancé à 80 % avec une panne de tachymètre simulée, puis « Arrêt » : le 12 V doit être coupé (alimente faux, 0 tr/min) et aucune panne ne doit être signalée", timeout: 8,
+    setup: (f, cmd) => { f.restaurer(); f.panne('ventilo', true); cmd('/api/ventilo', { pourcent: 80 }); cmd('/api/ventilo', { mode: 'arret' }); },
+    expect: (e) => !e.ventilo.alimente && e.ventilo.rpm === 0 && e.ventilo.pourcent === 0 && !e.erreurs.ventilo, ok: () => 'ventilateur coupé (12 V), pas de fausse panne' },
+  { id: 'hiver', label: 'Mode hiver', hint: "Nid à 33 °C, dehors 26 °C, automatique activé mais mode hiver (ventilateur retiré, bloc isolant) : le ventilateur ne doit pas démarrer", timeout: 8,
+    setup: (f, cmd) => { f.restaurer(); f.forcer(33, 26); cmd('/api/auto', { actif: true, hiver: true }); },
+    expect: (e) => e.ventilo.pourcent === 0 && !e.ventilo.alimente && e.auto.raison.includes('hiver'), ok: (e) => e.auto.raison },
   { id: 'nid-panne-auto', label: 'Capteur du nid en panne (automatique)', hint: "Nid chaud, automatique activé, mais le BME280 ne répond plus : on ne sait pas s'il fait chaud, le ventilateur ne doit pas démarrer (sécurité)", timeout: 10,
     setup: (f, cmd) => { f.restaurer(); f.forcer(33, 26); f.panne('bme', true); cmd('/api/auto', { actif: true }); },
     expect: (e) => e.ventilo.pourcent === 0 && e.auto.etat === 'securite' && !!e.erreurs.bme280, ok: (e) => `ventilateur arrêté — ${e.auto.raison}` },

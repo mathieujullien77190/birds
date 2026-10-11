@@ -63,12 +63,13 @@ journalctl -u nichoir -f  # voir ce qu'il raconte
 Les LED infrarouges et les caméras se commandent à la main depuis la page (pas d'horaire automatique pour l'instant).
 
 ## Le ventilateur
-Un **Noctua NF-A6x25 PWM** (60 mm, 12 V, 4 fils) : 12 V et masse depuis le rail 12 V, **PWM 25 kHz sur GPIO18** (broche 12), **tachymètre sur GPIO17** (broche 11, résistance de rappel interne, 2 impulsions par tour), masse commune broche 14. Débit visé ≈ 4 à 5 m³/h à bas régime. Il ne tourne que quand il fait chaud.
+Un **Noctua NF-A6x25 PWM** (60 mm, 12 V, 4 fils) : Le **12 V positif passe par un interrupteur (MOSFET) commandé par GPIO27** (broche 13) ; **PWM 25 kHz sur GPIO18** (broche 12) ; **tachymètre sur GPIO17** (broche 11, résistance de rappel interne, 2 impulsions par tour) ; masse commune broche 14. Débit visé ≈ 4 à 5 m³/h à bas régime. Il ne tourne que quand il fait chaud.
 
+- **Arrêt = 12 V coupé.** Un Noctua PWM tourne encore à ~20 % à 0 % de rapport cyclique, donc « Arrêt » met le PWM à 0 puis coupe GPIO27. Pour démarrer : GPIO27 à haut d'abord, ~0,5 s d'attente (démarrage), puis le PWM. Le 12 V n'est jamais coupé quand une vitesse est demandée. GPIO27 est bas au démarrage et à l'arrêt du programme ; PWM à 0 quand le 12 V est coupé (le fil de commande n'alimente pas le ventilateur). `etat.ventilo.alimente` dit si le 12 V est présent ; la carte affiche « coupé (12 V) » sinon.
 - **Vitesse minimale réelle : 30 %.** En dessous le ventilateur tourne mal : toute commande sous 30 % est un arrêt.
 - Consommation : ≈ 0,6 W à 100 %, proportionnelle au **cube** de la vitesse (à 50 % : 0,08 W).
 - Carte « Ventilateur » du site : vitesse en %, tr/min mesurés, qui commande (arrêt / à la main / automatique), boutons Arrêt et Marche, curseur de 30 à 100 %.
-- **À valider sur le vrai matériel** : sur Pi 5, `gpiozero` passe par `lgpio`, dont le PWM serait limité à 10 kHz. Si 25 kHz est refusé le programme retombe sur 10 kHz et l'écrit sur la page (`ventilo_pwm`) ; piste de repli : le PWM matériel du noyau (`dtoverlay=pwm-2chan`). De plus un ventilateur PWM à 0 % de rapport cyclique **tourne au minimum** : « arrêt » n'est vraiment un arrêt que si son 12 V est coupé.
+- **À valider sur le vrai matériel** : sur Pi 5, `gpiozero` passe par `lgpio`, dont le PWM serait limité à 10 kHz. Si 25 kHz est refusé le programme retombe sur 10 kHz et l'écrit sur la page (`ventilo_pwm`) ; piste de repli : le PWM matériel du noyau (`dtoverlay=pwm-2chan`).
 
 ## Ventilation automatique
 Bouton « Ventilation automatique » dans la carte Ventilateur (désactivée au départ ; réglages et interrupteur gardés dans `reglages.json`). Les seuils portent sur la **température intérieure du nid** (le BME280). Tout est modifiable dans « Réglages ».
@@ -80,7 +81,9 @@ Bouton « Ventilation automatique » dans la carte Ventilateur (désactivée au 
 | Arrêt | le nid repasse sous **26 °C** (seuil − marge de 2 °C) OU le nid n'est plus plus chaud que dehors (nid ≤ dehors + 0,5 °C) |
 | Alerte | si le nid dépasse **35 °C** (même automatique éteint) : message sur la page et notification [ntfy.sh](https://ntfy.sh) si `NICHOIR_NTFY_TOPIC` est réglé |
 
-**Sécurités.** Capteur du nid absent, muet ou valeur aberrante (hors −40 à 60 °C) : le ventilateur ne démarre pas (on ne sait pas s'il fait chaud) et l'état passe à « Arrêtée par sécurité » avec la raison. **Panne du ventilateur** : commandé à 30 % ou plus depuis plus de 10 s alors que le tachymètre lit 0 tr/min : erreur affichée et notification (seulement si le tachymètre a déjà donné des impulsions, c'est-à-dire s'il est branché). **Le délestage de la batterie ne coupe jamais le ventilateur** : c'est la sécurité du nid. Une commande manuelle (Arrêt / Marche / curseur) désactive l'automatique ; désactiver l'automatique arrête le ventilateur qu'il pilotait.
+**Mode hiver.** Case à cocher dans la carte (clé `hiver`, gardée dans `reglages.json` ; l'ancienne clé `bouche` est encore lue) : en hiver on **retire à la main la cassette du ventilateur** (connecteur 4 broches), on pose à sa place **un bloc isolant** et on met **le bouchon de la prise d'air du dessous**. Cochée, la ventilation automatique ne démarre jamais le ventilateur (raison « mode hiver : ventilateur retiré ») ; la commande manuelle reste possible, mais la carte avertit « mode hiver actif : le ventilateur est censé être retiré » si on le met en marche. La page rappelle de **remettre la cassette et d'ôter le bouchon au printemps**, puis de décocher.
+
+**Sécurités.** Capteur du nid absent, muet ou valeur aberrante (hors −40 à 60 °C) : le ventilateur ne démarre pas (on ne sait pas s'il fait chaud) et l'état passe à « Arrêtée par sécurité » avec la raison. **Panne du ventilateur** : commandé à 30 % ou plus depuis plus de 10 s alors qu'il est alimenté (12 V présent) et que le tachymètre lit 0 tr/min (jamais quand il est coupé volontairement) : erreur affichée et notification (seulement si le tachymètre a déjà donné des impulsions, c'est-à-dire s'il est branché). **Le délestage de la batterie ne coupe jamais le ventilateur** : c'est la sécurité du nid. Une commande manuelle (Arrêt / Marche / curseur) désactive l'automatique ; désactiver l'automatique arrête le ventilateur qu'il pilotait.
 
 **Adapté à notre montage.** Une seule sonde de température, dans le nid ; la température de dehors vient de la **météo en ligne** (Open-Meteo) : sans internet la condition « plus chaud que dehors » est ignorée et la page le signale. L'**INA219** (batterie) et le **tachymètre** sont facultatifs (sans tachymètre : pas de tr/min ni de détection de panne, avertissement affiché).
 
@@ -116,6 +119,8 @@ Le menu « 🧪 Tests » du simulateur provoque chaque cas dans le Python simul�
 | Nid chaud | nid 33 °C, dehors 26 °C, automatique activé | le ventilateur démarre (> 30 %) |
 | Nid frais | nid 20 °C, dehors 18 °C | ventilateur arrêté (veille) |
 | Plus chaud dehors | nid 34 °C, dehors 36 °C | ventilateur arrêté, raison « dehors plus chaud » |
+| Arrêt = 12 V coupé | « Arrêt » avec une panne de tachymètre simulée | `alimente` faux, 0 tr/min, aucune fausse panne |
+| Mode hiver | nid chaud, automatique activé, case cochée | le ventilateur ne démarre pas |
 | Ventilateur en panne | commandé à 60 %, tachymètre à 0 tr/min | erreur `ventilo` après 10 s |
 | Capteur du nid en panne (automatique) | nid chaud mais BME280 muet | sécurité, ventilateur arrêté |
 | Capteur du nid en panne | BME280 muet | la page affiche « — » et l'erreur |
@@ -139,6 +144,6 @@ Le bouton « 🐍 Pi » en haut à droite de la vue 3D ouvre un écran qui simul
 
 ## Ce qu'il faut encore faire
 
-- Brancher le ventilateur et **valider le PWM 25 kHz** sur le Pi 5 (voir plus haut), vérifier le tachymètre (2 impulsions par tour).
+- Brancher le ventilateur (et son interrupteur 12 V GPIO27) et **valider le PWM 25 kHz** sur le Pi 5 (voir plus haut), vérifier le tachymètre (2 impulsions par tour).
 - Mesurer une saison de températures, puis décider des réglages (seuil, vitesses) ou d'autre chose.
 - Prévoir une sauvegarde de la carte microSD une fois que tout marche.
