@@ -203,6 +203,29 @@ describe('habillage arrière plan', () => {
   });
 });
 
+describe('poignées en U : sens de pose', () => {
+  // une poignée est un U de contreplaqué : la barre est du côté extérieur de la plaque qui la porte, les tenons (bas du profil) traversent la plaque et affleurent sa face intérieure
+  const barZ = (h: Plank) => { const ys = h.poly!.map((p) => p[1]), top = Math.max(...ys), bottom = Math.min(...ys), widthAtTop = h.poly!.filter((p) => Math.abs(p[1] - top) < 0.01).length, wBottom = h.poly!.filter((p) => Math.abs(p[1] - bottom) < 0.01).length; return { top, bottom, widthAtTop, wBottom }; };
+  it('cassette et bloc : barre au-dessus du couvercle, tenons dans le couvercle, aussi en position exposée', () => {
+    for (const [name, sc, lidRe, re] of [['cassette', sc0, /^Cassette ventilateur couvercle/, /^Poignée cassette 2$/], ['bloc', setWinterCassette(sc0, true), /^Bloc isolant d'hiver couvercle/, /^Poignée bloc d'hiver 2$/], ['bloc exposé', sc0, /^Bloc isolant d'hiver couvercle/, /^Poignée bloc d'hiver 2$/], ['cassette exposée', setWinterCassette(sc0, true), /^Cassette ventilateur couvercle/, /^Poignée cassette 2$/]] as [string, PlankScene, RegExp, RegExp][]) {
+      const h = one(sc, re), lid = one(sc, lidRe), lidTop = lid.pos[2] + t / 2, lidBot = lid.pos[2] - t / 2, g = barZ(h);
+      expect(h.pos[2] + g.top, name + ' haut').toBeGreaterThan(lidTop + 2); // la barre au-dessus du couvercle
+      expect(h.pos[2] + g.bottom, name + ' tenons').toBeCloseTo(lidBot, 1); // tenons affleurant la face intérieure
+      expect(g.widthAtTop, name).toBe(2); // la barre est pleine en haut (arête haute d'un seul tenant)
+    }
+  });
+  it('bouchon : barre SOUS le fond (z < 0), tenons dans le fond affleurant sa face intérieure, aussi une fois rangé', () => {
+    for (const [name, sc] of [['inséré', setAirPlug(sc0, true)], ['rangé', sc0]] as [string, PlankScene][]) {
+      const h = one(sc, /^Poignée bouchon prise d'air 2$/), fond = one(sc, /^Bouchon-boîte prise d'air fond/), g = barZ(h), fondTop = fond.pos[2] + t / 2, fondBot = fond.pos[2] - t / 2;
+      expect(h.pos[2] + g.top, name + ' tenons').toBeCloseTo(fondTop, 1); // tenons : le haut du profil affleure la face intérieure du fond
+      expect(h.pos[2] + g.bottom, name + ' barre').toBeLessThan(fondBot - 10); // la barre est sous le fond
+      expect(g.wBottom, name).toBe(2);
+      const legs = h.poly!.filter((p) => Math.abs(p[1] - g.top) < 0.01); expect(legs.length).toBe(4); // quatre sommets en haut : deux pieds
+      const bar = h.poly!.map((p) => p[1]).filter((y) => y < g.top - 0.01).reduce((a, b) => Math.max(a, b), -1e9); expect(h.pos[2] + bar, name + ' dessus de la barre').toBeLessThan(fondBot - 10); // l'ouverture du U regarde le fond
+    }
+  });
+});
+
 describe('habillage arrière : fenêtres sur une bande commune', () => {
   it("toutes les lames coupées par une fenêtre s'arrêtent au même niveau et reprennent au même niveau", () => {
     const lames = by(sc0, /^Lambris arrière/), bot = Math.min(...lames.map((l) => aabb(l, t).min.z)), top = Math.max(...lames.map((l) => aabb(l, t).max.z));
