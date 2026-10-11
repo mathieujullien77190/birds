@@ -1,12 +1,11 @@
 import type { AutoState } from '@/types';
 
-/** Libellé de l'état courant de l'automatique (arrêt, chauffage, froid, coupé par sécurité). */
+/** Libellé de l'état courant de la ventilation automatique. */
 export const AUTO_LABELS: Record<AutoState['etat'], string> = {
-  inactif: 'Désactivé',
-  veille: 'Arrêt',
-  chauffe: 'Chauffage',
-  refroidit: 'Froid',
-  securite: 'Coupé par sécurité',
+  inactif: 'Désactivée',
+  veille: 'Veille (ventilateur arrêté)',
+  ventile: 'Ventile',
+  securite: 'Arrêtée par sécurité',
 };
 
 /** Phrase qui dit ce que fait l'automatique et pourquoi. */

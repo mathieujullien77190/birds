@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getState, setAuto, setCamera, setLed, setPeltier } from '@/api';
+import { getHistory, getState, setAuto, setCamera, setFan, setLed } from '@/api';
 import { PERIODE } from '@/constants';
-import type { AutoPatch, DeviceState, PeltierMode } from '@/types';
+import type { AutoPatch, DeviceState, HistoryPoint } from '@/types';
 
-/** Relit l'état toutes les PERIODE ms et expose les commandes (chacune met l'état à jour). */
+/** Relit l'état et l'historique toutes les PERIODE ms et expose les commandes (chacune met l'état à jour). */
 export function useDeviceState() {
   const [state, setState] = useState<DeviceState | null>(null);
+  const [history, setHistory] = useState<HistoryPoint[]>([]);
   const [unreachable, setUnreachable] = useState(false);
   const alive = useRef(true);
 
@@ -16,6 +17,10 @@ export function useDeviceState() {
     } catch {
       if (alive.current) setUnreachable(true);
     }
+    try {
+      const h = await getHistory();
+      if (alive.current && Array.isArray(h)) setHistory(h);
+    } catch { /* pas d'historique : le graphique dit « pas encore de données » */ }
   }, []);
 
   useEffect(() => {
@@ -32,8 +37,9 @@ export function useDeviceState() {
 
   return {
     state,
+    history,
     unreachable,
-    peltier: (sens: PeltierMode, pct: number) => apply(setPeltier(sens, pct / 100)),
+    fan: (pct: number) => apply(setFan(pct)),
     auto: (patch: AutoPatch) => apply(setAuto(patch)),
     led: (quoi: 'nid' | 'ext', on: boolean) => apply(setLed(quoi, on)),
     camera: (num: 0 | 1, on: boolean) => apply(setCamera(num, on)),

@@ -1,13 +1,14 @@
 /** Miroir du dictionnaire `etat` de pi/nichoir.py (réponse de GET /api/etat). */
-export type PeltierMode = 'froid' | 'chaud' | 'arrêt';
 
 /** Messages d'erreur par matériel (clés présentes seulement quand quelque chose manque). */
 export interface DeviceErrors {
   mock?: string;
   gpio?: string;
   bme280?: string;
-  ds18b20?: string;
-  securite?: string;
+  ventilo?: string;
+  ventilo_gpio?: string;
+  ventilo_pwm?: string;
+  tachymetre?: string;
   delestage?: string;
   picamera2?: string;
   batterie?: string;
@@ -20,9 +21,7 @@ export interface DeviceErrors {
 export interface DeviceState {
   t_nid: number | null;
   hum_nid: number | null;
-  t_dissipateur: number | null;
-  peltier: PeltierMode;
-  puissance: number;
+  ventilo: Fan;
   led_nid: boolean;
   led_ext: boolean;
   cam1: boolean;
@@ -35,6 +34,14 @@ export interface DeviceState {
   conso: Consumption;
 }
 
+/** Ventilateur de 60 mm : vitesse commandée (0 = arrêt, sinon 30 à 100 %), vitesse mesurée (null sans tachymètre), qui commande et pourquoi. */
+export interface Fan {
+  pourcent: number;
+  rpm: number | null;
+  mode: 'arret' | 'manuel' | 'auto';
+  raison: string;
+}
+
 /** Niveau de la batterie (mesuré par l'INA219, sinon simulé) ; `pourcent` est null quand on ne sait pas. */
 export interface Battery {
   pourcent: number | null;
@@ -43,29 +50,35 @@ export interface Battery {
   solaire_w?: number;
 }
 
-/** Réglages modifiables du Peltier automatique. */
+/** Réglages modifiables de la ventilation automatique. */
 export interface AutoSettings {
-  min_gel: number;
-  plafond_chauffe: number;
+  seuil_marche: number;
   ecart_ext: number;
-  max_chaleur: number;
   hysteresis: number;
-  puissance_max: number;
-  pause_inversion: number;
-  batterie_min_v: number;
+  vitesse_min: number;
+  vitesse_max: number;
+  plage: number;
   alerte_chaleur: number;
 }
 export type AutoSettingKey = keyof AutoSettings;
-/** Peltier automatique : réglages, interrupteur, ce qu'il fait (`etat`) et la température visée (`cible`). */
+/** Ventilation automatique : réglages, interrupteur, ce qu'elle fait (`etat`) et pourquoi (`raison`). */
 export interface AutoState extends AutoSettings {
   actif: boolean;
-  etat: 'inactif' | 'veille' | 'chauffe' | 'refroidit' | 'securite';
+  etat: 'inactif' | 'veille' | 'ventile' | 'securite';
   raison: string;
-  cible: number | null;
   avertissements: string[];
 }
 /** Ce que la page envoie à POST /api/auto (tout est facultatif). */
 export type AutoPatch = Partial<AutoSettings> & { actif?: boolean };
+
+/** Un point de l'historique (GET /api/historique) : un toutes les 5 min sur le Pi, 288 au plus (24 h). */
+export interface HistoryPoint {
+  t: string;
+  nid: number | null;
+  ext: number | null;
+  hum: number | null;
+  ventilo: number;
+}
 
 /** Météo extérieure (Open-Meteo, ou simulée) ; les champs sont null tant qu'on n'a rien reçu. */
 export interface Weather {
@@ -82,5 +95,5 @@ export interface Weather {
 /** Consommation estimée, en watts. */
 export interface Consumption {
   total_w: number | null;
-  detail: { pi?: number; cameras?: number; led?: number; peltier?: number };
+  detail: { pi?: number; cameras?: number; led?: number; ventilo?: number };
 }

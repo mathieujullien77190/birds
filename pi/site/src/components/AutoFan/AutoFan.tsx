@@ -2,16 +2,17 @@ import { useEffect, useState } from 'react';
 import { ErrorLine, ToggleButton } from '@/ui';
 import { AUTO_FIELDS } from './constants';
 import { describeAuto, isDirty } from './helpers';
-import type { AutoPeltierProps } from './types';
-import './AutoPeltier.css';
+import type { AutoFanProps } from './types';
+import './AutoFan.css';
 
-/** Peltier automatique : un bouton pour l'activer et des réglages modifiables (seuils de gel et de chaleur, écart avec l'extérieur). */
-export function AutoPeltier({ state, onAuto }: AutoPeltierProps) {
+/** Ventilation automatique : un bouton pour l'activer et des réglages modifiables (seuil, écart avec dehors, vitesses). */
+export function AutoFan({ state, onAuto }: AutoFanProps) {
   const a = state?.auto;
   const [draft, setDraft] = useState<Record<string, string>>({});
+  const signature = a ? AUTO_FIELDS.map((f) => a[f.key]).join('|') : '';
   useEffect(() => { // le brouillon repart des valeurs enregistrées quand elles changent côté programme
     if (a) setDraft(Object.fromEntries(AUTO_FIELDS.map((f) => [f.key, String(a[f.key])])));
-  }, [a?.min_gel, a?.plafond_chauffe, a?.ecart_ext, a?.max_chaleur, a?.hysteresis]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [signature]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!a) return null;
   const saved = Object.fromEntries(AUTO_FIELDS.map((f) => [f.key, a[f.key]]));
   const dirty = isDirty(draft, saved);
@@ -19,7 +20,7 @@ export function AutoPeltier({ state, onAuto }: AutoPeltierProps) {
   return (
     <div className="auto">
       <div className="row">
-        <ToggleButton id="p_auto" on={a.actif} onClick={() => onAuto({ actif: !a.actif })}>Peltier automatique</ToggleButton>
+        <ToggleButton id="v_auto" on={a.actif} onClick={() => onAuto({ actif: !a.actif })}>Ventilation automatique</ToggleButton>
       </div>
       <div className={`muted auto-etat auto-${a.etat}`} id="auto_etat">{describeAuto(a)}</div>
       {a.avertissements.map((w) => <div key={w} className="muted">⚠ {w}</div>)}
