@@ -39,9 +39,9 @@ HOT_MAX = 55.0      # °C sur le dissipateur : au-dessus, le Peltier est coupé
 PWM_MAX = 0.6       # puissance maximale du Peltier (batterie de 6 Ah)
 PERIODE = 5.0       # secondes entre deux lectures
 # FACULTATIF : météo extérieure (API gratuite Open-Meteo, sans clé). Sans connexion internet la page affiche « — » et le reste marche.
-# À RÉGLER : les coordonnées du nichoir (variables d'environnement NICHOIR_LAT / NICHOIR_LON, ou ici). Par défaut : Paris.
-LATITUDE = float(os.environ.get("NICHOIR_LAT", "48.85"))
-LONGITUDE = float(os.environ.get("NICHOIR_LON", "2.35"))
+# À RÉGLER : les coordonnées du nichoir (variables d'environnement NICHOIR_LAT / NICHOIR_LON, ou ici). Par défaut : Dammarie-les-Lys.
+LATITUDE = float(os.environ.get("NICHOIR_LAT", "48.51"))
+LONGITUDE = float(os.environ.get("NICHOIR_LON", "2.64"))
 METEO_PERIODE = 600   # secondes entre deux demandes (l'API met à jour toutes les 15 min : inutile d'insister)
 BATTERIE_BASSE = 20      # % : en dessous, le Peltier est coupé (et refusé) pour économiser l'énergie
 BATTERIE_CRITIQUE = 10   # % : en dessous, les caméras et les LED infrarouges sont coupées aussi (et refusées)
