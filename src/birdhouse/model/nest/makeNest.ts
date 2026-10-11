@@ -61,6 +61,11 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const hole = (p: Plank): Plank => ({ ...p, notches: [...p.notches, { id: uid(), edge: 'top', pos: r2(p.w / 2), width: OPEN + 1, depth: r2(bodyH - (holeZ - OPEN / 2)) }] }); // 0,5 mm de jeu de chaque côté : le bloc coulisse à la verticale dans l'encoche, il s'arrête sur le fond
   const floorEdge = (len: number) => ({ n: teethFor(len), phase: 0 as const }); // phase 0 : coins creux, dents au milieu
   const floor: Plank = recastAll({ id: uid(), name: 'Plancher int', w: W, h: D, pos: [0, 0, e + t / 2], rot: [0, 0, 0], notches: [], holes: [], group, cast: { top: floorEdge(W), bottom: floorEdge(W), left: floorEdge(D), right: floorEdge(D) } }, t, fit);
+  // barres de MDF 3 mm (découpées au laser, sur la planche MDF) qui tiennent le toit : quatre barres courtes passent par les murs avant et arrière, de chaque côté, et s'enfoncent dans la planche du milieu du cadre
+  const gapX = (n.l / 2 + t + (W / 2 - t)) / 2; // milieu de l'espace entre mur intérieur et mur extérieur
+  const barZ = bodyH - 3 * t / 2; // niveau de la planche du milieu
+  const BAR = 10; // largeur de la barre (sa hauteur = t)
+  const barHoles = (q: Plank): Plank => ({ ...q, holes: [...q.holes, ...[-gapX, gapX].map((x) => fitHole(q, { id: uid(), shape: 'square' as const, x, y: r2(barZ - q.pos[2]), size: BAR, sh: t }))] });
   // FIXATION À L'ARBRE : deux nervures verticales en x = ± W/4, chacune = 3 PLAQUES COLLÉES (9 mm), 30 mm de profondeur, du bas du corps jusqu'au bas du toit ;
   // 3 POINTS D'ACCROCHE par nervure, deux fois plus longs qu'une dent classique (RIB_TOOTH = 32) : deux en bas dans le mur arrière du corps (fentes 9,5 × 32), un au niveau du toit
   // (encoche ouverte dans le bas de la plaque arrière du toit : le toit se pose par-dessus et se retire toujours)
@@ -73,7 +78,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // quatre ÉTRIERS en U de contreplaqué qui tiennent le régulateur sous le plancher : plaque de 78 × 51 debout en travers, encoche de 62 × 42 ouverte vers le haut (le régulateur 61 × 33 + 1 de jeu),
   // bras de 8 dont les 3 mm du haut (= t) sont des tenons qui traversent le fond par des fentes 8 × 3 et AFFLEURENT son dessus : rien ne dépasse dans l'isolant
   const U_W = 78, U_ARM = 8, U_H = 46, U_TEN = t, U_YS = [-55, -22, 15, 52].map((d) => RGY + d); // gaine dans le coin arrière droit : à 1 cm du mur arrière, PILE sur le joint entre l'isolant du mur droit et celui du mur arrière (x = l/2 + t), à gauche de la barre du toit (x = 77,5…87,5) // régulateur de charge SOUS le nichoir (à plat, protégé par le lambris qui descend) ; les fils montent dans l'isolant du côté droit, dans une gaine (tuyau multicouche ou gaine électrique ICTA de diamètre minimal, 16)
-  const outerParts = outerBox.planks.filter((p) => !/^Dessus/.test(p.name)).map((p) => { let q = isWall(p) ? noTop(p) : p; if (n.solar && /^Dessous/.test(p.name)) q = { ...q, holes: [...q.holes, ...U_YS.flatMap((y) => [RGX - U_W / 2 + U_ARM / 2, RGX + U_W / 2 - U_ARM / 2].map((x) => fitHole(q, { id: uid(), shape: 'square' as const, x: r2(x), y: r2(y), size: U_ARM, sh: t })))] };/* fentes des tenons des étriers du régulateur */ if (/^Face arrière/.test(p.name)) q = { ...q, holes: [...q.holes, ...RIB_XS.flatMap((x) => RIB_TEETH_Z.slice(0, 2).map(([za, zb]) => fitHole(q, { id: uid(), shape: 'square' as const, x, y: r2((za + zb) / 2 - q.pos[2]), size: RIB_T + 0.5, sh: zb - za })))] }; /* fentes 9,5 × 32 des deux dents basses des nervures de fixation */ return /^Face avant/.test(p.name) ? hole(q) : q; });
+  const outerParts = outerBox.planks.filter((p) => !/^Dessus/.test(p.name)).map((p) => { let q = isWall(p) ? noTop(p) : p; if (n.solar && /^Dessous/.test(p.name)) q = { ...q, holes: [...q.holes, ...U_YS.flatMap((y) => [RGX - U_W / 2 + U_ARM / 2, RGX + U_W / 2 - U_ARM / 2].map((x) => fitHole(q, { id: uid(), shape: 'square' as const, x: r2(x), y: r2(y), size: U_ARM, sh: t })))] };/* fentes des tenons des étriers du régulateur */ if (/^(Face avant|Face arrière)/.test(p.name)) q = barHoles(q); if (/^Face arrière/.test(p.name)) q = { ...q, holes: [...q.holes, ...RIB_XS.flatMap((x) => RIB_TEETH_Z.slice(0, 2).map(([za, zb]) => fitHole(q, { id: uid(), shape: 'square' as const, x, y: r2((za + zb) / 2 - q.pos[2]), size: RIB_T + 0.5, sh: zb - za })))] }; /* fentes 9,5 × 32 des deux dents basses des nervures de fixation */ return /^Face avant/.test(p.name) ? hole(q) : q; });
   const innerParts = innerBox.planks.filter(isWall).map((p) => { let q = noTop({ ...p, pos: [p.pos[0], p.pos[1], p.pos[2] + e] as Vec3, group }); return /^Face avant/.test(p.name) ? hole(q) : q; });
   // fentes (le temps du calcul, tout est « hors groupe ») : dents du plancher dans les murs extérieurs, dents du bas des murs intérieurs dans le plancher
   const free = (p: Plank): Plank => ({ ...p, group: undefined });
@@ -227,14 +232,21 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     { id: uid(), name: CAMERA_NAMES[0], w: CAM_W, h: CAM_H, pos: [CAM_X, CAM_Y, floorTop + 6.6] as Vec3, rot: [0, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'camera' },
     { id: uid(), name: 'LED infrarouges', w: IR_W, h: IR_H, pos: [IR_X, CAM_Y, floorTop + 0.8] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir' },
   ] : [];
-  // cadre sous le toit, en trois planches collées ; en descendant dans l'isolant entre murs extérieur et intérieur, le cadre cale en plus le toit sur le corps
+  // cadre sous le toit, en trois planches collées : une planche haute et une basse, et entre elles une planche percée de fentes rectangulaires
+  // (de chaque côté, d'avant en arrière) où passent les barres de bois qui traversent aussi les murs avant et arrière : le toit tient ;
+  // en descendant dans l'isolant entre murs extérieur et intérieur, le cadre cale en plus le toit sur le corps
   const ring = (name: string, k: number, holes: Hole[]): Plank => ({ id: uid(), name, w: W - 2 * t, h: D - 2 * t, pos: [0, 0, bodyH - (2 * k + 1) * t / 2], rot: [0, 0, 0], notches: [], holes, group: roofGroup });
+  const BAR_LEN = 50; // quatre barres courtes (5 cm) : deux à l'avant, deux à l'arrière, chacune entre par un trou du mur et s'enfonce dans une encoche de la planche du milieu
+  const inside = BAR_LEN - t; // partie de la barre qui est dans l'encoche
+  const notch = (edge: Edge, x: number): Notch => ({ id: uid(), edge, pos: r2(x + (W - 2 * t) / 2), width: BAR, depth: inside });
   // le cadre est en U : son ouverture centrale (l'extérieur de la boîte intérieure) est ouverte vers l'avant par une encoche qui va jusqu'au bord avant, de sorte
   // que le bloc d'entrée (plaques de 55 dans l'isolant) peut monter à fleur du haut du mur, toit retiré ou posé
   const uNotch = (): Notch => ({ id: uid(), edge: 'bottom', pos: r2((W - 2 * t) / 2), width: n.l + 2 * t, depth: r2((D / 2 - t) + (n.L / 2 + t)) });
+  const bars: Plank[] = ([[-1, -1, 'avant gauche'], [1, -1, 'avant droite'], [-1, 1, 'arrière gauche'], [1, 1, 'arrière droite']] as const).map(([sx, sy, nm]): Plank => (
+    { id: uid(), name: `Barre ${nm} (MDF 3 mm)`, w: BAR_LEN, h: BAR, pos: [sx * gapX, sy * (D / 2 - BAR_LEN / 2), barZ] as Vec3, rot: [0, 0, 90] as Vec3, notches: [], holes: [], group: roofGroup, material: 'mdf' as const }));
   const frames: Plank[] = [
     { ...ring('Cadre toit haut', 0, []), notches: [uNotch()] },
-    { ...ring('Cadre toit milieu', 1, []), notches: [uNotch()] },
+    { ...ring('Cadre toit milieu', 1, []), notches: [-gapX, gapX].flatMap((x) => [notch('bottom', x), notch('top', x)]).concat(uNotch()) }, // encoches des barres sur les bords avant et arrière
     { ...ring('Cadre toit bas', 2, []), notches: [uNotch()] },
   ];
   // le Raspberry Pi sur le toit, à l'arrière (pas au-dessus de l'ouverture), calé par six petits bouts de bois collés sur le toit
@@ -529,22 +541,6 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     return { id: uid(), name, w: r2(Math.max(...xs) - Math.min(...xs)), h: r2(Math.max(...ys) - Math.min(...ys)), depth: r2(zMax - zBottom), pos: [r2(cx), r2(cy), r2(zc)] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: lamGroup, special: 'block' as const, color: '#f5f5f4',
       poly: plan.map(([x, y]) => [r2(x - cx), r2(y - cy)] as [number, number]), top: { z0: r2(A + Bx * cx + By * cy - zc), bx: Bx, by: By } };
   };
-  // ===== TOURNIQUETS DU TOIT : quatre, un par face, au milieu, à la jonction corps / toit (accessibles par une fenêtre de l'habillage) =====
-  // Blocage : le tourniquet (MDF 3 mm, 44 × 14, pivot Ø 4) est vissé (M3 × 8) sur un APPUI de 6 mm collé sur le mur du corps, qui monte le long de la plaque du toit ;
-  // tourné à l'horizontale il passe AU-DESSUS d'une PATTE (trois couches de contreplaqué, 9 mm) collée sur la plaque du toit : le toit ne peut plus monter (jeu 0,5 mm) ; vertical il dégage la patte et le toit se soulève.
-  const TQ = { L: 44, W: 14, piv: 4, zp: bodyH + 23.5, apW: 20, apZ0: bodyH - 14, apZ1: bodyH + 32, paX0: 11, paW: 11, paZ0: bodyH + 2, paZ1: bodyH + 16, apT: 6, paT: 9, tqT: t, headT: 1.65 };
-  const TQ_FACES: { nm: string; nrm: [number, number]; u: [number, number]; P: number }[] = [{ nm: 'avant', nrm: [0, -1], u: [1, 0], P: D / 2 }, { nm: 'arrière', nrm: [0, 1], u: [-1, 0], P: D / 2 }, { nm: 'gauche', nrm: [-1, 0], u: [0, -1], P: W / 2 }, { nm: 'droite', nrm: [1, 0], u: [0, 1], P: W / 2 }]; // normale sortante ; u = sens de la patte le long de la face (u × z = normale)
-  const stadium = (len: number, wid: number): [number, number][] => { const r = wid / 2, c = len / 2 - r, pts: [number, number][] = []; for (let i = 0; i <= 10; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 10; pts.push([c + r * Math.cos(a), r * Math.sin(a)]); } for (let i = 0; i <= 10; i++) { const a = Math.PI / 2 + (i * Math.PI) / 10; pts.push([-c + r * Math.cos(a), r * Math.sin(a)]); } return pts.map(([x, y]) => [r2(x), r2(y)] as [number, number]); }; // barrette à bouts ronds
-  const tourniquets: Plank[] = TQ_FACES.flatMap((f, k) => {
-    const rot = rotFromBasis([f.u[0], f.u[1], 0], [0, 0, 1]), at = (off: number, tan: number, z: number): Vec3 => [r2(f.nrm[0] * (f.P + off) + f.u[0] * tan), r2(f.nrm[1] * (f.P + off) + f.u[1] * tan), r2(z)];
-    const blk3 = (name: string, w: number, h: number, depth: number, pos: Vec3, grp: string, color: string): Plank => ({ id: uid(), name, w, h, depth, pos, rot, notches: [], holes: [], group: grp, special: 'block' as const, color });
-    return [
-      blk3(`Appui tourniquet ${k + 1}`, TQ.apW, TQ.apZ1 - TQ.apZ0, TQ.apT, at(TQ.apT / 2, 0, (TQ.apZ0 + TQ.apZ1) / 2), group, '#e2c79a'), // deux couches de contreplaqué collées sur le mur du corps
-      blk3(`Patte toit ${k + 1}`, TQ.paW, TQ.paZ1 - TQ.paZ0, TQ.paT, at(TQ.paT / 2, TQ.paX0 + TQ.paW / 2, (TQ.paZ0 + TQ.paZ1) / 2), roofGroup, '#e2c79a'), // trois couches de contreplaqué collées sur la plaque du toit
-      { id: uid(), name: `Tourniquet toit ${k + 1} (MDF 3 mm)`, w: TQ.L, h: TQ.W, pos: at(TQ.apT + TQ.tqT / 2, 0, TQ.zp), rot, notches: [], holes: [{ id: uid(), shape: 'round' as const, x: 0, y: 0, size: TQ.piv }], group, poly: stadium(TQ.L, TQ.W), material: 'mdf' as const },
-      blk3(`Vis tourniquet ${k + 1} (M3 × 8, tête ronde)`, 6, 6, TQ.headT, at(TQ.apT + TQ.tqT + TQ.headT / 2, 0, TQ.zp), group, '#9ca3af'),
-    ];
-  });
   const lambris: Plank[] = n.lambris ? (() => {
     const xe = W / 2, ye = D / 2, k = Math.max(1, Math.round((W + 2 * LAM_T) / LAM_W)), kd = Math.max(1, Math.round(D / LAM_W)), sx = (2 * xe + 2 * LAM_T) / k, sy = (2 * ye) / kd; // façade et arrière : W + 2·LAM_T (elles recouvrent les bouts des côtés) ; côtés : D ; une largeur fixe par face
     const fx0 = -(xe + LAM_T), bx0l = -(xe + LAM_T), ry0 = -ye, ly0 = -ye; // début des lames : façade et arrière de −(xe + LAM_T) à xe + LAM_T, côtés de −ye à ye
@@ -553,16 +549,6 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     // les COINS sont à JOINT PLAT : la façade et l'arrière recouvrent les bouts des lames des côtés (demande de l'utilisateur) ; même largeur sur la façade et l'arrière, une autre largeur sur les côtés
     const frontTop = n.pente ? bodyH + Hf : roofTop, backTop = n.pente ? bodyH + Hb : roofTop;
     const slope = n.pente ? (Hb - Hf) / (2 * ye) : 0, sideA = n.pente ? bodyH + Hf + ye * slope : roofTop; // z = sideA + slope · y sur les côtés
-    // fenêtre des tourniquets sur chaque côté (y de −32 à 32, de bodyH − 16 à bodyH + 50) : une lame qu'elle touche est coupée en morceaux (de part et d'autre, puis sous et au-dessus de la fenêtre)
-    const SWIN = { y0: -32, y1: 32, z0: bodyH - 16, z1: bodyH + 50 };
-    const sidePieces = (side: string, i: number, ya: number, yb: number, plan: (a: number, b: number) => [number, number][]) => {
-      const nm = `Lambris ${side} ${i + 1}`;
-      if (SWIN.y1 <= ya + 0.01 || SWIN.y0 >= yb - 0.01) { out.push(prism(nm, plan(ya, yb), -LAM_DOWN, sideA, 0, slope)); return; }
-      const wa = Math.max(ya, SWIN.y0), wb = Math.min(yb, SWIN.y1);
-      if (wa - ya > 0.01) out.push(prism(nm + '.a', plan(ya, wa), -LAM_DOWN, sideA, 0, slope));
-      if (yb - wb > 0.01) out.push(prism(nm + '.b', plan(wb, yb), -LAM_DOWN, sideA, 0, slope));
-      out.push(prism(nm + '.c', plan(wa, wb), -LAM_DOWN, SWIN.z0, 0, 0), prism(nm + '.d', plan(wa, wb), SWIN.z1, sideA, 0, slope));
-    };
     for (let i = 0; i < kd; i++) { // côtés gauche et droit : lames le long de y
       const ry0i = ry0 + i * sy, ry1i = ry0 + (i + 1) * sy, ly0i = ly0 + i * sy, ly1i = ly0 + (i + 1) * sy; // côtés : de −ye à ye, entre la façade et l'arrière
       const y0 = ry0i, y1 = ry1i, y0o = ry0i, y1o = ry1i;
@@ -573,8 +559,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
         piece(`Lambris droite ${i + 1}.b`, wb, y1, -LAM_DOWN, sideA, slope, wb, y1o);
         piece(`Lambris droite ${i + 1}.c`, wa, wb, -LAM_DOWN, za, 0);
         piece(`Lambris droite ${i + 1}.d`, wa, wb, zb2, sideA, slope);
-      } else sidePieces('droite', i, y0, y1, (a, b) => [[xe, a], [xe + LAM_T, a], [xe + LAM_T, b], [xe, b]]);
-      sidePieces('gauche', i, ly0i, ly1i, (a, b) => [[-xe - LAM_T, a], [-xe, a], [-xe, b], [-xe - LAM_T, b]]);
+      } else out.push(prism(`Lambris droite ${i + 1}`, [[xe, y0], [xe + LAM_T, y0o], [xe + LAM_T, y1o], [xe, y1]], -LAM_DOWN, sideA, 0, slope));
+      out.push(prism(`Lambris gauche ${i + 1}`, [[-xe - LAM_T, ly0i], [-xe, ly0i], [-xe, ly1i], [-xe - LAM_T, ly1i]], -LAM_DOWN, sideA, 0, slope));
     }
     // BANDE COMMUNE des fenêtres de l'habillage arrière : la fenêtre de sortie du ventilateur et celle des prises du Pi s'arrêtent et reprennent aux MÊMES hauteurs, pour que toutes les lames s'interrompent au même niveau
     const BAND_Z0 = bodyH + Math.min(VENT_Z0 - 4, PORT_Z0 - 4), BAND_Z1 = bodyH + Math.max(VENT_Z0 + VENT_H + 4, PORT_Z1 + 4);
@@ -586,7 +572,6 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       for (const w of ws) for (const j of joints) { if (Math.abs(w[0] - j) < 10) w[0] = j; if (Math.abs(w[2] - j) < 10) w[2] = j; }
       for (const a of ws) for (const b of ws) { if (a !== b && Math.abs(a[2] - b[0]) < 10) b[0] = a[2]; }
     };
-    windows.push([-26, bodyH - 16, 26, BAND_Z0]); frontWindows.push([-26, bodyH - 16, 26, bodyH + 50]); // fenêtres des tourniquets avant et arrière (arrière : jusqu'à la bande des fenêtres du ventilateur et des prises, pour ne laisser aucune lamelle entre elles)
     snapWins(windows, jointsB); snapWins(frontWindows, jointsF);
     for (const x of RIB_XS) windows.push([x - RIB_T / 2 - 0.25, RIB_Z0 - 1, x + RIB_T / 2 + 0.25, RIB_Z1 + 1]); // les nervures de fixation traversent les lames arrière par une fente de 3,5 (ajoutées APRÈS l'aimantation : une fente de 3,5 ne doit pas être élargie jusqu'au joint)
     // façade et arrière : CHAQUE LAME EST UNE SEULE PLANCHE de largeur fixe (sx), percée de ses fenêtres (trous rectangulaires) ; une fenêtre qui mord sur le bord d'une lame
@@ -661,7 +646,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     ...slotted.map((p) => ({ ...p, group, name: p.name.replace(/ (\d+)$/, ' ext $1') })),
     { ...floorSlotted, group },
     ...innerParts.map((p) => ({ ...p, name: p.name.replace(/ (\d+)$/, ' int $1') })),
-    ...roofParts, ...frames, ...tourniquets, ...camParts, ...camera, ...pi, ...cable, ...wires,
+    ...roofParts, ...frames, ...bars, ...camParts, ...camera, ...pi, ...cable, ...wires,
     { id: uid(), name: 'Schéma électronique', w: 1, h: 1, pos: [0, 0, -30] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: docGroupId, special: 'doc' as const }, // document (pas une pièce physique) : un clic dans « Pièces » l'ouvre
   ];
   if (n.solar) { // la gaine traverse le fond, le plancher intérieur, le cadre du toit et le plancher / dessus du toit, dans l'isolant du côté droit

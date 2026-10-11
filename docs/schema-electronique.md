@@ -293,17 +293,6 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Courant | nous sommes à environ 1 A | — |
 | Précaution | enfoncer les fils jusqu'au fond ; pour un montage définitif, bornier à vis ou cosses serties | à droite du fusible |
 
-### Tourniquets du toit (MDF 3 mm)
-
-| Paramètre | Valeur à viser | Dans le modèle |
-| --- | --- | --- |
-| Rôle | verrouiller le toit sur le corps (remplacent les quatre barres de bois) | 4 tourniquets, un par face, à la jonction corps / toit |
-| Pièces | barrette de MDF de 3 mm de 44 × 14 mm à bouts ronds, trou de pivot Ø 4 mm ; vis M3 × 8 à tête ronde ; appui de 6 mm (2 couches de contreplaqué) collé sur le mur du corps ; patte de 9 mm (3 couches) collée sur la plaque du toit | « Tourniquet toit k (MDF 3 mm) », « Vis tourniquet k », « Appui tourniquet k », « Patte toit k » |
-| Principe | l'appui, collé sur le mur du corps, monte le long de la plaque du toit ; le tourniquet y est vissé ; tourné à l'horizontale il passe au-dessus de la patte du toit (recouvrement de 11 mm, jeu de 0,5 mm) : le toit ne peut plus monter. Géométrie retenue parce que la force de soulèvement passe par la patte collée au toit et par la vis dans l'appui collé au corps, sans toucher à l'isolant | verrouillé : barrette horizontale |
-| Accès | une fenêtre de l'habillage de chaque face (environ 52 × 66 mm) ; sur l'arrière, la fenêtre rejoint celle de la sortie du ventilateur dans la lame du milieu | visibles, jamais cachés |
-| Mode d'emploi | tourner les 4 tourniquets de 90° (barrette verticale) pour libérer le toit, puis le soulever ; les remettre à l'horizontale après avoir reposé le toit | — |
-| Découpe | le MDF se découpe sur ses propres planches (« Planche MDF 1 ») : une feuille de MDF de 3 mm, distincte du contreplaqué | 4 pièces |
-
 ### Câblage
 
 | Paramètre | Valeur à viser |
@@ -334,7 +323,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Module INA219 (facultatif) | version **avec broches soudées** | cordons Dupont F/F | I2C : 3,3 V, SDA, SCL, masse |
 | Passage des fils | passe-câbles, gaine annelée de Ø 16 | — | on enfile les fils dans la gaine avant de brancher |
 
-**Liste de courses sans soudure** (prix indicatifs) : cordons Dupont F/F 20 cm, lot de 40, 3 € ; embouts de câble assortis avec leur kit, 8 € ; tournevis plat de 2 mm, 4 € ; tournevis cruciforme PH1 pour les vis des tourniquets, 3 € ; pince à dénuder, 8 € ; Wago 221-413 (déjà comptés dans le prix du rail 12 V) ; porte-fusible à fils tout fait (déjà compté) ; rallonge ventilateur Noctua 4 broches (déjà comptée). Ces achats sont ajoutés à la table des prix, groupe « Électronique ».
+**Liste de courses sans soudure** (prix indicatifs) : cordons Dupont F/F 20 cm, lot de 40, 3 € ; embouts de câble assortis avec leur kit, 8 € ; tournevis plat de 2 mm, 4 € ; pince à dénuder, 8 € ; Wago 221-413 (déjà comptés dans le prix du rail 12 V) ; porte-fusible à fils tout fait (déjà compté) ; rallonge ventilateur Noctua 4 broches (déjà comptée). Ces achats sont ajoutés à la table des prix, groupe « Électronique ».
 
 **Trois conseils.**
 
@@ -387,7 +376,7 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 | Caméras, LED, capteur, convertisseur, modules, fusible | 0,15 kg |
 | Ventilateur, prise et rallonge, interrupteur, plots, mousse, bloc d'hiver | 0,15 kg |
 | Câbles, gaine, nappes | 0,15 kg |
-| Cales, tourniquets, étriers, clavettes | 0,1 kg |
+| Cales, barres, étriers, clavettes | 0,1 kg |
 | **Total accroché à l'arbre** | **≈ 5,9 kg** |
 | Panneau solaire 100 W (au sol, à part) | 8 kg |
 
@@ -412,8 +401,7 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | 4 cellules LiFePO4 32700 + BMS 4S + support | 40 € |
 | Électronique | Fusible + porte-fusible | 3 € |
 | Électronique | Cordons Dupont F/F 20 cm, lot de 40 | 3 € |
-| Corps | Feuille de MDF 3 mm (quatre tourniquets) | 3 € |
-| Corps | 4 vis M3 × 8 à tête ronde pour les tourniquets | 1 € |
+| Corps | Feuille de MDF 3 mm (quatre barres du toit, découpées au laser) | 3 € |
 | Électronique | Embouts de câble assortis (kit) | 8 € |
 | Électronique | Tournevis plat 2 mm | 4 € |
 | Électronique | Pince à dénuder | 8 € |
