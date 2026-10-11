@@ -2333,7 +2333,7 @@
    "group": "id3",
    "special": "wago",
    "color": "#dc2626",
-   "url": "https://www.wago.com/fr/bornes-de-connexion-pour-conducteurs/221-413"
+   "url": "https://www.wago.com/221-413"
   },
   {
    "id": "id114",
@@ -2356,7 +2356,7 @@
    "group": "id3",
    "special": "wago",
    "color": "#111827",
-   "url": "https://www.wago.com/fr/bornes-de-connexion-pour-conducteurs/221-413"
+   "url": "https://www.wago.com/221-415"
   },
   {
    "id": "id115",
@@ -2812,7 +2812,7 @@
    "group": "id3",
    "special": "block",
    "color": "#1d4ed8",
-   "url": "https://azcus.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948"
+   "url": "https://sunforgellc.com/product/gv-10/"
   },
   {
    "id": "id127",
@@ -3047,7 +3047,7 @@
    "holes": [],
    "group": "id3",
    "special": "sensor",
-   "url": "https://cdn.sparkfun.com/assets/5/3/0/f/7/BME280_Datasheet.pdf"
+   "url": "https://www.adafruit.com/product/2652"
   },
   {
    "id": "id131",
@@ -3522,7 +3522,8 @@
    "holes": [],
    "group": "id8",
    "special": "block",
-   "color": "#111827"
+   "color": "#111827",
+   "url": "https://noctua.at/en/nf-a6x25-pwm"
   },
   {
    "id": "id146",
@@ -3544,7 +3545,8 @@
    "holes": [],
    "group": "id8",
    "special": "block",
-   "color": "#374151"
+   "color": "#374151",
+   "url": "https://noctua.at/en/nf-a6x25-pwm"
   },
   {
    "id": "id147",

@@ -27,6 +27,8 @@ Plusieurs outils dans la même app, choisis au démarrage (`src/tools.ts`, `src/
 
 **Effet de cassette translucide désactivé à la demande de l'utilisateur** (la cassette garde son opacité quand le ventilateur tourne) ; la machinerie `three/ghost.ts` est gardée, opacité cible 1. **Le Jour / Nuit n'est que dans la fenêtre de l'interface web du Pi** ; la vue 3D reste de jour ; la nuit ne s'applique qu'aux prises de vue des caméras (`CameraShooter.lights`) ; fermer la fenêtre du simulateur la cache sans l'arrêter.
 
+**Liens des composants** : le tableau des prix du document a une colonne « Modèle exact / lien » (lien Markdown vérifié, ou « lien à trouver — référence exacte : … » ; jamais de lien inventé) ; `LINKS` de `makeNest.ts` donne le lien de chaque pièce dans la 3D ; `enhancePrices` garde les liens et la colonne, les liens du document s'ouvrent dans un nouvel onglet (`renderDoc`).
+
 **Montage sans soudure** (l'utilisateur ne peut pas souder) : le document décrit composant par composant les achats (cordons Dupont, borniers à vis, Wago 221, prises d'origine, composants à broches ou fils pré-soudés), une liste de courses et trois conseils ; voir la section « Montage sans soudure » de `docs/schema-electronique.md`.
 
 ## Règle : le document suit le modèle

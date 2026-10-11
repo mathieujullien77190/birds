@@ -310,7 +310,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Composant | À acheter (référence type) | Section de fil | Comment le brancher |
 | --- | --- | --- | --- |
 | Raspberry Pi 5 (GPIO) | cordons Dupont femelle-femelle de 20 cm, lot de 40 | fil du cordon (≈ 0,1 mm²) | un cordon par picot : PWM ventilateur GPIO18 (broche 12), tachymètre GPIO17 (broche 11), commande de l'interrupteur GPIO27 (broche 13), masse (broche 14), capteur (broches 1, 3, 5, 9), LED et module MOSFET (broches 2, 4, 6, 16, 18, 20) ; l'autre bout dans le bornier ou la broche du module |
-| Capteur BME280 | carte « avec broches soudées » (4 broches mâles) | cordons Dupont F/F | 3,3 V, SDA, SCL, masse par quatre cordons enfichés sur les broches de la carte |
+| Capteur BME280 | Adafruit 2652 (STEMMA QT) + câble STEMMA QT → broches mâles Adafruit 4209 (4 fils : 3,3 V, masse, SDA, SCL) | fils du câble | le câble s'enfiche sur la carte (connecteur JST SH) ; ses quatre fils vont sur les broches 1, 3, 5 et 9 du Pi |
 | Cartes de 4 LED infrarouges 850 nm | modèle à **fils pré-soudés** ou à **bornier à vis** | fils fournis (≈ 0,3 mm²) | 5 V sur la broche 2 ou 4 du Pi par un cordon Dupont ; l'autre fil dans le bornier du module MOSFET |
 | Module 2 × MOSFET (LED) et module interrupteur 12 V du ventilateur | cartes **avec borniers à vis** | 0,25 à 0,5 mm² | fil dénudé de 6 mm dans le bornier, vis serrée au tournevis plat de 2 mm ; commande par cordon Dupont sur le GPIO |
 | Régulateur solaire Genasun | modèle d'origine à **borniers à vis** | 4 mm² côté panneau, 2,5 mm² côté batterie | fils dénudés de 8 mm avec embouts, vis serrées à fond |
@@ -323,7 +323,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Module INA219 (facultatif) | version **avec broches soudées** | cordons Dupont F/F | I2C : 3,3 V, SDA, SCL, masse |
 | Passage des fils | passe-câbles, gaine annelée de Ø 16 | — | on enfile les fils dans la gaine avant de brancher |
 
-**Liste de courses sans soudure** (prix indicatifs) : cordons Dupont F/F 20 cm, lot de 40, 3 € ; embouts de câble assortis avec leur kit, 8 € ; tournevis plat de 2 mm, 4 € ; pince à dénuder, 8 € ; Wago 221-413 (déjà comptés dans le prix du rail 12 V) ; porte-fusible à fils tout fait (déjà compté) ; rallonge ventilateur Noctua 4 broches (déjà comptée). Ces achats sont ajoutés à la table des prix, groupe « Électronique ».
+**Liste de courses sans soudure** (prix indicatifs) : [cordons Dupont F/F 20 cm, lot de 40 (Adafruit 4447)](https://www.adafruit.com/products/4447), 3 € ; embouts de câble assortis avec leur kit, 8 € ; tournevis plat de 2 mm, 4 € ; pince à dénuder, 8 € ; Wago 221-413 (déjà comptés dans le prix du rail 12 V) ; porte-fusible à fils tout fait (déjà compté) ; rallonge ventilateur Noctua 4 broches (déjà comptée). Ces achats sont ajoutés à la table des prix, groupe « Électronique ».
 
 **Trois conseils.**
 
@@ -386,40 +386,40 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 
 Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifier au moment de l'achat. Décoche une ligne ou un groupe entier pour l'enlever du total (le choix est gardé).
 
-| Groupe | Élément | Prix |
-| --- | --- | --- |
-| Électronique | Raspberry Pi 5 (4 Go) + microSD 32 Go | 75 € |
-| Électronique | 2 × Camera Module 3 NoIR + 2 nappes adaptatrices 22 → 15 broches | 70 € |
-| Électronique | 2 × carte 4 LED infrarouges 850 nm (fils pré-soudés) | 10 € |
-| Électronique | Capteur BME280 (avec broches soudées) | 5 € |
-| Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € |
-| Électronique | Grille de protection ventilateur 60 mm (fil d'acier) | 1 € |
-| Électronique | Module interrupteur 12 V côté + (P-MOSFET, commande 3,3 V) | 4 € |
-| Électronique | Rallonge Noctua 4 broches (mâle ⇄ femelle, ≈ 30 cm) | 3 € |
-| Électronique | Module 2 × MOSFET | 5 € |
-| Électronique | Convertisseur 12 V → 5 V 5 A USB-C | 15 € |
-| Électronique | 4 cellules LiFePO4 32700 + BMS 4S + support | 40 € |
-| Électronique | Fusible + porte-fusible | 3 € |
-| Électronique | Cordons Dupont F/F 20 cm, lot de 40 | 3 € |
-| Corps | Feuille de MDF 3 mm (quatre barres du toit, découpées au laser) | 3 € |
-| Électronique | Embouts de câble assortis (kit) | 8 € |
-| Électronique | Tournevis plat 2 mm | 4 € |
-| Électronique | Pince à dénuder | 8 € |
-| Électronique | Wago 221-413 (3 entrées) pour le + du rail 12 V | 1 € |
-| Électronique | Wago 221-415 (5 entrées) pour le − du rail 12 V | 1,5 € |
-| Électronique | Câbles (2,5 mm², 4 mm², signaux), gaine ICTA, presse-étoupe, cosses | 25 € |
-| Solaire | Panneau solaire 100 W | 90 € |
-| Solaire | Régulateur de charge Genasun GV-10-Li | 120 € |
-| Corps | Contreplaqué peuplier 3 mm (10 planches de 41 × 40 cm) | 20 € |
-| Corps | Laine de bois 40 mm (0,3 m²) | 10 € |
-| Corps | Colle, vis inox | 8 € |
-| Corps | Bloc isolant d'hiver (mousse de 35 mm + cadre de contreplaqué) | 6 € |
-| Corps | Prise d'air basse (contreplaqué du conduit) | 1 € |
-| Corps | Sous-boîte isolante de la prise d'air (contreplaqué + laine de bois) | 1 € |
-| Corps | Grillage inox à mailles carrées de 5 mm (fil 0,5 mm), un rouleau : sortie du ventilateur et prise d'air | 3 € |
-| Habillage | Chêne 18 mm (27 × 30 cm) | 12 € |
-| Habillage | Lambris pin 10 mm (0,35 m²) | 15 € |
-| Habillage | Peinture blanche | 7 € |
+| Groupe | Élément | Prix | Modèle exact / lien |
+| --- | --- | --- | --- |
+| Électronique | Raspberry Pi 5 (4 Go) + microSD 32 Go | 75 € | [Raspberry Pi 5 (4 Go) — page officielle](https://www.raspberrypi.com/products/raspberry-pi-5/) |
+| Électronique | 2 × Camera Module 3 NoIR + 2 nappes adaptatrices 22 → 15 broches | 70 € | [Camera Module 3 NoIR (choisir « NoIR » dans la page)](https://www.raspberrypi.com/products/camera-module-3/) ; nappes : [Adafruit 5818, Pi 5 FPC 22 broches → 15 broches, 200 mm](https://www.adafruit.com/product/5818) |
+| Électronique | 2 × carte 4 LED infrarouges 850 nm (fils pré-soudés) | 10 € | lien à trouver — référence exacte : carte de 4 LED infrarouges 850 nm, 5 V, environ 12 × 24 mm, fils pré-soudés |
+| Électronique | Capteur BME280 (Adafruit 2652) + câble STEMMA QT → broches mâles (Adafruit 4209), sans soudure | 14 € | [Adafruit 2652 BME280 (I2C, STEMMA QT)](https://www.adafruit.com/product/2652) + [câble STEMMA QT → broches mâles, Adafruit 4209](https://www.adafruit.com/product/4209) : branchement sans soudure ; puce : [Bosch BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) |
+| Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € | [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 × 60 × 25 mm, 12 V, 4 broches) |
+| Électronique | Grille de protection ventilateur 60 mm (fil d'acier) | 1 € | lien à trouver — référence exacte : grille de protection de ventilateur 60 mm en fil d'acier, trous de vis 50 mm |
+| Électronique | Module interrupteur 12 V côté + (P-MOSFET, commande 3,3 V) | 4 € | lien à trouver — référence exacte : module « high side switch » à P-MOSFET, 12 V, commande logique 3,3 V, borniers à vis |
+| Électronique | Rallonge Noctua NA-EC1 4 broches (mâle ⇄ femelle, 30 cm), fournie avec le ventilateur | 0 € | incluse dans la boîte du ventilateur (câble NA-EC1, 4 broches, 30 cm) : voir [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) |
+| Électronique | Module 2 × MOSFET | 5 € | lien à trouver — référence exacte : module 2 canaux MOSFET à niveau logique 3,3 V (IRLZ44N ou équivalent), borniers à vis |
+| Électronique | Convertisseur 12 V → 5 V 5 A USB-C | 15 € | lien à trouver — référence exacte : convertisseur DC-DC 12 V → 5 V, 5 A continus, sortie USB-C, entrée à bornier à vis |
+| Électronique | 4 cellules LiFePO4 32700 + BMS 4S + support | 40 € | [Cellule HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523) ; BMS 4S LiFePO4 et support : lien à trouver |
+| Électronique | Fusible + porte-fusible | 3 € | lien à trouver — référence exacte : fusible à lame 15 A + porte-fusible à fils tout fait (2,5 mm²) |
+| Électronique | Cordons Dupont F/F 20 cm, lot de 40 | 3 € | [Adafruit 4447, cordons F/F silicone 200 mm × 40](https://www.adafruit.com/products/4447) |
+| Corps | Feuille de MDF 3 mm (quatre barres du toit, découpées au laser) | 3 € | lien à trouver — référence exacte : MDF 3 mm, feuille d'au moins 410 × 400 mm |
+| Électronique | Embouts de câble assortis (kit) | 8 € | lien à trouver — référence exacte : kit d'embouts de câble isolés 0,25 à 4 mm² |
+| Électronique | Tournevis plat 2 mm | 4 € | lien à trouver — référence exacte : tournevis plat 2 mm (lame de 2,0 × 0,4 mm) |
+| Électronique | Pince à dénuder | 8 € | lien à trouver — référence exacte : pince à dénuder automatique 0,2 à 6 mm² |
+| Électronique | Wago 221-413 (3 entrées) pour le + du rail 12 V | 1 € | [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413) |
+| Électronique | Wago 221-415 (5 entrées) pour le − du rail 12 V | 1,5 € | [WAGO 221-415, borne à levier 5 conducteurs](https://www.wago.com/221-415) |
+| Électronique | Câbles (2,5 mm², 4 mm², signaux), gaine ICTA, presse-étoupe, cosses | 25 € | lien à trouver — référence exacte : fil souple 2,5 mm² et 4 mm² (rouge / noir), fil de signal 0,25 mm², gaine ICTA Ø 16, cosses isolées |
+| Solaire | Panneau solaire 100 W | 90 € | [Panneau 100 Wc monocristallin AST100-17M, 970 × 585 × 30 mm (Wattuneed)](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html) |
+| Solaire | Régulateur de charge Genasun GV-10-Li | 120 € | [Genasun GV-10-Li-14.2V (4S LiFePO4, 10,5 A)](https://sunforgellc.com/product/gv-10/) ; revendeur : [DigiKey GV-10-Li-14.2V-OEM](https://www.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948) |
+| Corps | Contreplaqué peuplier 3 mm (10 planches de 41 × 40 cm) | 20 € | lien à trouver — référence exacte : contreplaqué peuplier 3 mm, planches de 41 × 40 cm |
+| Corps | Laine de bois 40 mm (0,3 m²) | 10 € | lien à trouver — référence exacte : panneau de laine de bois 40 mm |
+| Corps | Colle, vis inox | 8 € | lien à trouver — référence exacte : colle à bois vinylique D3 (résistante à l'eau), vis inox A2 |
+| Corps | Bloc isolant d'hiver (mousse de 35 mm + cadre de contreplaqué) | 6 € | fabriqué : mousse de 35 mm + contreplaqué |
+| Corps | Prise d'air basse (contreplaqué du conduit) | 1 € | fabriquée : contreplaqué |
+| Corps | Sous-boîte isolante de la prise d'air (contreplaqué + laine de bois) | 1 € | fabriquée : contreplaqué + laine de bois |
+| Corps | Grillage inox à mailles carrées de 5 mm (fil 0,5 mm), un rouleau : sortie du ventilateur et prise d'air | 3 € | lien à trouver — référence exacte : grillage inox à mailles carrées de 5 mm, fil de 0,5 mm |
+| Habillage | Chêne 18 mm (27 × 30 cm) | 12 € | lien à trouver — référence exacte : planche de chêne 18 mm |
+| Habillage | Lambris pin 10 mm (0,35 m²) | 15 € | lien à trouver — référence exacte : lambris de pin 10 mm |
+| Habillage | Peinture blanche | 7 € | lien à trouver — référence exacte : peinture blanche extérieure pour bois |
 
 Le ventilateur, sa grille et son interrupteur coûtent environ 22 € (le Peltier, son pont en H, son filtre, sa sonde et sa plaque en coûtaient 61 €). Le poste le plus cher est le régulateur Genasun (120 €) : un régulateur PWM LiFePO4 à 20 € ferait le travail avec un rendement moindre, et enlèverait 100 € au total. La découpe laser n'est pas comptée.
 
@@ -434,10 +434,19 @@ Le ventilateur, sa grille et son interrupteur coûtent environ 22 € (le Peltie
 
 ## Liens des composants
 
-- [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/)
-- [Camera Module 3](https://www.raspberrypi.com/products/camera-module-3/)
-- [Ventilateur Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm)
-- [Cellule LiFePO4 32700](https://robu.in/?p=2024523)
-- [Régulateur Genasun GV-10-Li](https://azcus.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948)
-- [Capteur BME280, fiche Bosch](https://cdn.sparkfun.com/assets/5/3/0/f/7/BME280_Datasheet.pdf)
-- [Panneau 100 W Wattuneed](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html)
+Chaque lien a été ouvert et vérifié (page et référence exacte). Les éléments sans lien sont dans le tableau des prix, avec leur référence exacte à chercher.
+
+- [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/) (page officielle, « Buy a Raspberry Pi 5 »)
+- [Camera Module 3, variantes standard / Wide / NoIR](https://www.raspberrypi.com/products/camera-module-3/) (page officielle)
+- [Câble caméra Raspberry Pi 5, 22 broches → 15 broches, 200 mm (Adafruit 5818)](https://www.adafruit.com/product/5818)
+- [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 mm, 12 V, 4 broches ; la boîte contient la rallonge NA-EC1 de 30 cm)
+- [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413)
+- [WAGO 221-415, borne à levier 5 conducteurs](https://www.wago.com/221-415)
+- [Régulateur Genasun GV-10-Li-14.2V (page fabricant Sunforge)](https://sunforgellc.com/product/gv-10/)
+- [Régulateur Genasun GV-10-Li-14.2V-OEM (DigiKey)](https://www.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948)
+- [Capteur Adafruit BME280, I2C ou SPI, STEMMA QT (Adafruit 2652)](https://www.adafruit.com/product/2652)
+- [Câble STEMMA QT → broches mâles, 150 mm (Adafruit 4209)](https://www.adafruit.com/product/4209)
+- [Capteur BME280, page Bosch Sensortec](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/)
+- [Cordons Dupont F/F silicone 200 mm × 40 (Adafruit 4447)](https://www.adafruit.com/products/4447)
+- [Cellule LiFePO4 HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523)
+- [Panneau 100 Wc AST100-17M (Wattuneed)](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html)

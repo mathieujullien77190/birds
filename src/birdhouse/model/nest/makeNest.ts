@@ -672,11 +672,12 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const LINKS: [RegExp, string][] = [ // fiches de référence (constructeur ou revendeur)
     [/^Raspberry Pi/, 'https://www.raspberrypi.com/products/raspberry-pi-5/'],
     [/^Caméra( 2)?$/, 'https://www.raspberrypi.com/products/camera-module-3/'],
-    [/^Ventilateur Noctua/, 'https://noctua.at/en/nf-a6x25-pwm'],
-    [/^Wago/, 'https://www.wago.com/fr/bornes-de-connexion-pour-conducteurs/221-413'],
+    [/^(Ventilateur Noctua|Prise 4 broches du ventilateur|Rallonge ventilateur)/, 'https://noctua.at/en/nf-a6x25-pwm'],
+    [/^Wago 221-413/, 'https://www.wago.com/221-413'],
+    [/^Wago 221-415/, 'https://www.wago.com/221-415'],
     [/^Batterie/, 'https://robu.in/?p=2024523'],
-    [/^Régulateur/, 'https://azcus.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948'],
-    [/^Capteur/, 'https://cdn.sparkfun.com/assets/5/3/0/f/7/BME280_Datasheet.pdf'],
+    [/^Régulateur/, 'https://sunforgellc.com/product/gv-10/'],
+    [/^Capteur/, 'https://www.adafruit.com/product/2652'],
     [/^Panneau solaire/, 'https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html'],
   ];
   const underRoof = (pt: Vec3): Vec3 => (n.pente && Math.abs(pt[0]) < W / 2 - t && Math.abs(pt[1]) < D / 2 - t ? [pt[0], pt[1], r2(Math.min(pt[2], bodyH + Hf + ((pt[1] + D / 2) * (Hb - Hf)) / D - 2))] : pt); // fils et nappes restent sous la pente du toit
