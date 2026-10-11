@@ -4,7 +4,7 @@
  * centrée sur son milieu ; l'épaisseur est le long de z, centrée aussi.
  * **Monde : Z = hauteur** (X = largeur, Y = profondeur, +y = arrière, sol = plan XY), comme la visionneuse STL.
  */
-import { Euler, MathUtils, Matrix4, Quaternion, Vector3 } from 'three';
+import { fromAxisAngle, fromEulerDeg, invert, multiply, rotate, roundDeg, toEulerRad, basisToEulerRad, vadd, vaddScaled, vcross, vdot, vscale, vsub, type Rotation, type V3 } from './model/math/rotation';
 
 export type Vec3 = [number, number, number];
 /** Positions gardées au centième de millimètre : les plaques d'une boîte sont à ± une demi-épaisseur (1,5 mm), un arrondi au millimètre les décalerait de 0,5 mm et les crans ne tomberaient plus en face. */
@@ -80,25 +80,22 @@ export const newPlank = (n: number, w = 120, h = 80): Plank => ({ id: uid(), nam
 
 /** Rotation (degrés XYZ) qui envoie l'axe x local sur `bx` et l'axe y local sur `by` (base directe : z = x × y). */
 export function rotFromBasis(bx: Vec3, by: Vec3): Vec3 {
-  const x = new Vector3(...bx), y = new Vector3(...by), z = x.clone().cross(y);
-  const e = new Euler().setFromRotationMatrix(new Matrix4().makeBasis(x, y, z), 'XYZ');
-  return [e.x, e.y, e.z].map((r) => Math.round(MathUtils.radToDeg(r))) as Vec3;
+  return roundDeg(basisToEulerRad(bx, by, vcross(bx, by)));
 }
 
 /** Conversion d'une scène Y = hauteur (ancien repère) vers Z = hauteur : (x, y, z) → (x, −z, y), rotations composées avec Rx(+90°) (le monde entier tourne). */
 export function toZUp(s: PlankScene): PlankScene {
   if (s.up === 'z2') return s;
-  const qM = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2), qMi = qM.clone().invert();
-  const d = MathUtils.degToRad;
+  const qM = fromAxisAngle([1, 0, 0], Math.PI / 2), qMi = invert(qM);
   return {
     ...s,
     up: 'z2',
     planks: s.planks.map((p) => {
-      const qc = new Quaternion().setFromEuler(new Euler(d(p.rot[0]), d(p.rot[1]), d(p.rot[2]), 'XYZ'));
+      const qc = fromEulerDeg(p.rot);
       // bonne formule : R = Rx(90) · R_ancien. 'z' avait fait R_conj = Rx(90)·R·Rx(−90) → R = R_conj·Rx(90) ; 'z1' avait fait Rx(90)·R_conj → R = Rx(−90)·R_z1·Rx(90)
-      const q = s.up === 'z' ? qc.clone().multiply(qM) : s.up === 'z1' ? qMi.clone().multiply(qc).multiply(qM) : qM.clone().multiply(qc);
-      const e = new Euler().setFromQuaternion(q, 'XYZ');
-      return { ...p, pos: s.up ? p.pos : ([p.pos[0], -p.pos[2], p.pos[1]] as Vec3), rot: [e.x, e.y, e.z].map((r) => Math.round(MathUtils.radToDeg(r))) as Vec3 };
+      const q = s.up === 'z' ? multiply(qc, qM) : s.up === 'z1' ? multiply(multiply(qMi, qc), qM) : multiply(qM, qc);
+      const e = toEulerRad(q);
+      return { ...p, pos: s.up ? p.pos : ([p.pos[0], -p.pos[2], p.pos[1]] as Vec3), rot: roundDeg(e) };
     }),
   };
 }
@@ -218,11 +215,10 @@ export function bounds(planks: Plank[], t: number): { min: Vec3; max: Vec3 } {
 export function corners(planks: Plank[], t: number): Vec3[] {
   if (planks.length === 1) {
     const p = planks[0];
-    const q = new Quaternion().setFromEuler(new Euler(MathUtils.degToRad(p.rot[0]), MathUtils.degToRad(p.rot[1]), MathUtils.degToRad(p.rot[2]), 'XYZ'));
+    const q = fromEulerDeg(p.rot);
     const out: Vec3[] = [];
     for (const x of [-p.w / 2, p.w / 2]) for (const y of [-p.h / 2, p.h / 2]) for (const z of [-(p.depth ?? t) / 2, (p.depth ?? t) / 2]) {
-      const v = new Vector3(x, y, z).applyQuaternion(q).add(new Vector3(...p.pos));
-      out.push([v.x, v.y, v.z]);
+      out.push(vadd(rotate([x, y, z], q), p.pos));
     }
     return out;
   }
@@ -252,16 +248,15 @@ export function movingWith(s: PlankScene, p: Plank): Plank[] {
 }
 
 /** Applique à des plaques une rotation `qD` autour de `pivot` puis une translation `shift` (positions au centième, rotations en degrés entiers). */
-export function transformPlanks(s: PlankScene, ids: Set<string>, shift: Vec3, qD: Quaternion, pivot: Vec3): PlankScene {
-  const d = MathUtils.degToRad, centre = new Vector3(...pivot), sh = new Vector3(...shift);
+export function transformPlanks(s: PlankScene, ids: Set<string>, shift: Vec3, qD: Rotation, pivot: Vec3): PlankScene {
+  const centre = pivot, sh = shift;
   return {
     ...s,
     planks: s.planks.map((x) => {
       if (!ids.has(x.id)) return x;
-      const np = new Vector3(...x.pos).sub(centre).applyQuaternion(qD).add(centre).add(sh);
-      const qm = qD.clone().multiply(new Quaternion().setFromEuler(new Euler(d(x.rot[0]), d(x.rot[1]), d(x.rot[2]), 'XYZ')));
-      const e = new Euler().setFromQuaternion(qm, 'XYZ');
-      return { ...x, pos: [r2(np.x), r2(np.y), r2(np.z)] as Vec3, rot: [e.x, e.y, e.z].map((r) => Math.round(MathUtils.radToDeg(r))) as Vec3 };
+      const np = vadd(vadd(rotate(vsub(x.pos, centre), qD), centre), sh);
+      const e = toEulerRad(multiply(qD, fromEulerDeg(x.rot)));
+      return { ...x, pos: [r2(np[0]), r2(np[1]), r2(np[2])] as Vec3, rot: roundDeg(e) };
     }),
   };
 }
@@ -274,10 +269,8 @@ export function moveWithGroup(s: PlankScene, id: string, pos: Vec3, rot: Vec3): 
   const p = s.planks.find((x) => x.id === id);
   if (!p) return s;
   const members = movingWith(s, p);
-  const d = MathUtils.degToRad;
-  const qOld = new Quaternion().setFromEuler(new Euler(d(p.rot[0]), d(p.rot[1]), d(p.rot[2]), 'XYZ'));
-  const qNew = new Quaternion().setFromEuler(new Euler(d(rot[0]), d(rot[1]), d(rot[2]), 'XYZ'));
-  const qD = qNew.clone().multiply(qOld.clone().invert());
+  const qOld = fromEulerDeg(p.rot), qNew = fromEulerDeg(rot);
+  const qD = multiply(qNew, invert(qOld));
   const shift: Vec3 = [pos[0] - p.pos[0], pos[1] - p.pos[1], pos[2] - p.pos[2]];
   const next = transformPlanks(s, new Set(members.map((x) => x.id)), shift, qD, p.pos);
   return { ...next, planks: next.planks.map((x) => (x.id === id ? { ...x, pos, rot } : x)) }; // la plaque menée prend exactement ce qu'on lui a donné
@@ -599,10 +592,9 @@ export function sheetsPreviewSvg(sheets: NestSheet[], W: number, H: number, gap 
 export type FaceAxis = 'x' | 'y' | 'z';
 
 /** Axes locaux d'une plaque, en coordonnées monde. */
-function axesOf(p: Plank): { x: Vector3; y: Vector3; z: Vector3 } {
-  const d = MathUtils.degToRad;
-  const q = new Quaternion().setFromEuler(new Euler(d(p.rot[0]), d(p.rot[1]), d(p.rot[2]), 'XYZ'));
-  return { x: new Vector3(1, 0, 0).applyQuaternion(q), y: new Vector3(0, 1, 0).applyQuaternion(q), z: new Vector3(0, 0, 1).applyQuaternion(q) };
+function axesOf(p: Plank): { x: V3; y: V3; z: V3 } {
+  const q = fromEulerDeg(p.rot);
+  return { x: rotate([1, 0, 0], q), y: rotate([0, 1, 0], q), z: rotate([0, 0, 1], q) };
 }
 
 /**
@@ -615,11 +607,11 @@ export function pullFace(s: PlankScene, id: string, axis: FaceAxis, sign: 1 | -1
   const p = s.planks.find((x) => x.id === id);
   if (!p || !d) return { scene: s, applied: 0 };
   const ax = axesOf(p);
-  const N = ax[axis].clone().multiplyScalar(sign);
+  const N = vscale(ax[axis], sign);
   const half = axis === 'x' ? p.w / 2 : axis === 'y' ? p.h / 2 : s.t / 2;
-  const facePos = new Vector3(...p.pos).dot(N) + half; // position du plan de la face le long de N
+  const facePos = vdot(p.pos, N) + half; // position du plan de la face le long de N
   const tol = s.t + 1;
-  const proj = (x: Plank) => corners([x], s.t).map((c) => new Vector3(...c).dot(N));
+  const proj = (x: Plank) => corners([x], s.t).map((c) => vdot(c, N));
   const touchesPlane = (x: Plank) => Math.abs(Math.max(...proj(x)) - facePos) < tol || Math.abs(Math.min(...proj(x)) - facePos) < tol;
   const bb = new Map<string, { min: Vec3; max: Vec3 }>();
   const boxOf = (x: Plank) => { let b = bb.get(x.id); if (!b) { b = bounds([x], s.t); bb.set(x.id, b); } return b; };
@@ -637,9 +629,9 @@ export function pullFace(s: PlankScene, id: string, axis: FaceAxis, sign: 1 | -1
   for (const x of set.values()) {
     if (x.id === p.id && axis !== 'z') { plan.set(x.id, { kind: 'resize', axis: axis === 'x' ? 'w' : 'h' }); continue; }
     const a = axesOf(x);
-    if (Math.abs(a.z.dot(N)) > 0.9) plan.set(x.id, { kind: 'move' });
-    else if (Math.abs(a.x.dot(N)) > 0.9) plan.set(x.id, { kind: 'resize', axis: 'w' });
-    else if (Math.abs(a.y.dot(N)) > 0.9) plan.set(x.id, { kind: 'resize', axis: 'h' });
+    if (Math.abs(vdot(a.z, N)) > 0.9) plan.set(x.id, { kind: 'move' });
+    else if (Math.abs(vdot(a.x, N)) > 0.9) plan.set(x.id, { kind: 'resize', axis: 'w' });
+    else if (Math.abs(vdot(a.y, N)) > 0.9) plan.set(x.id, { kind: 'resize', axis: 'h' });
     else plan.set(x.id, { kind: 'move' });
   }
   // minimum 1 mm sur tout ce qui se raccourcit
@@ -651,9 +643,9 @@ export function pullFace(s: PlankScene, id: string, axis: FaceAxis, sign: 1 | -1
     planks: s.planks.map((x) => {
       const what = plan.get(x.id);
       if (!what) return x;
-      if (what.kind === 'move') { const np = new Vector3(...x.pos).addScaledVector(N, applied); return { ...x, pos: [r2(np.x), r2(np.y), r2(np.z)] as Vec3 }; }
-      const np = new Vector3(...x.pos).addScaledVector(N, applied / 2); // le bord opposé ne bouge pas
-      const nx: Plank = { ...x, pos: [r2(np.x), r2(np.y), r2(np.z)] as Vec3, [what.axis]: +((what.axis === 'w' ? x.w : x.h) + applied).toFixed(2) };
+      if (what.kind === 'move') { const np = vaddScaled(x.pos, N, applied); return { ...x, pos: [r2(np[0]), r2(np[1]), r2(np[2])] as Vec3 }; }
+      const np = vaddScaled(x.pos, N, applied / 2); // le bord opposé ne bouge pas
+      const nx: Plank = { ...x, pos: [r2(np[0]), r2(np[1]), r2(np[2])] as Vec3, [what.axis]: +((what.axis === 'w' ? x.w : x.h) + applied).toFixed(2) };
       return recastAll(nx, s.t, s.fit);
     }),
   };
@@ -670,14 +662,14 @@ export function pullFace(s: PlankScene, id: string, axis: FaceAxis, sign: 1 | -1
 export function slotsForTeeth(s: PlankScene, id: string): { scene: PlankScene; added: number; planks: number } {
   const B = s.planks.find((p) => p.id === id);
   if (!B) return { scene: s, added: 0, planks: 0 };
-  const bx = axesOf(B), nB = bx.z, posB = new Vector3(...B.pos);
+  const bx = axesOf(B), nB = bx.z, posB = B.pos;
   const fresh: Hole[] = [];
   const sources = new Set<string>();
   for (const A of s.planks) {
     if (A.id === B.id || (A.group && A.group === B.group)) continue;
     const ax = axesOf(A);
-    if (Math.abs(nB.dot(ax.z)) > 0.1) continue; // A doit être perpendiculaire à B
-    const a = nB.dot(ax.x), b = nB.dot(ax.y), c = nB.dot(new Vector3(...A.pos).sub(posB));
+    if (Math.abs(vdot(nB, ax.z)) > 0.1) continue; // A doit être perpendiculaire à B
+    const a = vdot(nB, ax.x), b = vdot(nB, ax.y), c = vdot(nB, vsub(A.pos, posB));
     const n2 = a * a + b * b;
     if (n2 < 0.5) continue;
     const norm = Math.sqrt(n2), p0: Pt = [-c * a / n2, -c * b / n2], dir: Pt = [-b / norm, a / norm];
@@ -691,12 +683,12 @@ export function slotsForTeeth(s: PlankScene, id: string): { scene: PlankScene; a
       ss.push((P[0] + (Q[0] - P[0]) * k - p0[0]) * dir[0] + (P[1] + (Q[1] - P[1]) * k - p0[1]) * dir[1]);
     }
     ss.sort((u, v) => u - v);
-    const posA = new Vector3(...A.pos);
+    const posA = A.pos;
     const toB = (sv: number): [number, number] => {
-      const w = new Vector3().addScaledVector(ax.x, p0[0] + dir[0] * sv).addScaledVector(ax.y, p0[1] + dir[1] * sv).add(posA).sub(posB);
-      return [w.dot(bx.x), w.dot(bx.y)];
+      const w = vsub(vadd(vaddScaled(vaddScaled([0, 0, 0], ax.x, p0[0] + dir[0] * sv), ax.y, p0[1] + dir[1] * sv), posA), posB);
+      return [vdot(w, bx.x), vdot(w, bx.y)];
     };
-    const nLoc: [number, number] = [ax.z.dot(bx.x), ax.z.dot(bx.y)]; // épaisseur de A vue dans le plan de B
+    const nLoc: [number, number] = [vdot(ax.z, bx.x), vdot(ax.z, bx.y)]; // épaisseur de A vue dans le plan de B
     for (let i = 0; i + 1 < ss.length; i += 2) {
       if (ss[i + 1] - ss[i] < 0.5) continue;
       const [x0, y0] = toB(ss[i]), [x1, y1] = toB(ss[i + 1]);
@@ -934,9 +926,9 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const cam2Target: Vec3 = [0, -D / 2 - (n.lambris ? 10 : 0), holeZ];
   const cdx = cam2Target[0] - cam2X, cdy = cam2Target[1] - cam2Y, chor = Math.hypot(cdx, cdy);
   const cam2Yaw = Math.atan2(cdx, -cdy), cam2Pitch = Math.atan2(cam2Cz - cam2Target[2], chor); // la face avant (−y) est tournée vers le trou puis baissée
-  const cam2Q = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), cam2Yaw).multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), cam2Pitch));
-  const irOff = new Vector3(-20, -3, 0).applyQuaternion(cam2Q.clone().invert()); // décalage (monde) des LED extérieures par rapport à la caméra 2 : 20 mm à sa gauche, exprimé dans le repère de la caméra
-  const cam2Pt = (lx: number, ly: number, lz: number): Vec3 => { const v = new Vector3(lx, ly, lz).applyQuaternion(cam2Q); return [r2(cam2X + v.x), r2(cam2Y + v.y), r2(cam2Cz + v.z)]; }; // repère de la boîte, centré
+  const cam2Q = multiply(fromAxisAngle([0, 0, 1], cam2Yaw), fromAxisAngle([1, 0, 0], cam2Pitch));
+  const irOff = rotate([-20, -3, 0], invert(cam2Q)); // décalage (monde) des LED extérieures par rapport à la caméra 2 : 20 mm à sa gauche, exprimé dans le repère de la caméra
+  const cam2Pt = (lx: number, ly: number, lz: number): Vec3 => { const v = rotate([lx, ly, lz], cam2Q); return [r2(cam2X + v[0]), r2(cam2Y + v[1]), r2(cam2Cz + v[2])]; }; // repère de la boîte, centré
   const camBox: Plank[] = n.cam2 ? (() => {
     const bx = makeBox(CAM2_L, CAM2_D, CAM2_H, t, fit, start);
     const planksBox: Plank[] = []; void bx; (bx.planks as Plank[]).filter(() => false).map((p) => {
@@ -944,7 +936,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       return /^Face avant/.test(p.name) ? { ...q, holes: [...q.holes, fitHole(q, { id: uid(), shape: 'round' as const, x: 0, y: 0, size: 12 })] } : q;
     });
     const cam2: Plank = { id: uid(), name: 'Caméra 2', w: CAM_W, h: CAM_H, pos: [0, -CAM2_D / 2 + t + 10, 0] as Vec3, rot: [-90, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'camera' };
-    const ir2: Plank = { id: uid(), name: 'LED infrarouges extérieures', w: IR_W, h: IR_H, pos: [r2(irOff.x), r2(-CAM2_D / 2 + t + 10 + irOff.y), r2(irOff.z)] as Vec3, rot: [-90, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir' }; // à côté de la caméra 2, tournée comme elle
+    const ir2: Plank = { id: uid(), name: 'LED infrarouges extérieures', w: IR_W, h: IR_H, pos: [r2(irOff[0]), r2(-CAM2_D / 2 + t + 10 + irOff[1]), r2(irOff[2])] as Vec3, rot: [-90, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir' }; // à côté de la caméra 2, tournée comme elle
     const all = [...planksBox, cam2, ir2], ids = new Set(all.map((p) => p.id));
     return transformPlanks({ t, fit, planks: all }, ids, [cam2X, cam2Y, cam2Cz], cam2Q, [0, 0, 0]).planks;
   })() : [];
@@ -1015,7 +1007,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   ] : [];
   const wires2: Plank[] = n.cam2 ? ([['Fil 5 V LED extérieures (rouge)', '#dc2626', 0, 0, -10.5], ['Fil masse LED extérieures (noir)', '#111827', 9, 0, -13]] as const).map(([nm, color, pinIdx, _r, dx]): Plank => {
     const [xt, yt] = pw(PI_PIN_X0 + pinIdx * 2.54, PI_PIN_Y), sx = cam2X - 10 + dx, yw = -D / 2, zs = topZ + 28; // tous les deux à GAUCHE de la nappe (à 10,5 et 13 mm de son axe ; elle fait 16 de large, la fente 28) : jamais dessus, jamais croisée
-    const end = cam2Pt(irOff.x + dx / 4, -2 + irOff.y, IR_H / 2 + 2 + irOff.z);
+    const end = cam2Pt(irOff[0] + dx / 4, -2 + irOff[1], IR_H / 2 + 2 + irOff[2]);
     return { id: uid(), name: nm, w: 1.2, h: 1.2, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'wire' as const, color,
       path: [...(pinIdx === 9 ? [[MX + 4, MY - 7, MZ + 4], [MX + 4, MY - 12, MZ + 10], [sx + 10, -34, topZ + 24]] as Vec3[] : [[xt, yt, piZ + 3.5], [xt, yt, piZ + 10], [xt + dx, yt - 10, topZ + 27]] as Vec3[]), [sx, -46, zs + 1], [sx, yw + 12, zs], [sx, yw, zs], [sx, yw - 5, zs], [sx - 2, (yw + cam2Y) / 2, (zs + end[2]) / 2 + 2], [end[0], end[1], end[2] + 6], end] as Vec3[] };
   }) : [];
