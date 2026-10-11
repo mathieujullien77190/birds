@@ -45,7 +45,7 @@ export class WebSerialTransport implements GrblTransport {
   /** Demande le port à l'utilisateur (doit être appelée directement par un clic), l'ouvre et lance la lecture. */
   async open(): Promise<void> {
     const s = serial();
-    if (!s) throw new Error(webSerialProblem() ?? 'Web Serial indisponible');
+    if (!s) throw new Error(webSerialProblem()!); // sans navigator.serial, webSerialProblem() rend toujours un message
     const port = await s.requestPort();
     await port.open({ baudRate: 115200, dataBits: 8, stopBits: 1, parity: 'none', flowControl: 'none', bufferSize: 4096 });
     this.port = port;

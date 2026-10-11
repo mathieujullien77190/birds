@@ -23,7 +23,7 @@ export function itemFromFile(fileName: string, text: string): LaserItem {
   const base = (dot > 0 ? fileName.slice(0, dot) : fileName) || 'fichier';
   if (ext === 'svg' || (!GCODE_EXT.includes(ext) && /<svg[\s>]/i.test(text))) {
     const { job, warnings } = parseSvg(text);
-    if (!job.layers.cut.length && !job.layers.engrave?.length) throw new Error(warnings[warnings.length - 1] ?? 'Rien à découper dans ce SVG.');
+    if (!job.layers.cut.length && !job.layers.engrave?.length) throw new Error(warnings[warnings.length - 1]); // sans contour, parseSvg a toujours ajouté « Aucun contour fermé… »
     job.title = base;
     return { label: fileName, fileName: base, job, notice: [`Traits noirs = coupe (${job.layers.cut.length}), traits bleus = gravure (${job.layers.engrave?.length ?? 0}) ; le reste est ignoré.`, ...warnings].join(' ') };
   }

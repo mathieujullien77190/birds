@@ -82,7 +82,7 @@ type Attrs = Record<string, string>;
 
 function attrsOf(tag: string): Attrs {
   const out: Attrs = {};
-  for (const m of tag.matchAll(/([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) out[m[1]] = m[2] ?? m[3] ?? '';
+  for (const m of tag.matchAll(/([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) out[m[1]] = (m[2] ?? m[3])!; // l'une des deux alternatives (guillemets doubles ou simples) a toujours participé
   if (out.style) for (const d of out.style.split(';')) { const i = d.indexOf(':'); if (i > 0) out[d.slice(0, i).trim()] = d.slice(i + 1).trim(); }
   return out;
 }
@@ -91,8 +91,8 @@ const length = (s: string | undefined): number | null => {
   if (!s) return null;
   const m = /^\s*([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\s*(mm|cm|in|px|pt|pc)?\s*$/.exec(s);
   if (!m) return null;
-  const k = { mm: 1, cm: 10, in: 25.4, px: 1, pt: 25.4 / 72, pc: 25.4 / 6 }[m[2] ?? 'px'] ?? 1;
-  return Number(m[1]) * (m[2] === 'px' || !m[2] ? 1 : k);
+  const k = { mm: 1, cm: 10, in: 25.4, px: 1, pt: 25.4 / 72, pc: 25.4 / 6 }[m[2] ?? 'px'] as number;
+  return Number(m[1]) * k;
 };
 /** Longueur donnée avec une vraie unité physique (pas en px) : en mm, sinon `null`. */
 const physical = (s: string | undefined): number | null => (s && /(mm|cm|in|pt|pc)\s*$/.test(s) ? length(s) : null);
@@ -149,7 +149,7 @@ export function flattenPath(d: string): Sub[] {
       x = sx; y = sy; cur = null; lastC = lastQ = null;
       continue;
     }
-    if (!more()) { if (C !== 'Z') break; }
+    if (!more()) break;
     const ox = rel ? x : 0, oy = rel ? y : 0;
     if (C === 'M') {
       const nx = take() + ox, ny = take() + oy;
@@ -215,8 +215,7 @@ function shapeSubs(tag: string, a: Attrs): Sub[] {
       for (let k = 0; k + 1 < v.length; k += 2) pts.push([v[k], v[k + 1]]);
       return pts.length >= 2 ? [{ pts, closed: tag === 'polygon' }] : [];
     }
-    case 'line': return [{ pts: [[n('x1'), n('y1')], [n('x2'), n('y2')]], closed: false }];
-    default: return [];
+    default: return [{ pts: [[n('x1'), n('y1')], [n('x2'), n('y2')]], closed: false }]; // 'line', la seule forme restante (voir SHAPES)
   }
 }
 
@@ -243,7 +242,7 @@ export function parseSvg(text: string): SvgImport {
   const cut: Polyline[] = [], engrave: Polyline[] = [];
   let open = 0, other = 0, tooSmall = 0, used = 0;
   type Frame = { tag: string; m: Mat; stroke?: string };
-  const stack: Frame[] = [{ tag: 'svg', m: ID, stroke: root[1] ? attrsOf(root[1]).stroke : undefined }];
+  const stack: Frame[] = [{ tag: 'svg', m: ID, stroke: ra.stroke }];
   const rest = clean.slice(root.index + root[0].length);
   for (const t of rest.matchAll(/<(\/?)([a-zA-Z][\w:-]*)([^>]*?)(\/?)>/g)) {
     const [, closing, tag, body, self] = t;
