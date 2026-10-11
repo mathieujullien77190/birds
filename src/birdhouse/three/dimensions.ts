@@ -1,3 +1,4 @@
+import { MARK } from './constants';
 import { BufferGeometry, CanvasTexture, Float32BufferAttribute, Group, LineBasicMaterial, LineSegments, Sprite, SpriteMaterial, Vector3 } from 'three';
 
 /** Étiquette de mesure flottante : texte dessiné sur un canvas, toujours face à la caméra, au-dessus de tout. */
@@ -14,7 +15,7 @@ function measureSprite(text: string): Sprite {
   g.fillText(text, cv.width / 2, 37);
   const sp = new Sprite(new SpriteMaterial({ map: new CanvasTexture(cv), transparent: true })); // testée en profondeur : cachée derrière le bois
   sp.scale.set(60, 13.5, 1);
-  sp.renderOrder = 20;
+  sp.renderOrder = MARK.dimensionRenderOrder;
   return sp;
 }
 

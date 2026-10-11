@@ -1,6 +1,7 @@
 import { useEffect, type MutableRefObject } from 'react';
 import { BufferGeometry, DoubleSide, Float32BufferAttribute, Line, LineBasicMaterial, LineLoop, LineSegments, MathUtils, Mesh, MeshStandardMaterial, Plane, PlaneGeometry, Sprite, Vector3 } from 'three';
 import { bounds, extents, holeOutline, outline, type PlankScene, type Vec3 } from '@/birdhouse/model';
+import { EMISSIVE, MARK } from '@/birdhouse/three/constants';
 import { dimension } from '@/birdhouse/three/dimensions';
 import { oakTexture } from '@/birdhouse/three/oakTexture';
 import { piModel } from '@/birdhouse/three/piModel';
@@ -56,8 +57,8 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       const mat = m.material as MeshStandardMaterial;
       const hovered = !!hover && (hover.plank === p.id || (!!hover.group && hover.group === p.group));
       const chosen = groupSel ? p.group === groupSel : p.id === selectedId; // boîte choisie : toutes ses plaques
-      mat.emissive.set(hovered ? '#d97706' : chosen ? '#3d6f5a' : extra.has(p.id) ? '#2f5f8a' : '#000000'); // survolé dans la liste : ambre
-      mat.emissiveIntensity = hovered ? 0.5 : 0.35;
+      mat.emissive.set(hovered ? EMISSIVE.hover : chosen ? EMISSIVE.chosen : extra.has(p.id) ? EMISSIVE.extra : EMISSIVE.none); // survolé dans la liste : ambre
+      mat.emissiveIntensity = hovered ? EMISSIVE.hoverIntensity : EMISSIVE.baseIntensity;
       if (p.name === 'Toit en chêne') { if (!mat.map) { mat.map = oakTexture(); mat.vertexColors = false; mat.color.set('#ffffff'); mat.roughness = 0.7; mat.needsUpdate = true; } } // le pan de toit en chêne porte une texture de bois (le reste garde ses couleurs par sommets)
       mat.transparent = !!p.transparent;
       mat.opacity = p.transparent ? 0.3 : 1;
@@ -81,16 +82,16 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
     const mm = mp ? v.meshes.get(mp.id) : undefined;
     if (mp && mh && mm) {
       const loop = holeOutline(mh);
-      for (const z of [-sc.t / 2 - 0.3, sc.t / 2 + 0.3]) {
+      for (const z of [-sc.t / 2 - MARK.holeOffset, sc.t / 2 + MARK.holeOffset]) {
         const geo = new BufferGeometry().setAttribute('position', new Float32BufferAttribute(loop.flatMap(([x, y]) => [x, y, z]), 3));
         const line = new LineLoop(geo, HOLE_MARK);
         line.computeLineDistances();
-        line.renderOrder = 25;
+        line.renderOrder = MARK.holeRenderOrder;
         v.holeMark.add(line);
       }
       // cotes : du bord de la plaque au bord du trou, des quatre côtés, dans le plan de la face avant
       const hw = mh.shape === 'square' ? mh.size / 2 : mh.size / 2, hh = mh.shape === 'square' ? (mh.sh ?? mh.size) / 2 : mh.size / 2;
-      const z = sc.t / 2 + 0.6, X = new Vector3(1, 0, 0), Yv = new Vector3(0, 1, 0), none = new Vector3();
+      const z = sc.t / 2 + MARK.holeDimensionOffset, X = new Vector3(1, 0, 0), Yv = new Vector3(0, 1, 0), none = new Vector3();
       const r1 = (v: number) => `${+v.toFixed(2)}`; // valeur exacte au centième, sans zéros inutiles
       v.holeMark.add(
         dimension(new Vector3(-mp.w / 2, mh.y, z), new Vector3(mh.x - hw, mh.y, z), Yv, none, r1(mh.x - hw + mp.w / 2)), // gauche
@@ -106,14 +107,14 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
     const pp = pull ? sc.planks.find((x) => x.id === pull.plankId) : undefined;
     const pm = pp ? v.meshes.get(pp.id) : undefined;
     if (pp && pm && pull) {
-      const t2 = sc.t / 2 + 0.3, w2 = pp.w / 2 + 0.3, h2 = pp.h / 2 + 0.3;
+      const t2 = sc.t / 2 + MARK.pullOffset, w2 = pp.w / 2 + MARK.pullOffset, h2 = pp.h / 2 + MARK.pullOffset;
       let loop: number[];
       if (pull.axis === 'z') { const z = pull.sign * t2; loop = outline(pp).flatMap(([x, y]) => [x, y, z]); }
       else if (pull.axis === 'x') { const x = pull.sign * w2; loop = [x, -h2, -t2, x, h2, -t2, x, h2, t2, x, -h2, t2]; }
       else { const y = pull.sign * h2; loop = [-w2, y, -t2, w2, y, -t2, w2, y, t2, -w2, y, t2]; }
       const line = new LineLoop(new BufferGeometry().setAttribute('position', new Float32BufferAttribute(loop, 3)), PULL_MARK);
       line.computeLineDistances();
-      line.renderOrder = 26;
+      line.renderOrder = MARK.pullRenderOrder;
       v.pullMark.add(line);
       v.pullMark.position.copy(pm.position);
       v.pullMark.quaternion.copy(pm.quaternion);
@@ -122,19 +123,19 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
     for (const o of [...v.cutMark.children]) { v.cutMark.remove(o); (o as Mesh).geometry.dispose(); }
     if (cut.on && sc.planks.length) {
       const { min, max } = bounds(sc.planks, sc.t);
-      const size = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2], 50) * 1.4;
+      const size = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2], MARK.cutMinSize) * MARK.cutScale;
       const quad = new Mesh(new PlaneGeometry(size, size), CUT_MAT);
       const n = AXIS_N[cut.axis];
       quad.quaternion.setFromUnitVectors(new Vector3(0, 0, 1), n);
       quad.position.set((min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2);
       quad.position.setComponent(AXIS_I[cut.axis], cut.pos);
-      quad.renderOrder = 5;
+      quad.renderOrder = MARK.cutRenderOrder;
       v.cutMark.add(quad);
     }
     // cotes : traits le long des côtés de chaque composant de plus haut niveau (plaque seule : largeur et hauteur dans son plan ; groupe : l, L, H de son encombrement)
     for (const o of [...v.labels.children]) { v.labels.remove(o); o.traverse((c) => { const sp = c as Sprite; if (sp.isSprite) { sp.material.map?.dispose(); sp.material.dispose(); } else (c as Mesh).geometry?.dispose(); }); }
     { // cotes de l'HABILLAGE seulement (demande de l'utilisateur : plus de bouton « Mesures », plus de cotes sur les autres pièces) : l × L × H de son encombrement
-      const O = 14; // écart entre l'objet et la cote
+      const O = MARK.dimensionGap; // écart entre l'objet et la cote
       const done = new Set<string>();
       for (const p of sc.planks) {
         if (p.group && (sc.groupNames?.[p.group] ?? '').startsWith('Habillage')) {

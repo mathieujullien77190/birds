@@ -1,12 +1,13 @@
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { BoxGeometry, BufferGeometry, Color, CylinderGeometry, EdgesGeometry, ExtrudeGeometry, Float32BufferAttribute, Path, Shape, Vector2 } from 'three';
 import { holeOutline, type Plank } from '../model';
+import { PART } from './constants';
 import { piModel } from './piModel';
 import { conduitGeometry, ribbonGeometry, wireGeometry } from './wires';
 
 /** Boîtier étanche du Pi : fond, quatre parois, couvercle (plaques minces). Origine : milieu du fond. */
 function caseGeometry(p: Plank): { geo: BufferGeometry; edges: BufferGeometry } {
-  const W = p.w, D = p.h, H = 35, w = 2.5;
+  const W = p.w, D = p.h, H = PART.caseHeight, w = PART.caseWall;
   const parts: { g: BufferGeometry; c: Color }[] = [];
   const slab = (sx: number, sy: number, sz: number, x: number, y: number, z: number, c = '#cbd5e1') => { const g = new BoxGeometry(sx, sy, sz); g.translate(x, y, z); parts.push({ g, c: new Color(c) }); };
   slab(W, D, w, 0, 0, w / 2); // fond
@@ -15,7 +16,7 @@ function caseGeometry(p: Plank): { geo: BufferGeometry; edges: BufferGeometry } 
   slab(w, D - 2 * w, H - 2 * w, -(W - w) / 2, 0, H / 2); slab(w, D - 2 * w, H - 2 * w, (W - w) / 2, 0, H / 2); // gauche, droite
   const geos = parts.map(({ g, c }) => { const ni = g.toNonIndexed(); ni.deleteAttribute('uv'); const n = ni.attributes.position.count, col = new Float32Array(n * 3); for (let i = 0; i < n; i++) { col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b; } ni.setAttribute('color', new Float32BufferAttribute(col, 3)); return ni; });
   const geo = mergeGeometries(geos)!;
-  return { geo, edges: new EdgesGeometry(geo, 30) };
+  return { geo, edges: new EdgesGeometry(geo, PART.edgeAngle) };
 }
 
 export function cameraGeometry(p: Plank, t = 3): { geo: BufferGeometry; edges: BufferGeometry } {
@@ -47,7 +48,7 @@ export function cameraGeometry(p: Plank, t = 3): { geo: BufferGeometry; edges: B
     const hub = new CylinderGeometry(p.w * 0.14, p.w * 0.14, d + 1.2, 20); hub.rotateX(Math.PI / 2); parts.push({ g: hub, c: new Color('#0f172a') });
     const geos = parts.map(({ g, c }) => { const ni = g.toNonIndexed(); ni.deleteAttribute('uv'); const n = ni.attributes.position.count, col = new Float32Array(n * 3); for (let i = 0; i < n; i++) { col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b; } ni.setAttribute('color', new Float32BufferAttribute(col, 3)); return ni; });
     const geo = mergeGeometries(geos)!;
-    return { geo, edges: new EdgesGeometry(geo, 30) };
+    return { geo, edges: new EdgesGeometry(geo, PART.edgeAngle) };
   }
   if (p.special === 'peltier') { // TEC1-12706 : deux céramiques blanches de 0,8 et l'âme grise (plots) entre elles
     const parts: { g: BufferGeometry; c: Color }[] = [], d = p.depth ?? 3.8, core = d - 1.6;
@@ -56,7 +57,7 @@ export function cameraGeometry(p: Plank, t = 3): { geo: BufferGeometry; edges: B
     const mid = new BoxGeometry(p.w - 3, p.h - 3, core); parts.push({ g: mid, c: new Color('#4b5563') });
     const geos = parts.map(({ g, c }) => { const ni = g.toNonIndexed(); ni.deleteAttribute('uv'); const n = ni.attributes.position.count, col = new Float32Array(n * 3); for (let i = 0; i < n; i++) { col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b; } ni.setAttribute('color', new Float32BufferAttribute(col, 3)); return ni; });
     const geo = mergeGeometries(geos)!;
-    return { geo, edges: new EdgesGeometry(geo, 30) };
+    return { geo, edges: new EdgesGeometry(geo, PART.edgeAngle) };
   }
   if (p.special === 'driver') { // module MOSFET (type XY-MOS) : carte rouge, MOSFET noir avec languette, deux borniers bleus de chaque côté
     const parts: { g: BufferGeometry; c: Color }[] = [];
@@ -68,7 +69,7 @@ export function cameraGeometry(p: Plank, t = 3): { geo: BufferGeometry; edges: B
     const led = new BoxGeometry(3, 3, 1.5); led.translate(8, -7, z0 + 0.75); parts.push({ g: led, c: new Color('#22c55e') });
     const geos = parts.map(({ g, c }) => { const ni = g.toNonIndexed(); ni.deleteAttribute('uv'); const n = ni.attributes.position.count, col = new Float32Array(n * 3); for (let i = 0; i < n; i++) { col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b; } ni.setAttribute('color', new Float32BufferAttribute(col, 3)); return ni; });
     const geo = mergeGeometries(geos)!;
-    return { geo, edges: new EdgesGeometry(geo, 30) };
+    return { geo, edges: new EdgesGeometry(geo, PART.edgeAngle) };
   }
   if (p.special === 'heatsink') { // radiateur alu : semelle de 3 mm et 11 ailettes de 1,2 mm (z local : vers l'extérieur)
     const parts: { g: BufferGeometry; c: Color }[] = [], c = new Color(p.color ?? '#cbd5e1'), D = p.depth ?? 23;
@@ -77,7 +78,7 @@ export function cameraGeometry(p: Plank, t = 3): { geo: BufferGeometry; edges: B
     for (let i = 0; i < nF; i++) { const fin = new BoxGeometry(1.2, p.h, D - 3); fin.translate(-p.w / 2 + 0.6 + i * ((p.w - 1.2) / (nF - 1)), 0, 1.5); parts.push({ g: fin, c: c.clone().multiplyScalar(0.85) }); }
     const geos = parts.map(({ g, c: cc }) => { const ni = g.toNonIndexed(); ni.deleteAttribute('uv'); const n = ni.attributes.position.count, col = new Float32Array(n * 3); for (let i = 0; i < n; i++) { col[3 * i] = cc.r; col[3 * i + 1] = cc.g; col[3 * i + 2] = cc.b; } ni.setAttribute('color', new Float32BufferAttribute(col, 3)); return ni; });
     const geo = mergeGeometries(geos)!;
-    return { geo, edges: new EdgesGeometry(geo, 30) };
+    return { geo, edges: new EdgesGeometry(geo, PART.edgeAngle) };
   }
   if (p.special === 'sensor') { // carte du capteur : circuit bleu, puce blanche à grille noire (côté +z local = vers le nid), quatre broches dorées
     const parts: { g: BufferGeometry; c: Color }[] = [];
@@ -87,7 +88,7 @@ export function cameraGeometry(p: Plank, t = 3): { geo: BufferGeometry; edges: B
     for (let i = 0; i < 4; i++) { const pin = new BoxGeometry(0.64, 0.64, 4); pin.translate(-3.75 + i * 2.5, -p.h / 2 + 1.5, -1.8); parts.push({ g: pin, c: new Color('#d4a017') }); }
     const geos = parts.map(({ g, c }) => { const ni = g.toNonIndexed(); ni.deleteAttribute('uv'); const n = ni.attributes.position.count, col = new Float32Array(n * 3); for (let i = 0; i < n; i++) { col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b; } ni.setAttribute('color', new Float32BufferAttribute(col, 3)); return ni; });
     const geo = mergeGeometries(geos)!;
-    return { geo, edges: new EdgesGeometry(geo, 30) };
+    return { geo, edges: new EdgesGeometry(geo, PART.edgeAngle) };
   }
   if (p.special === 'block' && (p.holes.length || p.poly)) { // pavé percé (lambris à l'entrée) ou à contour libre (lames qui montent en diagonale) : une plaque épaisse, épaisseur p.depth selon z
     const shape = new Shape((p.poly ?? [[-p.w / 2, -p.h / 2], [p.w / 2, -p.h / 2], [p.w / 2, p.h / 2], [-p.w / 2, p.h / 2]]).map(([x, y]) => new Vector2(x, y)));
@@ -101,13 +102,13 @@ export function cameraGeometry(p: Plank, t = 3): { geo: BufferGeometry; edges: B
     const n = g.attributes.position.count, col = new Float32Array(n * 3), c = new Color(p.color ?? '#c8995a');
     for (let i = 0; i < n; i++) { col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b; }
     g.setAttribute('color', new Float32BufferAttribute(col, 3));
-    return { geo: g, edges: new EdgesGeometry(g, 30) };
+    return { geo: g, edges: new EdgesGeometry(g, PART.edgeAngle) };
   }
   if (p.special === 'block') { // pavé d'isolant : une boîte pleine
     const g = new BoxGeometry(p.w, p.h, p.depth ?? t), n = g.attributes.position.count, col = new Float32Array(n * 3), c = new Color(p.color ?? '#f59e0b');
     for (let i = 0; i < n; i++) { col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b; }
     g.setAttribute('color', new Float32BufferAttribute(col, 3));
-    return { geo: g, edges: new EdgesGeometry(g, 30) };
+    return { geo: g, edges: new EdgesGeometry(g, PART.edgeAngle) };
   }
   if (p.special === 'cable') return ribbonGeometry(p);
   if (p.special === 'conduit') return conduitGeometry(p);
@@ -157,5 +158,5 @@ export function cameraGeometry(p: Plank, t = 3): { geo: BufferGeometry; edges: B
     return ni;
   });
   const geo = mergeGeometries(geos)!;
-  return { geo, edges: new EdgesGeometry(geo, 30) };
+  return { geo, edges: new EdgesGeometry(geo, PART.edgeAngle) };
 }

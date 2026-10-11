@@ -2,6 +2,7 @@ import { useEffect, type Dispatch, type MutableRefObject, type RefObject, type S
 import { AmbientLight, Color, DirectionalLight, Group, MOUSE, PerspectiveCamera, Plane, Raycaster, Scene, Vector2, Vector3, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { pullFace, moveWithGroup, r2, type FaceAxis, type PlankScene, type Vec3 } from '@/birdhouse/model';
+import { AMBIENCE, SUN_POSITION, VIEW } from '@/birdhouse/three/constants';
 import { AXIS_N, SNAP, type Cut, type View } from '@/birdhouse/three/types';
 
 /** Ce que la vue 3D lit ou écrit dans le composant : uniquement des refs et des setters stables (l'effet de création ne tourne qu'une fois). */
@@ -27,21 +28,21 @@ export function useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickR
   useEffect(() => {
     const el = host.current!;
     const scene = new Scene();
-    scene.background = new Color('#eef2f1');
-    const ambient = new AmbientLight('#ffffff', 1.1);
+    scene.background = new Color(AMBIENCE.day.background);
+    const ambient = new AmbientLight(AMBIENCE.day.ambient, AMBIENCE.day.ambientI);
     scene.add(ambient);
-    const sun = new DirectionalLight('#ffffff', 1.8);
-    sun.position.set(300, -400, 500);
+    const sun = new DirectionalLight(AMBIENCE.day.sun, AMBIENCE.day.sunI);
+    sun.position.set(...SUN_POSITION);
     scene.add(sun);
-    const camera = new PerspectiveCamera(40, 1, 1, 6000);
+    const camera = new PerspectiveCamera(VIEW.fov, 1, VIEW.near, VIEW.far);
     camera.up.set(0, 0, 1); // Z = hauteur, comme la visionneuse STL
-    camera.position.set(-945, -1676, 1548); // vue de départ en 3/4 tournée de 180° (demande de l'utilisateur), assez loin pour voir le nichoir ET le panneau solaire
+    camera.position.set(...VIEW.position); // vue de départ en 3/4 tournée de 180° (demande de l'utilisateur), assez loin pour voir le nichoir ET le panneau solaire
     const renderer = new WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, VIEW.maxPixelRatio));
     el.appendChild(renderer.domElement);
     const orbit = new OrbitControls(camera, renderer.domElement);
     orbit.mouseButtons = { LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.ROTATE, RIGHT: MOUSE.PAN };
-    orbit.target.set(330, 0, 100);
+    orbit.target.set(...VIEW.target);
     orbit.enableDamping = true;
     const labels = new Group();
     const handles = new Group(); // ronds aux coins de l'élément choisi : on les tire pour déplacer l'élément par ce coin
