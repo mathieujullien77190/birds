@@ -7,7 +7,8 @@ Un nichoir à mésanges isolé, dessiné en 3D dans le navigateur et découpé a
 ## Ce que fait l'application
 
 **Concevoir le nichoir**
-- Un nichoir complet généré en 3D (Three.js) à partir de quelques curseurs : taille intérieure, hauteur et diamètre du trou d'envol. Options : panneau solaire et 2ᵉ caméra.
+- Un nichoir complet généré en 3D (Three.js) à partir de quelques curseurs : taille intérieure, hauteur et diamètre du trou d'envol. Option : 2ᵉ caméra (le panneau solaire est toujours là).
+- Montage sans soudure : cordons Dupont, borniers à vis, Wago 221 et prises d'origine ; voir la section « Montage sans soudure » du document « Schéma électronique ».
 - Chaque pièce est une plaque de contreplaqué de 3 mm à crans qui s'emboîtent, avec isolant, habillage en lambris, toit, ventilateur amovible avec son conduit de sortie, prise d'air basse et fixation à l'arbre. L'électronique est modélisée aussi (Raspberry Pi, caméras, batterie, régulateur, fils et nappes à leur vraie taille).
 - Vue 3D interactive : survol et sélection des pièces, liste « Pièces » (groupes, œil pour cacher, renommer, dupliquer), plan de coupe, tirer une face, trou par clic droit, historique avec « Retour ».
 - Mode **jour / nuit** de la scène, et **schéma électronique** à côté de la 3D : survoler un fil ou un composant le met en surbrillance des deux côtés, clic sur un module pour sa fiche.

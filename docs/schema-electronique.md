@@ -255,6 +255,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
 | Longueur d'onde | 850 nm (compatible avec la caméra NoIR) | — |
+| Fils | modèle à fils pré-soudés ou à bornier à vis (aucune soudure à faire) | — |
 | Alimentation | 5 V depuis le Pi | broche 4 |
 | Courant | à déterminer selon la carte (plus que la limite d'une broche GPIO : ne jamais l'alimenter par un GPIO) | — |
 | Commande | module 2 × MOSFET (niveau logique 3,3 V, ex. IRLZ44N ou module « 2 channel MOSFET »), coupure côté masse | module MOSFET, GPIO23 / GPIO24 |
@@ -264,6 +265,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
+| Version | carte « avec broches soudées » (aucune soudure à faire) | — |
 | Alimentation | 3,3 V | broche 1 |
 | Bus | I2C (SDA, SCL), adresse 0x76 ou 0x77 | broches 3 et 5 |
 | Mesures | température, humidité et pression | — |
@@ -298,6 +300,34 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Panneau vers régulateur | environ 4 mm² (tirage d'environ 70 cm à plusieurs mètres) |
 | Signaux (PWM, tachymètre, commande de l'interrupteur, I2C) | 0,25 mm² environ |
 | Masse | commune entre le Pi, le ventilateur (broche 14) et le rail 12 V |
+
+## Montage sans soudure
+
+**Principe.** Tout se branche à la main, sans fer à souder ni pince à sertir : cordons Dupont tout faits, borniers à vis ou à ressort, Wago 221, prises d'origine. On achète des composants **avec leurs broches ou leurs fils déjà soudés**.
+
+| Composant | À acheter (référence type) | Section de fil | Comment le brancher |
+| --- | --- | --- | --- |
+| Raspberry Pi 5 (GPIO) | cordons Dupont femelle-femelle de 20 cm, lot de 40 | fil du cordon (≈ 0,1 mm²) | un cordon par picot : PWM ventilateur GPIO18 (broche 12), tachymètre GPIO17 (broche 11), commande de l'interrupteur GPIO27 (broche 13), masse (broche 14), capteur (broches 1, 3, 5, 9), LED et module MOSFET (broches 2, 4, 6, 16, 18, 20) ; l'autre bout dans le bornier ou la broche du module |
+| Capteur BME280 | carte « avec broches soudées » (4 broches mâles) | cordons Dupont F/F | 3,3 V, SDA, SCL, masse par quatre cordons enfichés sur les broches de la carte |
+| Cartes de 4 LED infrarouges 850 nm | modèle à **fils pré-soudés** ou à **bornier à vis** | fils fournis (≈ 0,3 mm²) | 5 V sur la broche 2 ou 4 du Pi par un cordon Dupont ; l'autre fil dans le bornier du module MOSFET |
+| Module 2 × MOSFET (LED) et module interrupteur 12 V du ventilateur | cartes **avec borniers à vis** | 0,25 à 0,5 mm² | fil dénudé de 6 mm dans le bornier, vis serrée au tournevis plat de 2 mm ; commande par cordon Dupont sur le GPIO |
+| Régulateur solaire Genasun | modèle d'origine à **borniers à vis** | 4 mm² côté panneau, 2,5 mm² côté batterie | fils dénudés de 8 mm avec embouts, vis serrées à fond |
+| Fusible | porte-fusible lame **avec fils déjà montés** | 2,5 mm² | on le met en série sur le fil + de la batterie, avec les Wago |
+| Rail 12 V | Wago 221-413 (3 entrées, sans outil), un pour le +, un pour le − | 0,2 à 4 mm² | on lève le levier, on glisse le fil dénudé de 11 mm (fil souple avec embout conseillé), on rabat le levier |
+| Convertisseur 12 V → 5 V | modèle avec **sortie USB-C** et entrée à bornier à vis | 2,5 mm² côté 12 V | sortie USB-C directement dans le Pi, pas de câble à confectionner |
+| Batterie LiFePO4 | batterie avec **bornes à visser** ou fils livrés | 2,5 mm² | cosses ou embouts vissés sur les bornes |
+| Caméras | caméras Camera Module 3 NoIR avec **nappes plates** | nappe 15 ou 22 broches | la nappe s'enfiche dans le connecteur à levier (CSI) du Pi, sans outil |
+| Ventilateur Noctua | **prise 4 broches d'origine du ventilateur** + **rallonge 4 broches Noctua** (mâle ⇄ femelle, ≈ 30 cm) | fils du Noctua | la rallonge s'emboîte sur la prise d'origine ; l'autre bout se branche sur le toit ; aucune soudure ni sertissage |
+| Module INA219 (facultatif) | version **avec broches soudées** | cordons Dupont F/F | I2C : 3,3 V, SDA, SCL, masse |
+| Passage des fils | passe-câbles, gaine annelée de Ø 16 | — | on enfile les fils dans la gaine avant de brancher |
+
+**Liste de courses sans soudure** (prix indicatifs) : cordons Dupont F/F 20 cm, lot de 40, 3 € ; embouts de câble assortis avec leur kit, 8 € ; tournevis plat de 2 mm, 4 € ; pince à dénuder, 8 € ; Wago 221-413 (déjà comptés dans le prix du rail 12 V) ; porte-fusible à fils tout fait (déjà compté) ; rallonge ventilateur Noctua 4 broches (déjà comptée). Ces achats sont ajoutés à la table des prix, groupe « Électronique ».
+
+**Trois conseils.**
+
+1. Étiqueter chaque cordon (ruban adhésif et feutre) : « PWM », « tacho », « 5 V LED nid »…
+2. Tirer légèrement sur chaque fil après l'avoir serré : s'il bouge, le bornier ou le Wago n'est pas bien fermé.
+3. Avant la mise sous tension, mesurer au multimètre : continuité sur le rail 12 V, et surtout jamais de court-circuit entre le + et le − du rail.
 
 ## Vérification que rien ne coince
 
@@ -358,8 +388,8 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | --- | --- | --- |
 | Électronique | Raspberry Pi 5 (4 Go) + microSD 32 Go | 75 € |
 | Électronique | 2 × Camera Module 3 NoIR + 2 nappes adaptatrices 22 → 15 broches | 70 € |
-| Électronique | 2 × carte 4 LED infrarouges 850 nm | 10 € |
-| Électronique | Capteur BME280 | 5 € |
+| Électronique | 2 × carte 4 LED infrarouges 850 nm (fils pré-soudés) | 10 € |
+| Électronique | Capteur BME280 (avec broches soudées) | 5 € |
 | Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € |
 | Électronique | Grille de protection ventilateur 60 mm (fil d'acier) | 1 € |
 | Électronique | Module interrupteur 12 V côté + (P-MOSFET, commande 3,3 V) | 4 € |
@@ -368,6 +398,10 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Convertisseur 12 V → 5 V 5 A USB-C | 15 € |
 | Électronique | 4 cellules LiFePO4 32700 + BMS 4S + support | 40 € |
 | Électronique | Fusible + porte-fusible | 3 € |
+| Électronique | Cordons Dupont F/F 20 cm, lot de 40 | 3 € |
+| Électronique | Embouts de câble assortis (kit) | 8 € |
+| Électronique | Tournevis plat 2 mm | 4 € |
+| Électronique | Pince à dénuder | 8 € |
 | Électronique | 2 × Wago 221 (3 entrées) pour le rail 12 V | 2 € |
 | Électronique | Câbles (2,5 mm², 4 mm², signaux), gaine ICTA, presse-étoupe, cosses | 25 € |
 | Solaire | Panneau solaire 100 W | 90 € |
