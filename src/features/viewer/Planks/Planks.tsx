@@ -86,7 +86,7 @@ export default function Planks() {
     escape: () => { setCtx(null); setHoleEdit(null); setExtra(new Set()); setPull(null); },
   });
 
-  useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickRef, setSc, setCut, setCtx, setSelectedId, setHover, pushEntry });
+  useThreeView({ host, view, scRef, cutRef, pullRef, pickRef, setSc, setCut, setCtx, setSelectedId, setHover, pushEntry });
   useDayNight(view, night); // après useThreeView : la vue existe au montage
   useSceneSync(view, { sc, selectedId, extra, hover, groupSel, holeEdit, holeHover, pull, cut, hidden, piReady });
 

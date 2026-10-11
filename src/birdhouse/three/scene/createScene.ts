@@ -36,17 +36,14 @@ export function createScene(host: HTMLElement): SceneHandle {
   orbit.target.set(...VIEW.target);
   orbit.enableDamping = true;
   const labels = new Group();
-  const handles = new Group(); // ronds aux coins de l'élément choisi (désactivés)
-  const targets = new Group(); // ronds aux coins des autres pièces (désactivés)
-  targets.visible = false;
-  scene.add(labels, handles, targets);
+  scene.add(labels);
   const holeMark = new Group(); // le trou en cours de réglage, en pointillés ambre sur les deux faces de la plaque
   renderer.localClippingEnabled = true;
   const cutMark = new Group(); // le plan de coupe (carré bleu transparent), qu'on glisse le long de son axe
   scene.add(cutMark);
   const pullMark = new Group(); // la face double-cliquée, en pointillés bleus : on la tire ou on la pousse
   scene.add(holeMark, pullMark);
-  const view: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, handles, targets, holeMark, pullMark, cutMark, dragging: false };
+  const view: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, holeMark, pullMark, cutMark, dragging: false };
 
   const resize = () => { const w = host.clientWidth, h = host.clientHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); };
   const ro = new ResizeObserver(resize);
@@ -62,7 +59,7 @@ export function createScene(host: HTMLElement): SceneHandle {
     orbit.dispose();
     for (const m of view.meshes.values()) { scene.remove(m); disposeObject3D(m); }
     view.meshes.clear();
-    for (const g of [labels, handles, targets, holeMark, pullMark, cutMark]) clearGroup(g);
+    for (const g of [labels, holeMark, pullMark, cutMark]) clearGroup(g);
     scene.clear();
     disposeAll(); // matériaux et textures partagés (après les objets qui s'en servent)
     renderer.dispose();

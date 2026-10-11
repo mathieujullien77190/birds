@@ -59,9 +59,6 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       m.edges.material.clippingPlanes = clipPlanes;
     }
     for (const [id, m] of v.meshes) if (!seen.has(id)) { v.scene.remove(m); m.geometry.dispose(); v.meshes.delete(id); }
-    // ronds de coin : sur l'élément choisi (vert, à tirer) et sur toutes les autres pièces (bleu à 50 %, cibles d'aimantation, visibles pendant le glissé)
-    for (const g of [v.handles, v.targets]) for (const o of [...g.children]) g.remove(o);
-    v.handles.visible = false; // plus de ronds de coin : on ne déplace plus les pièces à la souris (retirés à la demande de l'utilisateur)
     // trou en cours de réglage (ou survolé) : son contour en pointillés sur les deux faces de la plaque
     for (const o of [...v.holeMark.children]) { v.holeMark.remove(o); o.traverse((c) => { const sp = c as Sprite; if (sp.isSprite) { sp.material.map?.dispose(); sp.material.dispose(); } else (c as Line).geometry?.dispose(); }); }
     const mark = holeEdit ?? holeHover;

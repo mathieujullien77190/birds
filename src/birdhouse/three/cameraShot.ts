@@ -24,7 +24,7 @@ export function shootCamera(v: View, board: Object3D, label: string, opts: { w?:
     target = new WebGLRenderTarget(w, h);
     target.texture.colorSpace = SRGBColorSpace; // sinon l'image sort sombre (conversion de sortie faite seulement à l'écran)
   }
-  const hide = [v.labels, v.handles, v.targets, v.holeMark, v.pullMark, v.cutMark, board]; // ni cotes, ni poignées, ni la carte elle-même
+  const hide = [v.labels, v.holeMark, v.pullMark, v.cutMark, board]; // ni cotes, ni repères, ni la carte elle-même
   const was = hide.map((o) => o.visible);
   hide.forEach((o) => { o.visible = false; });
   // vision nocturne : les LED infrarouges de la caméra éclairent la scène (lampe ponctuelle posée à l'objectif, le temps de la prise de vue)
