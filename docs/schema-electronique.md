@@ -37,7 +37,7 @@ flowchart TB
   SWF -->|"12 V commuté (rallonge 4 broches)"| FAN
   RAIL -->|"12 V − (masse)"| FAN
   PI -->|"GPIO27 (broche 13) commande<br/>3,3 V"| SWF
-  PI -->|"GPIO18 (broche 12) PWM 25 kHz<br/>GPIO17 (broche 11) tachymètre<br/>masse broche 14"| FAN
+  PI -->|"GPIO18 (broche 12) PWM 25 kHz visé (10 kHz si refusé)<br/>GPIO17 (broche 11) tachymètre<br/>masse broche 14"| FAN
   PI -->|"nappe CSI → CAM0"| CAM1
   PI -->|"longue nappe CSI → CAM1<br/>par la fente de la plaque avant"| CAM2
   PI -->|"GPIO23 (broche 16) IN1<br/>GPIO24 (broche 18) IN2<br/>masse broche 6"| SW
@@ -103,9 +103,9 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 | Alimentation du Pi | Convertisseur 12 → 5 V | Prise USB-C du Pi 5 | 5 V, 5 A recommandés pour le Pi 5 |
 | Interrupteur du ventilateur | Wago + (12 V) ; Pi GPIO27 (broche 13) ; masse sur le Wago − | Entrée, commande 3,3 V et masse du module interrupteur 12 V (côté +) | Le Noctua ne s'arrête pas à 0 % de PWM (il tourne à environ 20 %) : on coupe son 12 V. Côté **+**, pas côté masse : une masse coupée ferait remonter jusqu'à 12 V dans les fils PWM et tachymètre vers les GPIO |
 | 12 V du ventilateur | Sortie de l'interrupteur (+, rouge) ; Wago − (−, noir) | Prise 4 broches d'origine du ventilateur (sur le couvercle de la cassette) + rallonge 4 broches | Fils de 1,6 mm de diamètre ; la prise de la rallonge se débranche à la main (cassette amovible), aucune soudure |
-| Commande du ventilateur | Pi GPIO18 (broche 12, PWM matériel 25 kHz), GPIO17 (broche 11, tachymètre), masse commune broche 14 | Fils PWM (bleu) et tachymètre (jaune) du Noctua, par la prise 4 broches d'origine et la rallonge | Le PWM est référencé à la masse du ventilateur : d'où le fil de masse commune vers la broche 14. Le tachymètre est collecteur ouvert : tirage interne du GPIO17 (pull-up logiciel) |
+| Commande du ventilateur | Pi GPIO18 (broche 12, PWM par gpiozero / lgpio : 25 kHz visé, repli à 10 kHz si le Pi le refuse), GPIO17 (broche 11, tachymètre), masse commune broche 14 | Fils PWM (bleu) et tachymètre (jaune) du Noctua, par la prise 4 broches d'origine et la rallonge | Le PWM est référencé à la masse du ventilateur : d'où le fil de masse commune vers la broche 14. Le tachymètre est collecteur ouvert : tirage interne du GPIO17 (pull-up logiciel) |
 | Caméra 1 | Pi, port CSI CAM0 | Camera Module 3 NoIR, dans le nid | Courte nappe, passe par l'ouverture du toit |
-| Caméra 2 | Pi, port CSI CAM1 | Caméra 2, dehors sous le débord | Longue nappe, sort par une fente rectangulaire 20 × 4 mm de la plaque avant |
+| Caméra 2 | Pi, port CSI CAM1 | Caméra 2, dehors sous le débord, dans une boîte carrée crénelée en okoumé 5 mm peint (50 × 50 × 40 mm) | Longue nappe, sort par une fente rectangulaire 20 × 4 mm de la plaque avant |
 | LED infrarouges | Pi broche 4 (5 V) | Carte 4 LED IR | Masse par le module MOSFET (OUT1) : le Pi les allume ou les éteint |
 | LED infrarouges extérieures | Pi broche 2 (5 V) | Carte 4 LED IR à côté de la caméra 2 | Masse par le module MOSFET (OUT2) ; les fils suivent la nappe et sortent par la même fente |
 | Module MOSFET | Pi GPIO23 (broche 16), GPIO24 (broche 18), masse broche 6 | Module 2 canaux (MOSFET logique 3,3 V) | Coupe la masse de chaque carte de LED ; 5 V direct, courant des LED hors du GPIO |
@@ -124,11 +124,11 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 
 **Ventilation.** Un ventilateur silencieux de 60 mm (Noctua NF-A6x25 PWM) aspire l'air chaud du nid à travers le plafond et le rejette à l'arrière, sous le débord du toit en chêne ; l'air frais entre par le trou d'envol et par une prise d'air basse dans l'isolant (voir la fiche « Prise d'air basse »). Le ventilateur n'est pas dans la zone de l'électronique : il tourne dans une **cassette amovible à la main** (quatre parois de contreplaqué, un cadre, un couvercle à poignée, le ventilateur posé sur quatre plots en caoutchouc) qui se pose par gravité dans un **siège fixe** collé sur le plancher du toit (la goulotte : trois parois, la plaque arrière du toit fait la quatrième). La cassette a une fenêtre de sortie en face de celle de la plaque arrière (la cassette est posée contre la plaque arrière, sans joint) ; dehors, un grillage inox à mailles de 5 mm est posé à plat contre la plaque (rien ne dépasse derrière). Il n'y a pas de clapet : l'ouverture du plafond reste ouverte quand le ventilateur est arrêté, et par temps froid on pose le bloc isolant à la place de la cassette. Le câble d'origine du ventilateur finit par sa prise 4 broches posée sur le couvercle ; une rallonge 4 broches (12 V commuté, masse, PWM, tachymètre) s'y emboîte : on la débranche à la main, sans soudure. Le Pi allume le ventilateur seulement quand il fait chaud : il règle sa vitesse par PWM, et peut couper son 12 V avec l'interrupteur (le Noctua tourne encore à environ 20 % à 0 % de PWM). **Pour soulever le toit** : tirer les 4 barres de MDF (60 mm, à fleur du lambris, par une petite fenêtre ; on accroche la pointe d'un crochet dans le trou de 3 mm de leur bout), puis soulever le toit ; à la repose, les repousser jusqu'à ce qu'elles affleurent. **Été / hiver, en 4 lignes** : 1) retirer le toit en chêne (on accède au grenier) ; 2) débrancher la rallonge 4 broches et sortir la cassette à la main ; 3) poser à sa place le bloc isolant d'hiver (même empreinte, mousse de 35 mm : il rend au plafond son isolation) ; 4) l'été, faire l'inverse et rebrancher la rallonge.
 
-**Vision.** La caméra 1 regarde dans le nid, éclairée par 4 LED infrarouges ; la caméra 2 est dehors, sous le débord du toit en chêne, à l'avant gauche, tournée vers le trou d'entrée, avec une seconde carte de 4 LED infrarouges à côté d'elle pour éclairer le trou la nuit. Sa longue nappe part du Pi, traverse le toit et sort par la fente de la plaque avant.
+**Vision.** (Habillage et boîte de la caméra 2 : contreplaqué okoumé extérieur de 5 mm peint en blanc, découpé au laser sur ses propres planches, « Planche okoumé 5 mm ».) La caméra 1 regarde dans le nid, éclairée par 4 LED infrarouges ; la caméra 2 est dehors, sous le débord du toit en chêne, à l'avant gauche, tournée vers le trou d'entrée, avec une seconde carte de 4 LED infrarouges à côté d'elle pour éclairer le trou la nuit. Sa longue nappe part du Pi, traverse le toit et sort par la fente de la plaque avant.
 
 ## Paramètres à respecter, composant par composant
 
-Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas). Les cases « à déterminer » dépendent du matériel exact que tu achèteras. Vérifie toujours la fiche du modèle choisi.
+Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) ; la dernière ligne de chaque tableau donne le modèle exact à acheter, avec son lien. Les cases « à déterminer » dépendent du matériel exact que tu achèteras. Vérifie toujours la fiche du modèle choisi.
 
 ### Panneau solaire 100 W
 
@@ -141,6 +141,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Tension à vide (Voc) | environ 21 à 22 V : doit rester sous la limite d'entrée du régulateur | — |
 | Dimensions | selon le modèle, par exemple 970 × 585 × 30 mm | 970 × 585 × 30 mm |
 | Connecteurs et câble | MC4, 2 fils de 4 mm² environ, boîte de jonction étanche | câble Ø 7 mm |
+| Modèle exact / lien | [Panneau 100 Wc monocristallin AST100-17M, 970 × 585 × 30 mm (Wattuneed)](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html) | — |
 
 ### Régulateur de charge solaire
 
@@ -153,6 +154,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Type | MPPT (meilleur rendement) ou PWM (moins cher) | — |
 | Protections | surcharge, décharge profonde, inversion de polarité, court-circuit | — |
 | Dimensions | exemple Genasun GV-10-Li : 137 × 61 × 33 mm | 137 × 61 × 33 mm (vraie taille), à plat sous le nichoir |
+| Modèle exact / lien | [Genasun GV-10-Li-14.2V (4S LiFePO4, 10,5 A)](https://sunforgellc.com/product/gv-10/) ; revendeur : [DigiKey GV-10-Li-14.2V-OEM](https://www.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948) | — |
 
 ### Batterie LiFePO4 12,8 V
 
@@ -167,6 +169,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | BMS | obligatoire : équilibrage, coupure haute et basse, court-circuit | — |
 | Température de charge | pas de charge sous 0 °C : BMS avec protection basse température (important pour un nichoir dehors) | — |
 | Dimensions du pack | environ 70 × 128 × 32 mm pour 4 cellules côte à côte | 128 × 70 × 32 mm (vraie taille), dans le grenier |
+| Modèle exact / lien | [Cellule HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523) ; BMS 4S LiFePO4 et support : lien à trouver | — |
 
 ### Fusible
 
@@ -174,6 +177,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | --- | --- | --- |
 | Calibre | 15 A suffit (charge au plus 10 A, décharge environ 8 A) ; il doit être inférieur à ce que le câble supporte | 15 A |
 | Type | fusible à lame automobile 12 V avec porte-fusible, placé au plus près du + de la batterie | 19 × 18,5 × 5 mm, posé à plat |
+| Modèle exact / lien | lien à trouver — référence exacte : fusible à lame 15 A + porte-fusible à fils tout fait (2,5 mm²) | — |
 
 ### Convertisseur 12 V → 5 V
 
@@ -186,6 +190,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Protections | surintensité, court-circuit, surtempérature |
 | Dimensions dans le modèle | environ 60 × 36 × 16 mm : estimation à confirmer avec le module acheté |
 | À déterminer | fixation dans le toit |
+| Modèle exact / lien | lien à trouver — référence exacte : convertisseur DC-DC 12 V → 5 V, 5 A continus, sortie USB-C, entrée à bornier à vis |
 
 ### Raspberry Pi 5
 
@@ -197,6 +202,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Dimensions | 85 × 56 mm, hauteur du composant environ 17 mm | 85 × 56 mm |
 | Stockage | carte microSD ou SSD | — |
 | Refroidissement | dissipateur ou ventilateur d'origine si le toit chauffe (le Pi est dans le grenier, que le ventilateur du nid ne refroidit pas) | — |
+| Modèle exact / lien | [Raspberry Pi 5 (4 Go) — page officielle](https://www.raspberrypi.com/products/raspberry-pi-5/) ; en France : [Kubii, Raspberry Pi 5 (choisir « 4 Go » ; le prix affiché, 76,80 €, est celui du 2 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html) + [carte micro-SD officielle 32 Go (Kubii, 34,20 €)](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) | — |
 
 ### Ventilateur Noctua NF-A6x25 PWM
 
@@ -208,13 +214,14 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Puissance | environ 0,6 W (environ 0,05 A) : négligeable pour la batterie | — |
 | Vitesse et bruit | environ 3 000 tr/min, environ 19 dB(A) à pleine vitesse (à vérifier à l'achat) ; à vitesse réduite il est quasi inaudible | — |
 | Arrêt | il tourne encore à environ 20 % quand le PWM est à 0 % : couper son 12 V avec l'interrupteur | module interrupteur côté + |
-| Commande | PWM 25 kHz (matériel du Pi) sur GPIO18 (broche 12) ; tachymètre 2 impulsions par tour sur GPIO17 (broche 11) avec tirage interne ; masse commune sur la broche 14 | fils bleu, jaune, noir |
+| Commande | PWM par gpiozero / lgpio sur GPIO18 (broche 12) : 25 kHz visé, repli à 10 kHz signalé sur la page si le Pi le refuse (à valider sur le matériel) ; tachymètre 2 impulsions par tour sur GPIO17 (broche 11) avec tirage interne ; masse commune sur la broche 14 | fils bleu, jaune, noir |
 | Montage | cassette amovible à la main, **boîte crénelée** (quatre parois qui s'emboîtent par leurs arêtes verticales, cadre du bas et couvercle emboîtés dans les parois, dents d'environ 16 mm, comme les autres boîtes ; contreplaqué 3 mm) avec une petite poignée en U de contreplaqué centrée sur le couvercle (trois couches de 3 mm collées face à face, 9 mm d'épaisseur ; pieds incrustés dans deux fentes du couvercle ; ouverture 24 × 6 mm au-dessus du couvercle : on glisse le bout des doigts ; la même sur le bloc d'hiver ; le centre de gravité de la cassette est à moins de 1 mm de la poignée), quatre plots en caoutchouc de 12 × 2 × 3 mm sous le ventilateur, pas de joint de mousse : la cassette est ajustée pile au siège (jeu 0), l'étanchéité vient de l'ajustement ; fuites faibles mais non nulles (jeux de découpe, quelques dixièmes de mm), à compenser en tapant la cassette au maillet ou en collant un ruban de mousse à la demande ; les vibrations ne passent que par les 4 plots en caoutchouc | oui, dans un siège fixe (la goulotte) |
 | Prise 4 broches (d'origine) + rallonge | le câble d'origine du Noctua (≈ 30 cm, quatre fils) monte dans la cassette, traverse le couvercle par un passage de 6 × 12 mm et finit par sa prise 4 broches femelle d'origine (bloc noir de 6 × 10 × 6 mm posé sur le couvercle) ; la rallonge 4 broches Noctua (mâle ⇄ femelle, ≈ 30 cm) s'y emboîte horizontalement ; ses fils font ≈ 50 mm de mou au-dessus du dessus du toit, de quoi sortir la cassette prise débranchée. Pas de plaque de prototypage, pas de soudure | prise sur le couvercle : 6 mm de haut, marge de 8 mm sous la pente ; la prise mâle reste sur le toit (posée sur le bloc d'hiver quand la cassette est sortie) |
 | Ouverture du plafond | 56 de large ; la profondeur (environ 21 mm) est limitée par le mur du nid et le compartiment de la caméra : c'est le point étroit, 11,8 cm² soit environ un tiers de la face de 60 × 60 du ventilateur (36 cm²). Sans bouger le siège elle peut aller jusqu'à 67 × 26 mm (17,4 cm², 48 %) ; en élargissant le siège en x, le plafond est libre de −59 à +59 mm (rien dessous : la caméra, ses LED et le capteur sont plus en avant, la batterie est au-dessus du toit), mais le ventilateur de 60 mm n'en aspire qu'une partie. L'ouverture est nue : la grille de protection en fil d'acier (60 × 60 × 3 mm, environ 90 % ouverte, pas de 6 à 8 mm entre fils, composant acheté) est fixée sur la face d'aspiration du ventilateur, dans la cassette, à environ 3 mm du plafond ; le débit réel est à mesurer | 56 × 21 mm ; grille de fil dans la cassette |
 | Sortie d'air | fenêtre de 51,4 × 40,5 mm (≈ 20,8 cm², entre les crans de la cassette) dans la cassette puis dans la plaque arrière, grillage inox à mailles de 5 mm posé à plat dehors, sous le débord du toit en chêne, sans clapet (la sortie reste ouverte ventilateur arrêté : bloc isolant par temps froid) ; aucune communication avec la zone du Pi et de la batterie | oui |
 | Hiver | remplacer la cassette par le bloc isolant d'hiver (même empreinte, mousse de 35 mm) pour supprimer la déperdition de chaleur par l'ouverture. Le bloc est une boîte pleine fermée, sans aucune ouverture (sa poignée est une plaque pleine) ; les pièces d'hiver (le bloc et la sous-boîte isolante du conduit d'aération) sont **dessinées à côté du nichoir, sur le sol, à gauche** ; deux boutons en haut de la vue 3D (« Cassette : ventilateur / isolante » et « Prise d'air : ouverte / bouchée ») les mettent en place ou les rangent. Ces boutons ne font que montrer la cassette en place dans la 3D : le réglage « Mode hiver » du Pi est à part | pièces de rechange visibles à côté du nichoir |
 | Grillages | grillage inox (ou galvanisé) à mailles carrées de 5 mm, fil de 0,5 mm, environ 85 à 90 % d'ouverture, sur la sortie du ventilateur, le dessous de la prise d'air basse et sa fente. Il arrête guêpes, frelons, rongeurs et araignées ; il ne retient pas les moustiques et les petits insectes, ce qui est voulu : le trou d'envol reste ouvert à tout, et une moustiquaire fine (55 à 65 % d'ouverture) étoufferait le débit d'un ventilateur qui ne développe qu'environ 20 Pa | « Grillage inox maille 5 mm » (sortie, prise d'air, fente) |
+| Modèle exact / lien | [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 × 60 × 25 mm, 12 V, 4 broches) ; en France : [Amazon.fr, NF-A6x25 PWM marron](https://www.amazon.fr/dp/B00VXTANZ4) ; lien à trouver — référence exacte : grille de protection de ventilateur 60 mm en fil d'acier, trous de vis 50 mm | — |
 
 ### Interrupteur 12 V du ventilateur (côté +)
 
@@ -226,6 +233,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Tension et courant | 12 V (la batterie va de 10 à 14,6 V), 1 A au moins (le ventilateur prend 0,05 A) | — |
 | Commande | logique 3,3 V compatible, sur GPIO27 (broche 13) du Pi | broche 13 |
 | Montage | à côté du Wago +, dans le coin arrière droit du grenier, quatre cales de bois basses | oui |
+| Modèle exact / lien | lien à trouver — référence exacte : module « high side switch » à P-MOSFET, 12 V, commande logique 3,3 V, borniers à vis | — |
 
 ### Caméras (Camera Module 3 NoIR)
 
@@ -236,6 +244,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Liaison | nappe CSI, adaptateur vers le port 22 broches du Pi 5 | oui |
 | Caméra 2 : longueur de nappe | longue ; au-delà d'environ 30 cm, le signal peut devenir instable : à valider ou utiliser une nappe protégée / un prolongateur | longue nappe de 16 mm de large |
 | Caméra 2 : étanchéité | protéger l'objectif de la pluie sous le débord | sous le débord du toit |
+| Modèle exact / lien | [Camera Module 3 NoIR (choisir « NoIR » dans la page)](https://www.raspberrypi.com/products/camera-module-3/) ; nappes : [Adafruit 5818, Pi 5 FPC 22 broches → 15 broches, 200 mm](https://www.adafruit.com/product/5818) ; en France : [Kubii, module caméra v3 « Infrarouge » (39 €) : c'est le NoIR de Raspberry Pi, mais sa fiche parle d'un filtre IR intégré — demander confirmation à Kubii avant de commander](https://www.kubii.com/fr/cameras-capteurs/3879-module-camera-v3-infrarouge-raspberry-pi-3272496313682.html) + [Kubii, nappe CSI / MIPI pour Pi 5 (2,40 €, 22 broches côté Pi → 15 broches côté caméra, 200 / 300 / 500 mm, 16 mm de large)](https://www.kubii.com/fr/nappes-cables-adaptateurs/4116-1860-nappe-csi-mipi-camera-pour-raspberry-pi-5-3272496316669.html) | — |
 
 ### Prise d'air basse (conduit dans l'isolant)
 
@@ -260,6 +269,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Courant | à déterminer selon la carte (plus que la limite d'une broche GPIO : ne jamais l'alimenter par un GPIO) | — |
 | Commande | module 2 × MOSFET (niveau logique 3,3 V, ex. IRLZ44N ou module « 2 channel MOSFET »), coupure côté masse | module MOSFET, GPIO23 / GPIO24 |
 | Dimensions | 12 × 24 mm | 12 × 24 mm |
+| Modèle exact / lien | lien à trouver — référence exacte : carte de 4 LED infrarouges 850 nm, 5 V, environ 12 × 24 mm, fils pré-soudés | — |
 
 ### Capteur de température et d'humidité (BME280)
 
@@ -269,9 +279,10 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Alimentation | 3,3 V | broche 1 |
 | Bus | I2C (SDA, SCL), adresse 0x76 ou 0x77 | broches 3 et 5 |
 | Mesures | température, humidité et pression | — |
-| Dimensions de la carte | environ 19 × 18 mm (jusqu'à 25 × 18 selon la marque) | 19 × 18 mm |
+| Dimensions de la carte | 19 × 19 × 2,75 mm (Pimoroni PIM472, fiche Kubii) | 19 × 19 mm dans le modèle, logement 19,5 × 19,5 dans le plafond |
 | Contrainte | la condensation est possible sous le plafond : choisir un capteur protégé ou le vernir | à fleur du plafond, dans le compartiment de la caméra (x = 33, y = −14), ses fils sortent par l'ouverture du dessus du toit, sans passer dans l'isolant ; ≥ 4,5 mm de bois autour de son logement |
 | Rôle | donne au Pi la température du nid pour piloter le ventilateur ; toujours présent | oui |
+| Modèle exact / lien | [Pimoroni BME280 Breakout (PIM472), Kubii, 15,88 €, 16 en stock](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html) : I2C, 19 × 19 × 2,75 mm, brochage fait pour les broches 1, 3, 5, 7, 9 du Pi ; puce : [Bosch BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) | — |
 
 ### Module 2 × MOSFET (LED infrarouges)
 
@@ -281,6 +292,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Commande | niveau logique 3,3 V (MOSFET « logic level », par exemple IRLZ44N), IN1 sur GPIO23 (broche 16), IN2 sur GPIO24 (broche 18) | broches 16, 18 et masse 6 |
 | Courant | largement au-dessus des LED (quelques centaines de mA) | — |
 | Alimentation des LED | 5 V direct depuis les broches 2 et 4 du Pi, la masse passe par le module (OUT1 : nid, OUT2 : extérieur) | — |
+| Modèle exact / lien | lien à trouver — référence exacte : module 2 canaux MOSFET à niveau logique 3,3 V (IRLZ44N ou équivalent), borniers à vis | — |
 
 ### Wago 221 du rail 12 V
 
@@ -292,6 +304,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Entrées du − | batterie, convertisseur, ventilateur, masse de l'interrupteur : une entrée chacun, la 5ᵉ est libre | 4 sur 5 |
 | Courant | nous sommes à environ 1 A | — |
 | Précaution | enfoncer les fils jusqu'au fond ; pour un montage définitif, bornier à vis ou cosses serties | à droite du fusible |
+| Modèle exact / lien | [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413) ; [WAGO 221-415, borne à levier 5 conducteurs](https://www.wago.com/221-415) | — |
 
 ### Câblage
 
@@ -309,8 +322,8 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 
 | Composant | À acheter (référence type) | Section de fil | Comment le brancher |
 | --- | --- | --- | --- |
-| Raspberry Pi 5 (GPIO) | cordons Dupont femelle-femelle de 20 cm, lot de 40 | fil du cordon (≈ 0,1 mm²) | un cordon par picot : PWM ventilateur GPIO18 (broche 12), tachymètre GPIO17 (broche 11), commande de l'interrupteur GPIO27 (broche 13), masse (broche 14), capteur (broches 1, 3, 5, 9), LED et module MOSFET (broches 2, 4, 6, 16, 18, 20) ; l'autre bout dans le bornier ou la broche du module |
-| Capteur BME280 | Adafruit 2652 (STEMMA QT) + câble STEMMA QT → broches mâles Adafruit 4209 (4 fils : 3,3 V, masse, SDA, SCL) | fils du câble | le câble s'enfiche sur la carte (connecteur JST SH) ; ses quatre fils vont sur les broches 1, 3, 5 et 9 du Pi |
+| Raspberry Pi 5 (GPIO) | cordons Dupont femelle-femelle de **30 cm**, lot de 40 (les fils du modèle mesurent de 20 à 28 cm vers le Pi ; la commande de l'interrupteur, GPIO27, fait environ 36 cm : prévoir un cordon de 40 cm pour celui-là) | fil du cordon (≈ 0,1 mm²) | un cordon par picot : PWM ventilateur GPIO18 (broche 12), tachymètre GPIO17 (broche 11), commande de l'interrupteur GPIO27 (broche 13), masse (broche 14), capteur (broches 1, 3, 5, 9), LED et module MOSFET (broches 2, 4, 6, 16, 18, 20) ; l'autre bout dans le bornier ou la broche du module |
+| Capteur BME280 | Pimoroni BME280 Breakout (PIM472, Kubii) : rangée de 5 broches faite pour les broches 1, 3, 5, 7 et 9 du Pi (3,3 V, SDA, SCL, GPIO4 non utilisé, masse) | cordons Dupont | sur le modèle, 4 cordons Dupont vont de la rangée de broches de la carte aux broches 1, 3, 5 et 9 du Pi ; la fiche Kubii ne dit pas si les broches sont fournies ou à souder : à vérifier avant de commander |
 | Cartes de 4 LED infrarouges 850 nm | modèle à **fils pré-soudés** ou à **bornier à vis** | fils fournis (≈ 0,3 mm²) | 5 V sur la broche 2 ou 4 du Pi par un cordon Dupont ; l'autre fil dans le bornier du module MOSFET |
 | Module 2 × MOSFET (LED) et module interrupteur 12 V du ventilateur | cartes **avec borniers à vis** | 0,25 à 0,5 mm² | fil dénudé de 6 mm dans le bornier, vis serrée au tournevis plat de 2 mm ; commande par cordon Dupont sur le GPIO |
 | Régulateur solaire Genasun | modèle d'origine à **borniers à vis** | 4 mm² côté panneau, 2,5 mm² côté batterie | fils dénudés de 8 mm avec embouts, vis serrées à fond |
@@ -323,7 +336,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Module INA219 (facultatif) | version **avec broches soudées** | cordons Dupont F/F | I2C : 3,3 V, SDA, SCL, masse |
 | Passage des fils | passe-câbles, gaine annelée de Ø 16 | — | on enfile les fils dans la gaine avant de brancher |
 
-**Liste de courses sans soudure** (prix indicatifs) : [cordons Dupont F/F 20 cm, lot de 40 (Adafruit 4447)](https://www.adafruit.com/products/4447), 3 € ; embouts de câble assortis avec leur kit, 8 € ; tournevis plat de 2 mm, 4 € ; pince à dénuder, 8 € ; Wago 221-413 (déjà comptés dans le prix du rail 12 V) ; porte-fusible à fils tout fait (déjà compté) ; rallonge ventilateur Noctua 4 broches (déjà comptée). Ces achats sont ajoutés à la table des prix, groupe « Électronique ».
+**Liste de courses sans soudure** (prix indicatifs) : [cordons Dupont F/F 30 cm, lot de 40 (Adafruit 793)](https://www.adafruit.com/product/793), 7 € (20 cm ne suffisent pas : les fils vers le Pi font 20 à 36 cm) ; embouts de câble assortis avec leur kit, 8 € ; tournevis plat de 2 mm, 4 € ; pince à dénuder, 8 € ; Wago 221-413 (déjà comptés dans le prix du rail 12 V) ; porte-fusible à fils tout fait (déjà compté) ; rallonge ventilateur Noctua 4 broches (déjà comptée). Ces achats sont ajoutés à la table des prix, groupe « Électronique ».
 
 **Trois conseils.**
 
@@ -348,7 +361,7 @@ Contrôle fait par calcul sur le modèle : recouvrement entre chaque composant e
 | Prise d'air basse | le conduit (35 × 46 mm) traverse l'isolant sous le plancher, le fond intérieur (par un passage découpé) et l'isolant du mur gauche ; libre dessous, loin du régulateur |
 | Fils et nappes | corrigé : plusieurs fils sortaient de 0,5 à 5 mm au-dessus de la pente, ils sont maintenant ramenés dessous |
 | Pièces en bois | contrôle de recouvrement par boîtes orientées : les seuls recouvrements restants sont voulus (dents dans leurs fentes, parois du siège et de la cassette qui traversent le dessus du toit par son encoche, conduit d'air dans le passage du fond) |
-| Caméra 2 | dehors, ne touche pas le toit ; sa nappe passe par la fente de la plaque avant |
+| Caméra 2 | dehors, dans sa boîte carrée crénelée (50 × 50 × 40, okoumé 5 mm peint en blanc, avec la carte de LED infrarouges à côté de la caméra : trou d'objectif Ø 12, fenêtre des LED 6 × 20, fente de 34 × 9 dans le dessus pour la nappe et les deux fils), à 3 mm de l'habillage, sous le pan de chêne : ne touche ni l'habillage ni le toit ; sa nappe passe par la fente de la plaque avant |
 
 Contrôle des fils : les fils du ventilateur côté 12 V ne traversent ni nappe ni autre fil ; les quatre fils vers le Pi (PWM, tachymètre, masse commune, commande de l'interrupteur) restent sur le dessus du toit, passent par-dessus la cassette sous la pente (2 mm au moins) et peuvent croiser les nappes et d'autres fils : à reprendre au cas par cas au montage. Limite du contrôle : les formes des pièces sont des boîtes, donc les trous et encoches ne sont pas pris en compte. Les composants sont dessinés à leur vraie taille même quand ils ne tiennent pas : les chevauchements restants (régulateur, batterie) sont à corriger en choisissant d'autres emplacements ou composants.
 
@@ -362,12 +375,12 @@ Contrôle des fils : les fils du ventilateur côté 12 V ne traversent ni nappe 
 
 ## Poids (estimation)
 
-Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm ≈ 1,4 kg/m², lambris pin 10 mm ≈ 5 kg/m², chêne 18 mm ≈ 13 kg/m², laine de bois ≈ 50 kg/m³) et d'après les fiches des composants. À ± 15 %.
+Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm ≈ 1,4 kg/m², contreplaqué okoumé extérieur 5 mm ≈ 2,9 kg/m², chêne 18 mm ≈ 13 kg/m², laine de bois ≈ 50 kg/m³) et d'après les fiches des composants. À ± 15 %.
 
 | Élément | Poids |
 | --- | --- |
-| Contreplaqué 3 mm (73 pièces, 0,88 m²) | 1,23 kg |
-| Habillage lambris 10 mm (0,33 m²) | 1,6 kg |
+| Contreplaqué 3 mm (91 pièces, 0,93 m²) | 1,3 kg |
+| Habillage et boîte de la caméra 2 : okoumé extérieur 5 mm peint en blanc (28 pièces, 0,33 m²) | 0,95 kg |
 | Toit en chêne 18 mm | 1,1 kg |
 | Isolant laine de bois 39 mm (murs, fond, toit) | 0,55 kg |
 | Batterie 4 × 32700 + BMS + support | 0,6 kg |
@@ -377,10 +390,10 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 | Ventilateur, prise et rallonge, interrupteur, plots, mousse, bloc d'hiver | 0,15 kg |
 | Câbles, gaine, nappes | 0,15 kg |
 | Cales, barres, étriers, clavettes | 0,1 kg |
-| **Total accroché à l'arbre** | **≈ 5,9 kg** |
+| **Total accroché à l'arbre** | **≈ 5,3 kg** |
 | Panneau solaire 100 W (au sol, à part) | 8 kg |
 
-**Tenue de la fixation.** 5,9 kg font 58 N. Ils sont repris par 4 dents de 9 × 32 mm dans du contreplaqué de 3 mm : la pression sur le bois reste sous 1 MPa, pour une résistance d'au moins 20 MPa. Le centre de gravité est à environ 11 cm du dos, ce qui ajoute un couple de 6 N·m, soit un effort d'environ 60 N sur la dent du haut : toujours loin de la limite. Les 4 vis Ø 5 dans le tronc (ou une sangle) tiennent cela sans difficulté. Les points à soigner : le collage des 3 plaques de chaque nervure, et des vis inox de 5 × 60 dans du bois sain.
+**Tenue de la fixation.** 5,3 kg font 52 N. Ils sont repris par 4 dents de 9 × 32 mm dans du contreplaqué de 3 mm : la pression sur le bois reste sous 1 MPa, pour une résistance d'au moins 20 MPa. Le centre de gravité est à environ 11 cm du dos, ce qui ajoute un couple de 6 N·m, soit un effort d'environ 60 N sur la dent du haut : toujours loin de la limite. Les 4 vis Ø 5 dans le tronc (ou une sangle) tiennent cela sans difficulté. Les points à soigner : le collage des 3 plaques de chaque nervure, et des vis inox de 5 × 60 dans du bois sain.
 
 ## Prix (ordre de grandeur, 2026)
 
@@ -391,8 +404,8 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Raspberry Pi 5 (4 Go) + microSD 32 Go | 75 € | [Raspberry Pi 5 (4 Go) — page officielle](https://www.raspberrypi.com/products/raspberry-pi-5/) ; en France : [Kubii, Raspberry Pi 5 (choisir « 4 Go » ; le prix affiché, 76,80 €, est celui du 2 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html) + [carte micro-SD officielle 32 Go (Kubii, 34,20 €)](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) |
 | Électronique | 2 × Camera Module 3 NoIR + 2 nappes adaptatrices 22 → 15 broches | 70 € | [Camera Module 3 NoIR (choisir « NoIR » dans la page)](https://www.raspberrypi.com/products/camera-module-3/) ; nappes : [Adafruit 5818, Pi 5 FPC 22 broches → 15 broches, 200 mm](https://www.adafruit.com/product/5818) ; en France : [Kubii, module caméra v3 « Infrarouge » (39 €) : c'est le NoIR de Raspberry Pi, mais sa fiche parle d'un filtre IR intégré — demander confirmation à Kubii avant de commander](https://www.kubii.com/fr/cameras-capteurs/3879-module-camera-v3-infrarouge-raspberry-pi-3272496313682.html) + [Kubii, nappe CSI / MIPI pour Pi 5 (2,40 €, 22 broches côté Pi → 15 broches côté caméra, 200 / 300 / 500 mm, 16 mm de large)](https://www.kubii.com/fr/nappes-cables-adaptateurs/4116-1860-nappe-csi-mipi-camera-pour-raspberry-pi-5-3272496316669.html) |
 | Électronique | 2 × carte 4 LED infrarouges 850 nm (fils pré-soudés) | 10 € | lien à trouver — référence exacte : carte de 4 LED infrarouges 850 nm, 5 V, environ 12 × 24 mm, fils pré-soudés |
-| Électronique | Capteur BME280 (Adafruit 2652) + câble STEMMA QT → broches mâles (Adafruit 4209), sans soudure | 14 € | [Adafruit 2652 BME280 (I2C, STEMMA QT)](https://www.adafruit.com/product/2652) + [câble STEMMA QT → broches mâles, Adafruit 4209](https://www.adafruit.com/product/4209) : branchement sans soudure ; puce : [Bosch BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) |
-| Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € | [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 × 60 × 25 mm, 12 V, 4 broches) |
+| Électronique | Capteur BME280 Pimoroni PIM472 (Kubii) + cordons Dupont | 16 € | [Pimoroni BME280 Breakout (PIM472), Kubii, 15,88 €, 16 en stock](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html) : I2C, 19 × 19 × 2,75 mm, brochage fait pour les broches 1, 3, 5, 7, 9 du Pi ; puce : [Bosch BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) |
+| Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € | [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 × 60 × 25 mm, 12 V, 4 broches) ; en France : [Amazon.fr, NF-A6x25 PWM marron](https://www.amazon.fr/dp/B00VXTANZ4) |
 | Électronique | Grille de protection ventilateur 60 mm (fil d'acier) | 1 € | lien à trouver — référence exacte : grille de protection de ventilateur 60 mm en fil d'acier, trous de vis 50 mm |
 | Électronique | Module interrupteur 12 V côté + (P-MOSFET, commande 3,3 V) | 4 € | lien à trouver — référence exacte : module « high side switch » à P-MOSFET, 12 V, commande logique 3,3 V, borniers à vis |
 | Électronique | Rallonge Noctua NA-EC1 4 broches (mâle ⇄ femelle, 30 cm), fournie avec le ventilateur | 0 € | incluse dans la boîte du ventilateur (câble NA-EC1, 4 broches, 30 cm) : voir [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) |
@@ -400,11 +413,11 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Convertisseur 12 V → 5 V 5 A USB-C | 15 € | lien à trouver — référence exacte : convertisseur DC-DC 12 V → 5 V, 5 A continus, sortie USB-C, entrée à bornier à vis |
 | Électronique | 4 cellules LiFePO4 32700 + BMS 4S + support | 40 € | [Cellule HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523) ; BMS 4S LiFePO4 et support : lien à trouver |
 | Électronique | Fusible + porte-fusible | 3 € | lien à trouver — référence exacte : fusible à lame 15 A + porte-fusible à fils tout fait (2,5 mm²) |
-| Électronique | Cordons Dupont F/F 20 cm, lot de 40 | 3 € | [Adafruit 4447, cordons F/F silicone 200 mm × 40](https://www.adafruit.com/products/4447) |
+| Électronique | Cordons Dupont F/F 30 cm, lot de 40 (+ 1 cordon de 40 cm pour la commande de l'interrupteur) | 7 € | [Adafruit 793, cordons F/F 300 mm × 40](https://www.adafruit.com/product/793) ; cordon de 40 cm : lien à trouver — référence exacte : cordon Dupont femelle-femelle 40 cm |
 | Corps | Feuille de MDF 3 mm (quatre barres du toit de 60 × 10 mm, découpées au laser) | 3 € | lien à trouver — référence exacte : MDF 3 mm, feuille d'au moins 410 × 400 mm |
 | Électronique | Embouts de câble assortis (kit) | 8 € | lien à trouver — référence exacte : kit d'embouts de câble isolés 0,25 à 4 mm² |
-| Électronique | Tournevis plat 2 mm | 4 € | lien à trouver — référence exacte : tournevis plat 2 mm (lame de 2,0 × 0,4 mm) |
-| Électronique | Pince à dénuder | 8 € | lien à trouver — référence exacte : pince à dénuder automatique 0,2 à 6 mm² |
+| Outils | Tournevis plat 2 mm | 4 € | lien à trouver — référence exacte : tournevis plat 2 mm (lame de 2,0 × 0,4 mm) |
+| Outils | Pince à dénuder | 8 € | lien à trouver — référence exacte : pince à dénuder automatique 0,2 à 6 mm² |
 | Électronique | Wago 221-413 (3 entrées) pour le + du rail 12 V | 1 € | [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413) |
 | Électronique | Wago 221-415 (5 entrées) pour le − du rail 12 V | 1,5 € | [WAGO 221-415, borne à levier 5 conducteurs](https://www.wago.com/221-415) |
 | Électronique | Câbles (2,5 mm², 4 mm², signaux), gaine ICTA, presse-étoupe, cosses | 25 € | lien à trouver — référence exacte : fil souple 2,5 mm² et 4 mm² (rouge / noir), fil de signal 0,25 mm², gaine ICTA Ø 16, cosses isolées |
@@ -418,8 +431,8 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Corps | Sous-boîte isolante de la prise d'air (contreplaqué + laine de bois) | 1 € | fabriquée : contreplaqué + laine de bois |
 | Corps | Grillage inox à mailles carrées de 5 mm (fil 0,5 mm), un rouleau : sortie du ventilateur et prise d'air | 3 € | lien à trouver — référence exacte : grillage inox à mailles carrées de 5 mm, fil de 0,5 mm |
 | Habillage | Chêne 18 mm (27 × 30 cm) | 12 € | lien à trouver — référence exacte : planche de chêne 18 mm |
-| Habillage | Lambris pin 10 mm (0,35 m²) | 15 € | lien à trouver — référence exacte : lambris de pin 10 mm |
-| Habillage | Peinture blanche | 7 € | lien à trouver — référence exacte : peinture blanche extérieure pour bois |
+| Habillage | Contreplaqué okoumé extérieur 5 mm (3 planches de 41 × 40 cm, soit 0,33 m² de pièces : l'habillage et la boîte de la caméra 2), découpé au laser, peint en blanc | 18 € | lien à trouver — référence exacte : contreplaqué okoumé extérieur (CTBX) 5 mm, feuille d'au moins 410 × 400 mm (prix estimé, à confirmer) |
+| Habillage | Peinture blanche (habillage et boîte de la caméra 2) | 7 € | lien à trouver — référence exacte : peinture blanche extérieure pour bois |
 
 Le ventilateur, sa grille et son interrupteur coûtent environ 22 € (le Peltier, son pont en H, son filtre, sa sonde et sa plaque en coûtaient 61 €). Le poste le plus cher est le régulateur Genasun (120 €) : un régulateur PWM LiFePO4 à 20 € ferait le travail avec un rendement moindre, et enlèverait 100 € au total. La découpe laser n'est pas comptée.
 
@@ -440,14 +453,13 @@ Chaque lien a été ouvert et vérifié (page et référence exacte). Les élém
 - [Camera Module 3, variantes standard / Wide / NoIR](https://www.raspberrypi.com/products/camera-module-3/) (page officielle)
 - [Câble caméra Raspberry Pi 5, 22 broches → 15 broches, 200 mm (Adafruit 5818)](https://www.adafruit.com/product/5818)
 - Chez [Kubii](https://www.kubii.com/fr/) (boutique française de Raspberry Pi) : [Raspberry Pi 5 (1 à 16 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html), [module caméra v3 Infrarouge](https://www.kubii.com/fr/cameras-capteurs/3879-module-camera-v3-infrarouge-raspberry-pi-3272496313682.html) (fiche à vérifier : filtre IR annoncé), [nappe CSI / MIPI pour Pi 5](https://www.kubii.com/fr/nappes-cables-adaptateurs/4116-1860-nappe-csi-mipi-camera-pour-raspberry-pi-5-3272496316669.html), [carte micro-SD officielle](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) (pages ouvertes le 2026-10-11 ; le 4 Go du Pi 5 était en rupture à cette date)
-- [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 mm, 12 V, 4 broches ; la boîte contient la rallonge NA-EC1 de 30 cm)
+- [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 mm, 12 V, 4 broches ; la boîte contient la rallonge NA-EC1 de 30 cm) ; [la même référence sur Amazon.fr](https://www.amazon.fr/dp/B00VXTANZ4) (page ouverte : modèle NF-A6x25 PWM, 60 × 25 mm, 3000 tr/min, 4 broches ; contenu de la boîte non lisible sur la page)
 - [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413)
 - [WAGO 221-415, borne à levier 5 conducteurs](https://www.wago.com/221-415)
 - [Régulateur Genasun GV-10-Li-14.2V (page fabricant Sunforge)](https://sunforgellc.com/product/gv-10/)
 - [Régulateur Genasun GV-10-Li-14.2V-OEM (DigiKey)](https://www.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948)
-- [Capteur Adafruit BME280, I2C ou SPI, STEMMA QT (Adafruit 2652)](https://www.adafruit.com/product/2652)
-- [Câble STEMMA QT → broches mâles, 150 mm (Adafruit 4209)](https://www.adafruit.com/product/4209)
+- [Capteur BME280 Pimoroni PIM472, I2C (Kubii)](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html)
 - [Capteur BME280, page Bosch Sensortec](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/)
-- [Cordons Dupont F/F silicone 200 mm × 40 (Adafruit 4447)](https://www.adafruit.com/products/4447)
+- [Cordons Dupont F/F 300 mm × 40 (Adafruit 793)](https://www.adafruit.com/product/793)
 - [Cellule LiFePO4 HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523)
 - [Panneau 100 Wc AST100-17M (Wattuneed)](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html)

@@ -8,18 +8,20 @@ import { type PartGeometry } from './geometry';
 
 /** Dessus (face +z de la plaque) clair, dessous un peu plus foncé, tranche (épaisseur) marron foncé : on voit tout de suite le sens et l'épaisseur. */
 const TOP = new Color(PALETTE.plywoodTop), BOTTOM = new Color(PALETTE.plywoodBottom), SIDE = new Color(PALETTE.plywoodSide);
+
 const MDF_TOP = new Color(PALETTE.mdfTop), MDF_BOTTOM = new Color(PALETTE.mdfBottom), MDF_SIDE = new Color(PALETTE.mdfSide);
-export function plankGeometry(p: Plank, t: number): PartGeometry {
-  if (p.special) return partGeometry(p, t);
+export function plankGeometry(p: Plank, scene_t: number): PartGeometry {
+  if (p.special) return partGeometry(p, scene_t);
+  const t = p.material === 'okoume' ? (p.depth ?? scene_t) : scene_t; // l'okoumé de l'habillage a sa propre épaisseur (5 mm)
   const pts = outline(p);
   const shape = new Shape(pts.map(([x, y]) => new Vector2(x, y)));
   for (const h of p.holes) shape.holes.push(new Path(holeOutline(h).map(([x, y]) => new Vector2(x, y))));
   const geo = new ExtrudeGeometry(shape, { depth: t, bevelEnabled: false });
   geo.translate(0, 0, -t / 2);
   // couleur par face d'après la normale : dessus, dessous, tranche
-  const nrm = geo.attributes.normal, col = new Float32Array(nrm.count * 3);
+  const paint = new Color(p.color ?? PALETTE.white), nrm = geo.attributes.normal, col = new Float32Array(nrm.count * 3);
   for (let i = 0; i < nrm.count; i++) {
-    const z = nrm.getZ(i), mdf = p.material === 'mdf', c = z > 0.5 ? (mdf ? MDF_TOP : TOP) : z < -0.5 ? (mdf ? MDF_BOTTOM : BOTTOM) : mdf ? MDF_SIDE : SIDE;
+    const z = nrm.getZ(i), mdf = p.material === 'mdf', c = p.material === 'okoume' ? paint : z > 0.5 ? (mdf ? MDF_TOP : TOP) : z < -0.5 ? (mdf ? MDF_BOTTOM : BOTTOM) : mdf ? MDF_SIDE : SIDE;
     col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b;
   }
   geo.setAttribute('color', new Float32BufferAttribute(col, 3));
@@ -36,7 +38,7 @@ export function plankGeometry(p: Plank, t: number): PartGeometry {
  * Tout ce qui change la forme ou la couleur d'une plaque : dimensions, crans, trous, épaisseur, chemin, profondeur, couleur, contour libre, haut incliné, type spécial,
  * et la présence du modèle 3D du Pi. Clé de cache de la géométrie d'une `PlankMesh`.
  */
-export const plankShapeKey = (p: Plank, t: number): string => JSON.stringify([p.w, p.h, p.notches, p.holes, t, p.path, p.depth, p.color, p.poly, p.top, p.special, p.special === 'pi' && !!piModel, p.material]);
+export const plankShapeKey = (p: Plank, t: number): string => JSON.stringify([p.w, p.h, p.notches, p.holes, t, p.path, p.depth, p.color, p.poly, p.special, p.special === 'pi' && !!piModel, p.material]);
 
 const PLANK_ROUGHNESS = 0.85;
 

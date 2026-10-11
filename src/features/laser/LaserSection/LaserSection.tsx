@@ -25,7 +25,7 @@ export function LaserSection({ cutCfg, setCutCfg, cutView, setCutView, sheets, m
       {sheets.map((sh, i) => (
         <div key={i} className="flex items-center gap-2 text-[11px]">
           <span className="min-w-0 flex-1 truncate text-stone-700">{sheetLabel(sheets, i)} : {sh.items.length} pièce{sh.items.length > 1 ? 's' : ''}, {Math.round(Math.min(sh.used, 1) * 100)} % de la hauteur{sh.used > 1 ? ' — déborde !' : ''}</span>
-          <Btn block={false} variant="primary" onClick={() => saveSvg(sheetSvg(sh, cutCfg.W, cutCfg.H, i), `${sh.material === 'mdf' ? 'planche-mdf' : 'planche'}-${i + 1}-${cutCfg.W}x${cutCfg.H}.svg`)}>SVG</Btn>
+          <Btn block={false} variant="primary" onClick={() => saveSvg(sheetSvg(sh, cutCfg.W, cutCfg.H, i), `${sh.material === 'mdf' ? 'planche-mdf' : sh.material === 'okoume' ? 'planche-okoume' : 'planche'}-${i + 1}-${cutCfg.W}x${cutCfg.H}.svg`)}>SVG</Btn>
         </div>
       ))}
     </LaserShell>

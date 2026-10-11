@@ -11,11 +11,11 @@ const lamberMaterial = (l: Plank, x: number, z: number) => { const p: Pt = [x - 
 
 describe('barres du toit en MDF 3 mm, découpées au laser, à fleur du lambris', () => {
   for (const [nom, over] of Object.entries(VARIANTS)) {
-    it(`(${nom}) quatre barres de 60 × 10 en MDF, cachées par défaut, qui s'engagent pile dans les trous des murs et les encoches du cadre, à fleur du lambris`, () => {
+    it(`(${nom}) quatre barres de 55 × 10 en MDF, cachées par défaut, qui s'engagent pile dans les trous des murs et les encoches du cadre, à fleur du lambris`, () => {
       const sc = buildNest(over), t = sc.t, bars = sc.planks.filter((p) => /^Barre /.test(p.name));
       expect(bars.map((b) => b.name).sort()).toEqual(['avant droite', 'avant gauche', 'arrière droite', 'arrière gauche'].map((n) => `Barre ${n} (MDF 3 mm)`).sort());
       const lam = sc.planks.filter((p) => /^Lambris (avant|arrière)/.test(p.name)), faceY = (front: boolean) => { const l = lam.filter((q) => (q.pos[1] > 0) === !front); return l[0].pos[1] + (front ? -1 : 1) * l[0].depth! / 2; }; // face extérieure du lambris
-      for (const b of bars) { expect(b.material).toBe('mdf'); expect(b.special).toBeUndefined(); expect([b.w, b.h]).toEqual([60, 10]); expect(HIDDEN_AT_CREATION.some((re) => re.test(b.name)), b.name).toBe(false); }
+      for (const b of bars) { expect(b.material).toBe('mdf'); expect(b.special).toBeUndefined(); expect([b.w, b.h]).toEqual([55, 10]); expect(HIDDEN_AT_CREATION.some((re) => re.test(b.name)), b.name).toBe(false); }
       const mid = sc.planks.find((p) => p.name === 'Cadre toit milieu')!, walls = sc.planks.filter((p) => /^Face (avant|arrière) ext/.test(p.name));
       expect(mid.notches.filter((n) => n.width === 10)).toHaveLength(4); for (const n of mid.notches.filter((x) => x.width === 10)) expect(n.depth).toBe(47); // l'engagement dans l'encoche reste de 47 mm
       for (const w of walls) expect(w.holes.filter((h) => h.size === 10 && Math.abs((h.sh ?? 0) - t) < 0.5), w.name).toHaveLength(2);
@@ -23,9 +23,9 @@ describe('barres du toit en MDF 3 mm, découpées au laser, à fleur du lambris'
         const bb = aabb(b, t), front = b.pos[1] < 0, wall = walls.find((w) => (b.pos[1] > 0) === (w.pos[1] > 0))!, hole = wall.holes.find((h) => h.size === 10 && Math.abs(wall.pos[0] + h.x - b.pos[0]) < 0.6)!;
         expect(hole, b.name).toBeTruthy(); expect(Math.abs(wall.pos[2] + hole.y - b.pos[2]), b.name + ' hauteur').toBeLessThan(0.6);
         const tip = front ? bb.min.y : bb.max.y; expect(Math.abs(tip - faceY(front)), b.name + ' à fleur du lambris').toBeLessThanOrEqual(0.05);
-        const inner = front ? bb.max.y : bb.min.y; expect(Math.abs(Math.abs(inner) - (Math.abs(faceY(front)) - 10 - 50)), b.name + ' bout dans l encoche').toBeLessThanOrEqual(0.05); // le bout intérieur est resté au même endroit : 50 mm sous la plaque extérieure
+        const inner = front ? bb.max.y : bb.min.y; expect(Math.abs(Math.abs(inner) - (Math.abs(faceY(front)) - 5 - 50)), b.name + ' bout dans l encoche').toBeLessThanOrEqual(0.05); // le bout intérieur est resté au même endroit : 50 mm sous la plaque extérieure
         const hole3 = b.holes.find((h) => h.shape === 'round' && h.size === 3)!; expect(hole3, b.name + ' trou Ø 3').toBeTruthy();
-        expect(Math.abs(hole3.x), 'à 6 mm du bout').toBeCloseTo(30 - 6, 2); expect(Math.sign(hole3.x) * (front ? -1 : 1)).toBe(1); // côté du bout extérieur
+        expect(Math.abs(hole3.x), 'à 6 mm du bout').toBeCloseTo(b.w / 2 - 6, 2); expect(Math.sign(hole3.x) * (front ? -1 : 1)).toBe(1); // côté du bout extérieur
         const lig = ligament(b, hole3).min; expect(lig, b.name + ' ligament du trou Ø 3').toBeGreaterThanOrEqual(3.5 - 1e-6); // 10 mm de large : 3,5 mm de MDF de chaque côté (4,5 mm au bout)
         // fenêtre du lambris : de la taille de la barre + 0,5 mm de chaque côté, pas de matière dedans ; la barre n'est pas gênée
         const zc = b.pos[2], strips = lam.filter((l) => (l.pos[1] > 0) !== front);
@@ -43,7 +43,7 @@ describe('barres du toit en MDF 3 mm, découpées au laser, à fleur du lambris'
   it('le MDF a ses propres planches : quatre barres, rien d\'autre ; libellé « Planche MDF 1 »', () => {
     const sc = buildNest({}), sheets = nestSheets(sc, 410, 400), mdf = sheets.filter((s) => s.material === 'mdf');
     expect(mdf).toHaveLength(1); expect(mdf[0].items.map((i) => i.plank.name).sort()).toEqual(sc.planks.filter((p) => p.material === 'mdf').map((p) => p.name).sort()); expect(mdf[0].items).toHaveLength(4);
-    for (const s of sheets.filter((x) => x.material !== 'mdf')) for (const i of s.items) expect(i.plank.material).toBeUndefined();
-    expect(sheetLabel(sheets, sheets.length - 1)).toBe('Planche MDF 1');
+    for (const s of sheets.filter((x) => !x.material)) for (const i of s.items) expect(i.plank.material).toBeUndefined();
+    expect(sheetLabel(sheets, sheets.indexOf(mdf[0]))).toBe('Planche MDF 1');
   });
 });

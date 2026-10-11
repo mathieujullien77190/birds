@@ -7,7 +7,7 @@ const base: Plank = { id: 'a', name: 'a', w: 40, h: 30, pos: [0, 0, 0], rot: [0,
 describe('clé de cache de la géométrie d\'une plaque', () => {
   it('change avec tout ce qui change le dessin', () => {
     const k = plankShapeKey(base, 3);
-    for (const over of [{ w: 41 }, { color: '#00ff00' }, { poly: [[-20, -15], [20, -15], [0, 15]] as [number, number][] }, { top: { z0: 5, bx: 0.1, by: 0 } }, { special: 'bar' as const }, { depth: 11 }]) {
+    for (const over of [{ w: 41 }, { color: '#00ff00' }, { poly: [[-20, -15], [20, -15], [0, 15]] as [number, number][] }, { material: 'okoume' as const }, { special: 'bar' as const }, { depth: 11 }]) {
       expect(plankShapeKey({ ...base, ...over }, 3)).not.toBe(k);
     }
     expect(plankShapeKey(base, 4)).not.toBe(k);

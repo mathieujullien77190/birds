@@ -196,12 +196,12 @@ describe('makeNest : balayage de la taille intérieure (120 à 300 par pas de 10
       expect(new Set(planks.map((p) => p.id)).size).toBe(planks.length);
       const W = l + 2 * (2 * T + 39);
       expect(byName(planks, /^Face avant ext$/).w).toBe(W);
-      // façade : toutes les lames ont la même largeur (somme = W + 2 × 10), les fenêtres n'en changent pas la largeur
+      // façade : toutes les lames ont la même largeur (somme = W + 2 × 5), les fenêtres n'en changent pas la largeur
       const front = planks.filter((p) => /^Lambris avant [0-9]/.test(p.name));
       const widths = new Set(front.map((p) => +p.w.toFixed(2)));
       expect(widths.size, `largeurs ${[...widths]}`).toBe(1);
       const k = front.length;
-      expect(k * [...widths][0]).toBeCloseTo(W + 20, 1);
+      expect(k * [...widths][0]).toBeCloseTo(W + 10, 1);
       expect(byName(planks, /^Isolant sous le bloc d'entrée$/).depth).toBeGreaterThan(0);
     });
   }

@@ -17,7 +17,7 @@ describe('une géométrie par type de pièce (golden)', () => {
       ['case', { special: 'case', w: 105, h: 68 }], ['solar', { special: 'solar', w: 1000, h: 600, depth: 35 }], ['fan', { special: 'fan', w: 60, h: 60, depth: 25, color: '#8b5a2b' }],
       ['driver', { special: 'driver', depth: 20 }],
       ['sensor', { special: 'sensor', w: 15, h: 11 }], ['block', { special: 'block', depth: 12 }], ['block percé', { special: 'block', depth: 12, holes: [{ id: 'h', shape: 'round', x: 0, y: 0, size: 10 }] }],
-      ['block poly', { special: 'block', depth: 12, poly: [[-20, -15], [20, -15], [20, 15]], top: { z0: 6, bx: 0.1, by: 0.05 } }],
+      ['block poly', { special: 'block', depth: 12, poly: [[-20, -15], [20, -15], [20, 15]] }],
       ['cable', { special: 'cable', w: 16, path }], ['conduit', { special: 'conduit', w: 16, path }], ['wire', { special: 'wire', w: 2.4, path, color: '#ff0000' }],
       ['pi', { special: 'pi', w: 85, h: 56 }], ['bar', { special: 'bar', w: 50, h: 10 }], ['ir', { special: 'ir', w: 12, h: 24 }], ['camera', { special: 'camera', w: 25, h: 24 }],
     ];

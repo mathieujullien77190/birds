@@ -50,17 +50,6 @@ describe('pavés (blockGeometry, shapedBlockGeometry)', () => {
     near(size(holed.geo), [30, 40, 9]);
     expect(holed.geo.attributes.position.count).toBeGreaterThan(full.geo.attributes.position.count);
   });
-  it('shapedBlockGeometry : le haut incliné (top) suit le plan z = z0 + bx·x + by·y, avec ou sans depth', () => {
-    for (const depth of [undefined, 10]) {
-      const g = shapedBlockGeometry(P({ w: 20, h: 10, depth, top: { z0: 8, bx: 0.5, by: 0 } }), 6).geo, pos = g.attributes.position, hz = (depth ?? 6) / 2;
-      let tops = 0;
-      for (let i = 0; i < pos.count; i++) if (pos.getZ(i) > hz - 1e-6 || Math.abs(pos.getZ(i) - (8 + 0.5 * pos.getX(i))) < 1e-6) { expect(pos.getZ(i)).toBeCloseTo(8 + 0.5 * pos.getX(i), 6); tops++; }
-      expect(tops).toBeGreaterThan(0);
-      g.computeBoundingBox();
-      expect(g.boundingBox!.max.z).toBeCloseTo(8 + 0.5 * 10, 6); // le sommet le plus haut est à x = +10
-      expect(g.boundingBox!.min.z).toBeCloseTo(-hz, 6); // le dessous reste plat
-    }
-  });
 });
 
 describe('fils, gaine et nappe', () => {
@@ -206,6 +195,13 @@ describe('plankGeometry / PlankMesh', () => {
     const sq = plankGeometry(P({ w: 20, h: 20, holes: [{ id: 'h', shape: 'square', x: 0, y: 0, size: 6, sh: 6 }] }), 3).edges.attributes.position.count;
     expect(holed).toBeGreaterThan(plain);
     expect(sq).toBe(plain + 4 * 6); // carré : 4 côtés × (haut + bas + vertical) × 2 sommets
+  });
+  it("okoumé peint : épaisseur = depth (sinon celle de la scène), tout en color (sinon blanc)", () => {
+    const size = (g: BufferGeometry) => { g.computeBoundingBox(); return g.boundingBox!.max.z - g.boundingBox!.min.z; };
+    const full = plankGeometry(P({ w: 20, h: 20, material: 'okoume', depth: 5, color: '#336699' }), 3).geo, bare = plankGeometry(P({ w: 20, h: 20, material: 'okoume' }), 3).geo;
+    expect(size(full)).toBeCloseTo(5, 6); expect(size(bare)).toBeCloseTo(3, 6);
+    const col = (g: BufferGeometry) => [...g.attributes.color.array.slice(0, 3)];
+    expect(col(full)).toEqual([...new Color('#336699').toArray()].map((x) => Math.fround(x))); expect(col(bare)).toEqual([1, 1, 1]);
   });
   it('plankShapeKey change avec chaque propriété de forme, et pas avec la position', () => {
     const base = P({}), k = plankShapeKey(base, 3);

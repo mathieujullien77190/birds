@@ -12,15 +12,13 @@ export interface Hole { id: string; shape: 'round' | 'square'; x: number; y: num
 
 export interface Plank {
   id: string;
-  /** Matériau de la plaque découpée : absent = contreplaqué ; 'mdf' = MDF (découpé sur ses propres planches). */
-  material?: 'mdf';
+  /** Matériau de la plaque découpée : absent = contreplaqué ; 'mdf' = MDF, 'okoume' = contreplaqué okoumé extérieur (habillage, épaisseur `depth`, peint en blanc) : chacun est découpé sur ses propres planches. */
+  material?: 'mdf' | 'okoume';
   /** Élément spécial (pas du bois) : dessiné par son propre modèle 3D, exclu de la découpe laser. « camera » (carte caméra) ou « ir » (carte de LED infrarouges). */
   /** Contour libre (repère de la plaque, sens trigonométrique) : remplace le rectangle (crans et trous restent possibles). */
   poly?: [number, number][];
-  /** Pavé à contour en plan : le haut est un plan incliné z = z0 + bx · x + by · y (repère de la plaque, z relatif au centre). */
-  top?: { z0: number; bx: number; by: number };
   special?: 'camera' | 'ir' | 'bar' | 'pi' | 'cable' | 'wire' | 'case' | 'block' | 'sensor' | 'fan' | 'driver' | 'solar' | 'doc' | 'conduit';
-  /** « block » (pavé) : épaisseur réelle du pavé selon z, au lieu de l'épaisseur du bois. */
+  /** « block » (pavé) ou plaque d'un autre matériau (`material`) : épaisseur réelle selon z, au lieu de l'épaisseur du bois. */
   depth?: number;
   /** « wire » : couleur du fil (CSS). */
   color?: string;
@@ -46,13 +44,13 @@ export interface Plank {
 
 export interface PlankScene { t: number; fit: number; planks: Plank[]; /** Nom des groupes (boîtes…) par identifiant. */ groupNames?: Record<string, string>; /** 'z2' : scène en Z = hauteur. (Vide : ancienne scène Y = hauteur ; 'z' / 'z1' : converties par des versions intermédiaires fautives ; toutes réparées au chargement.) */ up?: 'z' | 'z1' | 'z2' }
 
-/** Historique de « Retour », gardé aussi au rechargement, sans limite (si le navigateur refuse par manque de place, on lâche la moitié la plus ancienne et on réessaie). */
+/** Une étape de « Retour » (en mémoire seulement, plus enregistrée au rechargement). */
 export interface HistoryEntry { label: string; scene: PlankScene; at: number }
 
 export interface Placed { plank: Plank; poly: Pt[]; x: number; y: number }
 
 export interface NestItem { plank: Plank; poly: Pt[]; holes: Pt[][]; w: number; h: number; x: number; y: number; rotated: boolean }
-export interface NestSheet { items: NestItem[]; used: number; /** 'mdf' : feuille de MDF (matériau distinct du contreplaqué) ; absent : contreplaqué. */ material?: 'mdf' }
+export interface NestSheet { items: NestItem[]; used: number; /** 'mdf' : feuille de MDF, 'okoume' : feuille d'okoumé extérieur 5 mm (matériaux distincts du contreplaqué) ; absent : contreplaqué. */ material?: 'mdf' | 'okoume' }
 
 export type FaceAxis = 'x' | 'y' | 'z';
 
