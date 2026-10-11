@@ -33,10 +33,10 @@ export function plankGeometry(p: Plank, t: number): PartGeometry {
 }
 
 /**
- * Tout ce qui change la forme d'une plaque : dimensions, crans, trous, épaisseur, chemin, profondeur, et la présence du modèle 3D du Pi.
- * Clé de cache de la géométrie d'une `PlankMesh` — (volontairement) inchangée par rapport à l'ancien code : voir le bug « clé incomplète » du rapport.
+ * Tout ce qui change la forme ou la couleur d'une plaque : dimensions, crans, trous, épaisseur, chemin, profondeur, couleur, contour libre, haut incliné, type spécial,
+ * et la présence du modèle 3D du Pi. Clé de cache de la géométrie d'une `PlankMesh`.
  */
-export const plankShapeKey = (p: Plank, t: number): string => JSON.stringify([p.w, p.h, p.notches, p.holes, t, p.path, p.depth, p.special === 'pi' && !!piModel]);
+export const plankShapeKey = (p: Plank, t: number): string => JSON.stringify([p.w, p.h, p.notches, p.holes, t, p.path, p.depth, p.color, p.poly, p.top, p.special, p.special === 'pi' && !!piModel]);
 
 /** La mesh d'une plaque : sa surface, ses arêtes (matériau partagé du registre) et son identifiant, typés (plus de `userData`). */
 export class PlankMesh extends Mesh<BufferGeometry, MeshStandardMaterial> {
