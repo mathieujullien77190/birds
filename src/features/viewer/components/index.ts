@@ -5,7 +5,6 @@ export * from './PiecesList';
 export * from './PullBar';
 export * from './RightPanel';
 export * from './SelectionBar';
-export * from './UndoBar';
 export * from './WireSheet';
 export * from './ViewToolbar';
 export * from './MobileBar';

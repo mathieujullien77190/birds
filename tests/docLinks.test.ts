@@ -11,7 +11,8 @@ describe('liens du document « Schéma électronique »', () => {
     expect(rows.length).toBeGreaterThan(30);
     for (const r of rows) {
       const cells = r.split('|').slice(1, -1).map((c) => c.trim());
-      expect(cells, r).toHaveLength(4);
+      expect(cells, r).toHaveLength(5);
+      expect(cells[4], r).toMatch(/^\[( |x)\]$/); // colonne « Vérifié »
       expect(/\]\(https:\/\/[^ )]+\)/.test(cells[3]) || /^lien à trouver — référence exacte : .{15,}/.test(cells[3]) || /^(fabriqué|incluse)/.test(cells[3]), r).toBe(true);
     }
   });
@@ -20,6 +21,7 @@ describe('liens du document « Schéma électronique »', () => {
     expect(anchors.length).toBeGreaterThan(20);
     for (const a of anchors) { expect(a).toContain('target="_blank"'); expect(a).toContain('rel="noopener noreferrer"'); }
     expect(html).toContain('<th>Modèle exact / lien</th>');
+    expect(html).toContain('<th>Vérifié</th>');
   });
   it('plus de lien mort connu', () => { expect(md).not.toContain('azcus.digikey.com'); expect(md).not.toContain('cdn.sparkfun.com'); });
 });

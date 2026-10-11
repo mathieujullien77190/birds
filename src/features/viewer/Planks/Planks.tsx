@@ -5,11 +5,11 @@ import { randomId } from '@/lib';
 import { DocModal, DOCS } from '@/features/docs';
 import { LaserMachineModal, LaserPreview, useLaser } from '@/features/laser';
 import { SchemaPanel } from '@/features/schema';
-import { makeNest, moveWithGroup, setAirPlug, setWinterCassette, winterState, extents, forgetHistory, saveScene, loadScene, type Plank, type PlankScene, type Vec3 } from '@/birdhouse/model';
+import { makeNest, moveWithGroup, setAirPlug, setCassetteMode, nextCassette, winterState, extents, forgetHistory, saveScene, loadScene, type Plank, type PlankScene, type Vec3 } from '@/birdhouse/model';
 import { PiSimulator } from '@/birdhouse/PiSimulator';
 import { loadPiModel, piModel } from '@/birdhouse/three/piModel';
 import type { View } from '@/birdhouse/three/types';
-import { ContextMenu, CutPanel, LeftPanel, MobileBar, PartsSheet, PiecesList, PullBar, RightPanel, SelectionBar, UndoBar, ViewToolbar, WireSheet, wireSheetFor } from '../components';
+import { ContextMenu, CutPanel, LeftPanel, MobileBar, PartsSheet, PiecesList, PullBar, RightPanel, SelectionBar, ViewToolbar, WireSheet, wireSheetFor } from '../components';
 import { HIDDEN_AT_CREATION, STORAGE } from '../constants';
 import { useCutPlane, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useThreeView, useFanSpeed, useIrBeams } from '../hooks';
 import type { ContextMenuState, Hover, PullState } from '../types';
@@ -35,7 +35,6 @@ export default function Planks() {
   const [piOpen, setPiOpen] = useState(false); // simulateur de la page web du Pi (Python exécuté dans le navigateur) : fenêtre affichée
   const [piMounted, setPiMounted] = useState(false); // le simulateur reste monté une fois ouvert : fermer la fenêtre ne fait que la cacher, le Python continue (ventilateur, LED, batterie)
   const [night, setNight] = usePersistentFlag(STORAGE.night, false); // vue 3D de nuit (la clé n'est pas ouverte par défaut)
-  const [showCodes, setShowCodes] = usePersistentFlag(STORAGE.codes); // codes des plaques (T01…) écrits dans la 3D, affichés par défaut
   const [schemaOn, setSchemaOn] = usePersistentFlag(STORAGE.schema); // ouvert par défaut ; schéma électrique à côté de la 3D
   const { cut, setCut, cutRef, midOf } = useCutPlane(scRef);
   const { hidden, setHidden, toggleHidden } = useHiddenPlanks(); // pièces cachées dans la 3D (œil du volet « Pièces »)
@@ -75,7 +74,7 @@ export default function Planks() {
   scRef.current = sc;
   const selRef = useRef(selectedId);
   selRef.current = selectedId;
-  const { backLabel, commit, pushEntry, back } = useHistory(scRef, setSc, (scene) => {
+  const { commit, pushEntry, back } = useHistory(scRef, setSc, (scene) => {
     if (selRef.current && !scene.planks.some((p) => p.id === selRef.current)) setSelectedId(null);
   });
   useEffect(() => { saveScene(sc); }, [sc]);
@@ -86,7 +85,7 @@ export default function Planks() {
   const wireSheet = wireSheetFor(selected, sc.planks, groupSel, wireClosed); // fiche du fil, de la nappe ou de la gaine choisi (clic dans la 3D ou sur son nom dans « Pièces »)
   const wireSheetEl = wireSheet && <WireSheet info={wireSheet} onClose={() => setWireClosed(selectedId)} />;
   const wState = useMemo(() => winterState(sc), [sc]); // pièces d'hiver : cassette ventilateur / isolante, prise d'air ouverte / bouchée (état déduit des positions)
-  const toggleCassette = () => { const w = wState.cassette === 'summer'; commit(w ? 'Cassette isolante posée' : 'Cassette ventilateur posée', (s) => setWinterCassette(s, w)); };
+  const toggleCassette = () => { if (!wState.cassette) return; const m = nextCassette(wState.cassette); commit(m === 'winter' ? 'Cassette isolante posée' : m === 'none' ? 'Cassette retirée (siège vide)' : 'Cassette ventilateur posée', (s) => setCassetteMode(s, m)); };
   const togglePlug = () => { const p = wState.plug === 'open'; commit(p ? "Prise d'air bouchée" : "Prise d'air ouverte", (s) => setAirPlug(s, p)); };
   const commitRef = useRef(commit);
   commitRef.current = commit;
@@ -102,7 +101,7 @@ export default function Planks() {
   const [fanPct, setFanPct] = useState(0); // vitesse du ventilateur lue dans le simulateur du Pi (le rotor de la 3D tourne)
   useFanSpeed(view, fanPct);
   const [leds, setLeds] = useState({ nid: false, ext: false }); // LED infrarouges allumées dans le simulateur du Pi (faisceaux visibles dans la 3D)
-  useSceneSync(view, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady, showCodes });
+  useSceneSync(view, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady });
   useIrBeams(view, sc, leds); // après useSceneSync : les meshes des cartes de LED existent
 
   // ----- actions -----
@@ -174,8 +173,8 @@ export default function Planks() {
     return (
       <div className="flex h-full w-full flex-col overflow-hidden bg-stone-100 text-stone-800">
         <MobileBar settingsOn={mSettings} onSettings={() => { setMSettings((v) => !v); setMParts(false); }} partsOn={mParts} onParts={() => { setMParts((v) => !v); setMSettings(false); }}
-          backLabel={backLabel} onBack={back} winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug}
-          cutOn={cut.on} onToggleCut={toggleCut} codesOn={showCodes} onToggleCodes={() => setShowCodes((v) => !v)} />
+          winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug}
+          cutOn={cut.on} onToggleCut={toggleCut} />
         <main className="relative min-h-0 flex-1">
           <div ref={host} className="h-full w-full touch-none" />
           {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
@@ -183,7 +182,7 @@ export default function Planks() {
           {!mSettings && !mParts && wireSheetEl}
           {mSettings && (
             <div className="absolute inset-0 z-20 flex flex-col bg-stone-50 [&>aside]:!w-full [&>aside]:flex-1">
-              <LeftPanel open setOpen={(o) => setMSettings(o)} sc={sc} commit={commit} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} hideMachine />
+              <LeftPanel open setOpen={(o) => setMSettings(o)} sc={sc} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} hideMachine />
             </div>
           )}
           {mParts && <PartsSheet sc={sc} hidden={hidden} toggleHidden={toggleHidden} setHidden={setHidden} onClose={() => setMParts(false)}
@@ -196,13 +195,12 @@ export default function Planks() {
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-stone-100 text-stone-800">
-      <LeftPanel open={leftOpen} setOpen={setLeftOpen} sc={sc} commit={commit} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} />
+      <LeftPanel open={leftOpen} setOpen={setLeftOpen} sc={sc} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} />
 
       <main className="relative min-w-0 flex-1" onClick={() => setCtx(null)}>
         <div ref={host} className="h-full w-full" />
         {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
-        <UndoBar backLabel={backLabel} onBack={back} />
-        <ViewToolbar codesOn={showCodes} onToggleCodes={() => setShowCodes((v) => !v)} winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={openPi} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
+        <ViewToolbar winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={openPi} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
         {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
         {wireSheetEl}
         {pull && <PullBar cutOn={cut.on} onDone={() => setPull(null)} />}

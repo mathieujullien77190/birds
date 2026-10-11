@@ -1,1 +1,0 @@
-export { UndoBar } from './UndoBar';

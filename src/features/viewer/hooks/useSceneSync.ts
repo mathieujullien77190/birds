@@ -19,7 +19,6 @@ export interface SceneSyncState {
   hidden: Set<string>;
   piReady: boolean;
   /** Écrire le code de chaque plaque découpée sur sa face (bouton « N° »). */
-  showCodes: boolean;
 }
 
 /**
@@ -27,7 +26,7 @@ export interface SceneSyncState {
  * 1. les meshes (une par plaque : forme, position, rotation, transparence ; les plaques supprimées sont libérées) ;
  * 2. la surbrillance (sélection, survol) ; 3. la coupe et la visibilité ; 4–6. les repères (face tirée, plan de coupe) et les cotes de l'habillage ; 7. les codes écrits sur les plaques.
  */
-export function useSceneSync(view: MutableRefObject<View | null>, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady, showCodes }: SceneSyncState) {
+export function useSceneSync(view: MutableRefObject<View | null>, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady }: SceneSyncState) {
   // 1. une mesh par plaque, géométrie refaite si la forme change, position / rotation recopiées
   useEffect(() => {
     const v = view.current;
@@ -85,7 +84,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       m.edges.material.clippingPlanes = clipPlanes;
       if (m.label) { m.label.material.clippingPlanes = clipPlanes; m.label.material.needsUpdate = true; } // l'étiquette est coupée avec sa plaque
     }
-  }, [view, sc, cut, hidden, showCodes]);
+  }, [view, sc, cut, hidden]);
 
   // 4. face à tirer : son contour en pointillés bleus
   useEffect(() => {
@@ -120,7 +119,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
   useEffect(() => {
     const v = view.current;
     if (!v) return;
-    const codes = showCodes ? plankCodes(sc) : null;
+    const codes = plankCodes(sc);
     for (const p of sc.planks) v.meshes.get(p.id)?.setCode(codes?.get(p.id) ?? null, p, sc.t);
-  }, [view, sc, showCodes, piReady]);
+  }, [view, sc, piReady]);
 }
