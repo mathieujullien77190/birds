@@ -177,7 +177,7 @@ export default function Planks() {
           {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
           {mSettings && (
             <div className="absolute inset-0 z-20 flex flex-col bg-stone-50 [&>aside]:!w-full [&>aside]:flex-1">
-              <LeftPanel open setOpen={(o) => setMSettings(o)} sc={sc} commit={commit} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} />
+              <LeftPanel open setOpen={(o) => setMSettings(o)} sc={sc} commit={commit} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} hideMachine />
             </div>
           )}
           {mParts && <PartsSheet sc={sc} hidden={hidden} toggleHidden={toggleHidden} setHidden={setHidden} onClose={() => setMParts(false)}
