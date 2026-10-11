@@ -8,7 +8,7 @@ export type Edge = 'bottom' | 'right' | 'top' | 'left';
 export interface Notch { id: string; edge: Edge; pos: number; width: number; depth: number }
 
 /** Un trou dans la plaque : rond (diamètre `size`) ou rectangulaire (`size` de long sur `sh` de large, coins arrondis de rayon `r`), centré en (x, y) depuis le centre de la plaque. */
-export interface Hole { id: string; shape: 'round' | 'square'; x: number; y: number; size: number; sh?: number; r?: number }
+export interface Hole { id: string; shape: 'round' | 'square'; x: number; y: number; size: number; sh?: number; r?: number; /** Contour libre (repère de la plaque, sens trigonométrique) : remplace la forme (un trou en peigne : ouverture + fentes des dents d'une boîte qui la traverse). */ poly?: [number, number][] }
 
 export interface Plank {
   id: string;

@@ -110,7 +110,7 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 | LED infrarouges extérieures | Pi broche 2 (5 V) | Carte 4 LED IR à côté de la caméra 2 | Masse par le module MOSFET (OUT2) ; les fils suivent la nappe et sortent par la même fente |
 | Module MOSFET | Pi GPIO23 (broche 16), GPIO24 (broche 18), masse broche 6 | Module 2 canaux (MOSFET logique 3,3 V) | Coupe la masse de chaque carte de LED ; 5 V direct, courant des LED hors du GPIO |
 | Capteur température / humidité | Pi broches 1 (3,3 V), 3 (SDA), 5 (SCL), 9 (masse) | Capteur collé sous le plafond | Liaison I2C, 4 fils |
-| Prise d'air basse | — (pas d'électronique) | Conduit de contreplaqué dans l'isolant du mur gauche avant, fente dans la paroi intérieure à mi-hauteur | Section libre 11,6 cm² ; clapet à gravité et grillage sur la fente, bouchon amovible sous la boîte |
+| Prise d'air basse | — (pas d'électronique) | Conduit de contreplaqué dans l'isolant du mur gauche avant, fente dans la paroi intérieure à mi-hauteur | Section libre 10,9 cm² ; clapet à gravité et grillage sur la fente, sous-boîte isolante amovible par le dessous (lèvre de 11 mm sous le fond) |
 
 ## Explication, bloc par bloc
 
@@ -244,10 +244,10 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Rôle | une entrée d'air de plus, en bas, pour que l'air traverse le nid jusqu'au ventilateur (à l'arrière) ; le trou d'envol reste l'entrée principale. À faire dès la construction : impossible à rajouter une fois monté | oui, toujours présente |
 | Électronique | aucune | — |
 | Position | dans l'épaisseur d'isolant (39 mm) du mur gauche, à l'avant (centre à 30 mm du mur avant, côté opposé au ventilateur), du dessous de la boîte à mi-hauteur du nid | fente à 74 à 104 mm au-dessus du fond du nid, sous le trou d'envol |
-| Section libre | au moins 8 cm² | 29 × 40 mm = 11,6 cm² |
-| Pièces | une boîte de contreplaqué crénelée, comme les autres boîtes du nichoir (« Conduit d'air 1 à 5 » : 4 parois qui s'emboîtent par 11 dents verticales par arête, et un couvercle à 3 dents par bord qui s'emboîte dans le haut des parois ; ouverte en dessous, 35 × 46 mm hors tout), étanche à l'air et à l'humidité de la laine ; ouverture dans le fond extérieur (le fond intérieur n'a que le passage du conduit) ; fente de 36 × 30 mm dans la paroi intérieure gauche | oui |
-| Protection | grillage inox à mailles de 5 mm sur l'ouverture du dessous et sur la fente, clapet léger à gravité à l'intérieur (s'ouvre sous l'aspiration, retombe sinon). Pas d'auvent : une chicane de bois sous la boîte était prévue contre la pluie qui remonte et les éclaboussures, mais l'ouverture étant sous la boîte ce n'est pas nécessaire ; seul le grillage plat de 0,8 mm est sous le fond | oui |
-| Bouchon | un bouchon de bois amovible enfoncé dans l'ouverture du dessous la condamne de l'extérieur (hiver) | pièce cachée par défaut |
+| Section libre | au moins 8 cm² | intérieur 23,6 × 46 mm = 10,9 cm² (empreinte extérieure 29,6 × 52 mm, centrée à 35 mm du mur avant intérieur : 6 mm plus longue que d'abord, vers l'AVANT) ; fente de 34 × 30 mm (10,2 cm²) ; ligaments de bois mini 4,5 mm (avant : 0,8 mm sur le fond intérieur à l'est et 2 mm sur la paroi du conduit à l'arrière de la fente) |
+| Pièces | une boîte de contreplaqué crénelée, comme les autres boîtes du nichoir (« Conduit d'air 1 à 5 » : 4 parois qui s'emboîtent par 11 dents verticales par arête, et un couvercle à 3 dents par bord qui s'emboîte dans le haut des parois ; ouverte en dessous), **incrustée dans le fond par crénelage** : les dents du bas des parois traversent des fentes de « Dessous ext » (ouverture et fentes forment un seul trou en peigne) et affleurent la face extérieure du fond ; « Plancher int » n'a que le passage du conduit ; quatre petites plaques (« Conduit d'air manchon ») ferment le jour de 4,7 mm entre le conduit et la paroi intérieure autour de la fente ; étanche à l'air et à l'humidité de la laine | oui |
+| Protection | grillage inox à mailles de 5 mm sur la fente (pas de grillage sous l'ouverture du dessous : il gênerait la sous-boîte ; les guêpes peuvent entrer dans le conduit en été, c'est accepté, le remède est de poser la sous-boîte isolante quand on n'a pas besoin de la prise d'air), clapet léger à gravité à l'intérieur (s'ouvre sous l'aspiration, retombe sinon). Pas d'auvent : une chicane de bois sous la boîte était prévue contre la pluie qui remonte et les éclaboussures, mais l'ouverture étant sous la boîte ce n'est pas nécessaire ; seul le grillage plat de 0,8 mm est sous le fond | oui |
+| Sous-boîte isolante (bouchon) | une sous-boîte de contreplaqué crénelée (4 parois + fond-lèvre, mêmes dents que le conduit), qui passe pile dans l'intérieur libre du conduit (23,6 × 46 mm, jeu 0), haute de 62 mm dans le conduit (s'arrête à plus de 50 mm sous la fente), ouverte en haut et remplie de laine de bois ; son fond forme une lèvre de 35,6 × 58 mm qui dépasse de 11 mm sous le fond de la boîte, avec deux encoches pour les doigts. Mode d'emploi hiver : on pousse la sous-boîte remplie de laine dans le conduit par le dessous, la lèvre reste accessible pour la ressortir | pièce de rechange (parois « Bouchon-boîte prise d'air 1 à 4 », « fond / lèvre », « Laine bouchon prise d'air ») |
 | Habillage | le lambris descend de 10 mm (45 mm avec le solaire) sous la boîte : il ne ferme pas le dessous, l'air entre par en bas ; le régulateur solaire est à droite et ne bouche pas l'ouverture | oui |
 
 ### Carte de 4 LED infrarouges
@@ -376,7 +376,8 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Corps | Laine de bois 40 mm (0,3 m²) | 10 € |
 | Corps | Colle, vis inox | 8 € |
 | Corps | Bloc isolant d'hiver (mousse de 35 mm + cadre de contreplaqué) | 6 € |
-| Corps | Prise d'air basse (contreplaqué, bouchon) | 1 € |
+| Corps | Prise d'air basse (contreplaqué du conduit) | 1 € |
+| Corps | Sous-boîte isolante de la prise d'air (contreplaqué + laine de bois) | 1 € |
 | Corps | Grillage inox à mailles carrées de 5 mm (fil 0,5 mm), un rouleau : sortie du ventilateur et prise d'air | 3 € |
 | Habillage | Chêne 18 mm (27 × 30 cm) | 12 € |
 | Habillage | Lambris pin 10 mm (0,35 m²) | 15 € |

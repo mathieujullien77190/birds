@@ -5,6 +5,7 @@ import { HIDDEN_AT_CREATION } from '@/features/viewer/constants';
 import { VARIANTS, buildNest } from './helpers';
 import { aabb, gap, inside, obb, pathContacts, pathItems, ribbonPoints, thick } from './geomChecks';
 import { outline } from '@/birdhouse/model';
+import { ligament } from './geomLigament';
 
 const by = (sc: PlankScene, re: RegExp): Plank[] => sc.planks.filter((p) => re.test(p.name));
 const one = (sc: PlankScene, re: RegExp): Plank => { const l = by(sc, re); expect(l, String(re)).toHaveLength(1); return l[0]; };
@@ -154,7 +155,7 @@ describe('bloc isolant d\'hiver', () => {
     const foam = one(sc0, /^Isolant bloc d'hiver/), open = one(sc0, /^Dessous toit/).holes.find((h) => h.size === 56)!, ring = one(sc0, /^Bloc isolant d'hiver cadre du bas/);
     expect(foam.w).toBeGreaterThanOrEqual(open.size); expect(foam.depth).toBeGreaterThanOrEqual(30); expect(foam.depth).toBeLessThanOrEqual(40);
     expect(foam.pos[2] - foam.depth! / 2).toBeGreaterThanOrEqual(ring.pos[2] - t / 2 - 0.01); // posée sur le cadre
-    const names = [...by(sc0, /^Bloc isolant d'hiver/), foam, one(sc0, /^Poignée bloc d'hiver/), one(sc0, /^Bouchon prise d'air/)].map((p) => p.name);
+    const names = [...by(sc0, /^Bloc isolant d'hiver/), foam, one(sc0, /^Poignée bloc d'hiver/), one(sc0, /^Bouchon-boîte prise d'air fond/), one(sc0, /^Laine bouchon prise d'air/), ...by(sc0, /^Bouchon-boîte prise d'air [1-4]$/)].map((p) => p.name);
     for (const n of names) expect(HIDDEN_AT_CREATION.some((re) => re.test(n)), n).toBe(true);
     expect(HIDDEN_AT_CREATION.some((re) => re.test('Cassette ventilateur 1'))).toBe(false);
   });
@@ -196,28 +197,45 @@ describe("prise d'air basse", () => {
     expect(x1 - t / 2).toBeGreaterThan(outer.pos[0] + t / 2); expect(x2 + t / 2).toBeLessThan(inner.pos[0] - t / 2); // entre les deux parois
     expect(y3).toBeLessThan(0); // à l'avant (−y), le ventilateur est à l'arrière
     expect(cover.pos[2]).toBeGreaterThan(w[0].pos[2]);
-    expect(by(sc0, /^Conduit d'air/)).toHaveLength(5);
+    expect(by(sc0, /^Conduit d'air [1-5]/)).toHaveLength(5);
   });
   it("la fente est à l'opposé du ventilateur : plus loin que la moitié de la largeur du nid", () => {
-    const inner = one(sc0, /^Côté gauche int/), slot = inner.holes.find((h) => h.size === 36 && h.sh === 30)!;
+    const inner = one(sc0, /^Côté gauche int/), slot = inner.holes.find((h) => h.size === 34 && h.sh === 30)!;
     expect(slot).toBeTruthy();
     const sx = inner.pos[0], sy = inner.pos[1] + slot.x;
     const floor = one(sc0, /^Dessous toit/), open = floor.holes.find((h) => h.size === 56)!;
     expect(Math.hypot(sx - (floor.pos[0] + open.x), sy - (floor.pos[1] + open.y))).toBeGreaterThan(l / 2);
     expect(inner.pos[2] + slot.y).toBeGreaterThan(one(sc0, /^Plancher int/).pos[2]); // au-dessus du fond du nid
-    expect(one(sc0, /^Clapet prise d'air/)); expect(one(sc0, /^Grillage inox maille 5 mm — fente/)); expect(one(sc0, /^Grillage inox maille 5 mm — prise d'air$/)); expect(by(sc0, /^Auvent|^Cale auvent/)).toEqual([]);
+    expect(one(sc0, /^Clapet prise d'air/)); expect(one(sc0, /^Grillage inox maille 5 mm — fente/)); expect(by(sc0, /^Grillage inox maille 5 mm — prise/)).toEqual([]); expect(by(sc0, /^Auvent|^Cale auvent/)).toEqual([]);
   });
   it("l'ouverture est dans « Dessous ext » (le fond intérieur n'a que le passage du conduit) et rien ne la bouche dessous", () => {
     const bottom = one(sc0, /^Dessous ext/), opening = bottom.holes.find((h) => h.shape === 'square' && Math.abs(h.x - one(sc0, /^Conduit d'air 5/).pos[0]) < 0.1)!;
     expect(opening).toBeTruthy();
     const box = { min: new Vector3(opening.x - opening.size / 2, bottom.pos[1] + opening.y - (opening.sh ?? 0) / 2, -400), max: new Vector3(opening.x + opening.size / 2, bottom.pos[1] + opening.y + (opening.sh ?? 0) / 2, 0) };
-    const mine = /^(Grillage inox maille 5 mm — prise|Bouchon prise|Conduit d'air)/;
+    const mine = /^(Bouchon-boîte prise d'air|Laine bouchon|Conduit d'air)/;
     for (const p of sc0.planks) { if (mine.test(p.name) || p.special === 'doc' || p.path) continue; const b = aabb(p, t); if (b.max.z > 0.01) continue; expect(gap(box, b), p.name).toBeGreaterThan(0.5); }
-    expect(aabb(one(sc0, /^Grillage inox maille 5 mm — prise d'air$/), t).min.z).toBeGreaterThanOrEqual(-0.85); // la seule pièce sous le fond, à plat
-    expect(aabb(one(sc0, /^Bouchon prise d'air/), t).min.z).toBeGreaterThanOrEqual(-0.01); // le bouchon s'enfonce, sans saillie
     const reg = aabb(one(sc0, /^Régulateur de charge/), t);
     expect(gap(box, reg)).toBeGreaterThan(20);
-    expect(one(sc0, /^Plancher int/).holes.some((h) => h.size > 30 && h.sh! > 40)).toBe(true);
+    expect(one(sc0, /^Plancher int/).holes.some((h) => h.size > 29 && h.sh! > 46)).toBe(true);
+  });
+  it("la sous-boîte isolante passe pile dans le conduit, dépasse de 10 à 12 mm sous le fond, s'arrête à 10 mm au moins sous la fente, ses dents s'emboîtent", () => {
+    const ws = [1, 2, 3, 4].map((i) => one(sc0, new RegExp(`^Bouchon-boîte prise d'air ${i}$`))), lip = one(sc0, /^Bouchon-boîte prise d'air fond/), wool = one(sc0, /^Laine bouchon prise d'air/), duct = [1, 2, 3, 4].map((i) => one(sc0, new RegExp(`^Conduit d'air ${i}$`)));
+    const inX = Math.abs(duct[1].pos[0] - duct[0].pos[0]) - t, inY = Math.abs(duct[3].pos[1] - duct[2].pos[1]) - t; // intérieur libre du conduit
+    const bx = union(ws, t);
+    expect(bx.max.x - bx.min.x).toBeCloseTo(inX, 1); expect(bx.max.y - bx.min.y).toBeCloseTo(inY, 1); // pile, jeu 0
+    expect(bx.min.z).toBeLessThanOrEqual(-10); expect(bx.min.z).toBeGreaterThanOrEqual(-12); // la lèvre dépasse de 10 à 12 mm sous le fond
+    const inner = one(sc0, /^Côté gauche int/), slot = inner.holes.find((h) => h.size === 34 && h.sh === 30)!;
+    expect(inner.pos[2] + slot.y - slot.sh! / 2 - bx.max.z).toBeGreaterThanOrEqual(10); // ≥ 10 mm sous le bas de la fente
+    expect(bx.max.z).toBeGreaterThan(55); // assez haute pour tenir et isoler
+    expect(lip.w).toBeGreaterThan(inX + 10); expect(lip.notches.length).toBe(2); // collerette large, deux encoches pour les doigts
+    expect(lip.holes.length).toBeGreaterThanOrEqual(4); // fentes des dents des parois
+    for (const p of ws) { expect(p.cast?.bottom?.phase).toBe(0); expect(p.cast?.top).toBeUndefined(); } // dents en bas dans la lèvre, ouverte en haut
+    expect(aabb(wool, t).min.z).toBeGreaterThanOrEqual(lip.pos[2] + t / 2 - 0.01);
+    for (const p of [...ws, lip, wool]) expect(HIDDEN_AT_CREATION.some((re) => re.test(p.name)), p.name).toBe(true);
+    expect(by(sc0, /^Grillage inox maille 5 mm — prise/)).toEqual([]); // plus de grillage sous l'ouverture
+    // aucune pièce visible (hors pièces de rechange cachées) ne gêne la sous-boîte
+    const box = { min: bx.min, max: bx.max };
+    for (const p of sc0.planks) { if (p.special === 'doc' || p.path || /^(Bouchon-boîte|Laine bouchon|Conduit d.air|Dessous ext|Plancher int|Isolant|Grillage|Clapet prise)/.test(p.name)) continue; expect(gap(box, aabb(p, t)), p.name).toBeGreaterThan(0.3); }
   });
   it("l'isolant est découpé autour du conduit", () => {
     const x = one(sc0, /^Conduit d'air 5/).pos, w = one(sc0, /^Conduit d'air 5/);
@@ -239,7 +257,7 @@ describe("conduit de la prise d'air : boîte crénelée", () => {
   const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
   const solid = (p: Plank, pt: Vector3, m = 0): boolean => { const b = obb(p, t), d = pt.clone().sub(b.c), lx = d.dot(b.ax[0]), ly = d.dot(b.ax[1]), lz = d.dot(b.ax[2]); return Math.abs(lz) <= t / 2 - m && inPoly([lx, ly], outline(p)) && !p.holes.some((h) => Math.abs(lx - h.x) <= h.size / 2 && Math.abs(ly - h.y) <= (h.sh ?? h.size) / 2); };
   it('quatre parois à dents verticales et un couvercle : chaque arête réunit un bord de phase 0 et un bord de phase 1', () => {
-    for (const p of w) { expect(p.cast?.left?.n, p.name).toBeGreaterThan(1); expect(p.cast?.right?.n).toBe(p.cast?.left?.n); expect(p.cast?.top?.phase).toBe(0); expect(p.cast?.bottom).toBeUndefined(); expect(p.notches.length, p.name).toBeGreaterThan(3); } // ouverte en dessous
+    for (const p of w) { expect(p.cast?.left?.n, p.name).toBeGreaterThan(1); expect(p.cast?.right?.n).toBe(p.cast?.left?.n); expect(p.cast?.top?.phase).toBe(0); expect(p.cast?.bottom?.phase).toBe(0); expect(p.notches.length, p.name).toBeGreaterThan(3); } // ouvert en dessous, dents du bas dans le fond
     expect(w[0].cast!.left!.phase).toBe(1); expect(w[1].cast!.left!.phase).toBe(1); expect(w[2].cast!.left!.phase).toBe(0); expect(w[3].cast!.left!.phase).toBe(0); // côtés (1, 2) contre faces (3, 4)
     expect(w[0].cast!.left!.n).toBe(w[2].cast!.left!.n);
     for (const e of ['top', 'bottom', 'left', 'right'] as const) expect(cover.cast![e]!.phase).toBe(1); // le couvercle s'emboîte dans le haut des parois
@@ -253,12 +271,46 @@ describe("conduit de la prise d'air : boîte crénelée", () => {
         if (solid(a, pt) && solid(b, pt, 0.05)) throw new Error(`${a.name} recoupe ${b.name} en ${pt.toArray().map((v) => v.toFixed(1))}`);
       }
     }
-    expect(Math.abs(w[1].pos[0] - w[0].pos[0]) - t, 'largeur libre').toBeGreaterThanOrEqual(25);
+    expect(Math.abs(w[1].pos[0] - w[0].pos[0]) - t, 'largeur libre').toBeGreaterThanOrEqual(23);
     expect(((Math.abs(w[1].pos[0] - w[0].pos[0]) - t) * (Math.abs(w[3].pos[1] - w[2].pos[1]) - t)) / 100).toBeGreaterThanOrEqual(8);
   });
   it('la fente de la paroi côté nid ne touche aucun cran', () => {
     const p = w[1], h = p.holes[0], poly = outline(p);
     for (let dx = -h.size / 2 - 1.5; dx <= h.size / 2 + 1.5; dx += 1) for (const dy of [-(h.sh! / 2 + 1.5), h.sh! / 2 + 1.5]) expect(inPoly([h.x + dx, h.y + dy], poly), 'marge de bois autour de la fente').toBe(true);
     for (let dy = -h.sh! / 2 - 1.5; dy <= h.sh! / 2 + 1.5; dy += 1) for (const dx of [-(h.size / 2 + 1.5), h.size / 2 + 1.5]) expect(inPoly([h.x + dx, h.y + dy], poly), 'marge de bois autour de la fente').toBe(true);
+  });
+});
+
+describe("prise d'air basse : incrustée dans le fond, ligaments de bois", () => {
+  const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
+  it('les dents du bas des parois traversent des fentes du fond (même position, affleurent z = 0)', () => {
+    const bottom = one(sc0, /^Dessous ext/), comb = bottom.holes.find((h) => h.poly)!, walls = [1, 2, 3, 4].map((i) => one(sc0, new RegExp(`^Conduit d'air ${i}$`)));
+    expect(comb).toBeTruthy(); expect(comb.poly!.length).toBeGreaterThan(12); // un trou en peigne : ouverture + fentes
+    for (const w of walls) {
+      const b = obb(w, t), down = b.ax[1].z < 0 ? -1 : 1; // sens « bas » du repère de la paroi
+      expect(Math.abs(Math.abs(w.pos[2] - w.h / 2) - 0)).toBeLessThan(0.01); // le bas des dents est à z = 0
+      let n = 0;
+      for (let x = -w.w / 2 + t + 0.5; x < w.w / 2 - t; x += 0.7) { // hors des bouts (les coins appartiennent aux parois voisines)
+        const local: [number, number] = [x, -w.h / 2 * Math.abs(down) + 0.5], matter = inPoly(local, outline(w));
+        const world = b.c.clone().addScaledVector(b.ax[0], x).addScaledVector(b.ax[1], local[1]);
+        const inHole = inPoly([world.x - bottom.pos[0], world.y - bottom.pos[1]], comb.poly!);
+        expect(inHole, `${w.name} x=${x.toFixed(1)}`).toBe(matter); n += matter ? 1 : 0; // dent ⇒ fente, cran ⇒ bois du fond
+      }
+      expect(n).toBeGreaterThan(5);
+    }
+  });
+  it('ligaments de bois ≥ 4,5 mm autour du conduit, de la fente et du passage dans le fond intérieur', () => {
+    const mins: Record<string, number> = {};
+    const check = (nom: string, p: Plank, pick: (h: Plank['holes'][number]) => boolean) => { const h = p.holes.find(pick)!; expect(h, nom).toBeTruthy(); mins[nom] = ligament(p, h).min; expect(mins[nom], nom).toBeGreaterThanOrEqual(4.5 - 1e-6); };
+    check('Dessous ext (ouverture + fentes)', one(sc0, /^Dessous ext/), (h) => !!h.poly);
+    check('Plancher int (passage)', one(sc0, /^Plancher int/), (h) => h.size > 29 && h.sh! > 46);
+    check('Côté gauche int (fente)', one(sc0, /^Côté gauche int/), (h) => h.size === 34 && h.sh === 30);
+    check("Conduit d'air 2 (fente)", one(sc0, /^Conduit d'air 2$/), (h) => h.size === 34 && h.sh === 30);
+    expect(Math.min(...Object.values(mins))).toBeGreaterThanOrEqual(4.5 - 1e-6);
+  });
+  it('le manchon ferme le passage entre le conduit et la paroi intérieure, sous-boîte pile dans l intérieur libre', () => {
+    expect(by(sc0, /^Conduit d'air manchon/)).toHaveLength(4);
+    const w1 = one(sc0, /^Conduit d'air 1$/), w2 = one(sc0, /^Conduit d'air 2$/), inner = one(sc0, /^Côté gauche int/);
+    expect(inner.pos[0] - t / 2 - (w2.pos[0] + t / 2)).toBeGreaterThan(4); expect(w1.pos[0]).toBeLessThan(w2.pos[0]); // jour de 4,7 mm entre le conduit et la paroi, comblé par le manchon
   });
 });

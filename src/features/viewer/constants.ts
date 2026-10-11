@@ -11,4 +11,4 @@ export const STORAGE = {
 } as const;
 
 /** Types de pièces cachées d'office quand on crée un nichoir : isolant, barres du toit, pan de toit en chêne (l'œil de « Pièces » les affiche). */
-export const HIDDEN_AT_CREATION = [/^Isolant/, /^Barre /, /^Toit en chêne$/, /^Bloc isolant d'hiver/, /^Poignée bloc d'hiver/, /^Bouchon prise d'air/];
+export const HIDDEN_AT_CREATION = [/^Isolant/, /^Barre /, /^Toit en chêne$/, /^Bloc isolant d'hiver/, /^Poignée bloc d'hiver/, /^Bouchon-boîte prise d'air/, /^Laine bouchon prise d'air/];

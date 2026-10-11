@@ -1697,13 +1697,13 @@
   "geo": {
    "n": 612,
    "idx": 0,
-   "pos": "6123e6fffe6024b8",
+   "pos": "db57af203f0af6df",
    "col": "cf7f401daa96cbc7"
   },
   "edges": {
    "n": 208,
    "idx": 0,
-   "pos": "cfd9fed783bf88c3",
+   "pos": "bcb008c5ed5e230f",
    "col": null
   }
  },
@@ -1711,13 +1711,13 @@
   "geo": {
    "n": 612,
    "idx": 0,
-   "pos": "6123e6fffe6024b8",
+   "pos": "db57af203f0af6df",
    "col": "cf7f401daa96cbc7"
   },
   "edges": {
    "n": 208,
    "idx": 0,
-   "pos": "cfd9fed783bf88c3",
+   "pos": "bcb008c5ed5e230f",
    "col": null
   }
  },
@@ -1725,13 +1725,13 @@
   "geo": {
    "n": 672,
    "idx": 0,
-   "pos": "fd70b21dbb7310d6",
+   "pos": "a5ca42ee759a47d9",
    "col": "eb70af251eb83338"
   },
   "edges": {
    "n": 232,
    "idx": 0,
-   "pos": "41af57fe68ee23df",
+   "pos": "c6f9054c10572814",
    "col": null
   }
  },
@@ -1739,13 +1739,13 @@
   "geo": {
    "n": 612,
    "idx": 0,
-   "pos": "7ddf0245687cb99e",
+   "pos": "e9bc849013653305",
    "col": "cf7f401daa96cbc7"
   },
   "edges": {
    "n": 208,
    "idx": 0,
-   "pos": "483fd939402b365b",
+   "pos": "faf3577146f58f1d",
    "col": null
   }
  },
@@ -1753,199 +1753,353 @@
   "geo": {
    "n": 228,
    "idx": 0,
-   "pos": "303a0deb56ac9c1a",
+   "pos": "37225a0fc572d6c0",
    "col": "7d604a6d4bd7c0e5"
   },
   "edges": {
    "n": 80,
    "idx": 0,
-   "pos": "c8eaac99c21204ab",
+   "pos": "190857dc06a651e0",
    "col": null
   }
  },
- "126 Grillage inox maille 5 mm — prise d'air": {
+ "126 Conduit d'air manchon haut": {
+  "geo": {
+   "n": 36,
+   "idx": 0,
+   "pos": "ff635cb6ea029dc6",
+   "col": "81ee9ae44ff8baa2"
+  },
+  "edges": {
+   "n": 24,
+   "idx": 0,
+   "pos": "0eff95febf6aee3f",
+   "col": null
+  }
+ },
+ "127 Conduit d'air manchon bas": {
+  "geo": {
+   "n": 36,
+   "idx": 0,
+   "pos": "ff635cb6ea029dc6",
+   "col": "81ee9ae44ff8baa2"
+  },
+  "edges": {
+   "n": 24,
+   "idx": 0,
+   "pos": "0eff95febf6aee3f",
+   "col": null
+  }
+ },
+ "128 Conduit d'air manchon avant": {
+  "geo": {
+   "n": 36,
+   "idx": 0,
+   "pos": "b43e53e8ffefda35",
+   "col": "81ee9ae44ff8baa2"
+  },
+  "edges": {
+   "n": 24,
+   "idx": 0,
+   "pos": "65d272c849887820",
+   "col": null
+  }
+ },
+ "129 Conduit d'air manchon arrière": {
+  "geo": {
+   "n": 36,
+   "idx": 0,
+   "pos": "b43e53e8ffefda35",
+   "col": "81ee9ae44ff8baa2"
+  },
+  "edges": {
+   "n": 24,
+   "idx": 0,
+   "pos": "65d272c849887820",
+   "col": null
+  }
+ },
+ "130 Grillage inox maille 5 mm — fente": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "f59f2571b6fc56db",
+   "pos": "98dcc721c3dccde2",
    "col": "6fdb65fc39eb0796"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "47a85babc8e4a4cc",
+   "pos": "f0525dbc7bc85131",
    "col": null
   }
  },
- "127 Bouchon prise d'air (à enfoncer dans l'ouverture pour la condamner)": {
+ "131 Clapet prise d'air": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "e8b34512b720c1f8",
-   "col": "5e0a28371075c7c3"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "11045bc6044487f7",
-   "col": null
-  }
- },
- "128 Grillage inox maille 5 mm — fente": {
-  "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "6106612a8c86b7e7",
-   "col": "6fdb65fc39eb0796"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "5629504453b65efe",
-   "col": null
-  }
- },
- "129 Clapet prise d'air": {
-  "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "c44ef5818d441ecc",
+   "pos": "b3f88d807370c256",
    "col": "941369e1d33c4b2c"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "5276caa7e944c533",
+   "pos": "91893f921f061f84",
    "col": null
   }
  },
- "130 Isolant sous le plancher 1": {
+ "132 Bouchon-boîte prise d'air 3": {
+  "geo": {
+   "n": 324,
+   "idx": 0,
+   "pos": "72b3d4936e89a131",
+   "col": "2e95a0a9e8505128"
+  },
+  "edges": {
+   "n": 112,
+   "idx": 0,
+   "pos": "58eed876234f7db7",
+   "col": null
+  }
+ },
+ "133 Bouchon-boîte prise d'air 4": {
+  "geo": {
+   "n": 324,
+   "idx": 0,
+   "pos": "72b3d4936e89a131",
+   "col": "2e95a0a9e8505128"
+  },
+  "edges": {
+   "n": 112,
+   "idx": 0,
+   "pos": "58eed876234f7db7",
+   "col": null
+  }
+ },
+ "134 Bouchon-boîte prise d'air 2": {
+  "geo": {
+   "n": 324,
+   "idx": 0,
+   "pos": "9d44c012b8151a17",
+   "col": "2e95a0a9e8505128"
+  },
+  "edges": {
+   "n": 112,
+   "idx": 0,
+   "pos": "54dd2403cb1c4eea",
+   "col": null
+  }
+ },
+ "135 Bouchon-boîte prise d'air 1": {
+  "geo": {
+   "n": 324,
+   "idx": 0,
+   "pos": "9d44c012b8151a17",
+   "col": "2e95a0a9e8505128"
+  },
+  "edges": {
+   "n": 112,
+   "idx": 0,
+   "pos": "54dd2403cb1c4eea",
+   "col": null
+  }
+ },
+ "136 Bouchon-boîte prise d'air fond / lèvre": {
+  "geo": {
+   "n": 360,
+   "idx": 0,
+   "pos": "187ed734ae68b7d8",
+   "col": "d42e479bee6996de"
+  },
+  "edges": {
+   "n": 168,
+   "idx": 0,
+   "pos": "991e9f14e41a0907",
+   "col": null
+  }
+ },
+ "137 Laine bouchon prise d'air": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "33ef5538de05e391",
+   "pos": "87f47813ecd85def",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "54055c3a95647f3c",
+   "pos": "8aff8d7c93d67950",
    "col": null
   }
  },
- "131 Isolant sous le plancher 2": {
+ "138 Isolant sous le plancher 1": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "90739e1e726e918c",
+   "pos": "ce6c8516b1206661",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "c6cb3a6966010050",
+   "pos": "9ca9eab6f884b18a",
    "col": null
   }
  },
- "132 Isolant sous le plancher 3": {
+ "139 Isolant sous le plancher 2": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "147367c420161e81",
+   "pos": "72b818c3aecd87cd",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "6be44fd402d0da2f",
+   "pos": "384f5c71a37f1b6f",
    "col": null
   }
  },
- "133 Isolant sous le plancher 4": {
+ "140 Isolant sous le plancher 3": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "b0d6ad5c055271ab",
+   "pos": "c59a36a61a9df2de",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "0f40c6a7e2fb321b",
+   "pos": "7f6ef6db3bdabf7d",
    "col": null
   }
  },
- "134 Isolant gauche 1": {
+ "141 Isolant sous le plancher 4": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "a4b0727d52d01ce2",
+   "pos": "442f29021b1ecf4c",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "e7eeb4724391ff78",
+   "pos": "ba6fa73f445dd6a5",
    "col": null
   }
  },
- "135 Isolant gauche 2": {
+ "142 Isolant gauche 1": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "7b83290cda35729a",
+   "pos": "b6828ae8608488e3",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "290d47a0182c25a7",
+   "pos": "66b7d0c07d16105d",
    "col": null
   }
  },
- "136 Isolant gauche 3": {
+ "143 Isolant gauche 2": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "ca82b1c00ce2ccf8",
+   "pos": "d6d3472d26019640",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "a733e9d432aa7638",
+   "pos": "28c4a99d2313ae90",
    "col": null
   }
  },
- "137 Isolant gauche 4": {
+ "144 Isolant gauche 3": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "c354b3c1d18d53a3",
+   "pos": "336ed0b00d9210f9",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "f0817b3689ac3349",
+   "pos": "33708a5611471b02",
    "col": null
   }
  },
- "138 Isolant gauche dessus conduit": {
+ "145 Isolant gauche 4": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "cd5e9069dc9502bb",
+   "pos": "e798c8d300821049",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "c66f5aa96efb2574",
+   "pos": "6d3550b78fecd8e4",
    "col": null
   }
  },
- "139 Isolant droite": {
+ "146 Isolant gauche 5": {
+  "geo": {
+   "n": 24,
+   "idx": 36,
+   "pos": "636164e250d1c528",
+   "col": "952b3713c1187e61"
+  },
+  "edges": {
+   "n": 24,
+   "idx": 0,
+   "pos": "4f46e8c6a1b8778f",
+   "col": null
+  }
+ },
+ "147 Isolant gauche manchon bas": {
+  "geo": {
+   "n": 24,
+   "idx": 36,
+   "pos": "4f4a6fb81672896e",
+   "col": "952b3713c1187e61"
+  },
+  "edges": {
+   "n": 24,
+   "idx": 0,
+   "pos": "c203309e1b241bc3",
+   "col": null
+  }
+ },
+ "148 Isolant gauche manchon haut": {
+  "geo": {
+   "n": 24,
+   "idx": 36,
+   "pos": "f3e52771192d6768",
+   "col": "952b3713c1187e61"
+  },
+  "edges": {
+   "n": 24,
+   "idx": 0,
+   "pos": "1d45d8659cce1921",
+   "col": null
+  }
+ },
+ "149 Isolant gauche dessus conduit": {
+  "geo": {
+   "n": 24,
+   "idx": 36,
+   "pos": "bf2fcd3977b7b09f",
+   "col": "952b3713c1187e61"
+  },
+  "edges": {
+   "n": 24,
+   "idx": 0,
+   "pos": "51e6805c1b1f2507",
+   "col": null
+  }
+ },
+ "150 Isolant droite": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -1959,7 +2113,7 @@
    "col": null
   }
  },
- "140 Isolant arrière": {
+ "151 Isolant arrière": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -1973,7 +2127,7 @@
    "col": null
   }
  },
- "141 Isolant avant gauche": {
+ "152 Isolant avant gauche": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -1987,7 +2141,7 @@
    "col": null
   }
  },
- "142 Isolant avant droite": {
+ "153 Isolant avant droite": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2001,7 +2155,7 @@
    "col": null
   }
  },
- "143 Isolant sous le bloc d'entrée": {
+ "154 Isolant sous le bloc d'entrée": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2015,7 +2169,7 @@
    "col": null
   }
  },
- "144 Isolant toit 1": {
+ "155 Isolant toit 1": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2029,7 +2183,7 @@
    "col": null
   }
  },
- "145 Isolant toit 2": {
+ "156 Isolant toit 2": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2043,7 +2197,7 @@
    "col": null
   }
  },
- "146 Isolant toit 3": {
+ "157 Isolant toit 3": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2057,7 +2211,7 @@
    "col": null
   }
  },
- "147 Isolant toit 4": {
+ "158 Isolant toit 4": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2071,7 +2225,7 @@
    "col": null
   }
  },
- "148 Isolant toit 5": {
+ "159 Isolant toit 5": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2085,7 +2239,7 @@
    "col": null
   }
  },
- "149 Isolant toit 6": {
+ "160 Isolant toit 6": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2099,7 +2253,7 @@
    "col": null
   }
  },
- "150 Entrée 1": {
+ "161 Entrée 1": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2113,7 +2267,7 @@
    "col": null
   }
  },
- "151 Entrée 2": {
+ "162 Entrée 2": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2127,7 +2281,7 @@
    "col": null
   }
  },
- "152 Entrée 3": {
+ "163 Entrée 3": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2141,7 +2295,7 @@
    "col": null
   }
  },
- "153 Entrée 4": {
+ "164 Entrée 4": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2155,7 +2309,7 @@
    "col": null
   }
  },
- "154 Entrée 5": {
+ "165 Entrée 5": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2169,7 +2323,7 @@
    "col": null
   }
  },
- "155 Entrée 6": {
+ "166 Entrée 6": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2183,7 +2337,7 @@
    "col": null
   }
  },
- "156 Entrée 7": {
+ "167 Entrée 7": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2197,7 +2351,7 @@
    "col": null
   }
  },
- "157 Entrée 8": {
+ "168 Entrée 8": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2211,7 +2365,7 @@
    "col": null
   }
  },
- "158 Entrée 9": {
+ "169 Entrée 9": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2225,7 +2379,7 @@
    "col": null
   }
  },
- "159 Entrée 10": {
+ "170 Entrée 10": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2239,7 +2393,7 @@
    "col": null
   }
  },
- "160 Entrée 11": {
+ "171 Entrée 11": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2253,7 +2407,7 @@
    "col": null
   }
  },
- "161 Entrée 12": {
+ "172 Entrée 12": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2267,7 +2421,7 @@
    "col": null
   }
  },
- "162 Entrée 13": {
+ "173 Entrée 13": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2281,7 +2435,7 @@
    "col": null
   }
  },
- "163 Entrée 14": {
+ "174 Entrée 14": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2295,7 +2449,7 @@
    "col": null
   }
  },
- "164 Entrée 15": {
+ "175 Entrée 15": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2309,7 +2463,7 @@
    "col": null
   }
  },
- "165 Face avant ext": {
+ "176 Face avant ext": {
   "geo": {
    "n": 1464,
    "idx": 0,
@@ -2323,7 +2477,7 @@
    "col": null
   }
  },
- "166 Face arrière ext": {
+ "177 Face arrière ext": {
   "geo": {
    "n": 1620,
    "idx": 0,
@@ -2337,7 +2491,7 @@
    "col": null
   }
  },
- "167 Côté droit ext": {
+ "178 Côté droit ext": {
   "geo": {
    "n": 1296,
    "idx": 0,
@@ -2351,7 +2505,7 @@
    "col": null
   }
  },
- "168 Côté gauche ext": {
+ "179 Côté gauche ext": {
   "geo": {
    "n": 1296,
    "idx": 0,
@@ -2365,35 +2519,35 @@
    "col": null
   }
  },
- "169 Dessous ext": {
+ "180 Dessous ext": {
   "geo": {
-   "n": 2076,
+   "n": 2268,
    "idx": 0,
-   "pos": "5bf352593c68b601",
-   "col": "bd8fcd5be0a051a5"
+   "pos": "075fd54be294d9eb",
+   "col": "8911d2eebe9e2115"
   },
   "edges": {
-   "n": 744,
+   "n": 800,
    "idx": 0,
-   "pos": "3ca83ee68157beab",
+   "pos": "c7235d9e0ba20148",
    "col": null
   }
  },
- "170 Plancher int": {
+ "181 Plancher int": {
   "geo": {
    "n": 2484,
    "idx": 0,
-   "pos": "a164a5308de43714",
+   "pos": "a600a73fb3ac8049",
    "col": "0685c90369e6212f"
   },
   "edges": {
    "n": 936,
    "idx": 0,
-   "pos": "cd3095167900a002",
+   "pos": "2c19e8f5f37300c8",
    "col": null
   }
  },
- "171 Face avant int": {
+ "182 Face avant int": {
   "geo": {
    "n": 756,
    "idx": 0,
@@ -2407,7 +2561,7 @@
    "col": null
   }
  },
- "172 Face arrière int": {
+ "183 Face arrière int": {
   "geo": {
    "n": 708,
    "idx": 0,
@@ -2421,7 +2575,7 @@
    "col": null
   }
  },
- "173 Côté droit int": {
+ "184 Côté droit int": {
   "geo": {
    "n": 708,
    "idx": 0,
@@ -2435,21 +2589,21 @@
    "col": null
   }
  },
- "174 Côté gauche int": {
+ "185 Côté gauche int": {
   "geo": {
    "n": 768,
    "idx": 0,
-   "pos": "d6a3971d7c7af89b",
+   "pos": "1cba930c5dd3f38c",
    "col": "1452d46063e016a6"
   },
   "edges": {
    "n": 264,
    "idx": 0,
-   "pos": "d6f02abe6e1b1d84",
+   "pos": "0c88fb5d8eeaa402",
    "col": null
   }
  },
- "175 Face avant toit": {
+ "186 Face avant toit": {
   "geo": {
    "n": 564,
    "idx": 0,
@@ -2463,7 +2617,7 @@
    "col": null
   }
  },
- "176 Face arrière toit": {
+ "187 Face arrière toit": {
   "geo": {
    "n": 768,
    "idx": 0,
@@ -2477,7 +2631,7 @@
    "col": null
   }
  },
- "177 Côté droit toit": {
+ "188 Côté droit toit": {
   "geo": {
    "n": 612,
    "idx": 0,
@@ -2491,7 +2645,7 @@
    "col": null
   }
  },
- "178 Côté gauche toit": {
+ "189 Côté gauche toit": {
   "geo": {
    "n": 612,
    "idx": 0,
@@ -2505,7 +2659,7 @@
    "col": null
   }
  },
- "179 Dessus toit": {
+ "190 Dessus toit": {
   "geo": {
    "n": 600,
    "idx": 0,
@@ -2519,7 +2673,7 @@
    "col": null
   }
  },
- "180 Dessous toit": {
+ "191 Dessous toit": {
   "geo": {
    "n": 2730,
    "idx": 0,
@@ -2533,7 +2687,7 @@
    "col": null
   }
  },
- "181 Tasseau gauche": {
+ "192 Tasseau gauche": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2547,7 +2701,7 @@
    "col": null
   }
  },
- "182 Tasseau droite": {
+ "193 Tasseau droite": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2561,7 +2715,7 @@
    "col": null
   }
  },
- "183 Tasseau avant": {
+ "194 Tasseau avant": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2575,7 +2729,7 @@
    "col": null
   }
  },
- "184 Tasseau arrière 1": {
+ "195 Tasseau arrière 1": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2589,7 +2743,7 @@
    "col": null
   }
  },
- "185 Tasseau arrière 2": {
+ "196 Tasseau arrière 2": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2603,7 +2757,7 @@
    "col": null
   }
  },
- "186 Cadre toit haut": {
+ "197 Cadre toit haut": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -2617,7 +2771,7 @@
    "col": null
   }
  },
- "187 Cadre toit milieu": {
+ "198 Cadre toit milieu": {
   "geo": {
    "n": 672,
    "idx": 0,
@@ -2631,7 +2785,7 @@
    "col": null
   }
  },
- "188 Cadre toit bas": {
+ "199 Cadre toit bas": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -2645,7 +2799,7 @@
    "col": null
   }
  },
- "189 Barre avant gauche": {
+ "200 Barre avant gauche": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2659,7 +2813,7 @@
    "col": null
   }
  },
- "190 Barre avant droite": {
+ "201 Barre avant droite": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2673,7 +2827,7 @@
    "col": null
   }
  },
- "191 Barre arrière gauche": {
+ "202 Barre arrière gauche": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2687,7 +2841,7 @@
    "col": null
   }
  },
- "192 Barre arrière droite": {
+ "203 Barre arrière droite": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2701,7 +2855,7 @@
    "col": null
   }
  },
- "193 Face avant caméra 1": {
+ "204 Face avant caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2715,7 +2869,7 @@
    "col": null
   }
  },
- "194 Face arrière caméra 1": {
+ "205 Face arrière caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2729,7 +2883,7 @@
    "col": null
   }
  },
- "195 Côté droit caméra 1": {
+ "206 Côté droit caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2743,7 +2897,7 @@
    "col": null
   }
  },
- "196 Côté gauche caméra 1": {
+ "207 Côté gauche caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2757,7 +2911,7 @@
    "col": null
   }
  },
- "197 Caméra": {
+ "208 Caméra": {
   "geo": {
    "n": 396,
    "idx": 0,
@@ -2771,7 +2925,7 @@
    "col": null
   }
  },
- "198 LED infrarouges": {
+ "209 LED infrarouges": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2785,7 +2939,7 @@
    "col": null
   }
  },
- "199 Raspberry Pi": {
+ "210 Raspberry Pi": {
   "geo": {
    "n": 4104,
    "idx": 0,
@@ -2799,7 +2953,7 @@
    "col": null
   }
  },
- "200 Cale Pi 1": {
+ "211 Cale Pi 1": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2813,7 +2967,7 @@
    "col": null
   }
  },
- "201 Cale Pi 2": {
+ "212 Cale Pi 2": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2827,7 +2981,7 @@
    "col": null
   }
  },
- "202 Cale Pi 3": {
+ "213 Cale Pi 3": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2841,7 +2995,7 @@
    "col": null
   }
  },
- "203 Cale Pi 4": {
+ "214 Cale Pi 4": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2855,7 +3009,7 @@
    "col": null
   }
  },
- "204 Cale Pi 5": {
+ "215 Cale Pi 5": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2869,7 +3023,7 @@
    "col": null
   }
  },
- "205 Cale Pi 6": {
+ "216 Cale Pi 6": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2883,7 +3037,7 @@
    "col": null
   }
  },
- "206 Nappe caméra": {
+ "217 Nappe caméra": {
   "geo": {
    "n": 242,
    "idx": 720,
@@ -2897,7 +3051,7 @@
    "col": null
   }
  },
- "207 Fil 5 V (rouge)": {
+ "218 Fil 5 V (rouge)": {
   "geo": {
    "n": 1521,
    "idx": 8064,
@@ -2911,7 +3065,7 @@
    "col": null
   }
  },
- "208 Fil masse (noir)": {
+ "219 Fil masse (noir)": {
   "geo": {
    "n": 1305,
    "idx": 6912,
