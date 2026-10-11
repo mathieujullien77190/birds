@@ -46,7 +46,7 @@ describe('pavés (blockGeometry, shapedBlockGeometry)', () => {
     near(size(tri.geo), [10, 6, 4]);
   });
   it("shapedBlockGeometry : un trou ne change pas l'encombrement mais ajoute des sommets", () => {
-    const full = shapedBlockGeometry(P({ w: 30, h: 40, depth: 9 }), 3), holed = shapedBlockGeometry(P({ w: 30, h: 40, depth: 9, holes: [{ shape: 'round', x: 0, y: 0, size: 10 }] }), 3);
+    const full = shapedBlockGeometry(P({ w: 30, h: 40, depth: 9 }), 3), holed = shapedBlockGeometry(P({ w: 30, h: 40, depth: 9, holes: [{ id: 'h', shape: 'round', x: 0, y: 0, size: 10 }] }), 3);
     near(size(holed.geo), [30, 40, 9]);
     expect(holed.geo.attributes.position.count).toBeGreaterThan(full.geo.attributes.position.count);
   });
@@ -170,14 +170,14 @@ describe('Raspberry Pi : dessin de repli', () => {
 describe('partGeometry : aiguillage par type', () => {
   it('un bloc plein : boîte ; un bloc percé ou à contour libre : plaque épaisse (plus de sommets)', () => {
     const plain = partGeometry(P({ special: 'block', w: 20, h: 20, depth: 10 }), 3);
-    const holed = partGeometry(P({ special: 'block', w: 20, h: 20, depth: 10, holes: [{ shape: 'round', x: 0, y: 0, size: 6 }] }), 3);
+    const holed = partGeometry(P({ special: 'block', w: 20, h: 20, depth: 10, holes: [{ id: 'h', shape: 'round', x: 0, y: 0, size: 6 }] }), 3);
     const poly = partGeometry(P({ special: 'block', w: 20, h: 20, depth: 10, poly: [[0, 0], [20, 0], [0, 20]] }), 3);
     expect(plain.geo.attributes.position.count).toBe(24); // 6 faces × 4 sommets (boîte indexée)
     expect(holed.geo.attributes.position.count).toBeGreaterThan(24);
     near(size(poly.geo), [20, 20, 10]);
   });
   it("une pièce sans type connu est dessinée comme une carte caméra, de même qu'un type absent de la table (doc, alu)", () => {
-    const cam = cameraBoardGeometry(P({ special: 'camera' }), 3);
+    const cam = cameraBoardGeometry(P({ special: 'camera' }));
     for (const special of [undefined, 'doc', 'alu'] as const) {
       const g = partGeometry(P({ special: special as Plank['special'] }), 3);
       expect(g.geo.attributes.position.count).toBe(cam.geo.attributes.position.count);
@@ -202,8 +202,8 @@ describe('plankGeometry / PlankMesh', () => {
   });
   it("les trous ajoutent des arêtes ; les trous ronds n'ont pas de verticales (seuls les contours à angles en ont)", () => {
     const plain = plankGeometry(P({ w: 20, h: 20 }), 3).edges.attributes.position.count;
-    const holed = plankGeometry(P({ w: 20, h: 20, holes: [{ shape: 'round', x: 0, y: 0, size: 6 }] }), 3).edges.attributes.position.count;
-    const sq = plankGeometry(P({ w: 20, h: 20, holes: [{ shape: 'square', x: 0, y: 0, size: 6, sh: 6 }] }), 3).edges.attributes.position.count;
+    const holed = plankGeometry(P({ w: 20, h: 20, holes: [{ id: 'h', shape: 'round', x: 0, y: 0, size: 6 }] }), 3).edges.attributes.position.count;
+    const sq = plankGeometry(P({ w: 20, h: 20, holes: [{ id: 'h', shape: 'square', x: 0, y: 0, size: 6, sh: 6 }] }), 3).edges.attributes.position.count;
     expect(holed).toBeGreaterThan(plain);
     expect(sq).toBe(plain + 4 * 6); // carré : 4 côtés × (haut + bas + vertical) × 2 sommets
   });
