@@ -44,6 +44,8 @@ export class PlankMesh extends Mesh<BufferGeometry, MeshStandardMaterial> {
   readonly plankId: string;
   /** Arêtes tracées sur la surface (enfant de la mesh). */
   readonly edges: LineSegments<BufferGeometry, LineBasicMaterial>;
+  /** Partie tournante (rotor du ventilateur), enfant de la mesh : même matériau que la plaque, arêtes en enfant ; absente pour les autres pièces. */
+  rotor: Mesh<BufferGeometry, MeshStandardMaterial> | null = null;
   /** Clé de la forme actuellement construite (voir `plankShapeKey`). */
   shapeKey = '';
 
@@ -68,15 +70,32 @@ export class PlankMesh extends Mesh<BufferGeometry, MeshStandardMaterial> {
     }
   }
 
+  /** Installe, remplace ou retire le rotor (libère l'ancien). L'angle courant est gardé quand on remplace. */
+  private setRotor(g: PartGeometry['rotor']): void {
+    if (!g) {
+      if (this.rotor) { this.remove(this.rotor); this.rotor.geometry.dispose(); this.rotor.children.forEach((c) => { if (c instanceof LineSegments) c.geometry.dispose(); }); this.rotor = null; }
+      return;
+    }
+    if (!this.rotor) {
+      this.rotor = new Mesh(g.geo, this.material);
+      this.rotor.add(new LineSegments(g.edges, materials.edge()));
+      this.add(this.rotor);
+      return;
+    }
+    this.rotor.geometry.dispose(); this.rotor.geometry = g.geo;
+    for (const c of this.rotor.children) if (c instanceof LineSegments) { c.geometry.dispose(); c.geometry = g.edges; }
+  }
+
   /** Refait la géométrie si la forme a changé (libère l'ancienne). */
   updateShape(p: Plank, t: number): void {
     const key = plankShapeKey(p, t);
     if (this.shapeKey === key) return;
-    const { geo, edges } = plankGeometry(p, t);
+    const { geo, edges, rotor } = plankGeometry(p, t);
     this.geometry.dispose();
     this.geometry = geo;
     this.edges.geometry.dispose();
     this.edges.geometry = edges;
+    this.setRotor(rotor);
     this.shapeKey = key;
   }
 }

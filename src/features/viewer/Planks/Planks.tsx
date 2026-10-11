@@ -11,7 +11,7 @@ import { loadPiModel, piModel } from '@/birdhouse/three/piModel';
 import type { View } from '@/birdhouse/three/types';
 import { ContextMenu, CutPanel, HistoryList, HoleWindow, LeftPanel, PiecesList, PullBar, RightPanel, SelectionBar, UndoBar, ViewToolbar } from '../components';
 import { HIDDEN_AT_CREATION, STORAGE } from '../constants';
-import { useCutPlane, useDrawer, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useThreeView } from '../hooks';
+import { useCutPlane, useDrawer, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useThreeView, useFanSpeed } from '../hooks';
 import type { ContextMenuState, Hover, HoleEdit, PullState } from '../types';
 
 /** Écran du nichoir : vue 3D (Three.js), panneaux gauche / droite, schéma, documents, simulateur du Pi. Garde la scène, la sélection et l'historique. */
@@ -91,6 +91,8 @@ export default function Planks() {
 
   useThreeView({ host, view, scRef, cutRef, pullRef, pickRef, setSc, setCut, setCtx, setSelectedId, setHover, pushEntry });
   useDayNight(view, night); // après useThreeView : la vue existe au montage
+  const [fanPct, setFanPct] = useState(0); // vitesse du ventilateur lue dans le simulateur du Pi (le rotor de la 3D tourne)
+  useFanSpeed(view, fanPct);
   useSceneSync(view, { sc, selectedId, extra, hover, groupSel, holeEdit, holeHover, pull, cut, hidden, piReady });
 
   // ----- actions -----
@@ -177,7 +179,7 @@ export default function Planks() {
       </main>
 
       {machine.open && <LaserMachineModal m={machine} />}
-      {piOpen && <PiSimulator onClose={() => setPiOpen(false)} shoot={shoot} night={night} onToggleNight={() => setNight((v) => !v)} />}
+      {piOpen && <PiSimulator onClose={() => setPiOpen(false)} shoot={shoot} night={night} onToggleNight={() => setNight((v) => !v)} onFanSpeed={setFanPct} />}
       {docOpen && DOCS.find((d) => d.id === docOpen) && <DocModal doc={DOCS.find((d) => d.id === docOpen)!} onClose={() => setDocOpen(null)} />}
       {schemaOn && <SchemaPanel hover={hover} planks={sc.planks} onHover={(id) => setHover(id ? { plank: id } : null)} />}
       <RightPanel

@@ -3,7 +3,7 @@ import { BufferGeometry, EdgesGeometry, Float32BufferAttribute, type Color } fro
 import { PART } from '../constants';
 
 /** Ce que fabrique une fabrique de pièce : la surface (couleurs par sommet) et ses arêtes (vides pour les fils, nappes, panneaux). */
-export interface PartGeometry { geo: BufferGeometry; edges: BufferGeometry }
+export interface PartGeometry { geo: BufferGeometry; edges: BufferGeometry; /** Partie tournante (rotor d'un ventilateur) : maillage à part, enfant de la mesh, qui tourne autour de l'axe z local. */ rotor?: { geo: BufferGeometry; edges: BufferGeometry } }
 
 /** Un morceau d'une pièce : sa géométrie et sa couleur. */
 export interface Part { g: BufferGeometry; c: Color }

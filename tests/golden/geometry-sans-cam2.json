@@ -995,15 +995,15 @@
  },
  "071 Ventilateur Noctua NF-A6x25 PWM (60 × 60 × 25)": {
   "geo": {
-   "n": 1440,
+   "n": 828,
    "idx": 0,
-   "pos": "c3ae37edee71385e",
-   "col": "e1e1b2a5a8543296"
+   "pos": "d62ac7b3c460a806",
+   "col": "fcd33ff5152b9a1d"
   },
   "edges": {
-   "n": 592,
+   "n": 280,
    "idx": 0,
-   "pos": "e797b124b1e25e33",
+   "pos": "02914f9a5469eeee",
    "col": null
   }
  },

@@ -182,7 +182,7 @@ const PI_TESTS: PiTest[] = [
     expect: (e) => !e.led_nid && !e.cam1 && !e.cam2 && !!e.erreurs.delestage && e.ventilo.mode === 'auto' && e.ventilo.pourcent >= 30, ok: (e) => `${e.erreurs.delestage} — ventilateur à ${e.ventilo.pourcent} %` },
 ];
 
-export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { onClose: () => void; shoot?: (num: number, led?: boolean) => string | null; night?: boolean; onToggleNight?: () => void }) {
+export function PiSimulator({ onClose, shoot, night = false, onToggleNight, onFanSpeed }: { onClose: () => void; shoot?: (num: number, led?: boolean) => string | null; night?: boolean; onToggleNight?: () => void; /** Vitesse du ventilateur (0–100 %, 0 s'il est éteint ou coupé), à chaque seconde et à la fermeture. */ onFanSpeed?: (pct: number) => void }) {
   const [state, setState] = useState<'chargement' | 'prêt' | 'erreur'>('chargement');
   const [err, setErr] = useState('');
   const [log, setLog] = useState<string[]>([]); // lignes du terminal, dans l'ordre d'arrivée
@@ -192,6 +192,8 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
   const [accel, setAccel] = useState(1); // vitesse du temps de la batterie simulée (×1 = temps réel)
   const frameRef = useRef<HTMLIFrameElement>(null);
   const pyRef = useRef<Pyodide | null>(null);
+  const cbRef = useRef({ onFanSpeed });
+  cbRef.current = { onFanSpeed }; // les fonctions de rappel du parent sans relancer Python
 
   useEffect(() => {
     const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -219,7 +221,10 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
       };
       tick();
       let n = 0;
-      timers.push(window.setInterval(() => tick(), 1000)); // la boucle de lecture du programme (toutes les secondes en mode simulé)
+      const publish = () => { // l'état du Pi vers la vue 3D : ventilateur
+        try { const e = JSON.parse(String(py.globals.get('etat_json')())) as PiState; cbRef.current.onFanSpeed?.(e.ventilo.alimente ? e.ventilo.pourcent : 0); } catch { /* état pas encore lisible */ }
+      };
+      timers.push(window.setInterval(() => { tick(); publish(); }, 1000)); // la boucle de lecture du programme (toutes les secondes en mode simulé)
       timers.push(window.setInterval(() => { // flux vidéo simulés
         const doc = frameRef.current?.contentDocument;
         if (!doc) return;
@@ -230,6 +235,7 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
     }).catch((e: Error) => { setErr(String(e.message ?? e)); setState('erreur'); });
     return () => {
       dead = true;
+      cbRef.current.onFanSpeed?.(0); // fermé : le rotor s'arrête
       sink = () => {};
       timers.forEach((t) => clearInterval(t));
       delete window.__piFetch;

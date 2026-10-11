@@ -40,6 +40,9 @@ Le sens des dépendances : `features/viewer` → `three/` → `model/`. Jamais l
 
 Un type de plaque de bois (contour libre, trous…) n'a pas de `special` : il suit `factories/plank.ts`, qui extrude le contour de `outline(p)` avec ses trous.
 
+## Pièce tournante (rotor du ventilateur)
+
+Une fabrique peut rendre un `rotor` en plus de `geo` / `edges` (`PartGeometry.rotor`) : `PlankMesh` en fait un enfant (`mesh.rotor`, typé, même matériau que la pièce, arêtes en enfant), libéré avec elle. Le ventilateur (`part/fan.ts`) sépare ainsi le cadre (statique) et le rotor (9 pales + moyeu) ; à l'arrêt, cadre + rotor redonnent exactement l'ancien dessin d'un seul bloc (testé par empreinte). `three/fanSpin.ts` : `advanceAngle(angle, pct, dt)` (vitesse = pct / 100 × 3 tours/s au plus) et `spinRotors(view, dt)`, appelée à chaque image par la boucle de rendu de `createScene` (pas de temps plafonné à 0,1 s, la boucle ne tourne pas quand la page est cachée). `view.fan = { pct, angle }` est alimenté par le hook `useFanSpeed(view, pct)` ; le simulateur du Pi donne `pct` par sa prop `onFanSpeed` (chaque seconde ; 0 si le ventilateur est éteint ou coupé, et à la fermeture).
 ## Ce qui refait la géométrie d'une plaque
 
 `plankShapeKey` (dans `factories/plank.ts`) liste tout ce qui change le dessin : dimensions, crans, trous, épaisseur, chemin, profondeur, couleur, contour libre, haut incliné, type spécial. La mesh (`PlankMesh`) ne refait sa géométrie que si cette clé change. **Si une pièce dépend d'une nouvelle propriété de `Plank` pour son dessin, l'ajouter à la clé** (sinon le dessin reste périmé).

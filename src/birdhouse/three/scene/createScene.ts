@@ -5,6 +5,7 @@ import { CameraShooter } from '../cameraShooter';
 import { clearGroup, disposeObject3D } from '../dispose';
 import { disposeAll } from '../registry/materials';
 import type { View } from '../types';
+import { spinRotors } from '../fanSpin';
 import { startRenderLoop } from './renderLoop';
 
 /** La vue 3D créée, et de quoi la défaire. */
@@ -46,13 +47,14 @@ export function createScene(host: HTMLElement): SceneHandle {
   const pullMark = new Group(); // la face double-cliquée, en pointillés bleus : on la tire ou on la pousse
   scene.add(holeMark, pullMark);
   const shooter = new CameraShooter(scene, renderer, [labels, holeMark, pullMark, cutMark]);
-  const view: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, holeMark, pullMark, cutMark, shooter, dragging: false };
+  const view: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, holeMark, pullMark, cutMark, shooter, dragging: false, fan: { pct: 0, angle: 0 } };
 
   const resize = () => { const w = host.clientWidth, h = host.clientHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); };
   const ro = new ResizeObserver(resize);
   ro.observe(host);
   resize();
-  const stopLoop = startRenderLoop(() => { orbit.update(); renderer.render(scene, camera); }); // ne rend rien tant que la page est cachée
+  let last = performance.now();
+  const stopLoop = startRenderLoop(() => { const now = performance.now(), dt = (now - last) / 1000; last = now; spinRotors(view, dt); orbit.update(); renderer.render(scene, camera); }); // ne rend rien tant que la page est cachée
 
   const dispose = () => {
     stopLoop();
