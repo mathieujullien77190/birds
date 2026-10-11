@@ -71,6 +71,9 @@ def restaurer():
     for k in ("securite", "delestage", "ds18b20", "bme280"):
         nichoir.etat["erreurs"].pop(k, None)
 
+def nuit(v):
+    nichoir.MOCK_NUIT = bool(v)
+
 def surchauffe(v):
     nichoir.MOCK_SURCHAUFFE = float(v)
 `;
@@ -183,6 +186,12 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
       delete (window as any).__piFetch;
     };
   }, []);
+
+  useEffect(() => { // la scène 3D de nuit : le panneau solaire ne charge plus ; de jour, il recharge la batterie simulée
+    if (state !== 'prêt') return;
+    pyRef.current?.globals.get('nuit')(night);
+    sink(night ? '# nuit : le panneau solaire ne charge plus, la batterie se décharge' : '# jour : le panneau solaire recharge la batterie (≈ 55 W)');
+  }, [night, state]);
 
   useEffect(() => { const el = termRef.current; if (el) el.scrollTop = el.scrollHeight; }, [log]);
 

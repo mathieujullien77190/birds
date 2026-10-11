@@ -47,6 +47,7 @@ COURBE_LIFEPO4 = [(0, 10.0), (10, 12.0), (20, 12.8), (30, 12.9), (40, 13.0), (70
 # FACULTATIF : mode simulé, pour tester la page sans matériel (ordinateur). Jamais actif par défaut.
 MOCK = os.environ.get("NICHOIR_MOCK") == "1" or "--mock" in sys.argv
 SIM_ACCEL = float(os.environ.get("NICHOIR_MOCK_ACCEL", "10"))  # le temps passe 10 fois plus vite sur la batterie simulée (pour voir le niveau bouger)
+MOCK_NUIT = None   # None : jour / nuit d'après l'horloge ; True / False : imposé (le simulateur de l'app suit son bouton Jour / Nuit)
 MOCK_PANNES = {"bme": False, "sonde": False}  # pannes simulées (essais depuis le simulateur de l'app)
 MOCK_SURCHAUFFE = float(os.environ.get("NICHOIR_MOCK_SURCHAUFFE", "0"))  # °C : force le dissipateur à cette température quand le Peltier tourne (essai de la coupure)
 
@@ -238,9 +239,10 @@ if MOCK:
             etat["t_nid"] = round(15 + 3 * math.sin(time.time() / 600 * 2 * math.pi) + sim["decalage"] + random.uniform(-0.2, 0.2), 1)
             etat["hum_nid"] = round(70 + 10 * math.sin(time.time() / 900 * 2 * math.pi) + random.uniform(-1, 1), 0)
         etat["t_dissipateur"] = round(sim["diss"] + random.uniform(-0.2, 0.2), 1)
-        # batterie simulée : décharge de la consommation, recharge solaire selon l'heure (0 la nuit, jusqu'à 60 W vers midi)
-        h = time.localtime().tm_hour + time.localtime().tm_min / 60
-        solaire = max(0.0, 60 * math.sin((h - 6) / 12 * math.pi)) if 6 <= h <= 18 else 0.0
+        # batterie simulée : décharge de la consommation, recharge par le panneau solaire le jour (≈ 55 W), rien la nuit
+        h = time.localtime().tm_hour
+        nuit = MOCK_NUIT if MOCK_NUIT is not None else not 6 <= h < 18
+        solaire = 0.0 if nuit else round(55 + 5 * math.sin(time.time() / 7) + random.uniform(-1, 1), 1)  # le jour le panneau de 100 W donne ≈ 55 W (ensoleillement moyen)
         sim["wh"] = min(CAPACITE_WH, max(0.0, sim["wh"] + (solaire - consommation()["total_w"]) * PERIODE / 3600 * SIM_ACCEL))
         pc = 100 * sim["wh"] / CAPACITE_WH
         etat["batterie"] = {"pourcent": round(pc, 1), "tension": round(tension_depuis_pourcent(pc), 2), "source": "simulée", "solaire_w": round(solaire, 1)}
@@ -301,6 +303,10 @@ def leds(nid=None, ext=None):
 
 # ---------------------------------------------------------------- lecture des capteurs, toutes les PERIODE secondes
 # REQUIS : c'est la boucle qui lit les capteurs et applique la coupure de sécurité. Elle tourne en tâche de fond.
+_lectures = [0]
+LOG_TOUS_LES = 10   # une ligne de situation toutes les 10 lectures (50 s sur le Pi, 10 s en mode simulé)
+
+
 def lecture():
     """Une lecture des capteurs + la coupure de sécurité (appelée toutes les PERIODE secondes par boucle())."""
     if MOCK:
@@ -354,7 +360,15 @@ def lecture():
         etat["erreurs"].pop("delestage", None)
     etat["conso"] = consommation()
     etat["derniere_lecture"] = time.strftime("%H:%M:%S")
-    log(f"nid {etat['t_nid']} °C, {etat['hum_nid']} % · dissipateur {etat['t_dissipateur']} °C · Peltier {etat['peltier']} {round(etat['puissance'] * 100)} %" + (f" · conso {etat['conso']['total_w']} W · batterie {etat['batterie']['pourcent']} %" if etat["batterie"]["pourcent"] is not None else f" · conso {etat['conso']['total_w']} W"))
+    _lectures[0] += 1
+    if _lectures[0] % LOG_TOUS_LES == 1:  # un point de situation de temps en temps, pas à chaque lecture (le journal restait noyé)
+        parts = [f"nid {etat['t_nid']} °C, {etat['hum_nid']} %", f"dissipateur {etat['t_dissipateur']} °C"]
+        if etat["peltier"] != "arrêt":
+            parts.append(f"Peltier {etat['peltier']} {round(etat['puissance'] * 100)} %")  # le Peltier n'est cité que quand il tourne
+        parts.append(f"conso {etat['conso']['total_w']} W")
+        if etat["batterie"]["pourcent"] is not None:
+            parts.append(f"batterie {etat['batterie']['pourcent']} %")
+        log(" · ".join(parts))
 
 
 def boucle():
