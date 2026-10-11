@@ -1,3 +1,5 @@
 .conso-line { display: grid; grid-template-columns: 8.5rem 1fr 3.5rem; gap: 8px; align-items: center; margin-top: 6px; font-size: 0.9rem; }
 .conso-line.off { opacity: 0.4; }
 .conso-w { text-align: right; font-variant-numeric: tabular-nums; }
+
+#autonomie { margin-top: 14px; }
