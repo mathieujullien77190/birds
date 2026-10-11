@@ -1,4 +1,4 @@
-import { type PlankScene, type HistoryEntry } from './types';
+import { type PlankScene } from './types';
 import { DEFAULT_SCENE } from './constants';
 import { toZUp } from './geometry/transform';
 
@@ -10,13 +10,5 @@ export function loadScene(): PlankScene {
 export function saveScene(s: PlankScene): void { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch { /* quota */ } }
 
 const HKEY = 'plaques-historique';
-export function loadHistory(): HistoryEntry[] {
-  try { const h = JSON.parse(localStorage.getItem(HKEY) ?? '') as HistoryEntry[]; if (Array.isArray(h)) return h.map((e) => ({ ...e, scene: toZUp(e.scene) })); } catch { /* rien */ }
-  return [];
-}
-export function saveHistory(h: HistoryEntry[]): void {
-  let keep = h;
-  for (let tries = 0; tries < 6; tries++) {
-    try { localStorage.setItem(HKEY, JSON.stringify(keep)); return; } catch { keep = keep.slice(Math.ceil(keep.length / 2)); }
-  }
-}
+/** L'ancien historique « Retour » enregistré (retiré : il saturait le stockage du navigateur) est effacé au démarrage. */
+export function forgetHistory(): void { try { localStorage.removeItem(HKEY); } catch { /* rien */ } }

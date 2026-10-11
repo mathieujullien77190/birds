@@ -3,7 +3,6 @@ export * from './Btn';
 export * from './ConfirmDialog';
 export * from './Chip';
 export * from './CollapseButton';
-export * from './Drawer';
 export * from './Eye';
 export * from './FloatingPanel';
 export * from './Hint';

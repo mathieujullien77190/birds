@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_SCENE, loadHistory, loadScene, saveHistory, saveScene, type HistoryEntry, type Plank, type PlankScene } from '@/birdhouse/model';
+import { DEFAULT_SCENE, forgetHistory, loadScene, saveScene, type Plank, type PlankScene } from '@/birdhouse/model';
 
 /** localStorage factice en mémoire ; `limit` = taille maximale d'une valeur (au-delà : QuotaExceededError). */
 function fakeStorage(limit = Infinity) {
@@ -20,7 +20,6 @@ function fakeStorage(limit = Infinity) {
 
 const plank = (id: string, over: Partial<Plank> = {}): Plank => ({ id, name: id, w: 10, h: 10, pos: [1, 2, 3], rot: [0, 0, 0], notches: [], holes: [], ...over });
 const scene = (planks: Plank[], over: Partial<PlankScene> = {}): PlankScene => ({ t: 3, fit: 0, planks, up: 'z2', ...over });
-const entry = (label: string, at: number, planks = [plank('a')]): HistoryEntry => ({ label, at, scene: scene(planks) });
 
 let store: ReturnType<typeof fakeStorage>;
 beforeEach(() => { store = fakeStorage(); vi.stubGlobal('localStorage', store.api); });
@@ -70,51 +69,16 @@ describe('loadScene / saveScene', () => {
   });
 });
 
-describe('loadHistory / saveHistory', () => {
-  it('rien, JSON illisible ou pas une liste → []', () => {
-    expect(loadHistory()).toEqual([]);
-    store.data.set('plaques-historique', '{oups');
-    expect(loadHistory()).toEqual([]);
-    store.data.set('plaques-historique', JSON.stringify({ a: 1 }));
-    expect(loadHistory()).toEqual([]);
-  });
-  it('aller-retour exact', () => {
-    const h = [entry('un', 1), entry('deux', 2)];
-    saveHistory(h);
-    expect(store.calls.map((c) => c.key)).toEqual(['plaques-historique']);
-    expect(loadHistory()).toEqual(h);
-  });
-  it('chaque scène de l\'historique est convertie en Z = hauteur au chargement', () => {
-    const old: PlankScene = { t: 3, fit: 0, planks: [plank('a', { pos: [5, 6, 7] })] };
-    store.data.set('plaques-historique', JSON.stringify([{ label: 'ancien', at: 9, scene: old }]));
-    const h = loadHistory();
-    expect(h[0].label).toBe('ancien');
-    expect(h[0].scene.up).toBe('z2');
-    expect(h[0].scene.planks[0].pos).toEqual([5, -7, 6]);
-  });
-  it('quota : la moitié la plus ancienne est lâchée, jusqu\'à ce que ça rentre', () => {
-    const all = Array.from({ length: 8 }, (_, i) => entry(`e${i}`, i));
-    const oneLen = JSON.stringify([all[0]]).length;
-    store = fakeStorage(oneLen * 4 + 10); // 4 entrées passent, pas 8
-    vi.stubGlobal('localStorage', store.api);
-    saveHistory(all);
-    expect(store.calls).toHaveLength(2); // 8 refusées, 4 acceptées
-    expect(loadHistory().map((e) => e.label)).toEqual(['e4', 'e5', 'e6', 'e7']); // les plus récentes sont gardées
-  });
-  it('quota : nombre impair d\'entrées → on lâche ceil(n / 2) des plus anciennes', () => {
-    const all = Array.from({ length: 5 }, (_, i) => entry(`e${i}`, i));
-    const oneLen = JSON.stringify([all[0]]).length;
-    store = fakeStorage(oneLen * 2 + 10);
-    vi.stubGlobal('localStorage', store.api);
-    saveHistory(all);
-    expect(loadHistory().map((e) => e.label)).toEqual(['e3', 'e4']); // 5 → 2 (on ôte 3) ; 2 entrées tiennent
-  });
-  it('quota impossible : 6 essais au plus puis on abandonne sans lever d\'erreur', () => {
-    store = fakeStorage(0);
-    vi.stubGlobal('localStorage', store.api);
-    const all = Array.from({ length: 100 }, (_, i) => entry(`e${i}`, i));
-    expect(() => saveHistory(all)).not.toThrow();
-    expect(store.calls).toHaveLength(6);
+describe('forgetHistory', () => {
+  it('efface l\'ancien historique enregistré, sans toucher à la scène', () => {
+    store.data.set('plaques-historique', '[1]');
+    store.data.set('plaques-scene', '{}');
+    forgetHistory();
     expect(store.data.has('plaques-historique')).toBe(false);
+    expect(store.data.has('plaques-scene')).toBe(true);
+  });
+  it('un stockage qui refuse : ne plante pas', () => {
+    vi.stubGlobal('localStorage', { removeItem: () => { throw new Error('refusé'); } });
+    expect(() => forgetHistory()).not.toThrow();
   });
 });

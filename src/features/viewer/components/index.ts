@@ -1,6 +1,5 @@
 export * from './ContextMenu';
 export * from './CutPanel';
-export * from './HistoryList';
 export * from './LeftPanel';
 export * from './PiecesList';
 export * from './PullBar';

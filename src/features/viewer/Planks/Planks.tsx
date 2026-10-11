@@ -5,16 +5,16 @@ import { randomId } from '@/lib';
 import { DocModal, DOCS } from '@/features/docs';
 import { LaserMachineModal, LaserPreview, useLaser } from '@/features/laser';
 import { SchemaPanel } from '@/features/schema';
-import { makeNest, moveWithGroup, setAirPlug, setWinterCassette, winterState, extents, saveHistory, saveScene, loadScene, type Plank, type PlankScene, type Vec3 } from '@/birdhouse/model';
+import { makeNest, moveWithGroup, setAirPlug, setWinterCassette, winterState, extents, forgetHistory, saveScene, loadScene, type Plank, type PlankScene, type Vec3 } from '@/birdhouse/model';
 import { PiSimulator } from '@/birdhouse/PiSimulator';
 import { loadPiModel, piModel } from '@/birdhouse/three/piModel';
 import type { View } from '@/birdhouse/three/types';
-import { ContextMenu, CutPanel, HistoryList, LeftPanel, MobileBar, PartsSheet, PiecesList, PullBar, RightPanel, SelectionBar, UndoBar, ViewToolbar } from '../components';
+import { ContextMenu, CutPanel, LeftPanel, MobileBar, PartsSheet, PiecesList, PullBar, RightPanel, SelectionBar, UndoBar, ViewToolbar } from '../components';
 import { HIDDEN_AT_CREATION, STORAGE } from '../constants';
-import { useCutPlane, useDrawer, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useThreeView, useFanSpeed, useIrBeams } from '../hooks';
+import { useCutPlane, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useThreeView, useFanSpeed, useIrBeams } from '../hooks';
 import type { ContextMenuState, Hover, PullState } from '../types';
 
-/** Écran du nichoir : vue 3D (Three.js), panneaux gauche / droite, schéma, documents, simulateur du Pi. Garde la scène, la sélection et l'historique. */
+/** Écran du nichoir : vue 3D (Three.js), panneaux gauche / droite, schéma, documents, simulateur du Pi. Garde la scène, la sélection et « Retour ». */
 export default function Planks() {
   const mobile = useIsMobile();
   const firstMobile = useRef(mobile);
@@ -31,7 +31,7 @@ export default function Planks() {
   const pullRef = useRef(pull);
   pullRef.current = pull;
   const [leftOpen, setLeftOpen] = usePersistentFlag(STORAGE.leftOpen); // panneau de gauche replié ou non
-  const [rightOpen, setRightOpen] = usePersistentFlag(STORAGE.rightOpen); // panneau de droite (« Pièces » / « Historique ») replié ou non
+  const [rightOpen, setRightOpen] = usePersistentFlag(STORAGE.rightOpen); // panneau de droite (« Pièces ») replié ou non
   const [piOpen, setPiOpen] = useState(false); // simulateur de la page web du Pi (Python exécuté dans le navigateur) : fenêtre affichée
   const [piMounted, setPiMounted] = useState(false); // le simulateur reste monté une fois ouvert : fermer la fenêtre ne fait que la cacher, le Python continue (ventilateur, LED, batterie)
   const [night, setNight] = usePersistentFlag(STORAGE.night, false); // vue 3D de nuit (la clé n'est pas ouverte par défaut)
@@ -50,7 +50,7 @@ export default function Planks() {
     if (!ctrl && id) { // un composant électronique : choisi seul, son groupe est déplié dans « Pièces » et la carte affichée
       const pl = scRef.current.planks.find((p) => p.id === id);
       if (pl) { // n'importe quelle pièce (plus seulement l'électronique) : choisie seule, son groupe déplié dans « Pièces », la carte affichée
-        setSelectedId(id); setExtra(new Set()); setGroupSel(null); setDrawer('pieces'); if (pl.group) { const g = pl.group; setOpenGroups((s) => new Set([...s, g])); }
+        setSelectedId(id); setExtra(new Set()); setGroupSel(null); if (pl.group) { const g = pl.group; setOpenGroups((s) => new Set([...s, g])); }
         setTimeout(() => document.querySelector(`[data-pid="${id}"]`)?.scrollIntoView({ block: 'center', behavior: 'smooth' }), 80);
         return;
       }
@@ -64,7 +64,7 @@ export default function Planks() {
   };
   const pickRef = useRef(pick);
   pickRef.current = pick;
-  const [drawer, setDrawer] = useDrawer(); // volet ouvert à droite
+  useEffect(() => { forgetHistory(); }, []); // l'ancien historique enregistré est effacé (plus utilisé)
   const [ctx, setCtx] = useState<ContextMenuState | null>(null); // menu du clic droit
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<View | null>(null);
@@ -72,10 +72,10 @@ export default function Planks() {
   scRef.current = sc;
   const selRef = useRef(selectedId);
   selRef.current = selectedId;
-  const { history, backLabel, histN, commit, pushEntry, undoTo, back, clearHistory } = useHistory(scRef, setSc, (scene) => {
+  const { backLabel, commit, pushEntry, back } = useHistory(scRef, setSc, (scene) => {
     if (selRef.current && !scene.planks.some((p) => p.id === selRef.current)) setSelectedId(null);
   });
-  useEffect(() => { saveScene(sc); saveHistory(history.current); }, [sc]); // eslint-disable-line react-hooks/exhaustive-deps -- `history` est une ref (stable) : la scène et l'historique sont enregistrés ensemble, quand la scène change
+  useEffect(() => { saveScene(sc); }, [sc]);
   const backRef = useRef(back);
   backRef.current = back;
   const update = (id: string, patch: Partial<Plank>, label = 'Réglage de la plaque') => commit(label, (s) => ({ ...s, planks: s.planks.map((p) => (p.id === id ? { ...p, ...patch } : p)) }));
@@ -207,10 +207,8 @@ export default function Planks() {
       {modals}
       {schemaOn && <SchemaPanel hover={hover} planks={sc.planks} onHover={(id) => setHover(id ? { plank: id } : null)} />}
       <RightPanel
-        open={rightOpen} setOpen={setRightOpen} drawer={drawer} setDrawer={setDrawer}
-        piecesCount={sc.planks.length} historyCount={history.current.length}
+        open={rightOpen} setOpen={setRightOpen} piecesCount={sc.planks.length}
         pieces={sc.planks.length ? <PiecesList sc={sc} selectedId={selectedId} selected={selected} groupSel={groupSel} extra={extra} hidden={hidden} openGroups={openGroups} setOpenGroups={setOpenGroups} dropOn={dropOn} setDropOn={setDropOn} setHover={setHover} confirmAll={confirmAll} docOpen={docOpen} setDocOpen={setDocOpen} setSelectedId={setSelectedId} setGroupSel={setGroupSel} setExtra={setExtra} pick={pick} update={update} commit={commit} toggleHidden={toggleHidden} duplicate={duplicate} remove={remove} duplicateGroup={duplicateGroup} removeGroup={removeGroup} removeAll={removeAll} dropPlank={dropPlank} /> : <Hint>Aucune plaque.</Hint>}
-        history={<HistoryList entries={history.current} histN={histN} undoTo={undoTo} clearHistory={clearHistory} />}
       />
     </div>
   );

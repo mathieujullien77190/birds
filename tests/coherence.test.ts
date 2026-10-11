@@ -61,11 +61,13 @@ describe('cohérence : schéma mermaid de docs/schema-electronique.md', () => {
 
 describe('cohérence : documents', () => {
   const docs = readdirSync(join(root, 'docs')).filter((f) => f.endsWith('.md'));
+  const NOT_IN_APP = ['architecture-3d.md', 'checklist-changements.md']; // documents gardés dans le dépôt mais volontairement absents de l'application
   it('chaque docs/*.md est dans DOCS, dans la table « Documentation » du README et cité dans CLAUDE.md', () => {
     const src = read('src/features/docs/DocModal/constants.ts'), readme = read('README.md'), claude = read('CLAUDE.md');
     expect(docs.length).toBeGreaterThanOrEqual(5);
     for (const d of docs) {
-      expect(src, `${d} absent de DOCS`).toContain(`/docs/${d}?raw`);
+      if (NOT_IN_APP.includes(d)) expect(src, `${d} ne doit pas être dans l'application`).not.toContain(`/docs/${d}`);
+      else expect(src, `${d} absent de DOCS`).toContain(`/docs/${d}?raw`);
       expect(readme, `${d} absent du README`).toContain(`docs/${d}`);
       expect(claude, `${d} absent de CLAUDE.md`).toContain(`docs/${d}`);
     }
@@ -114,7 +116,7 @@ describe('cohérence : skills de .claude/skills', () => {
 describe('cohérence : réglages et configuration', () => {
   it('clés localStorage : valeurs figées (les renommer efface les réglages enregistrés de l\'utilisateur)', () => {
     expect(STORAGE).toEqual({
-      leftOpen: 'plaques-menu-gauche', rightOpen: 'plaques-menu-droit', drawer: 'plaques-volet', night: 'plaques-nuit',
+      leftOpen: 'plaques-menu-gauche', rightOpen: 'plaques-menu-droit', night: 'plaques-nuit',
       schema: 'plaques-schema', cut: 'plaques-coupe', hidden: 'plaques-caches', nest: 'plaques-nichoir-2',
     });
     expect(new Set(Object.values(STORAGE)).size).toBe(Object.keys(STORAGE).length);

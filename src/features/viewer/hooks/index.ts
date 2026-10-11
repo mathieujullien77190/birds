@@ -1,6 +1,5 @@
 export * from './useCutPlane';
 export * from './useDayNight';
-export * from './useDrawer';
 export * from './useHiddenPlanks';
 export * from './useHistory';
 export * from './useNestParams';

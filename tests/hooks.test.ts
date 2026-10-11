@@ -9,10 +9,9 @@ import { useCutPlane } from '@/features/viewer/hooks/useCutPlane';
 import { AmbientLight, Color, DirectionalLight } from 'three';
 import { AMBIENCE } from '@/birdhouse/three/constants';
 import { useDayNight } from '@/features/viewer/hooks/useDayNight';
-import { useDrawer } from '@/features/viewer/hooks/useDrawer';
 import { useFanSpeed } from '@/features/viewer/hooks/useFanSpeed';
 import { useHiddenPlanks } from '@/features/viewer/hooks/useHiddenPlanks';
-import { useHistory } from '@/features/viewer/hooks/useHistory';
+import { MAX_UNDO, useHistory } from '@/features/viewer/hooks/useHistory';
 import { useIrBeams } from '@/features/viewer/hooks/useIrBeams';
 import { useKeyboardShortcuts } from '@/features/viewer/hooks/useKeyboardShortcuts';
 import { useNestParams } from '@/features/viewer/hooks/useNestParams';
@@ -142,19 +141,6 @@ describe('useCutPlane', () => {
   });
 });
 
-describe('useDrawer', () => {
-  it('« pieces » par défaut ; fermer = texte vide enregistré, relu comme « fermé »', () => {
-    const { result, unmount } = renderHook(() => useDrawer());
-    expect(result.current[0]).toBe('pieces');
-    act(() => result.current[1](null));
-    expect(localStorage.getItem(STORAGE.drawer)).toBe('');
-    unmount();
-    expect(renderHook(() => useDrawer()).result.current[0]).toBeFalsy(); // volet fermé : le texte vide est relu tel quel, aucun volet ne s'ouvre
-    localStorage.setItem(STORAGE.drawer, 'history');
-    expect(renderHook(() => useDrawer()).result.current[0]).toBe('history');
-  });
-});
-
 describe('useHiddenPlanks', () => {
   it('toggleHidden : cache tout, puis montre tout si tout est déjà caché ; mémorisé', () => {
     const { result } = renderHook(() => useHiddenPlanks());
@@ -242,23 +228,25 @@ describe('useHistory : « Retour »', () => {
     expect(result.current.history.current.map((e) => e.label)).toEqual(['A']);
     expect(result.current.backLabel).toBe('A');
   });
-  it('pushEntry garde l\'état courant sans le changer ; clearHistory vide aussi le stockage', () => {
+  it('pushEntry garde l\'état courant sans le changer', () => {
     const { result } = setup();
     act(() => result.current.commit('A', add('a')));
     act(() => result.current.pushEntry('Glissé'));
     expect(result.current.backLabel).toBe('Glissé');
     expect(result.current.history.current[1].scene.planks.map((p) => p.id)).toEqual(['a']);
     expect(result.current.sc.planks).toHaveLength(1);
-    act(() => result.current.clearHistory());
-    expect(result.current.history.current).toEqual([]);
-    expect(result.current.backLabel).toBeNull();
-    expect(localStorage.getItem('plaques-historique')).toBe('[]');
   });
-  it('recharge l\'historique enregistré : le dernier libellé est proposé pour « Retour »', () => {
+  it('au plus MAX_UNDO étapes : les plus anciennes sont lâchées ; rien n\'est relu du stockage', () => {
     localStorage.setItem('plaques-historique', JSON.stringify([{ label: 'Ancien', scene: scene(), at: 1 }]));
     const { result } = setup();
-    expect(result.current.backLabel).toBe('Ancien');
-    expect(result.current.history.current).toHaveLength(1);
+    expect(result.current.backLabel).toBeNull();
+    expect(result.current.history.current).toHaveLength(0);
+    for (let i = 0; i < MAX_UNDO + 5; i++) act(() => result.current.commit(`Étape ${i}`, add(`p${i}`), false));
+    expect(result.current.history.current).toHaveLength(MAX_UNDO);
+    expect(result.current.history.current[0].label).toBe('Étape 5');
+    for (let i = 0; i < MAX_UNDO; i++) act(() => result.current.pushEntry(`Glissé ${i}`));
+    expect(result.current.history.current).toHaveLength(MAX_UNDO);
+    expect(result.current.history.current[MAX_UNDO - 1].label).toBe(`Glissé ${MAX_UNDO - 1}`);
   });
 });
 

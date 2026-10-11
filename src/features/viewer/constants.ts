@@ -2,7 +2,6 @@
 export const STORAGE = {
   leftOpen: 'plaques-menu-gauche', // panneau de gauche replié ou non
   rightOpen: 'plaques-menu-droit', // panneau de droite replié ou non
-  drawer: 'plaques-volet', // volet ouvert à droite (« Pièces » / « Historique »)
   night: 'plaques-nuit', // vue 3D en mode nuit (lune, fond sombre)
   schema: 'plaques-schema', // schéma électrique à côté de la 3D
   cut: 'plaques-coupe', // axe et côté du plan de coupe
