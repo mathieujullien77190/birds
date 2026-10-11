@@ -5,8 +5,6 @@ import { EMISSIVE } from '@/birdhouse/three/constants';
 import { clearGroup, disposeObject3D } from '@/birdhouse/three/dispose';
 import { cutMarkObject, habillageDimensions, holeMarkObjects, pullMarkObject } from '@/birdhouse/three/factories/marks';
 import { createPlankMesh } from '@/birdhouse/three/factories/plank';
-import { textures } from '@/birdhouse/three/registry/materials';
-import { PALETTE } from '@/birdhouse/three/registry/palette';
 import { AXIS_N, type Cut, type View } from '@/birdhouse/three/types';
 
 export interface SceneSyncState {
@@ -46,7 +44,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       m.position.set(...p.pos);
       m.rotation.set(MathUtils.degToRad(p.rot[0]), MathUtils.degToRad(p.rot[1]), MathUtils.degToRad(p.rot[2]));
       const mat = m.material;
-      if (p.name === 'Toit en chêne') { if (!mat.map) { mat.map = textures.oak(); mat.vertexColors = false; mat.color.set(PALETTE.white); mat.roughness = 0.7; mat.needsUpdate = true; } } // le pan de toit en chêne porte une texture de bois (le reste garde ses couleurs par sommets)
+      m.setOak(p.name === 'Toit en chêne'); // le pan de toit en chêne porte une texture de bois (le reste garde ses couleurs par sommets)
       mat.transparent = !!p.transparent;
       mat.opacity = p.transparent ? 0.3 : 1;
       mat.depthWrite = !p.transparent;

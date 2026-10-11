@@ -1,6 +1,6 @@
 import { BufferGeometry, Color, DoubleSide, ExtrudeGeometry, Float32BufferAttribute, LineBasicMaterial, LineSegments, Mesh, MeshStandardMaterial, Path, Shape, Vector2, type Object3D } from 'three';
 import { holeOutline, outline, type Plank } from '../../model';
-import { materials } from '../registry/materials';
+import { materials, textures } from '../registry/materials';
 import { PALETTE } from '../registry/palette';
 import { piModel } from '../piModel';
 import { partGeometry } from './part';
@@ -38,6 +38,8 @@ export function plankGeometry(p: Plank, t: number): PartGeometry {
  */
 export const plankShapeKey = (p: Plank, t: number): string => JSON.stringify([p.w, p.h, p.notches, p.holes, t, p.path, p.depth, p.color, p.poly, p.top, p.special, p.special === 'pi' && !!piModel]);
 
+const PLANK_ROUGHNESS = 0.85;
+
 /** La mesh d'une plaque : sa surface, ses arêtes (matériau partagé du registre) et son identifiant, typés (plus de `userData`). */
 export class PlankMesh extends Mesh<BufferGeometry, MeshStandardMaterial> {
   readonly plankId: string;
@@ -47,10 +49,24 @@ export class PlankMesh extends Mesh<BufferGeometry, MeshStandardMaterial> {
   shapeKey = '';
 
   constructor(plankId: string) {
-    super(new BufferGeometry(), new MeshStandardMaterial({ color: PALETTE.white, vertexColors: true, roughness: 0.85, side: DoubleSide }));
+    super(new BufferGeometry(), new MeshStandardMaterial({ color: PALETTE.white, vertexColors: true, roughness: PLANK_ROUGHNESS, side: DoubleSide }));
     this.plankId = plankId;
     this.edges = new LineSegments(new BufferGeometry(), materials.edge());
     this.add(this.edges);
+  }
+
+  /**
+   * Texture de chêne (pan de toit en chêne) : posée si `on`, retirée sinon (une plaque renommée redevient du contreplaqué, couleurs par sommet).
+   * Le chêne est une texture partagée du registre : elle n'est jamais libérée avec la plaque.
+   */
+  setOak(on: boolean): void {
+    const mat = this.material;
+    if (on) {
+      if (mat.map) return;
+      mat.map = textures.oak(); mat.vertexColors = false; mat.color.set(PALETTE.white); mat.roughness = 0.7; mat.needsUpdate = true;
+    } else if (mat.map) {
+      mat.map = null; mat.vertexColors = true; mat.color.set(PALETTE.white); mat.roughness = PLANK_ROUGHNESS; mat.needsUpdate = true;
+    }
   }
 
   /** Refait la géométrie si la forme a changé (libère l'ancienne). */
