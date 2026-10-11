@@ -236,6 +236,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // (de chaque côté, d'avant en arrière) où passent les barres de bois qui traversent aussi les murs avant et arrière : le toit tient ;
   // en descendant dans l'isolant entre murs extérieur et intérieur, le cadre cale en plus le toit sur le corps
   const ring = (name: string, k: number, holes: Hole[]): Plank => ({ id: uid(), name, w: W - 2 * t, h: D - 2 * t, pos: [0, 0, bodyH - (2 * k + 1) * t / 2], rot: [0, 0, 0], notches: [], holes, group: roofGroup });
+  // chaque barre ressort jusqu'au ras de la face extérieure du lambris (longueur BAR_LEN + LAM_T = 60), avec un trou Ø 3 à 6 mm du bout pour la tirer avec un crochet
   const BAR_LEN = 50; // quatre barres courtes (5 cm) : deux à l'avant, deux à l'arrière, chacune entre par un trou du mur et s'enfonce dans une encoche de la planche du milieu
   const inside = BAR_LEN - t; // partie de la barre qui est dans l'encoche
   const notch = (edge: Edge, x: number): Notch => ({ id: uid(), edge, pos: r2(x + (W - 2 * t) / 2), width: BAR, depth: inside });
@@ -243,7 +244,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // que le bloc d'entrée (plaques de 55 dans l'isolant) peut monter à fleur du haut du mur, toit retiré ou posé
   const uNotch = (): Notch => ({ id: uid(), edge: 'bottom', pos: r2((W - 2 * t) / 2), width: n.l + 2 * t, depth: r2((D / 2 - t) + (n.L / 2 + t)) });
   const bars: Plank[] = ([[-1, -1, 'avant gauche'], [1, -1, 'avant droite'], [-1, 1, 'arrière gauche'], [1, 1, 'arrière droite']] as const).map(([sx, sy, nm]): Plank => (
-    { id: uid(), name: `Barre ${nm} (MDF 3 mm)`, w: BAR_LEN, h: BAR, pos: [sx * gapX, sy * (D / 2 - BAR_LEN / 2), barZ] as Vec3, rot: [0, 0, 90] as Vec3, notches: [], holes: [], group: roofGroup, material: 'mdf' as const }));
+    { id: uid(), name: `Barre ${nm} (MDF 3 mm)`, w: BAR_LEN + LAM_T, h: BAR, pos: [sx * gapX, sy * (D / 2 + (LAM_T - BAR_LEN) / 2), barZ] as Vec3, rot: [0, 0, 90] as Vec3, notches: [], holes: [{ id: uid(), shape: 'round' as const, x: sy * (BAR_LEN + LAM_T) / 2 - sy * 6, y: 0, size: 3 }], group: roofGroup, material: 'mdf' as const }));
   const frames: Plank[] = [
     { ...ring('Cadre toit haut', 0, []), notches: [uNotch()] },
     { ...ring('Cadre toit milieu', 1, []), notches: [-gapX, gapX].flatMap((x) => [notch('bottom', x), notch('top', x)]).concat(uNotch()) }, // encoches des barres sur les bords avant et arrière
@@ -573,6 +574,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       for (const a of ws) for (const b of ws) { if (a !== b && Math.abs(a[2] - b[0]) < 10) b[0] = a[2]; }
     };
     snapWins(windows, jointsB); snapWins(frontWindows, jointsF);
+    for (const sx of [-1, 1]) { const wx = sx * gapX, win: [number, number, number, number] = [wx - BAR / 2 - 0.25, barZ - t / 2 - 0.5, wx + BAR / 2 + 0.25, barZ + t / 2 + 0.5]; windows.push(win); frontWindows.push([...win]); } // fenêtres des barres du toit (10,5 × t + 1), après l'aimantation : la fenêtre reste petite
     for (const x of RIB_XS) windows.push([x - RIB_T / 2 - 0.25, RIB_Z0 - 1, x + RIB_T / 2 + 0.25, RIB_Z1 + 1]); // les nervures de fixation traversent les lames arrière par une fente de 3,5 (ajoutées APRÈS l'aimantation : une fente de 3,5 ne doit pas être élargie jusqu'au joint)
     // façade et arrière : CHAQUE LAME EST UNE SEULE PLANCHE de largeur fixe (sx), percée de ses fenêtres (trous rectangulaires) ; une fenêtre qui mord sur le bord d'une lame
     // devient une encoche de ce bord ; seule une fenêtre qui traverse TOUTE la largeur d'une lame (la grande aération) la coupe en deux planches (dessous / dessus)

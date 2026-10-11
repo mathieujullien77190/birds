@@ -169,29 +169,29 @@
  },
  "012 Lambris avant 1": {
   "geo": {
-   "n": 66,
+   "n": 126,
    "idx": 0,
-   "pos": "3dca2bdba648d7bf",
-   "col": "b70d0f1f40d41f62"
+   "pos": "f0fd5eb6b3aa3f47",
+   "col": "a0b9a8e7beb1512e"
   },
   "edges": {
-   "n": 46,
+   "n": 70,
    "idx": 0,
-   "pos": "aade25c9be2c02ae",
+   "pos": "4ac54790fa439f96",
    "col": null
   }
  },
  "013 Lambris arrière 1": {
   "geo": {
-   "n": 84,
+   "n": 144,
    "idx": 0,
-   "pos": "1735d4609cf96a15",
-   "col": "678f7d5397366a95"
+   "pos": "244a03e5f1f7499f",
+   "col": "db20a2926f1ee2d7"
   },
   "edges": {
-   "n": 48,
+   "n": 72,
    "idx": 0,
-   "pos": "d935b4b1a8d92e48",
+   "pos": "dfb64ac87b810366",
    "col": null
   }
  },
@@ -365,29 +365,29 @@
  },
  "026 Lambris avant 7": {
   "geo": {
-   "n": 36,
+   "n": 96,
    "idx": 0,
-   "pos": "595169c1a8880d9f",
-   "col": "dff38860b9a69b37"
+   "pos": "95e5c71922e25572",
+   "col": "e3e5857c12dcccd8"
   },
   "edges": {
-   "n": 24,
+   "n": 48,
    "idx": 0,
-   "pos": "a49d3e5578338e83",
+   "pos": "a14092740d509739",
    "col": null
   }
  },
  "027 Lambris arrière 7": {
   "geo": {
-   "n": 36,
+   "n": 96,
    "idx": 0,
-   "pos": "df2154f97ec846c4",
-   "col": "dff38860b9a69b37"
+   "pos": "a8a3652a1c6c484a",
+   "col": "e3e5857c12dcccd8"
   },
   "edges": {
-   "n": 24,
+   "n": 48,
    "idx": 0,
-   "pos": "83ed48766c32407b",
+   "pos": "45c20fb08999dc03",
    "col": null
   }
  },
@@ -2983,57 +2983,57 @@
  },
  "213 Barre avant gauche (MDF 3 mm)": {
   "geo": {
-   "n": 36,
+   "n": 432,
    "idx": 0,
-   "pos": "925ba2824c9f6649",
-   "col": "156eb2ad5e78f726"
+   "pos": "c6ef99e79c22cf8c",
+   "col": "79b4313709f0df36"
   },
   "edges": {
-   "n": 24,
+   "n": 152,
    "idx": 0,
-   "pos": "1eb7009997ef7e9d",
+   "pos": "fe418d2c347c8da3",
    "col": null
   }
  },
  "214 Barre avant droite (MDF 3 mm)": {
   "geo": {
-   "n": 36,
+   "n": 432,
    "idx": 0,
-   "pos": "925ba2824c9f6649",
-   "col": "156eb2ad5e78f726"
+   "pos": "c6ef99e79c22cf8c",
+   "col": "79b4313709f0df36"
   },
   "edges": {
-   "n": 24,
+   "n": 152,
    "idx": 0,
-   "pos": "1eb7009997ef7e9d",
+   "pos": "fe418d2c347c8da3",
    "col": null
   }
  },
  "215 Barre arrière gauche (MDF 3 mm)": {
   "geo": {
-   "n": 36,
+   "n": 432,
    "idx": 0,
-   "pos": "925ba2824c9f6649",
-   "col": "156eb2ad5e78f726"
+   "pos": "e6c1116bc1d7a884",
+   "col": "79b4313709f0df36"
   },
   "edges": {
-   "n": 24,
+   "n": 152,
    "idx": 0,
-   "pos": "1eb7009997ef7e9d",
+   "pos": "6423ac6348ca7810",
    "col": null
   }
  },
  "216 Barre arrière droite (MDF 3 mm)": {
   "geo": {
-   "n": 36,
+   "n": 432,
    "idx": 0,
-   "pos": "925ba2824c9f6649",
-   "col": "156eb2ad5e78f726"
+   "pos": "e6c1116bc1d7a884",
+   "col": "79b4313709f0df36"
   },
   "edges": {
-   "n": 24,
+   "n": 152,
    "idx": 0,
-   "pos": "1eb7009997ef7e9d",
+   "pos": "6423ac6348ca7810",
    "col": null
   }
  },
