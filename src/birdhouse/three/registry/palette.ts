@@ -52,5 +52,9 @@ export const PALETTE = {
   cutPlane: '#2563eb',
   pullMark: '#0284c7',
   dimLine: '#1c1917',
+  /** Texte du code gravé sur une plaque (bleu : la couleur de la gravure dans les SVG). */
+  codeEngraving: '#0a2472',
+  /** Halo clair autour du texte du code (contraste sur le bois). */
+  codeHalo: '#fffbeb',
   dimExt: '#a8a29e',
 } as const;

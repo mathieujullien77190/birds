@@ -13,7 +13,6 @@ import { solarGeometry } from '@/birdhouse/three/factories/part/solar';
 import { cameraBoardGeometry } from '@/birdhouse/three/factories/part/camera';
 import { partGeometry } from '@/birdhouse/three/factories/part';
 import { createPlankMesh, plankGeometry, plankShapeKey } from '@/birdhouse/three/factories/plank';
-import { disposeAll, textures } from '@/birdhouse/three/registry/materials';
 
 const P = (over: Partial<Plank>): Plank => ({ id: 'p', name: 'p', w: 10, h: 20, pos: [0, 0, 0], rot: [0, 0, 0], notches: [], holes: [], ...over });
 /** Dimensions (x, y, z) de la boîte englobante. */
@@ -208,20 +207,6 @@ describe('plankGeometry / PlankMesh', () => {
     expect(plankShapeKey({ ...base, pos: [5, 5, 5], rot: [1, 2, 3] }, 3)).toBe(k);
     for (const o of [{ w: 11 }, { h: 21 }, { depth: 3 }, { color: '#fff' }, { material: 'mdf' as const }, { special: 'bar' as const }, { poly: [[0, 0], [1, 0], [0, 1]] as [number, number][] }]) expect(plankShapeKey({ ...base, ...o }, 3)).not.toBe(k);
     expect(plankShapeKey(base, 4)).not.toBe(k);
-  });
-  it("setOak : deux appels de suite ne refont pas le matériau ; retirer sans chêne ne change rien", () => {
-    const doc = { createElement: () => ({ width: 0, height: 0, getContext: () => ({ createImageData: (w: number, h: number) => ({ data: new Uint8ClampedArray(w * h * 4) }), putImageData: () => {} }) }) };
-    vi.stubGlobal('document', doc);
-    try {
-      const m = createPlankMesh(P({}), 3);
-      m.setOak(false);
-      expect(m.material.map).toBeNull(); expect(m.material.vertexColors).toBe(true);
-      m.setOak(true);
-      m.material.roughness = 0.1; // marque : un second setOak(true) ne doit pas réécrire le matériau
-      m.setOak(true);
-      expect(m.material.roughness).toBe(0.1);
-      expect(m.material.map).toBe(textures.oak());
-    } finally { disposeAll(); vi.unstubAllGlobals(); }
   });
   it("le rotor : créé avec le ventilateur, remplacé en gardant la même mesh (ancienne géométrie libérée), retiré quand la plaque n'est plus un ventilateur", () => {
     const fan = P({ special: 'fan', w: 60, h: 60 });

@@ -1,6 +1,7 @@
 import { BufferGeometry, Color, DoubleSide, ExtrudeGeometry, Float32BufferAttribute, LineBasicMaterial, LineSegments, Mesh, MeshStandardMaterial, Path, Shape, Vector2, type Object3D } from 'three';
-import { holeOutline, outline, type Plank } from '../../model';
-import { materials, textures } from '../registry/materials';
+import { codeSpot, holeOutline, outline, type Plank } from '../../model';
+import { createCodeLabel, type CodeLabel } from './codeLabel';
+import { materials } from '../registry/materials';
 import { PALETTE } from '../registry/palette';
 import { piModel } from '../piModel';
 import { partGeometry } from './part';
@@ -55,26 +56,15 @@ export class PlankMesh extends Mesh<BufferGeometry, MeshStandardMaterial> {
   baseTransparent = false;
   /** Clé de la forme actuellement construite (voir `plankShapeKey`). */
   shapeKey = '';
+  /** Étiquette du code de la plaque (enfant de la mesh, ressources partagées du registre) ; absente si les codes sont cachés ou si la plaque n'en a pas. */
+  label: CodeLabel | null = null;
+  private labelKey = '';
 
   constructor(plankId: string) {
     super(new BufferGeometry(), new MeshStandardMaterial({ color: PALETTE.white, vertexColors: true, roughness: PLANK_ROUGHNESS, side: DoubleSide }));
     this.plankId = plankId;
     this.edges = new LineSegments(new BufferGeometry(), materials.edge());
     this.add(this.edges);
-  }
-
-  /**
-   * Texture de chêne (pan de toit en chêne) : posée si `on`, retirée sinon (une plaque renommée redevient du contreplaqué, couleurs par sommet).
-   * Le chêne est une texture partagée du registre : elle n'est jamais libérée avec la plaque.
-   */
-  setOak(on: boolean): void {
-    const mat = this.material;
-    if (on) {
-      if (mat.map) return;
-      mat.map = textures.oak(); mat.vertexColors = false; mat.color.set(PALETTE.white); mat.roughness = 0.7; mat.needsUpdate = true;
-    } else if (mat.map) {
-      mat.map = null; mat.vertexColors = true; mat.color.set(PALETTE.white); mat.roughness = PLANK_ROUGHNESS; mat.needsUpdate = true;
-    }
   }
 
   /** Installe, remplace ou retire le rotor (libère l'ancien). L'angle courant est gardé quand on remplace. */
@@ -91,6 +81,20 @@ export class PlankMesh extends Mesh<BufferGeometry, MeshStandardMaterial> {
     }
     this.rotor.geometry.dispose(); this.rotor.geometry = g.geo;
     for (const c of this.rotor.children) if (c instanceof LineSegments) { c.geometry.dispose(); c.geometry = g.edges; }
+  }
+
+  /**
+   * Pose, remplace ou retire l'étiquette du code (`null` : plus d'étiquette). Elle se place à l'emplacement gravé (`codeSpot`) ; rien n'est refait si ni le code ni la forme n'ont changé.
+   * Géométrie et matériau de l'étiquette viennent du registre : jamais libérés avec la plaque.
+   */
+  setCode(code: string | null, p: Plank, t: number): void {
+    const spot = code ? codeSpot(p, code.length) : null;
+    const th = p.material === 'okoume' ? (p.depth ?? t) : t; // même épaisseur que la géométrie
+    const key = code && spot ? `${code}|${this.shapeKey}|${th}` : '';
+    if (key === this.labelKey) return;
+    if (this.label) { this.remove(this.label); this.label = null; } // ressources partagées : rien à libérer
+    this.labelKey = key;
+    if (code && spot) { this.label = createCodeLabel(code, spot, th); this.add(this.label); }
   }
 
   /** Refait la géométrie si la forme a changé (libère l'ancienne). */

@@ -27,7 +27,9 @@ export const IR_W = 12, IR_H = 24;
 export const CAM_X = -6, IR_X = 12.5;
 /** Épaisseur du contreplaqué okoumé extérieur peint en blanc (habillage), en mm. */
 export const OKOUME_T = 5, OKOUME_COLOR = '#f5f5f4';
-/** Deuxième caméra : NUE, À L'EXTÉRIEUR, sous le débord du toit en chêne, à l'avant gauche, inclinée et tournée pour viser le trou d'entrée (boîte en okoumé essayée puis retirée). Une longue nappe sort du Pi par une fente de la plaque avant du toit.
+/** Okoumé NON peint (brun-rosé chaud) : le pan du toit, que l'utilisateur huile ou sature lui-même pour l'extérieur (l'habillage, lui, est peint en blanc : `OKOUME_COLOR`). */
+export const OKOUME_NATURAL = '#c98f69';
+/** Deuxième caméra : NUE, À L'EXTÉRIEUR, sous le débord du toit en okoumé, à l'avant gauche, inclinée et tournée pour viser le trou d'entrée (boîte en okoumé essayée puis retirée). Une longue nappe sort du Pi par une fente de la plaque avant du toit.
  *  PI_CSI2 = connecteur du 2ᵉ port caméra du Pi dans le repère de la carte (provisoire : emplacement du port DSI du Pi 4 tant que le Pi 5 n'est pas intégré). */
 export const PI_CSI2: [number, number] = [-38.5, 0];
 

@@ -12,7 +12,7 @@ export interface Hole { id: string; shape: 'round' | 'square'; x: number; y: num
 
 export interface Plank {
   id: string;
-  /** Matériau de la plaque découpée : absent = contreplaqué ; 'mdf' = MDF, 'okoume' = contreplaqué okoumé extérieur (habillage, épaisseur `depth`, peint en blanc) : chacun est découpé sur ses propres planches. */
+  /** Matériau de la plaque découpée : absent = contreplaqué ; 'mdf' = MDF, 'okoume' = contreplaqué okoumé extérieur (habillage peint en blanc, toit non peint ; épaisseur `depth`) : chacun est découpé sur ses propres planches. */
   material?: 'mdf' | 'okoume';
   /** Élément spécial (pas du bois) : dessiné par son propre modèle 3D, exclu de la découpe laser. « camera » (carte caméra) ou « ir » (carte de LED infrarouges). */
   /** Contour libre (repère de la plaque, sens trigonométrique) : remplace le rectangle (crans et trous restent possibles). */
@@ -51,7 +51,7 @@ export interface HistoryEntry { label: string; scene: PlankScene; at: number }
 
 export interface Placed { plank: Plank; poly: Pt[]; x: number; y: number }
 
-export interface NestItem { plank: Plank; poly: Pt[]; holes: Pt[][]; w: number; h: number; x: number; y: number; rotated: boolean }
+export interface NestItem { plank: Plank; poly: Pt[]; holes: Pt[][]; w: number; h: number; x: number; y: number; rotated: boolean; /** Quarts de tour appliqués à la pièce (0 à 3). */ turns: 0 | 1 | 2 | 3; /** Code de la plaque (« T01 »). */ code?: string; /** Contours fermés du code à graver (bleu), dans le même repère que `poly` ; absent si la plaque est trop petite. */ engrave?: Pt[][] }
 export interface NestSheet { items: NestItem[]; used: number; /** 'mdf' : feuille de MDF, 'okoume' : feuille d'okoumé extérieur 5 mm (matériaux distincts du contreplaqué) ; absent : contreplaqué. */ material?: 'mdf' | 'okoume' }
 
 export type FaceAxis = 'x' | 'y' | 'z';

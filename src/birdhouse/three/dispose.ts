@@ -16,7 +16,7 @@ export function disposeObject3D(root: Object3D): void {
   root.traverse((o) => {
     if (o instanceof Sprite) { disposeMaterial(o.material); return; } // la géométrie d'un Sprite est commune à tous : on n'y touche pas
     if (o instanceof Mesh || o instanceof Line || o instanceof Points) {
-      o.geometry.dispose();
+      if (!isShared(o.geometry)) o.geometry.dispose(); // la géométrie du registre (carré des étiquettes) est commune à tous
       const mats: Material | Material[] = o.material;
       for (const m of Array.isArray(mats) ? mats : [mats]) disposeMaterial(m);
     }

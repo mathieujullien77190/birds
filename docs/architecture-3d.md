@@ -57,7 +57,7 @@ Effet de cassette translucide désactivé à la demande de l'utilisateur (la cas
 ## Libération des ressources
 
 - Toute géométrie, tout matériau ou toute texture créé pour UNE pièce ou UN repère est libéré par `disposeObject3D` (`dispose.ts`). `useSceneSync` l'appelle à la suppression d'une plaque ; `clearGroup` vide un groupe de repères.
-- Les ressources **partagées** (le matériau des arêtes, ceux des repères et des cotes, la texture de chêne) viennent du registre (`registry/materials.ts`), créées à la demande. **Elles ne sont jamais libérées avec une pièce** (`isShared` les reconnaît) : seulement par `disposeAll()`, appelé à la fermeture de la vue (`createScene().dispose()`).
+- Les ressources **partagées** (le matériau des arêtes, ceux des repères et des cotes) viennent du registre (`registry/materials.ts`), créées à la demande. **Elles ne sont jamais libérées avec une pièce** (`isShared` les reconnaît) : seulement par `disposeAll()`, appelé à la fermeture de la vue (`createScene().dispose()`).
 - Un matériau ou une texture partagés = un accesseur `lazy(...)` dans le registre, pas un `new` au niveau du module.
 - `createScene().dispose()` arrête la boucle, retire les écouteurs (les contrôleurs d'`interactions/` renvoient chacun leur désinscription), libère les meshes, les repères, le registre, les contrôles et le renderer.
 

@@ -169,15 +169,15 @@
  },
  "012 Lambris avant 1": {
   "geo": {
-   "n": 66,
+   "n": 36,
    "idx": 0,
-   "pos": "db74d399e1660ce8",
-   "col": "b70d0f1f40d41f62"
+   "pos": "18ed5c0267d4c011",
+   "col": "dff38860b9a69b37"
   },
   "edges": {
-   "n": 48,
+   "n": 24,
    "idx": 0,
-   "pos": "ba53cc11ab3403db",
+   "pos": "1958e2b292bca5ba",
    "col": null
   }
  },
@@ -391,49 +391,91 @@
    "col": null
   }
  },
- "028 Toit en chêne": {
+ "028 Baguette couvercle avant": {
   "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "5d9f88c6c489b452",
-   "col": "0e558392db44ae46"
+   "n": 408,
+   "idx": 0,
+   "pos": "b02c9c1763f2a7d5",
+   "col": "8af5219acf115d66"
+  },
+  "edges": {
+   "n": 140,
+   "idx": 0,
+   "pos": "fe8bc91d98f5f608",
+   "col": null
+  }
+ },
+ "029 Baguette couvercle arrière": {
+  "geo": {
+   "n": 492,
+   "idx": 0,
+   "pos": "d0ae3bae06d3f6dd",
+   "col": "3a5737ae6f453ddc"
+  },
+  "edges": {
+   "n": 168,
+   "idx": 0,
+   "pos": "7efb845f379df2aa",
+   "col": null
+  }
+ },
+ "030 Baguette couvercle gauche": {
+  "geo": {
+   "n": 420,
+   "idx": 0,
+   "pos": "958a6ca6b990a0e3",
+   "col": "f3753b714a5acb7d"
+  },
+  "edges": {
+   "n": 144,
+   "idx": 0,
+   "pos": "d18441c4807700b4",
+   "col": null
+  }
+ },
+ "031 Baguette couvercle droite": {
+  "geo": {
+   "n": 420,
+   "idx": 0,
+   "pos": "958a6ca6b990a0e3",
+   "col": "f3753b714a5acb7d"
+  },
+  "edges": {
+   "n": 144,
+   "idx": 0,
+   "pos": "d18441c4807700b4",
+   "col": null
+  }
+ },
+ "032 Toit en okoumé (plaque crénelée)": {
+  "geo": {
+   "n": 2232,
+   "idx": 0,
+   "pos": "8ff1e8b1ba63ede8",
+   "col": "8e95fb73c0b96658"
+  },
+  "edges": {
+   "n": 984,
+   "idx": 0,
+   "pos": "756d9b537f5aaf98",
+   "col": null
+  }
+ },
+ "033 Toit en okoumé (plaque pleine)": {
+  "geo": {
+   "n": 36,
+   "idx": 0,
+   "pos": "6e1600c8a5d33c8f",
+   "col": "cc0978aa75f1fba2"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "01194eb344c57d95",
+   "pos": "c50152040bd8e172",
    "col": null
   }
  },
- "029 Cadre couvercle 1": {
-  "geo": {
-   "n": 96,
-   "idx": 0,
-   "pos": "6176d4cba466ea38",
-   "col": "d3bf62603824e931"
-  },
-  "edges": {
-   "n": 48,
-   "idx": 0,
-   "pos": "247b029745c2ab93",
-   "col": null
-  }
- },
- "030 Cadre couvercle 2": {
-  "geo": {
-   "n": 96,
-   "idx": 0,
-   "pos": "6176d4cba466ea38",
-   "col": "d3bf62603824e931"
-  },
-  "edges": {
-   "n": 48,
-   "idx": 0,
-   "pos": "247b029745c2ab93",
-   "col": null
-  }
- },
- "031 Panneau solaire 100 W (97 × 58,5)": {
+ "034 Panneau solaire 100 W (97 × 58,5)": {
   "geo": {
    "n": 8928,
    "idx": 0,
@@ -447,7 +489,7 @@
    "col": null
   }
  },
- "032 Câble 12 V vers le toit": {
+ "035 Câble 12 V vers le toit": {
   "geo": {
    "n": 2601,
    "idx": 13824,
@@ -461,7 +503,7 @@
    "col": null
   }
  },
- "033 Étrier régulateur 1": {
+ "036 Étrier régulateur 1": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -475,7 +517,7 @@
    "col": null
   }
  },
- "034 Étrier régulateur 2": {
+ "037 Étrier régulateur 2": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -489,7 +531,7 @@
    "col": null
   }
  },
- "035 Étrier régulateur 3": {
+ "038 Étrier régulateur 3": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -503,7 +545,7 @@
    "col": null
   }
  },
- "036 Étrier régulateur 4": {
+ "039 Étrier régulateur 4": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -517,7 +559,7 @@
    "col": null
   }
  },
- "037 Fixation arbre 1.1": {
+ "040 Fixation arbre 1.1": {
   "geo": {
    "n": 1044,
    "idx": 0,
@@ -531,7 +573,7 @@
    "col": null
   }
  },
- "038 Fixation arbre 1.2": {
+ "041 Fixation arbre 1.2": {
   "geo": {
    "n": 1044,
    "idx": 0,
@@ -545,7 +587,7 @@
    "col": null
   }
  },
- "039 Fixation arbre 1.3": {
+ "042 Fixation arbre 1.3": {
   "geo": {
    "n": 1044,
    "idx": 0,
@@ -559,7 +601,7 @@
    "col": null
   }
  },
- "040 Fixation arbre 2.1": {
+ "043 Fixation arbre 2.1": {
   "geo": {
    "n": 1044,
    "idx": 0,
@@ -573,7 +615,7 @@
    "col": null
   }
  },
- "041 Fixation arbre 2.2": {
+ "044 Fixation arbre 2.2": {
   "geo": {
    "n": 1044,
    "idx": 0,
@@ -587,7 +629,7 @@
    "col": null
   }
  },
- "042 Fixation arbre 2.3": {
+ "045 Fixation arbre 2.3": {
   "geo": {
    "n": 1044,
    "idx": 0,
@@ -601,7 +643,7 @@
    "col": null
   }
  },
- "043 Clavette fixation 1.1": {
+ "046 Clavette fixation 1.1": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -615,7 +657,7 @@
    "col": null
   }
  },
- "044 Clavette fixation 1.2": {
+ "047 Clavette fixation 1.2": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -629,7 +671,7 @@
    "col": null
   }
  },
- "045 Clavette fixation 2.1": {
+ "048 Clavette fixation 2.1": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -643,7 +685,7 @@
    "col": null
   }
  },
- "046 Clavette fixation 2.2": {
+ "049 Clavette fixation 2.2": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -657,7 +699,7 @@
    "col": null
   }
  },
- "047 Caméra 2": {
+ "050 Caméra 2": {
   "geo": {
    "n": 396,
    "idx": 0,
@@ -671,7 +713,7 @@
    "col": null
   }
  },
- "048 LED infrarouges extérieures": {
+ "051 LED infrarouges extérieures": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -685,11 +727,11 @@
    "col": null
   }
  },
- "049 Nappe caméra 2 (longue, vers l'extérieur)": {
+ "052 Nappe caméra 2 (longue, vers l'extérieur)": {
   "geo": {
    "n": 242,
    "idx": 720,
-   "pos": "123f7ff07e028912",
+   "pos": "8259bd19d73bc7a7",
    "col": "a39afae55a0bdf16"
   },
   "edges": {
@@ -699,11 +741,11 @@
    "col": null
   }
  },
- "050 Fil 5 V LED extérieures (rouge)": {
+ "053 Fil 5 V LED extérieures (rouge)": {
   "geo": {
    "n": 2169,
    "idx": 11520,
-   "pos": "ed6f947917503eaa",
+   "pos": "4c2b8b9eadcb3865",
    "col": "6996d9d6a1f47614"
   },
   "edges": {
@@ -713,11 +755,11 @@
    "col": null
   }
  },
- "051 Fil masse LED extérieures (noir)": {
+ "054 Fil masse LED extérieures (noir)": {
   "geo": {
    "n": 2169,
    "idx": 11520,
-   "pos": "ff4886e7ccefa9a1",
+   "pos": "14cd15a7e82e714d",
    "col": "8af7067d6e615856"
   },
   "edges": {
@@ -727,7 +769,7 @@
    "col": null
   }
  },
- "052 Module 2 MOSFET (LED infrarouges on / off)": {
+ "055 Module 2 MOSFET (LED infrarouges on / off)": {
   "geo": {
    "n": 288,
    "idx": 0,
@@ -741,7 +783,7 @@
    "col": null
   }
  },
- "053 Fil masse module LED (noir)": {
+ "056 Fil masse module LED (noir)": {
   "geo": {
    "n": 1089,
    "idx": 5760,
@@ -755,7 +797,7 @@
    "col": null
   }
  },
- "054 Fil IN1 LED du nid (gris, GPIO23 broche 16)": {
+ "057 Fil IN1 LED du nid (gris, GPIO23 broche 16)": {
   "geo": {
    "n": 1089,
    "idx": 5760,
@@ -769,7 +811,7 @@
    "col": null
   }
  },
- "055 Fil IN2 LED extérieures (blanc, GPIO24 broche 18)": {
+ "058 Fil IN2 LED extérieures (blanc, GPIO24 broche 18)": {
   "geo": {
    "n": 1089,
    "idx": 5760,
@@ -783,7 +825,7 @@
    "col": null
   }
  },
- "056 Convertisseur 12 V → 5 V 5 A USB-C (taille à confirmer, ≈ 60 × 36 × 16)": {
+ "059 Convertisseur 12 V → 5 V 5 A USB-C (taille à confirmer, ≈ 60 × 36 × 16)": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -797,7 +839,7 @@
    "col": null
   }
  },
- "057 Fusible lame 15 A (19 × 18 × 5, posé à plat)": {
+ "060 Fusible lame 15 A (19 × 18 × 5, posé à plat)": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -811,7 +853,7 @@
    "col": null
   }
  },
- "058 Wago 221-413 (3 entrées) rail 12 V +": {
+ "061 Wago 221-413 (3 entrées) rail 12 V +": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -825,7 +867,7 @@
    "col": null
   }
  },
- "059 Wago 221-415 (5 entrées) rail 12 V −": {
+ "062 Wago 221-415 (5 entrées) rail 12 V −": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -839,7 +881,7 @@
    "col": null
   }
  },
- "060 Batterie LiFePO4 12,8 V 6 Ah (4 × 32700, 128 × 70 × 32)": {
+ "063 Batterie LiFePO4 12,8 V 6 Ah (4 × 32700, 128 × 70 × 32)": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -853,7 +895,7 @@
    "col": null
   }
  },
- "061 Fil fusible → batterie + (rouge)": {
+ "064 Fil fusible → batterie + (rouge)": {
   "geo": {
    "n": 1305,
    "idx": 6912,
@@ -867,7 +909,7 @@
    "col": null
   }
  },
- "062 Fil fusible → Wago + (rouge)": {
+ "065 Fil fusible → Wago + (rouge)": {
   "geo": {
    "n": 585,
    "idx": 3072,
@@ -881,7 +923,7 @@
    "col": null
   }
  },
- "063 Fil batterie − → Wago − (noir)": {
+ "066 Fil batterie − → Wago − (noir)": {
   "geo": {
    "n": 1521,
    "idx": 8064,
@@ -895,7 +937,7 @@
    "col": null
   }
  },
- "064 Fil rail → convertisseur + (rouge)": {
+ "067 Fil rail → convertisseur + (rouge)": {
   "geo": {
    "n": 2169,
    "idx": 11520,
@@ -909,7 +951,7 @@
    "col": null
   }
  },
- "065 Fil rail → convertisseur − (noir)": {
+ "068 Fil rail → convertisseur − (noir)": {
   "geo": {
    "n": 1953,
    "idx": 10368,
@@ -923,7 +965,7 @@
    "col": null
   }
  },
- "066 Régulateur de charge Genasun GV-10-Li (137 × 61 × 33, sous le nichoir)": {
+ "069 Régulateur de charge Genasun GV-10-Li (137 × 61 × 33, sous le nichoir)": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -937,7 +979,7 @@
    "col": null
   }
  },
- "067 Fil régulateur → batterie + (rouge, 2,5 mm²)": {
+ "070 Fil régulateur → batterie + (rouge, 2,5 mm²)": {
   "geo": {
    "n": 2385,
    "idx": 12672,
@@ -951,7 +993,7 @@
    "col": null
   }
  },
- "068 Fil régulateur → batterie − (noir, 2,5 mm²)": {
+ "071 Fil régulateur → batterie − (noir, 2,5 mm²)": {
   "geo": {
    "n": 3465,
    "idx": 18432,
@@ -965,7 +1007,7 @@
    "col": null
   }
  },
- "069 Gaine des fils (ICTA Ø 16 ou multicouche Ø 16, dans l’isolant)": {
+ "072 Gaine des fils (ICTA Ø 16 ou multicouche Ø 16, dans l’isolant)": {
   "geo": {
    "n": 8970,
    "idx": 50148,
@@ -979,7 +1021,7 @@
    "col": null
   }
  },
- "070 Capteur température / humidité (BME280, 19 × 19)": {
+ "073 Capteur température / humidité (BME280, 19 × 19)": {
   "geo": {
    "n": 252,
    "idx": 0,
@@ -993,7 +1035,7 @@
    "col": null
   }
  },
- "071 Fil 3,3 V (rouge)": {
+ "074 Fil 3,3 V (rouge)": {
   "geo": {
    "n": 1521,
    "idx": 8064,
@@ -1007,7 +1049,7 @@
    "col": null
   }
  },
- "072 Fil SDA (jaune)": {
+ "075 Fil SDA (jaune)": {
   "geo": {
    "n": 1521,
    "idx": 8064,
@@ -1021,7 +1063,7 @@
    "col": null
   }
  },
- "073 Fil SCL (vert)": {
+ "076 Fil SCL (vert)": {
   "geo": {
    "n": 1521,
    "idx": 8064,
@@ -1035,7 +1077,7 @@
    "col": null
   }
  },
- "074 Fil masse (noir)": {
+ "077 Fil masse (noir)": {
   "geo": {
    "n": 1521,
    "idx": 8064,
@@ -1049,7 +1091,7 @@
    "col": null
   }
  },
- "075 Ventilateur Noctua NF-A6x25 PWM (60 × 60 × 25)": {
+ "078 Ventilateur Noctua NF-A6x25 PWM (60 × 60 × 25)": {
   "geo": {
    "n": 828,
    "idx": 0,
@@ -1063,7 +1105,7 @@
    "col": null
   }
  },
- "076 Plot caoutchouc ventilateur 1": {
+ "079 Plot caoutchouc ventilateur 1": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -1077,7 +1119,7 @@
    "col": null
   }
  },
- "077 Plot caoutchouc ventilateur 2": {
+ "080 Plot caoutchouc ventilateur 2": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -1091,7 +1133,7 @@
    "col": null
   }
  },
- "078 Plot caoutchouc ventilateur 3": {
+ "081 Plot caoutchouc ventilateur 3": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -1105,7 +1147,7 @@
    "col": null
   }
  },
- "079 Plot caoutchouc ventilateur 4": {
+ "082 Plot caoutchouc ventilateur 4": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -1119,7 +1161,7 @@
    "col": null
   }
  },
- "080 Module interrupteur 12 V ventilateur (côté +, commande 3,3 V)": {
+ "083 Module interrupteur 12 V ventilateur (côté +, commande 3,3 V)": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -1133,7 +1175,7 @@
    "col": null
   }
  },
- "081 Prise 4 broches du ventilateur (d'origine, femelle)": {
+ "084 Prise 4 broches du ventilateur (d'origine, femelle)": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -1147,7 +1189,7 @@
    "col": null
   }
  },
- "082 Rallonge ventilateur 4 broches : prise mâle (mâle ⇄ femelle, câble ≈ 300 mm)": {
+ "085 Rallonge ventilateur 4 broches : prise mâle (mâle ⇄ femelle, câble ≈ 300 mm)": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -1161,7 +1203,7 @@
    "col": null
   }
  },
- "083 Fil cassette + (rouge)": {
+ "086 Fil cassette + (rouge)": {
   "geo": {
    "n": 1305,
    "idx": 6912,
@@ -1175,7 +1217,7 @@
    "col": null
   }
  },
- "084 Fil cassette PWM (bleu)": {
+ "087 Fil cassette PWM (bleu)": {
   "geo": {
    "n": 1305,
    "idx": 6912,
@@ -1189,7 +1231,7 @@
    "col": null
   }
  },
- "085 Fil cassette tachymètre (jaune)": {
+ "088 Fil cassette tachymètre (jaune)": {
   "geo": {
    "n": 1305,
    "idx": 6912,
@@ -1203,7 +1245,7 @@
    "col": null
   }
  },
- "086 Fil cassette − (noir)": {
+ "089 Fil cassette − (noir)": {
   "geo": {
    "n": 1305,
    "idx": 6912,
@@ -1217,7 +1259,7 @@
    "col": null
   }
  },
- "087 Fil Wago + → interrupteur ventilateur (rouge)": {
+ "090 Fil Wago + → interrupteur ventilateur (rouge)": {
   "geo": {
    "n": 1089,
    "idx": 5760,
@@ -1231,7 +1273,7 @@
    "col": null
   }
  },
- "088 Fil interrupteur → ventilateur + (rouge)": {
+ "091 Fil interrupteur → ventilateur + (rouge)": {
   "geo": {
    "n": 1737,
    "idx": 9216,
@@ -1245,7 +1287,7 @@
    "col": null
   }
  },
- "089 Fil ventilateur − (noir)": {
+ "092 Fil ventilateur − (noir)": {
   "geo": {
    "n": 1953,
    "idx": 10368,
@@ -1259,7 +1301,7 @@
    "col": null
   }
  },
- "090 Fil masse interrupteur → Wago − (noir)": {
+ "093 Fil masse interrupteur → Wago − (noir)": {
   "geo": {
    "n": 1305,
    "idx": 6912,
@@ -1273,7 +1315,7 @@
    "col": null
   }
  },
- "091 Fil PWM ventilateur (bleu)": {
+ "094 Fil PWM ventilateur (bleu)": {
   "geo": {
    "n": 2385,
    "idx": 12672,
@@ -1287,7 +1329,7 @@
    "col": null
   }
  },
- "092 Fil tachymètre ventilateur (jaune)": {
+ "095 Fil tachymètre ventilateur (jaune)": {
   "geo": {
    "n": 1953,
    "idx": 10368,
@@ -1301,7 +1343,7 @@
    "col": null
   }
  },
- "093 Fil masse commune ventilateur (noir)": {
+ "096 Fil masse commune ventilateur (noir)": {
   "geo": {
    "n": 2385,
    "idx": 12672,
@@ -1315,11 +1357,11 @@
    "col": null
   }
  },
- "094 Fil commande interrupteur ventilateur (orange)": {
+ "097 Fil commande interrupteur ventilateur (orange)": {
   "geo": {
    "n": 2169,
    "idx": 11520,
-   "pos": "acd2e81ac371032a",
+   "pos": "b9cbb65a469cb99e",
    "col": "b98f285c1031fce0"
   },
   "edges": {
@@ -1329,7 +1371,7 @@
    "col": null
   }
  },
- "095 Cassette ventilateur 1": {
+ "098 Cassette ventilateur 1": {
   "geo": {
    "n": 516,
    "idx": 0,
@@ -1343,35 +1385,21 @@
    "col": null
   }
  },
- "096 Cassette ventilateur 2": {
+ "099 Cassette ventilateur 2": {
   "geo": {
-   "n": 576,
+   "n": 624,
    "idx": 0,
-   "pos": "88d7fca71403afbe",
-   "col": "38867fe6226ec93d"
+   "pos": "59137caf50859a4c",
+   "col": "534939966721f959"
   },
   "edges": {
-   "n": 200,
+   "n": 224,
    "idx": 0,
-   "pos": "e29689549ba6e666",
+   "pos": "3042fa2a21ebc3dc",
    "col": null
   }
  },
- "097 Cassette ventilateur 4": {
-  "geo": {
-   "n": 516,
-   "idx": 0,
-   "pos": "69eae5cf3901c4ec",
-   "col": "8ce8044555c3a251"
-  },
-  "edges": {
-   "n": 176,
-   "idx": 0,
-   "pos": "575ec888facef408",
-   "col": null
-  }
- },
- "098 Cassette ventilateur 3": {
+ "100 Cassette ventilateur 4": {
   "geo": {
    "n": 516,
    "idx": 0,
@@ -1385,7 +1413,21 @@
    "col": null
   }
  },
- "099 Cassette ventilateur couvercle": {
+ "101 Cassette ventilateur 3": {
+  "geo": {
+   "n": 516,
+   "idx": 0,
+   "pos": "69eae5cf3901c4ec",
+   "col": "8ce8044555c3a251"
+  },
+  "edges": {
+   "n": 176,
+   "idx": 0,
+   "pos": "575ec888facef408",
+   "col": null
+  }
+ },
+ "102 Cassette ventilateur couvercle": {
   "geo": {
    "n": 588,
    "idx": 0,
@@ -1399,7 +1441,7 @@
    "col": null
   }
  },
- "100 Cassette ventilateur cadre du bas": {
+ "103 Cassette ventilateur cadre du bas": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -1413,7 +1455,7 @@
    "col": null
   }
  },
- "101 Poignée cassette 1": {
+ "104 Poignée cassette 1": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -1427,7 +1469,7 @@
    "col": null
   }
  },
- "102 Poignée cassette 2": {
+ "105 Poignée cassette 2": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -1441,7 +1483,7 @@
    "col": null
   }
  },
- "103 Poignée cassette 3": {
+ "106 Poignée cassette 3": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -1455,7 +1497,7 @@
    "col": null
   }
  },
- "104 Grille de protection ventilateur 60 mm (fil d'acier)": {
+ "107 Grille de protection ventilateur 60 mm (fil d'acier)": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -1469,7 +1511,7 @@
    "col": null
   }
  },
- "105 Bloc isolant d'hiver 1": {
+ "108 Bloc isolant d'hiver 1": {
   "geo": {
    "n": 516,
    "idx": 0,
@@ -1483,7 +1525,7 @@
    "col": null
   }
  },
- "106 Bloc isolant d'hiver 2": {
+ "109 Bloc isolant d'hiver 2": {
   "geo": {
    "n": 516,
    "idx": 0,
@@ -1497,77 +1539,77 @@
    "col": null
   }
  },
- "107 Bloc isolant d'hiver 3": {
+ "110 Bloc isolant d'hiver 3": {
+  "geo": {
+   "n": 612,
+   "idx": 0,
+   "pos": "8b69efe95525643c",
+   "col": "cf7f401daa96cbc7"
+  },
+  "edges": {
+   "n": 208,
+   "idx": 0,
+   "pos": "71eb2c23077f85be",
+   "col": null
+  }
+ },
+ "111 Bloc isolant d'hiver 4": {
+  "geo": {
+   "n": 612,
+   "idx": 0,
+   "pos": "8b69efe95525643c",
+   "col": "cf7f401daa96cbc7"
+  },
+  "edges": {
+   "n": 208,
+   "idx": 0,
+   "pos": "71eb2c23077f85be",
+   "col": null
+  }
+ },
+ "112 Bloc isolant d'hiver couvercle": {
+  "geo": {
+   "n": 624,
+   "idx": 0,
+   "pos": "0198683319ca20ce",
+   "col": "534939966721f959"
+  },
+  "edges": {
+   "n": 224,
+   "idx": 0,
+   "pos": "b88b13267b584aaa",
+   "col": null
+  }
+ },
+ "113 Bloc isolant d'hiver fond": {
   "geo": {
    "n": 516,
    "idx": 0,
-   "pos": "69eae5cf3901c4ec",
+   "pos": "f5438564d87e3baa",
    "col": "8ce8044555c3a251"
   },
   "edges": {
    "n": 176,
    "idx": 0,
-   "pos": "575ec888facef408",
+   "pos": "4d6669e5b68540d9",
    "col": null
   }
  },
- "108 Bloc isolant d'hiver 4": {
-  "geo": {
-   "n": 516,
-   "idx": 0,
-   "pos": "69eae5cf3901c4ec",
-   "col": "8ce8044555c3a251"
-  },
-  "edges": {
-   "n": 176,
-   "idx": 0,
-   "pos": "575ec888facef408",
-   "col": null
-  }
- },
- "109 Bloc isolant d'hiver couvercle": {
-  "geo": {
-   "n": 528,
-   "idx": 0,
-   "pos": "7ca112695b617bc8",
-   "col": "50ac4df646a949b1"
-  },
-  "edges": {
-   "n": 192,
-   "idx": 0,
-   "pos": "8872085872be14a0",
-   "col": null
-  }
- },
- "110 Bloc isolant d'hiver fond": {
-  "geo": {
-   "n": 420,
-   "idx": 0,
-   "pos": "bae6e5619531f810",
-   "col": "f3753b714a5acb7d"
-  },
-  "edges": {
-   "n": 144,
-   "idx": 0,
-   "pos": "674ace4b92bf7369",
-   "col": null
-  }
- },
- "111 Isolant bloc d'hiver": {
+ "114 Isolant bloc d'hiver": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "be9d0703f04b341a",
+   "pos": "33dd5c943ea92493",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "1f1a5e987a851062",
+   "pos": "b4fff92680a02a0d",
    "col": null
   }
  },
- "112 Poignée bloc d'hiver 1": {
+ "115 Poignée bloc d'hiver 1": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -1581,7 +1623,7 @@
    "col": null
   }
  },
- "113 Poignée bloc d'hiver 2": {
+ "116 Poignée bloc d'hiver 2": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -1595,7 +1637,7 @@
    "col": null
   }
  },
- "114 Poignée bloc d'hiver 3": {
+ "117 Poignée bloc d'hiver 3": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -1609,7 +1651,7 @@
    "col": null
   }
  },
- "115 Goulotte ventilateur gauche": {
+ "118 Goulotte ventilateur gauche": {
   "geo": {
    "n": 228,
    "idx": 0,
@@ -1623,7 +1665,7 @@
    "col": null
   }
  },
- "116 Goulotte ventilateur droite": {
+ "119 Goulotte ventilateur droite": {
   "geo": {
    "n": 228,
    "idx": 0,
@@ -1637,7 +1679,7 @@
    "col": null
   }
  },
- "117 Goulotte ventilateur avant": {
+ "120 Goulotte ventilateur avant": {
   "geo": {
    "n": 132,
    "idx": 0,
@@ -1651,7 +1693,7 @@
    "col": null
   }
  },
- "118 Conduit de sortie 1": {
+ "121 Conduit de sortie 1": {
   "geo": {
    "n": 132,
    "idx": 0,
@@ -1665,7 +1707,7 @@
    "col": null
   }
  },
- "119 Conduit de sortie 2": {
+ "122 Conduit de sortie 2": {
   "geo": {
    "n": 132,
    "idx": 0,
@@ -1679,7 +1721,7 @@
    "col": null
   }
  },
- "120 Conduit de sortie 3": {
+ "123 Conduit de sortie 3": {
   "geo": {
    "n": 132,
    "idx": 0,
@@ -1693,63 +1735,49 @@
    "col": null
   }
  },
- "121 Conduit de sortie 4": {
+ "124 Conduit de sortie 4": {
   "geo": {
-   "n": 132,
+   "n": 228,
    "idx": 0,
-   "pos": "90bf7dbf57f8f7fd",
-   "col": "058329784c369840"
+   "pos": "e1817e87ab7f8132",
+   "col": "7d604a6d4bd7c0e5"
   },
   "edges": {
-   "n": 72,
+   "n": 80,
    "idx": 0,
-   "pos": "fb6ca043f5848d35",
+   "pos": "60fe5d33f0727b2e",
    "col": null
   }
  },
- "122 Grille de sortie ventilation (contreplaqué 3 mm)": {
-  "geo": {
-   "n": 432,
-   "idx": 0,
-   "pos": "f97d55d0ff6b2610",
-   "col": "e2ef2aeb3305870d"
-  },
-  "edges": {
-   "n": 216,
-   "idx": 0,
-   "pos": "a30fead1f3d77a6f",
-   "col": null
-  }
- },
- "123 Conduit d'air 3": {
+ "125 Conduit d'air 3": {
   "geo": {
    "n": 612,
    "idx": 0,
-   "pos": "2909ee8bda725d08",
+   "pos": "52edc4afcab2fe64",
    "col": "cf7f401daa96cbc7"
   },
   "edges": {
    "n": 208,
    "idx": 0,
-   "pos": "155ed8855bfefdaf",
+   "pos": "58c2a780631a5ca6",
    "col": null
   }
  },
- "124 Conduit d'air 4": {
+ "126 Conduit d'air 4": {
   "geo": {
    "n": 612,
    "idx": 0,
-   "pos": "2909ee8bda725d08",
+   "pos": "52edc4afcab2fe64",
    "col": "cf7f401daa96cbc7"
   },
   "edges": {
    "n": 208,
    "idx": 0,
-   "pos": "155ed8855bfefdaf",
+   "pos": "58c2a780631a5ca6",
    "col": null
   }
  },
- "125 Conduit d'air 2": {
+ "127 Conduit d'air 2": {
   "geo": {
    "n": 672,
    "idx": 0,
@@ -1763,7 +1791,7 @@
    "col": null
   }
  },
- "126 Conduit d'air 1": {
+ "128 Conduit d'air 1": {
   "geo": {
    "n": 612,
    "idx": 0,
@@ -1777,91 +1805,21 @@
    "col": null
   }
  },
- "127 Conduit d'air 5 (couvercle)": {
+ "129 Conduit d'air 5 (couvercle)": {
   "geo": {
    "n": 228,
    "idx": 0,
-   "pos": "37225a0fc572d6c0",
+   "pos": "ed7f0b3c8c4b7bc9",
    "col": "7d604a6d4bd7c0e5"
   },
   "edges": {
    "n": 80,
    "idx": 0,
-   "pos": "190857dc06a651e0",
+   "pos": "3d01281a01efd490",
    "col": null
   }
  },
- "128 Conduit d'air manchon haut": {
-  "geo": {
-   "n": 36,
-   "idx": 0,
-   "pos": "ff635cb6ea029dc6",
-   "col": "81ee9ae44ff8baa2"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "0eff95febf6aee3f",
-   "col": null
-  }
- },
- "129 Conduit d'air manchon bas": {
-  "geo": {
-   "n": 36,
-   "idx": 0,
-   "pos": "ff635cb6ea029dc6",
-   "col": "81ee9ae44ff8baa2"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "0eff95febf6aee3f",
-   "col": null
-  }
- },
- "130 Conduit d'air manchon avant": {
-  "geo": {
-   "n": 36,
-   "idx": 0,
-   "pos": "b43e53e8ffefda35",
-   "col": "81ee9ae44ff8baa2"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "65d272c849887820",
-   "col": null
-  }
- },
- "131 Conduit d'air manchon arrière": {
-  "geo": {
-   "n": 36,
-   "idx": 0,
-   "pos": "b43e53e8ffefda35",
-   "col": "81ee9ae44ff8baa2"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "65d272c849887820",
-   "col": null
-  }
- },
- "132 Grillage inox maille 5 mm — fente": {
-  "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "98dcc721c3dccde2",
-   "col": "6fdb65fc39eb0796"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "f0525dbc7bc85131",
-   "col": null
-  }
- },
- "133 Clapet prise d'air": {
+ "130 Clapet prise d'air": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -1875,49 +1833,35 @@
    "col": null
   }
  },
- "134 Bouchon-boîte prise d'air 3": {
+ "131 Bouchon-boîte prise d'air 3": {
   "geo": {
    "n": 612,
    "idx": 0,
-   "pos": "8d1f5e9f4d9ddb88",
+   "pos": "af68b6919bae1e92",
    "col": "cf7f401daa96cbc7"
   },
   "edges": {
    "n": 208,
    "idx": 0,
-   "pos": "dfa1272b84c9c3a9",
+   "pos": "c0ac9e7b159e1fc2",
    "col": null
   }
  },
- "135 Bouchon-boîte prise d'air 4": {
+ "132 Bouchon-boîte prise d'air 4": {
   "geo": {
    "n": 612,
    "idx": 0,
-   "pos": "8d1f5e9f4d9ddb88",
+   "pos": "af68b6919bae1e92",
    "col": "cf7f401daa96cbc7"
   },
   "edges": {
    "n": 208,
    "idx": 0,
-   "pos": "dfa1272b84c9c3a9",
+   "pos": "c0ac9e7b159e1fc2",
    "col": null
   }
  },
- "136 Bouchon-boîte prise d'air 2": {
-  "geo": {
-   "n": 612,
-   "idx": 0,
-   "pos": "4611acac6fcca31c",
-   "col": "cf7f401daa96cbc7"
-  },
-  "edges": {
-   "n": 208,
-   "idx": 0,
-   "pos": "47ad6e72334da415",
-   "col": null
-  }
- },
- "137 Bouchon-boîte prise d'air 1": {
+ "133 Bouchon-boîte prise d'air 2": {
   "geo": {
    "n": 612,
    "idx": 0,
@@ -1931,35 +1875,49 @@
    "col": null
   }
  },
- "138 Bouchon-boîte prise d'air couvercle": {
+ "134 Bouchon-boîte prise d'air 1": {
+  "geo": {
+   "n": 612,
+   "idx": 0,
+   "pos": "4611acac6fcca31c",
+   "col": "cf7f401daa96cbc7"
+  },
+  "edges": {
+   "n": 208,
+   "idx": 0,
+   "pos": "47ad6e72334da415",
+   "col": null
+  }
+ },
+ "135 Bouchon-boîte prise d'air couvercle": {
   "geo": {
    "n": 228,
    "idx": 0,
-   "pos": "fc2f0c1061416a26",
+   "pos": "f0c31464ee412787",
    "col": "7d604a6d4bd7c0e5"
   },
   "edges": {
    "n": 80,
    "idx": 0,
-   "pos": "cf4810c1a5649ef3",
+   "pos": "bc06a34429494587",
    "col": null
   }
  },
- "139 Bouchon-boîte prise d'air fond": {
+ "136 Bouchon-boîte prise d'air fond": {
   "geo": {
    "n": 348,
    "idx": 0,
-   "pos": "50b67cbedb219a65",
+   "pos": "0d409d232d71d03b",
    "col": "a900a96677cce6b1"
   },
   "edges": {
    "n": 128,
    "idx": 0,
-   "pos": "d32aff291bb84f0d",
+   "pos": "48b989b2be93f687",
    "col": null
   }
  },
- "140 Poignée bouchon prise d'air 1": {
+ "137 Poignée bouchon prise d'air 1": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -1973,7 +1931,7 @@
    "col": null
   }
  },
- "141 Poignée bouchon prise d'air 2": {
+ "138 Poignée bouchon prise d'air 2": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -1987,7 +1945,7 @@
    "col": null
   }
  },
- "142 Poignée bouchon prise d'air 3": {
+ "139 Poignée bouchon prise d'air 3": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -2001,21 +1959,21 @@
    "col": null
   }
  },
- "143 Laine bouchon prise d'air": {
+ "140 Laine bouchon prise d'air": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "fe53129cd7fddeab",
+   "pos": "d9449fed595ee3cb",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "20d3da996eaf5fd4",
+   "pos": "0e02750be4ddc8dc",
    "col": null
   }
  },
- "144 Isolant sous le plancher 1": {
+ "141 Isolant sous le plancher 1": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2029,49 +1987,49 @@
    "col": null
   }
  },
- "145 Isolant sous le plancher 2": {
+ "142 Isolant sous le plancher 2": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "72b818c3aecd87cd",
+   "pos": "ebb1bf759302f888",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "384f5c71a37f1b6f",
+   "pos": "aa8ff61aa0b8496f",
    "col": null
   }
  },
- "146 Isolant sous le plancher 3": {
+ "143 Isolant sous le plancher 3": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "06bd11ad66ce9ddf",
+   "pos": "e39a489c40d0f84e",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "0e34b87ea95552ca",
+   "pos": "81cf5295daa5be34",
    "col": null
   }
  },
- "147 Isolant sous le plancher 4": {
+ "144 Isolant sous le plancher 4": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "509404a8ac68863e",
+   "pos": "f7cd33654938746a",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "32360c84a58aa2ea",
+   "pos": "3b792501932a5e08",
    "col": null
   }
  },
- "148 Isolant gauche 1": {
+ "145 Isolant gauche 1": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2085,105 +2043,49 @@
    "col": null
   }
  },
- "149 Isolant gauche 2": {
+ "146 Isolant gauche 2": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "da7f5790f3a5bbb4",
+   "pos": "2d60379707613d7c",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "c40f3692710df742",
+   "pos": "dd18c511138f50f4",
    "col": null
   }
  },
- "150 Isolant gauche 3": {
+ "147 Isolant gauche 3": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "81b4ccd0e3a36ab2",
+   "pos": "49ada7d0dc50db81",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "1a862013e31227f0",
+   "pos": "3a5a459beaa246f8",
    "col": null
   }
  },
- "151 Isolant gauche 4": {
+ "148 Isolant gauche dessus conduit": {
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "0ae288ee2a2d81dc",
+   "pos": "64e93336129a4043",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "798fb89d0de63d9e",
+   "pos": "582f70f76a0220c0",
    "col": null
   }
  },
- "152 Isolant gauche 5": {
-  "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "27f1c4d8efd3f7c0",
-   "col": "952b3713c1187e61"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "27177bdc92fa43b2",
-   "col": null
-  }
- },
- "153 Isolant gauche manchon bas": {
-  "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "171d95b465ee8557",
-   "col": "952b3713c1187e61"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "01693b27b81a4b20",
-   "col": null
-  }
- },
- "154 Isolant gauche manchon haut": {
-  "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "fb9c707ab30e6051",
-   "col": "952b3713c1187e61"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "fffa79136829c9ff",
-   "col": null
-  }
- },
- "155 Isolant gauche dessus conduit": {
-  "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "b92db355cd506506",
-   "col": "952b3713c1187e61"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "be62b559cdaf0a0f",
-   "col": null
-  }
- },
- "156 Isolant droite": {
+ "149 Isolant droite": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2197,7 +2099,7 @@
    "col": null
   }
  },
- "157 Isolant arrière": {
+ "150 Isolant arrière": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2211,7 +2113,7 @@
    "col": null
   }
  },
- "158 Isolant avant gauche": {
+ "151 Isolant avant gauche": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2225,7 +2127,7 @@
    "col": null
   }
  },
- "159 Isolant avant droite": {
+ "152 Isolant avant droite": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2239,7 +2141,7 @@
    "col": null
   }
  },
- "160 Isolant sous le bloc d'entrée": {
+ "153 Isolant sous le bloc d'entrée": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2253,7 +2155,7 @@
    "col": null
   }
  },
- "161 Isolant toit 1": {
+ "154 Isolant toit 1": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2267,7 +2169,7 @@
    "col": null
   }
  },
- "162 Isolant toit 2": {
+ "155 Isolant toit 2": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2281,7 +2183,7 @@
    "col": null
   }
  },
- "163 Isolant toit 3": {
+ "156 Isolant toit 3": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2295,7 +2197,7 @@
    "col": null
   }
  },
- "164 Isolant toit 4": {
+ "157 Isolant toit 4": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2309,7 +2211,7 @@
    "col": null
   }
  },
- "165 Isolant toit 5": {
+ "158 Isolant toit 5": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2323,7 +2225,7 @@
    "col": null
   }
  },
- "166 Isolant toit 6": {
+ "159 Isolant toit 6": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2337,7 +2239,7 @@
    "col": null
   }
  },
- "167 Isolant toit 7": {
+ "160 Isolant toit 7": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2351,7 +2253,7 @@
    "col": null
   }
  },
- "168 Entrée 1": {
+ "161 Entrée 1": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2365,7 +2267,7 @@
    "col": null
   }
  },
- "169 Entrée 2": {
+ "162 Entrée 2": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2379,7 +2281,7 @@
    "col": null
   }
  },
- "170 Entrée 3": {
+ "163 Entrée 3": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2393,7 +2295,7 @@
    "col": null
   }
  },
- "171 Entrée 4": {
+ "164 Entrée 4": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2407,7 +2309,7 @@
    "col": null
   }
  },
- "172 Entrée 5": {
+ "165 Entrée 5": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2421,7 +2323,7 @@
    "col": null
   }
  },
- "173 Entrée 6": {
+ "166 Entrée 6": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2435,7 +2337,7 @@
    "col": null
   }
  },
- "174 Entrée 7": {
+ "167 Entrée 7": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2449,7 +2351,7 @@
    "col": null
   }
  },
- "175 Entrée 8": {
+ "168 Entrée 8": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2463,7 +2365,7 @@
    "col": null
   }
  },
- "176 Entrée 9": {
+ "169 Entrée 9": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2477,7 +2379,7 @@
    "col": null
   }
  },
- "177 Entrée 10": {
+ "170 Entrée 10": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2491,7 +2393,7 @@
    "col": null
   }
  },
- "178 Entrée 11": {
+ "171 Entrée 11": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2505,7 +2407,7 @@
    "col": null
   }
  },
- "179 Entrée 12": {
+ "172 Entrée 12": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2519,7 +2421,7 @@
    "col": null
   }
  },
- "180 Entrée 13": {
+ "173 Entrée 13": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2533,7 +2435,7 @@
    "col": null
   }
  },
- "181 Entrée 14": {
+ "174 Entrée 14": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2547,7 +2449,7 @@
    "col": null
   }
  },
- "182 Entrée 15": {
+ "175 Entrée 15": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2561,7 +2463,7 @@
    "col": null
   }
  },
- "183 Baguette de cale 1": {
+ "176 Baguette de cale 1": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2575,7 +2477,7 @@
    "col": null
   }
  },
- "184 Baguette de cale 2": {
+ "177 Baguette de cale 2": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2589,7 +2491,7 @@
    "col": null
   }
  },
- "185 Baguette de cale 3": {
+ "178 Baguette de cale 3": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2603,7 +2505,7 @@
    "col": null
   }
  },
- "186 Baguette de cale 4": {
+ "179 Baguette de cale 4": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2617,7 +2519,7 @@
    "col": null
   }
  },
- "187 Baguette de cale 5": {
+ "180 Baguette de cale 5": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2631,7 +2533,7 @@
    "col": null
   }
  },
- "188 Baguette de cale 6": {
+ "181 Baguette de cale 6": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2645,7 +2547,7 @@
    "col": null
   }
  },
- "189 Baguette de cale 7": {
+ "182 Baguette de cale 7": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2659,7 +2561,7 @@
    "col": null
   }
  },
- "190 Face avant ext": {
+ "183 Face avant ext": {
   "geo": {
    "n": 1632,
    "idx": 0,
@@ -2673,7 +2575,7 @@
    "col": null
   }
  },
- "191 Face arrière ext": {
+ "184 Face arrière ext": {
   "geo": {
    "n": 1800,
    "idx": 0,
@@ -2687,7 +2589,7 @@
    "col": null
   }
  },
- "192 Côté droit ext": {
+ "185 Côté droit ext": {
   "geo": {
    "n": 1584,
    "idx": 0,
@@ -2701,7 +2603,7 @@
    "col": null
   }
  },
- "193 Côté gauche ext": {
+ "186 Côté gauche ext": {
   "geo": {
    "n": 1584,
    "idx": 0,
@@ -2715,35 +2617,35 @@
    "col": null
   }
  },
- "194 Dessous ext": {
+ "187 Dessous ext": {
   "geo": {
    "n": 2844,
    "idx": 0,
-   "pos": "8298fdd3a51ea377",
+   "pos": "fbc7fb117559ea84",
    "col": "f4261d76c54ea20c"
   },
   "edges": {
    "n": 992,
    "idx": 0,
-   "pos": "a707273507fd2eba",
+   "pos": "18f585365331c853",
    "col": null
   }
  },
- "195 Plancher int": {
+ "188 Plancher int": {
   "geo": {
-   "n": 3468,
+   "n": 3444,
    "idx": 0,
-   "pos": "302eb2256fcce9f1",
-   "col": "e06a44dac3f1ac8b"
+   "pos": "7d6333790bd5b7eb",
+   "col": "17d3d1ef59c5d5a2"
   },
   "edges": {
    "n": 1320,
    "idx": 0,
-   "pos": "9d50d508b315ecca",
+   "pos": "3b8e0f189dc2cf04",
    "col": null
   }
  },
- "196 Face avant int": {
+ "189 Face avant int": {
   "geo": {
    "n": 948,
    "idx": 0,
@@ -2757,7 +2659,7 @@
    "col": null
   }
  },
- "197 Face arrière int": {
+ "190 Face arrière int": {
   "geo": {
    "n": 900,
    "idx": 0,
@@ -2771,7 +2673,7 @@
    "col": null
   }
  },
- "198 Côté droit int": {
+ "191 Côté droit int": {
   "geo": {
    "n": 900,
    "idx": 0,
@@ -2785,63 +2687,49 @@
    "col": null
   }
  },
- "199 Côté gauche int": {
+ "192 Côté gauche int": {
   "geo": {
-   "n": 960,
+   "n": 1200,
    "idx": 0,
-   "pos": "2b1dc84536a69648",
-   "col": "a73303e4dd2d5e0c"
+   "pos": "68fe3140d223a574",
+   "col": "43b7a85071099385"
   },
   "edges": {
-   "n": 328,
+   "n": 448,
    "idx": 0,
-   "pos": "5a47807dde402f11",
+   "pos": "d335255e07552147",
    "col": null
   }
  },
- "200 Face avant toit": {
+ "193 Face avant toit": {
   "geo": {
-   "n": 720,
+   "n": 660,
    "idx": 0,
-   "pos": "8e10ed41d18be88d",
-   "col": "bc482382777472cd"
+   "pos": "a27fe9c71638ac43",
+   "col": "adb2b4698723bcd4"
   },
   "edges": {
-   "n": 248,
+   "n": 224,
    "idx": 0,
-   "pos": "2e1592711a813020",
+   "pos": "c9727d4bf351ebff",
    "col": null
   }
  },
- "201 Face arrière toit": {
+ "194 Face arrière toit": {
   "geo": {
-   "n": 912,
+   "n": 1248,
    "idx": 0,
-   "pos": "2b4015455a953019",
-   "col": "cb4df596ff7708c5"
+   "pos": "229e438df54c26fb",
+   "col": "6c4866cdcb0eeefd"
   },
   "edges": {
-   "n": 320,
+   "n": 488,
    "idx": 0,
-   "pos": "b1c5698b46b73245",
+   "pos": "669ac0a7833cd570",
    "col": null
   }
  },
- "202 Côté droit toit": {
-  "geo": {
-   "n": 732,
-   "idx": 0,
-   "pos": "4414171aade5f295",
-   "col": "46f37807cecd45f4"
-  },
-  "edges": {
-   "n": 248,
-   "idx": 0,
-   "pos": "e5238b988049d9d0",
-   "col": null
-  }
- },
- "203 Côté gauche toit": {
+ "195 Côté droit toit": {
   "geo": {
    "n": 732,
    "idx": 0,
@@ -2855,7 +2743,21 @@
    "col": null
   }
  },
- "204 Dessus toit": {
+ "196 Côté gauche toit": {
+  "geo": {
+   "n": 732,
+   "idx": 0,
+   "pos": "4414171aade5f295",
+   "col": "46f37807cecd45f4"
+  },
+  "edges": {
+   "n": 248,
+   "idx": 0,
+   "pos": "e5238b988049d9d0",
+   "col": null
+  }
+ },
+ "197 Dessus toit": {
   "geo": {
    "n": 540,
    "idx": 0,
@@ -2869,7 +2771,7 @@
    "col": null
   }
  },
- "205 Dessous toit": {
+ "198 Dessous toit": {
   "geo": {
    "n": 3636,
    "idx": 0,
@@ -2883,7 +2785,7 @@
    "col": null
   }
  },
- "206 Tasseau gauche": {
+ "199 Tasseau gauche": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2897,7 +2799,7 @@
    "col": null
   }
  },
- "207 Tasseau droite": {
+ "200 Tasseau droite": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2911,7 +2813,7 @@
    "col": null
   }
  },
- "208 Tasseau avant": {
+ "201 Tasseau avant": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2925,7 +2827,7 @@
    "col": null
   }
  },
- "209 Tasseau arrière 1": {
+ "202 Tasseau arrière 1": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2939,7 +2841,7 @@
    "col": null
   }
  },
- "210 Tasseau arrière 2": {
+ "203 Tasseau arrière 2": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2953,7 +2855,7 @@
    "col": null
   }
  },
- "211 Cadre toit haut": {
+ "204 Cadre toit haut": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -2967,7 +2869,7 @@
    "col": null
   }
  },
- "212 Cadre toit milieu": {
+ "205 Cadre toit milieu": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -2981,7 +2883,7 @@
    "col": null
   }
  },
- "213 Cadre toit bas": {
+ "206 Cadre toit bas": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -2995,7 +2897,7 @@
    "col": null
   }
  },
- "214 Face avant caméra 1": {
+ "207 Face avant caméra 1": {
   "geo": {
    "n": 228,
    "idx": 0,
@@ -3009,7 +2911,7 @@
    "col": null
   }
  },
- "215 Face arrière caméra 1": {
+ "208 Face arrière caméra 1": {
   "geo": {
    "n": 228,
    "idx": 0,
@@ -3023,7 +2925,7 @@
    "col": null
   }
  },
- "216 Côté droit caméra 1": {
+ "209 Côté droit caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -3037,7 +2939,7 @@
    "col": null
   }
  },
- "217 Côté gauche caméra 1": {
+ "210 Côté gauche caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -3051,7 +2953,7 @@
    "col": null
   }
  },
- "218 Caméra": {
+ "211 Caméra": {
   "geo": {
    "n": 648,
    "idx": 0,
@@ -3065,7 +2967,7 @@
    "col": null
   }
  },
- "219 LED infrarouges": {
+ "212 LED infrarouges": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -3079,7 +2981,7 @@
    "col": null
   }
  },
- "220 Raspberry Pi": {
+ "213 Raspberry Pi": {
   "geo": {
    "n": 4104,
    "idx": 0,
@@ -3093,7 +2995,7 @@
    "col": null
   }
  },
- "221 Nappe caméra": {
+ "214 Nappe caméra": {
   "geo": {
    "n": 242,
    "idx": 720,
@@ -3107,7 +3009,7 @@
    "col": null
   }
  },
- "222 Fil 5 V (rouge)": {
+ "215 Fil 5 V (rouge)": {
   "geo": {
    "n": 1521,
    "idx": 8064,
@@ -3121,7 +3023,7 @@
    "col": null
   }
  },
- "223 Fil masse (noir)": {
+ "216 Fil masse (noir)": {
   "geo": {
    "n": 1305,
    "idx": 6912,

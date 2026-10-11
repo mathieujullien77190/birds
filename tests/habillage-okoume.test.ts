@@ -6,7 +6,7 @@ import { aabb, obb } from './geomChecks';
 
 /** Sommets réels du contour de la plaque (poly ou rectangle), sur les deux faces. */
 const outlineCorners = (p: Plank, t: number): Vector3[] => { const b = obb(p, t), pts = p.poly ?? [[-p.w / 2, -p.h / 2], [p.w / 2, -p.h / 2], [p.w / 2, p.h / 2], [-p.w / 2, p.h / 2]]; return pts.flatMap(([x, y]) => [-1, 1].map((d) => b.c.clone().addScaledVector(b.ax[0], x).addScaledVector(b.ax[1], y).addScaledVector(b.ax[2], d * (p.depth ?? t) / 2))); };
-/** Distance signée d'un point au-dessous du dessous du pan de chêne (> 0 : sous le pan). */
+/** Distance signée d'un point au-dessous du dessous du pan en okoumé (plaque crénelée) (> 0 : sous le pan). */
 const belowOak = (oak: Plank, pt: Vector3, t: number) => { const b = obb(oak, t), n = b.ax[2].clone(); if (n.z < 0) n.negate(); return -(pt.clone().sub(b.c).dot(n)) - oak.depth! / 2; };
 
 describe('habillage en contreplaqué okoumé extérieur 5 mm, peint en blanc, découpé au laser', () => {
@@ -30,8 +30,8 @@ describe('habillage en contreplaqué okoumé extérieur 5 mm, peint en blanc, d�
       }
     });
 
-    it(`(${nom}) le haut de la façade reste sous le dessous du pan de chêne, l'arrière et les côtés ne le percent pas`, () => {
-      const sc = buildNest(over), t = sc.t, oak = sc.planks.find((p) => p.name === 'Toit en chêne')!;
+    it(`(${nom}) le haut de la façade reste sous le dessous du pan en okoumé, l'arrière et les côtés ne le percent pas`, () => {
+      const sc = buildNest(over), t = sc.t, oak = sc.planks.find((p) => p.name === 'Toit en okoumé (plaque crénelée)')!;
       for (const l of sc.planks.filter((p) => /^Lambris /.test(p.name))) {
         const worst = Math.min(...outlineCorners(l, t).filter((c) => c.z > aabb(l, t).max.z - 7).map((c) => belowOak(oak, c, t)));
         expect(worst, l.name).toBeGreaterThanOrEqual(l.name.startsWith('Lambris avant') ? 1.4 : -0.05); // devant : jeu (LAM_FRONT_GAP) ; ailleurs : au plus affleurant

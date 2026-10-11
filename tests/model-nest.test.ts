@@ -80,11 +80,10 @@ describe('makeNest : pièces présentes / absentes selon les options', () => {
       expect(off.some((p) => re.test(p.name))).toBe(false);
     }
     expect(CAMERA_NAMES[1]).toBe('Caméra 2');
-    // la fente de la nappe dans la plaque avant du toit n'existe qu'avec la 2ᵉ caméra
-    const hasSlot = (ps: Plank[]) => byName(ps, /^Face avant toit$/).holes.length;
-    expect(hasSlot(on)).toBe(1);
-    expect(hasSlot(off)).toBe(0);
-    expect(byName(on, /^Face avant toit$/).holes[0]).toMatchObject({ size: 28, sh: 4 });
+    // plus de fente dans la plaque avant du toit : la nappe passe par le canal du pan en okoumé
+    expect(byName(on, /^Face avant toit$/).holes).toHaveLength(0);
+    expect(byName(on, /^Toit en okoumé \(plaque crénelée\)$/).holes.some((h) => h.r === 8)).toBe(true);
+    expect(byName(off, /^Toit en okoumé \(plaque crénelée\)$/).holes.some((h) => h.r === 8)).toBe(false);
   });
   it('chêne : désactivé par défaut ; activé, il recouvre le toit (+ 15 mm de chaque côté) hors compartiment caméra, et tout ce qui est « sur le toit » monte de 18', () => {
     const a = build().planks, b = build({ chene: true }).planks;
@@ -240,19 +239,9 @@ describe("habillage : trou d'envol dans la façade", () => {
   });
 });
 
-describe('fente de la nappe 2 dans la plaque avant du toit', () => {
-  const slot = (l: number) => { const p = byName(build({ l, L: l }).planks, /^Face avant toit$/); return { p, h: p.holes[0] }; };
-  it('tient dans la plaque tant que le toit est assez haut (l ≤ 250)', () => {
-    for (const l of [120, 200, 250]) {
-      const { p, h } = slot(l);
-      expect(h).toMatchObject({ shape: 'square', size: 28, sh: 4 });
-      expect(Math.abs(h.y) + 2).toBeLessThanOrEqual(p.h / 2);
-    }
-  });
-  // BUG connu (voir fix-lambris-entry-hole.patch) : pour l ≥ 260 la plaque (Hf) est plus basse que roofH + 30 et la fente sort par le haut.
-  it('grand nichoir → la fente sort par le haut de la plaque', () => {
-    const { p, h } = slot(300);
-    expect(Math.abs(h.y) + 2).toBeLessThanOrEqual(p.h / 2);
+describe('plaque avant du toit', () => {
+  it('aucune fente pour la nappe de la 2ᵉ caméra, quelle que soit la taille (elle passe par le canal du pan)', () => {
+    for (const l of [120, 200, 250, 300]) expect(byName(build({ l, L: l }).planks, /^Face avant toit$/).holes).toHaveLength(0);
   });
 });
 
@@ -305,8 +294,8 @@ describe('découpe : planches MDF, libellés, SVG', () => {
     const svg = sheetSvg(sheets[0], 100, 50, 2);
     expect(svg).toContain('width="100mm" height="50mm" viewBox="0 0 100 50"');
     expect(svg).toContain('planche 3');
-    expect(svg).toContain('>Pièce A</text>');
-    expect(svg.match(/<polygon/g)).toHaveLength(2); // contour + trou
+    expect(svg).toContain('>X-01 Pièce A</text>'); // code de la plaque (sans groupe : X-01) + nom
+    expect(svg.match(/<polygon(?! class="e")/g)).toHaveLength(2); // contour + trou (le code gravé est à part, en bleu, class="e")
     expect(sheets[0].items[0].rotated).toBe(true); // 10 × 20 : tournée d'un quart de tour, au plus près du coin
     expect(svg).toContain('points="18,28 18,8 8,8 8,28"'); // pièce 10 × 20 en (8, 8), y vers le bas
     expect(svg).toContain('points="13,16 12.61,16.04'); // trou Ø 4 au centre (13, 18)
@@ -333,8 +322,8 @@ describe('pièces d\'hiver', () => {
     const s = nest();
     const w = setWinterCassette(s, true);
     expect(winterState(w).cassette).toBe('winter');
-    const seat = pos(s, /^Ventilateur Noctua/);
-    expect(Math.hypot(pos(w, /^Isolant bloc d'hiver/)[0] - seat[0], pos(w, /^Isolant bloc d'hiver/)[1] - seat[1])).toBeLessThan(1);
+    const seat = pos(s, /^Cassette ventilateur 1$/); // paroi avant de la cassette = celle du bloc (le bloc est plus long : il comble aussi la place du conduit de sortie)
+    expect(Math.hypot(pos(w, /^Bloc isolant d'hiver 1$/)[0] - seat[0], pos(w, /^Bloc isolant d'hiver 1$/)[1] - seat[1])).toBeLessThan(1);
     expect(pos(w, /^Ventilateur Noctua/)[0]).toBeLessThan(-(210 / 2) - 100); // rangé à gauche du nichoir
     expect(setWinterCassette(w, true)).toEqual(w); // déjà en hiver : rien ne bouge
     expect(setWinterCassette(w, false)).toEqual(s);

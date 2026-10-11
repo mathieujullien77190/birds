@@ -7,16 +7,17 @@ import { r2 } from '../util';
  * Les déplacements sont des translations au centième : l'aller-retour est exact.
  */
 
-const CASSETTE = [/^Cassette ventilateur/, /^Poignée cassette/, /^Plot caoutchouc ventilateur/, /^Grille de protection ventilateur/, /^Ventilateur Noctua/, /^Prise 4 broches du ventilateur/, /^Fil cassette/];
+const CASSETTE = [/^Cassette ventilateur/, /^Poignée cassette/, /^Plot caoutchouc ventilateur/, /^Grille de protection ventilateur/, /^Ventilateur Noctua/, /^Prise 4 broches du ventilateur/, /^Fil cassette/, /^Conduit de sortie/]; // le conduit de sortie est fixé à la cassette (dents dans sa paroi arrière) : il sort et rentre avec elle
 const BLOCK = [/^Bloc isolant d'hiver/, /^Isolant bloc d'hiver/, /^Poignée bloc d'hiver/];
 const PLUG = [/^Bouchon-boîte prise d'air/, /^Laine bouchon prise d'air/, /^Poignée bouchon prise d'air/];
 /** Distance entre le nichoir et les pièces rangées ; dépassement du U de la sous-boîte sous son fond. */
 export const SPARE_GAP = 150, PLUG_HANDLE = 15;
 
+const BLOCK_FRONT = /^Bloc isolant d'hiver 1$/; // paroi avant du bloc : alignée sur celle de la cassette
 const by = (s: PlankScene, re: RegExp) => s.planks.find((p) => re.test(p.name));
 const isIn = (p: Plank, res: RegExp[]) => res.some((re) => re.test(p.name));
 
-interface Layout { seat: [number, number]; floorTop: number; slotA: [number, number]; slotB: [number, number]; duct: [number, number]; lipBottom: number }
+interface Layout { seat: [number, number]; co: number; floorTop: number; slotA: [number, number]; slotB: [number, number]; duct: [number, number]; lipBottom: number }
 
 /** Repères de la scène (null si les pièces nécessaires manquent). */
 function layout(s: PlankScene): Layout | null {
@@ -24,7 +25,7 @@ function layout(s: PlankScene): Layout | null {
   if (!gl || !gr || !gf || !floor || !outerL || !lid || !bottom) return null;
   const co = Math.abs(gr.pos[0] - gl.pos[0]) - s.t, seat: [number, number] = [r2((gl.pos[0] + gr.pos[0]) / 2), r2(gf.pos[1] + s.t / 2 + co / 2)];
   const ex = r2(outerL.pos[0] - s.t / 2 - SPARE_GAP);
-  return { seat, floorTop: r2(floor.pos[2] + s.t / 2), slotA: [ex, 0], slotB: [ex, -80], duct: [lid.pos[0], lid.pos[1]], lipBottom: r2(bottom.pos[2] - s.t / 2 - PLUG_HANDLE) };
+  return { seat, co, floorTop: r2(floor.pos[2] + s.t / 2), slotA: [ex, 0], slotB: [ex, -80], duct: [lid.pos[0], lid.pos[1]], lipBottom: r2(bottom.pos[2] - s.t / 2 - PLUG_HANDLE) };
 }
 
 /** Translate des pièces (leur position, et les points de leur chemin pour les fils) au centième. */
@@ -38,8 +39,9 @@ export interface WinterState { cassette: 'summer' | 'winter' | null; plug: 'open
 
 /** État : la cassette ventilateur est-elle dans le siège (« summer »), exposée (« winter ») ? null si la scène n'a pas ces pièces. */
 export function winterState(s: PlankScene): WinterState {
-  const l = layout(s), fan = by(s, /^Ventilateur Noctua/), block = by(s, /^Isolant bloc d'hiver/), lip = by(s, /^Bouchon-boîte prise d'air fond/);
+  const l = layout(s), fan = by(s, /^Ventilateur Noctua/), lip = by(s, /^Bouchon-boîte prise d'air fond/);
   const near = (p: Plank, c: [number, number]) => Math.hypot(p.pos[0] - c[0], p.pos[1] - c[1]) < 1;
+  const block = by(s, BLOCK_FRONT);
   return {
     cassette: l && fan && block ? (near(fan, l.seat) ? 'summer' : 'winter') : null,
     plug: l && lip ? (near(lip, l.duct) ? 'plugged' : 'open') : null,
@@ -48,14 +50,15 @@ export function winterState(s: PlankScene): WinterState {
 
 /** Met en place la cassette isolante (winter) ou la cassette ventilateur (été) dans le siège ; l'autre est rangée à côté du nichoir. Ne fait rien sans ces pièces. */
 export function setWinterCassette(s: PlankScene, winter: boolean): PlankScene {
-  const l = layout(s), fan = by(s, /^Ventilateur Noctua/), block = by(s, /^Isolant bloc d'hiver/);
+  const l = layout(s), fan = by(s, /^Ventilateur Noctua/), block = by(s, BLOCK_FRONT);
   if (!l || !fan || !block) return s;
   const out: Vec3 = [l.slotA[0] - l.seat[0], l.slotA[1] - l.seat[1], -l.floorTop]; // du siège vers le sol à côté
   const inn: Vec3 = [-out[0], -out[1], -out[2]];
   const near = (p: Plank) => Math.hypot(p.pos[0] - l.seat[0], p.pos[1] - l.seat[1]) < 1;
+  const nearBlock = (p: Plank) => Math.hypot(p.pos[0] - l.seat[0], p.pos[1] - (l.seat[1] - l.co / 2 + s.t / 2)) < 1; // le bloc est plus long que la cassette (il occupe aussi la place du conduit) : on compare sa paroi avant
   let r = s;
-  if (winter) { if (near(fan)) r = shift(r, CASSETTE, out); if (!near(block)) r = shift(r, BLOCK, inn); } // la cassette sort, le bloc entre
-  else { if (near(block)) r = shift(r, BLOCK, out); if (!near(fan)) r = shift(r, CASSETTE, inn); }
+  if (winter) { if (near(fan)) r = shift(r, CASSETTE, out); if (!nearBlock(block)) r = shift(r, BLOCK, inn); } // la cassette sort, le bloc entre
+  else { if (nearBlock(block)) r = shift(r, BLOCK, out); if (!near(fan)) r = shift(r, CASSETTE, inn); }
   return r;
 }
 

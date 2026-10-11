@@ -7,7 +7,7 @@ import { coloredPart, emptyEdges, mergeColored, paintUniform } from '@/birdhouse
 import { startRenderLoop, type LoopEnv } from '@/birdhouse/three/scene/renderLoop';
 import { CameraShooter, type ShotRenderer } from '@/birdhouse/three/cameraShooter';
 import { AMBIENCE, CAMERA_SHOT } from '@/birdhouse/three/constants';
-import { disposeAll, textures } from '@/birdhouse/three/registry/materials';
+import { disposeAll, shared } from '@/birdhouse/three/registry/materials';
 import type { PlankMesh } from '@/birdhouse/three/factories/plank';
 import type { View } from '@/birdhouse/three/types';
 
@@ -23,15 +23,11 @@ describe('dispose : cas non couverts', () => {
     disposeObject3D(sp);
     expect([m.n, tx.n, g.n]).toEqual([1, 1, 0]);
   });
-  it('ne libère pas une texture partagée du registre (chêne) mais libère le matériau qui la porte', () => {
-    const ctx = { createImageData: (w: number, h: number) => ({ data: new Uint8ClampedArray(w * h * 4) }), putImageData: () => {} };
-    vi.stubGlobal('document', { createElement: () => ({ width: 0, height: 0, getContext: () => ctx }) });
-    try {
-      const oak = textures.oak(), mat = new MeshBasicMaterial({ map: oak }), mesh = new Mesh(new BoxGeometry(), mat);
-      const o = watch(oak), m = watch(mat);
-      disposeObject3D(mesh);
-      expect([o.n, m.n]).toEqual([0, 1]);
-    } finally { vi.unstubAllGlobals(); }
+  it('ne libère pas une texture partagée du registre mais libère le matériau qui la porte', () => {
+    const tex = shared('test-texture', () => new Texture()), mat = new MeshBasicMaterial({ map: tex }), mesh = new Mesh(new BoxGeometry(), mat);
+    const o = watch(tex), m = watch(mat);
+    disposeObject3D(mesh);
+    expect([o.n, m.n]).toEqual([0, 1]);
   });
   it('libère un Mesh à matériaux multiples, une Line et des Points (géométrie + matériau)', () => {
     const m1 = new MeshBasicMaterial(), m2 = new MeshBasicMaterial(), mesh = new Mesh(new BoxGeometry(), [m1, m2]);

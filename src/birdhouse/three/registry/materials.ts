@@ -1,5 +1,4 @@
-import { DoubleSide, LineBasicMaterial, LineDashedMaterial, MeshBasicMaterial, type CanvasTexture, type Material } from 'three';
-import { makeOakTexture } from '../oakTexture';
+import { DoubleSide, LineBasicMaterial, LineDashedMaterial, MeshBasicMaterial, PlaneGeometry, type Material } from 'three';
 import { PALETTE } from './palette';
 
 /** Une ressource GPU libérable (matériau, texture). */
@@ -22,6 +21,22 @@ function lazy<T extends Disposable>(make: () => T): () => T {
   };
 }
 
+const keyed = new Map<string, Disposable>(); // ressources partagées par clé (une étiquette par code de plaque)
+resets.push(() => keyed.clear());
+
+/** Ressource partagée à clé : créée au premier appel avec cette clé, rendue telle quelle ensuite (jusqu'au prochain `disposeAll`). */
+export function shared<T extends Disposable>(key: string, make: () => T): T {
+  let r = keyed.get(key) as T | undefined;
+  if (!r) { r = make(); keyed.set(key, r); live.add(r); }
+  return r;
+}
+
+/** Géométries partagées. */
+export const geometries = {
+  /** Carré de 1 × 1 dans le plan XY : les étiquettes des codes de plaques le mettent à leur taille (échelle de la mesh). */
+  unitPlane: lazy(() => new PlaneGeometry(1, 1)),
+};
+
 export const materials = {
   /** Plan de coupe : carré bleu transparent. */
   cut: lazy(() => new MeshBasicMaterial({ color: PALETTE.cutPlane, transparent: true, opacity: 0.18, side: DoubleSide, depthWrite: false })),
@@ -33,12 +48,6 @@ export const materials = {
   /** Cotes, testées en profondeur : trait de cote et traits de rappel. */
   dimLine: lazy(() => new LineBasicMaterial({ color: PALETTE.dimLine })),
   dimExtension: lazy(() => new LineBasicMaterial({ color: PALETTE.dimExt })),
-};
-
-/** Textures partagées. */
-export const textures = {
-  /** Chêne procédurale du pan de toit (une seule pour tout le monde). */
-  oak: lazy((): CanvasTexture => makeOakTexture()),
 };
 
 /** Cette ressource (matériau, texture) appartient-elle au registre (donc à ne pas libérer avec une pièce) ? */
