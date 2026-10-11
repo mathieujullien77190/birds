@@ -3014,7 +3014,7 @@
    "group": "id9",
    "special": "fan",
    "color": "#8b5a2b",
-   "url": "https://noctua.at/en/nf-a6x25-pwm"
+   "url": "https://www.amazon.fr/dp/B00VXTANZ4"
   },
   {
    "id": "id136",
@@ -3235,7 +3235,7 @@
    "group": "id9",
    "special": "block",
    "color": "#111827",
-   "url": "https://noctua.at/en/nf-a6x25-pwm"
+   "url": "https://www.amazon.fr/dp/B00VXTANZ4"
   },
   {
    "id": "id146",
@@ -3258,7 +3258,7 @@
    "group": "id9",
    "special": "block",
    "color": "#374151",
-   "url": "https://noctua.at/en/nf-a6x25-pwm"
+   "url": "https://www.amazon.fr/dp/B00VXTANZ4"
   },
   {
    "id": "id147",
@@ -4928,7 +4928,8 @@
    "group": "id9",
    "special": "block",
    "color": "#9ca3af",
-   "transparent": true
+   "transparent": true,
+   "url": "https://www.amazon.fr/dp/B0B1QRWHW3"
   },
   {
    "id": "id242",
