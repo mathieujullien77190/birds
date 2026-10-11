@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Card, ErrorLine, Stat, ToggleButton } from '@/ui';
 import { fmt } from '@/utils';
 import { PUISSANCE_DEFAUT, PUISSANCE_MAX } from '@/constants';
+import { AutoPeltier } from '@/components/AutoPeltier';
 import { MODES } from './constants';
 import type { PeltierCardProps } from './types';
 
-export function PeltierCard({ state, onCommand }: PeltierCardProps) {
+export function PeltierCard({ state, onCommand, onAuto }: PeltierCardProps) {
   const [power, setPower] = useState(PUISSANCE_DEFAUT);
   return (
     <Card title="Peltier">
@@ -22,6 +23,7 @@ export function PeltierCard({ state, onCommand }: PeltierCardProps) {
         Puissance <input id="puiss" type="range" min={0} max={PUISSANCE_MAX} value={power} onChange={(e) => setPower(Number(e.target.value))} /> <span id="puiss_v">{power}</span> %
       </div>
       <ErrorLine message={state?.erreurs.gpio} />
+      <AutoPeltier state={state} onAuto={onAuto} />
     </Card>
   );
 }

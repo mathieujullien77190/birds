@@ -151,8 +151,24 @@ Oui, le Pi peut lire la météo : `maj_meteo()` interroge l'API gratuite **Open-
 ## Niveau de la batterie et consommation
 `/api/etat` donne aussi `batterie` (pourcentage, tension, source) et `conso` (watts par élément et total). La **consommation est estimée** selon ce qui est allumé : Raspberry Pi 3,5 W, 0,7 W par caméra allumée, 1,2 W par carte de LED infrarouges, Peltier 72 W × (rapport cyclique)² (TEC1-12706 d'environ 2 Ω sous 12 V : ≈ 26 W à 60 %). Le **niveau** vient d'un module **INA219** (I2C 0x41, shunt 10 mΩ, bibliothèque `pi-ina219`) qui mesure la tension de la batterie, convertie en pourcentage par la courbe LiFePO4 (`COURBE_LIFEPO4`, grossière sous charge) ; sans ce module le niveau reste « — » (le module n'est pas encore dans le modèle 3D). En mode simulé la batterie part à 80 %, se décharge de la consommation et se recharge de jour par le panneau solaire (jusqu'à ≈ 60 W, le bouton Jour / Nuit de l'app impose le jour ou la nuit à la simulation ; sans lui c'est l'horloge), en **temps réel par défaut** : le simulateur de l'app propose ×1, ×10 et ×60 (`NICHOIR_MOCK_ACCEL`) pour voir le niveau bouger plus vite. Le panneau donne jusqu'à ≈ 60 W et varie avec des nuages (0,2 à 1 de la puissance) ; au-dessus de 90 % la charge ralentit comme avec un vrai régulateur.
 
+## Peltier automatique
+Bouton « Peltier automatique » dans la carte Peltier du site (désactivé au départ ; réglages et interrupteur gardés dans `reglages.json` à côté de `nichoir.py`). Les seuils portent sur la **température intérieure du nid** (le BME280 sous le plafond). Toutes les valeurs sont modifiables dans « Réglages » :
+
+| Cas | Règle (valeur par défaut) |
+| --- | --- |
+| Gel | démarre quand le nid passe **sous −5 °C** ; cible = le plus petit de **0 °C** et de **température extérieure + 5 °C** ; s'arrête quand la cible est atteinte |
+| Chaleur | démarre quand le nid dépasse **30 °C** ; vise 30 °C et **s'arrête sous 28 °C** (marge de 2 °C) |
+| Entre les deux | Peltier éteint |
+| Puissance | proportionnelle à l'écart avec la cible, de 15 % au plafond (60 %, réglable) |
+| Inversion de sens | **pause de 60 s** à puissance nulle entre chaud et froid |
+| Alerte | si le nid dépasse **35 °C** (même automatique éteint) : message sur la page et notification [ntfy.sh](https://ntfy.sh) si `NICHOIR_NTFY_TOPIC` est réglé |
+
+**Sécurités prioritaires** (le Peltier est coupé et l'état passe à « Coupé par sécurité » avec la raison) : batterie sous **12 V**, capteur du nid ou sonde du dissipateur muet ou valeur aberrante, dissipateur au-dessus de 55 °C, batterie sous 20 % (délestage). Désactiver le mode éteint le Peltier ; une commande manuelle (Froid / Chaud / Arrêt) désactive aussi l'automatique.
+
+**Adapté à notre montage.** Il n'y a **pas de sonde dehors** : la température extérieure vient de la météo en ligne (Open-Meteo) ; sans internet le réchauffage vise seulement le plafond (la page l'indique). La tension de la batterie vient de l'**INA219** (pas encore dans le modèle 3D) ; sans lui la coupure sous 12 V ne peut pas agir (avertissement affiché). Il n'y a pas de sonde sur la plaque froide : la sécurité « plaque sous 5 °C » n'existe pas. Le Peltier ne gagne que quelques degrés : par forte canicule il ne tiendra pas 30 °C, d'où l'alerte (et les aérations du toit).
+
 ## Sécurités et essais automatiques
-Le programme coupe le Peltier dans quatre cas : dissipateur au-dessus de 55 °C, sonde du dissipateur qui ne répond plus (sans mesure, pas de Peltier), batterie sous 20 % (délestage : le Peltier est coupé et refusé ; sous 10 % les **caméras** et les LED infrarouges le sont aussi, et refusées tant que la batterie reste sous 10 %). Le capteur du nid en panne n'arrête rien : la page affiche « — » et l'erreur. Le menu « 🧪 Tests » du simulateur provoque chacun de ces cas dans le Python simulé et vérifie la réaction (✔ TEST OK / ✘ TEST ÉCHEC dans le terminal) ; « Tout remettre à zéro » retire les pannes.
+Le programme coupe le Peltier dans quatre cas : dissipateur au-dessus de 55 °C, sonde du dissipateur qui ne répond plus (sans mesure, pas de Peltier), batterie sous 20 % (délestage : le Peltier est coupé et refusé ; sous 10 % les **caméras** et les LED infrarouges le sont aussi, et refusées tant que la batterie reste sous 10 %). Le capteur du nid en panne n'arrête rien : la page affiche « — » et l'erreur. Le menu « 🧪 Tests » du simulateur (dont quatre essais du Peltier automatique : gel, chaleur, entre les seuils, alerte) provoque chacun de ces cas dans le Python simulé et vérifie la réaction (✔ TEST OK / ✘ TEST ÉCHEC dans le terminal) ; « Tout remettre à zéro » retire les pannes.
 
 ## Mode nuit
 Le bouton « Jour / Nuit » de la vue 3D assombrit la scène (fond sombre, lumière de lune). Les caméras du simulateur voient cette scène : la nuit elles sont presque noires ; quand les LED infrarouges d'une caméra sont allumées, l'image devient **noir et blanc**, éclairée par ces LED (lampe posée à l'objectif) et granuleuse. Caméra éteinte : écran noir « éteinte ». Le même bouton Jour / Nuit est dans l'en-tête du simulateur, à côté de « 🧪 Tests ».

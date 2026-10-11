@@ -1,4 +1,4 @@
-import type { DeviceState, PeltierMode } from '@/types';
+import type { AutoPatch, DeviceState, PeltierMode } from '@/types';
 
 // `fetch` est appelé à l'exécution (window.fetch) : le simulateur de l'app le redirige vers Pyodide.
 async function lire(r: Response): Promise<DeviceState> {
@@ -17,6 +17,9 @@ export async function getState(): Promise<DeviceState> {
 export const setPeltier = (sens: PeltierMode, puissance: number) => post('/api/peltier', { sens, puissance });
 
 export const setLed = (quoi: 'nid' | 'ext', on: boolean) => post('/api/led', quoi === 'nid' ? { nid: on } : { ext: on });
+
+/** Active ou règle le Peltier automatique (les champs absents ne changent pas). */
+export const setAuto = (patch: AutoPatch) => post('/api/auto', patch);
 
 /** `num` : 0 pour la caméra 1, 1 pour la caméra 2. */
 export const setCamera = (num: 0 | 1, on: boolean) => post('/api/camera', { num, on });

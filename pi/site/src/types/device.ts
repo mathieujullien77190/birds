@@ -12,6 +12,7 @@ export interface DeviceErrors {
   picamera2?: string;
   batterie?: string;
   meteo?: string;
+  alerte_chaleur?: string;
   camera1?: string;
   camera2?: string;
 }
@@ -30,6 +31,7 @@ export interface DeviceState {
   derniere_lecture: string | null;
   batterie: Battery;
   meteo: Weather;
+  auto: AutoState;
   conso: Consumption;
 }
 
@@ -40,6 +42,30 @@ export interface Battery {
   source: 'simulée' | 'mesurée' | null;
   solaire_w?: number;
 }
+
+/** Réglages modifiables du Peltier automatique. */
+export interface AutoSettings {
+  min_gel: number;
+  plafond_chauffe: number;
+  ecart_ext: number;
+  max_chaleur: number;
+  hysteresis: number;
+  puissance_max: number;
+  pause_inversion: number;
+  batterie_min_v: number;
+  alerte_chaleur: number;
+}
+export type AutoSettingKey = keyof AutoSettings;
+/** Peltier automatique : réglages, interrupteur, ce qu'il fait (`etat`) et la température visée (`cible`). */
+export interface AutoState extends AutoSettings {
+  actif: boolean;
+  etat: 'inactif' | 'veille' | 'chauffe' | 'refroidit' | 'securite';
+  raison: string;
+  cible: number | null;
+  avertissements: string[];
+}
+/** Ce que la page envoie à POST /api/auto (tout est facultatif). */
+export type AutoPatch = Partial<AutoSettings> & { actif?: boolean };
 
 /** Météo extérieure (Open-Meteo, ou simulée) ; les champs sont null tant qu'on n'a rien reçu. */
 export interface Weather {

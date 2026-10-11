@@ -37,6 +37,7 @@ def api(url, body):
     if url == "/api/etat": r = nichoir.api_etat()
     elif url == "/api/peltier": fl.request.payload = json.loads(body or "{}"); r = nichoir.api_peltier()
     elif url == "/api/led": fl.request.payload = json.loads(body or "{}"); r = nichoir.api_led()
+    elif url == "/api/auto": fl.request.payload = json.loads(body or "{}"); r = nichoir.api_auto()
     elif url == "/api/camera": fl.request.payload = json.loads(body or "{}"); r = nichoir.api_camera()
     else: return None
     return json.dumps(r)
@@ -62,7 +63,18 @@ def batterie(pct):
 def etat_json():
     return json.dumps(nichoir.etat)
 
+def forcer(nid, ext):
+    nichoir.MOCK_FORCE["nid"] = None if nid is None else float(nid)
+    nichoir.MOCK_FORCE["ext"] = None if ext is None else float(ext)
+    nichoir.sim["decalage"] = 0.0
+
 def restaurer():
+    nichoir.MOCK_FORCE["nid"] = nichoir.MOCK_FORCE["ext"] = None
+    nichoir.sim["decalage"] = 0.0
+    nichoir.etat["auto"]["actif"] = False
+    nichoir._auto["mode"] = None
+    nichoir._auto["dernier_sens"] = None
+    nichoir.etat["erreurs"].pop("alerte_chaleur", None)
     nichoir.MOCK_SURCHAUFFE = 0.0
     nichoir.MOCK_PANNES["bme"] = nichoir.MOCK_PANNES["sonde"] = False
     nichoir.sim["wh"] = 0.8 * nichoir.CAPACITE_WH
@@ -116,8 +128,8 @@ const PAGE = indexHtml
   );
 
 /** État renvoyé par `/api/etat` (seulement ce que les essais lisent). */
-interface PiState { peltier: string; puissance: number; t_dissipateur: number | null; t_nid: number | null; led_nid: boolean; led_ext: boolean; cam1: boolean; cam2: boolean; erreurs: Record<string, string>; batterie: { pourcent: number | null } }
-type PyFns = Record<'restaurer' | 'surchauffe' | 'panne' | 'batterie', (...a: unknown[]) => unknown>;
+interface PiState { peltier: string; puissance: number; t_dissipateur: number | null; t_nid: number | null; led_nid: boolean; led_ext: boolean; cam1: boolean; cam2: boolean; erreurs: Record<string, string>; batterie: { pourcent: number | null }; auto: { actif: boolean; etat: string; raison: string } }
+type PyFns = Record<'restaurer' | 'surchauffe' | 'panne' | 'batterie' | 'forcer', (...a: unknown[]) => unknown>;
 
 /** Essais automatiques : on provoque un cas limite dans le Python simulé, puis on attend que le programme réagisse comme prévu (sinon l'essai échoue au bout de `timeout` secondes). */
 interface PiTest { id: string; label: string; hint: string; timeout: number; setup: (f: PyFns, cmd: (url: string, body: object) => void) => void; expect: (e: PiState) => boolean; ok: (e: PiState, maxT: number) => string }
@@ -134,6 +146,18 @@ const PI_TESTS: PiTest[] = [
   { id: 'batterie', label: 'Batterie presque vide (8 %)', hint: 'Peltier, LED et caméras allumés, batterie à 8 % : le délestage doit tout couper (Peltier sous 20 %, caméras et LED sous 10 %)', timeout: 10,
     setup: (f, cmd) => { f.restaurer(); cmd('/api/peltier', { sens: 'froid', puissance: 0.5 }); cmd('/api/led', { nid: true }); f.batterie(8); },
     expect: (e) => e.peltier === 'arrêt' && !e.led_nid && !e.cam1 && !e.cam2 && !!e.erreurs.delestage, ok: (e) => e.erreurs.delestage },
+  { id: 'auto-gel', label: 'Peltier automatique : gel', hint: 'Nid à −8 °C, dehors −10 °C, automatique activé : il doit réchauffer (cible −5 °C : dehors + 5 °C)', timeout: 15,
+    setup: (f, cmd) => { f.restaurer(); f.forcer(-8, -10); cmd('/api/auto', { actif: true, pause_inversion: 0 }); },
+    expect: (e) => e.peltier === 'chaud' && e.auto.etat === 'chauffe', ok: (e) => `Peltier en chaud à ${Math.round(e.puissance * 100)} % — ${e.auto.raison}` },
+  { id: 'auto-chaleur', label: 'Peltier automatique : chaleur (> 30 °C)', hint: 'Nid à 34 °C, automatique activé : il doit refroidir pour revenir sous 28 °C', timeout: 15,
+    setup: (f, cmd) => { f.restaurer(); f.forcer(34, 26); cmd('/api/auto', { actif: true, pause_inversion: 0 }); },
+    expect: (e) => e.peltier === 'froid' && e.auto.etat === 'refroidit', ok: (e) => `Peltier en froid à ${Math.round(e.puissance * 100)} % — ${e.auto.raison}` },
+  { id: 'auto-entre', label: 'Peltier automatique : entre les seuils', hint: 'Nid à 15 °C : l\'automatique actif ne doit rien faire', timeout: 6,
+    setup: (f, cmd) => { f.restaurer(); f.forcer(15, 12); cmd('/api/auto', { actif: true }); },
+    expect: (e) => e.peltier === 'arrêt' && e.auto.etat === 'veille', ok: (e) => `Peltier éteint — ${e.auto.raison}` },
+  { id: 'alerte', label: 'Alerte : nid au-dessus de 35 °C', hint: 'Nid à 37 °C malgré tout : une alerte doit apparaître (notification si configurée)', timeout: 10,
+    setup: (f, cmd) => { f.restaurer(); f.forcer(37, 33); cmd('/api/auto', { actif: true, pause_inversion: 0 }); },
+    expect: (e) => !!e.erreurs.alerte_chaleur, ok: (e) => e.erreurs.alerte_chaleur },
 ];
 
 export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { onClose: () => void; shoot?: (num: number, led?: boolean) => string | null; night?: boolean; onToggleNight?: () => void }) {
@@ -211,7 +235,7 @@ export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { 
     if (running || state !== 'prêt') return;
     setMenu(false); setRunning(t.id);
     sink(`# ESSAI : ${t.label}`); sink(`# ${t.hint}`);
-    const f: PyFns = { restaurer: fn('restaurer'), surchauffe: fn('surchauffe'), panne: fn('panne'), batterie: fn('batterie') };
+    const f: PyFns = { restaurer: fn('restaurer'), surchauffe: fn('surchauffe'), panne: fn('panne'), batterie: fn('batterie'), forcer: fn('forcer') };
     t.setup(f, cmd);
     let maxT = 0, verdict = '';
     for (let i = 0; i < t.timeout * 4 && !verdict; i++) {

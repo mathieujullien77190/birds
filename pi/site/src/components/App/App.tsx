@@ -8,14 +8,14 @@ import { ConsumptionCard } from '@/components/ConsumptionCard';
 import { useDeviceState } from '@/hooks';
 
 export function App() {
-  const { state, unreachable, peltier, led, camera } = useDeviceState();
+  const { state, unreachable, peltier, auto, led, camera } = useDeviceState();
   return (
     <>
       <Header state={state} unreachable={unreachable} />
       <div className="grid">
         <NestCard state={state} />
         <WeatherCard state={state} />
-        <PeltierCard state={state} onCommand={peltier} />
+        <PeltierCard state={state} onCommand={peltier} onAuto={auto} />
         <BatteryCard state={state} />
         <ConsumptionCard state={state} />
         <CameraCard title="Caméra 1 (nid)" num={1} cameraOn={!!state?.cam1} ledOn={!!state?.led_nid} errors={state?.erreurs}

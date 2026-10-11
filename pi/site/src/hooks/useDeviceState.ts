@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getState, setCamera, setLed, setPeltier } from '@/api';
+import { getState, setAuto, setCamera, setLed, setPeltier } from '@/api';
 import { PERIODE } from '@/constants';
-import type { DeviceState, PeltierMode } from '@/types';
+import type { AutoPatch, DeviceState, PeltierMode } from '@/types';
 
 /** Relit l'état toutes les PERIODE ms et expose les commandes (chacune met l'état à jour). */
 export function useDeviceState() {
@@ -34,6 +34,7 @@ export function useDeviceState() {
     state,
     unreachable,
     peltier: (sens: PeltierMode, pct: number) => apply(setPeltier(sens, pct / 100)),
+    auto: (patch: AutoPatch) => apply(setAuto(patch)),
     led: (quoi: 'nid' | 'ext', on: boolean) => apply(setLed(quoi, on)),
     camera: (num: 0 | 1, on: boolean) => apply(setCamera(num, on)),
   };

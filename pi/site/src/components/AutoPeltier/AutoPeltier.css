@@ -1,0 +1,9 @@
+.auto { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.auto details { margin-top: 8px; }
+.auto summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; }
+.auto-fields { display: grid; gap: 6px; margin-top: 8px; }
+.auto-fields label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.85rem; }
+.auto-fields label span { flex: 1 1 14rem; }
+.auto-fields input { width: 5.5rem; padding: 3px 6px; border: 1px solid var(--line); border-radius: 6px; font: inherit; }
+.auto-securite { color: var(--warn); font-weight: 600; }
+.auto-chauffe, .auto-refroidit { color: var(--green); font-weight: 600; }
