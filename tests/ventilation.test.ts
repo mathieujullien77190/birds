@@ -41,6 +41,8 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(by(sc0, /^Cale interrupteur/)).toHaveLength(4);
     const grille = one(sc0, /^Grille ventilateur/);
     expect(grille.holes.length).toBeGreaterThan(4);
+    const plafond = one(sc0, /^Dessous toit/);
+    expect(Math.abs(grille.pos[2] - plafond.pos[2])).toBeLessThan(0.01); // à fleur : dans l'épaisseur du plafond, pas collée dessous
     expect(grille.holes.every((h) => h.shape === 'round' && h.size === 6)).toBe(true);
   });
   it('le plafond du nid est percé sous le ventilateur, le dessus du toit est ouvert au-dessus (encoche)', () => {

@@ -211,7 +211,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Commande | PWM 25 kHz (matériel du Pi) sur GPIO18 (broche 12) ; tachymètre 2 impulsions par tour sur GPIO17 (broche 11) avec tirage interne ; masse commune sur la broche 14 | fils bleu, jaune, noir |
 | Montage | cassette amovible à la main : quatre parois + cadre du bas + couvercle à poignée (contreplaqué 3 mm), quatre plots en caoutchouc de 12 × 2 × 3 mm sous le ventilateur, joint de mousse sous la cassette et derrière | oui, dans un siège fixe (la goulotte) |
 | Connecteur | 4 broches (type Molex / JST), fils fixes côté toit avec une boucle assez longue pour sortir la cassette | bloc noir 6 × 10 × 6 mm entre la cassette et le toit |
-| Ouverture du plafond | 56 de large ; la profondeur (environ 21 mm) est limitée par le mur du nid et le compartiment de la caméra : le débit réel est à mesurer, une grille de contreplaqué (trous Ø 6, pas 8) protège les pales côté nid | 56 × 21 mm |
+| Ouverture du plafond | 56 de large ; la profondeur (environ 21 mm) est limitée par le mur du nid et le compartiment de la caméra : le débit réel est à mesurer, une grille de contreplaqué (trous Ø 6, pas 8) protège les pales, encastrée à fleur dans le plafond (même épaisseur, collée sur le chant) | 56 × 21 mm |
 | Sortie d'air | fenêtre de 60 × 45 mm dans la cassette puis dans la plaque arrière, grillage anti-insectes et clapet à gravité dehors, sous le débord du toit en chêne ; aucune communication avec la zone du Pi et de la batterie | oui |
 | Hiver | remplacer la cassette par le bloc isolant d'hiver (même empreinte, mousse de 35 mm) pour supprimer la déperdition de chaleur par l'ouverture | pièce de rechange cachée par défaut |
 

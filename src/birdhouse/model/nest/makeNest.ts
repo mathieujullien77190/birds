@@ -407,7 +407,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   ];
   const gcols = Math.floor((FAN_OPEN - FAN_GRID_HOLE - 6) / FAN_GRID_PITCH) + 1, grows = Math.max(1, Math.floor((FOP_H - FAN_GRID_HOLE - 6) / FAN_GRID_PITCH) + 1);
   const gholes: Hole[] = Array.from({ length: gcols * grows }, (_, i) => ({ id: uid(), shape: 'round' as const, x: r2(((i % gcols) - (gcols - 1) / 2) * FAN_GRID_PITCH), y: r2((Math.floor(i / gcols) - (grows - 1) / 2) * FAN_GRID_PITCH), size: FAN_GRID_HOLE }));
-  const fanGrid = wood('Grille ventilateur', FAN_OPEN + 6, FOP_H + 6, [FANX, FOP_YC, bodyH - t / 2], [0, 0, 0], roofGroup, gholes); // collée au plafond, côté nid : les oiseaux n'atteignent pas les pales
+  const fanGrid = wood('Grille ventilateur', r2(FAN_OPEN - 0.4), r2(FOP_H - 0.4), [FANX, FOP_YC, bodyH + t / 2], [0, 0, 0], roofGroup, gholes); // à fleur : encastrée dans l'ouverture du plafond (même épaisseur que la plaque), jeu de 0,2 mm, collée sur le chant ; les oiseaux n'atteignent pas les pales
   // la CASSETTE amovible : cadre du bas (ouvert au-dessus de l'ouverture du plafond), quatre parois dont l'arrière a la fenêtre de sortie, couvercle à poignée ; le ventilateur est posé sur quatre plots sur le cadre
   const cassWallZ0 = ZB + t, cassWallH = DUCT_Z1 - cassWallZ0, cassWallZ = (cassWallZ0 + DUCT_Z1) / 2;
   const cassette: Plank[] = [
