@@ -38,6 +38,7 @@ Déclencheur : une plaque, un composant, un fil, une nappe, un pavé ou un group
 | Le fil 3D (nom, chemin, couleur, diamètre) | `src/birdhouse/model/nest/makeNest.ts` | `tests/wiresSolid.test.ts`, `tests/ventilation.test.ts` |
 | Le schéma mermaid : nœud, flèche, `classDef`, **et la liste `linkStyle n` (un par flèche, dans l'ordre de la source : en ajouter ou retirer une flèche oblige à refaire toute la liste)** | `docs/schema-electronique.md` | **auto** : `tests/coherence.test.ts` (autant de `linkStyle` que de flèches, tous les `class` sont définis) |
 | Tableau « Branchements, fil par fil » (broche physique, GPIO, couleur) | `docs/schema-electronique.md` | à la main |
+| Fiche du fil (de → vers, rôle, tension, courant, raccord, broches) : `TABLE` de `wireInfo` | `src/birdhouse/model/wires/wireInfo.ts` | **auto** : `tests/wireInfo.test.ts` (aucun fil sans fiche, broches du tableau « Branchements ») |
 | Nom du fil dans le schéma : `MAP` (et `schemaKeys`) | `src/features/schema/SchemaPanel/constants.ts` | **auto** : `tests/coherence.test.ts` |
 | GPIO côté Pi : constantes et docstring | `pi/nichoir.py` | `npm run check` (pytest) |
 | Brochage résumé | `pi/README.md`, `docs/logiciel.md` | à la main |
