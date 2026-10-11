@@ -84,7 +84,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // évacuation de l'eau dans le mur intérieur gauche : une ENCOCHE dans son bord bas, centrée près du conduit d'air, jusqu'à DRAIN_H au-dessus du plancher (bas à fleur du plancher : pas de seuil) ;
   // elle va de DRAIN_LO à DRAIN_HI (depuis la position du conduit sur le bord) et couvre le trou de « Conduit d'air 2 » (DRAIN_HOLE) ; elle absorbe les crans du bord bas qu'elle recouvre (ces dents ne sont plus percées dans le plancher),
   // mais JAMAIS un cran qui touche un coin de la plaque ; les deux moignons de dent de 3 mm (« 3 mm d'espace ») qui restaient de chaque côté sont supprimés à la demande de l'utilisateur (« les deux mini encoches… vire-les, et les trous équivalents de la plaque ») : les crans voisins [0 ; 17] et [53 ; 70] touchent l'encoche, le bois reste plein et le plancher n'a plus leurs fentes
-  const DRAIN_LO = -11, DRAIN_HI = 25, DRAIN_HOLE: [number, number] = [-9.5, 18.5], DRAIN_KEEP = 3;
+  const DRAIN_LO = -14, DRAIN_HI = 14, DRAIN_HOLE: [number, number] = [-13, 13], DRAIN_KEEP = 3; // encoche et trou du conduit centrés sur le même axe que la fente d'aération (AIR_CY) : encoche de 28 mm, trou de 26 mm
   const drain = (q: Plank): Plank => {
     const c = r2(AIR_CY - q.pos[1] + q.w / 2); let s0 = c + DRAIN_LO, s1 = c + DRAIN_HI, rest = q.notches.filter((x) => x.edge === 'bottom');
     for (let again = true; again;) {
@@ -96,8 +96,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
           if (x1 >= q.w - 0.01) { s1 = Math.min(s1, x0 - DRAIN_KEEP); again = true; break; }
           s0 = Math.min(s0, x0); s1 = Math.max(s1, x1); rest = rest.filter((y) => y !== x); again = true; break;
         }
-        if (x1 <= s0 && s0 - x1 < DRAIN_KEEP - 1e-6) { s0 = x1 + DRAIN_KEEP; again = true; break; } // moignon de dent trop étroit
-        if (x0 >= s1 && x0 - s1 < DRAIN_KEEP - 1e-6) { s1 = x0 - DRAIN_KEEP; again = true; break; }
+        if (x1 <= s0 && s0 - x1 > 0.01 && s0 - x1 < DRAIN_KEEP - 1e-6) { s0 = x1 + DRAIN_KEEP; again = true; break; } // moignon de dent trop étroit
+        if (x0 >= s1 && x0 - s1 > 0.01 && x0 - s1 < DRAIN_KEEP - 1e-6) { s1 = x0 - DRAIN_KEEP; again = true; break; }
       }
     }
     // plus de moignon de dent : un cran voisin qui s'arrête à DRAIN_KEEP au plus de l'encoche est prolongé jusqu'à elle (le bois reste plein entre le coin ou le cran suivant et l'encoche ; ces dents n'existent plus, le plancher n'a pas leurs fentes)

@@ -13,13 +13,16 @@ export const DOC_CSS = `
 .doc-md h3{font-size:1.02rem;margin:1.6em 0 .5em;color:#292524}
 .doc-md p{margin:.7em 0;max-width:70ch}
 .doc-md ul{margin:.6em 0;padding-left:1.3em}
-.doc-md li{margin:.25em 0}
+.doc-md li{margin:.35em 0;line-height:1.55}
+.doc-md li::marker{color:#059669}
 .doc-md a{color:#0369a1;text-decoration:underline}
 .doc-md strong{color:#292524}
 .doc-md .tw{overflow-x:auto;margin:.8em 0;border:1px solid #e7e5e4;border-radius:8px}
 .doc-md table{border-collapse:collapse;width:100%;font-size:13px}
 .doc-md th{background:#ecfdf5;color:#064e3b;text-align:left;font-weight:600}
-.doc-md th,.doc-md td{padding:6px 10px;border-bottom:1px solid #e7e5e4;vertical-align:top}
+.doc-md th,.doc-md td{padding:9px 14px;border-bottom:1px solid #e7e5e4;vertical-align:top;line-height:1.55}
+.doc-md td:nth-child(2){min-width:22em}
+.doc-md td:first-child{min-width:7em;max-width:14em}
 .doc-md tr:last-child td{border-bottom:0}
 .doc-md td:first-child{font-weight:500}
 .doc-md .doc-price-group td{background:#f0fdf4;border-top:2px solid #a7f3d0}

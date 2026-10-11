@@ -613,8 +613,8 @@ describe('grilles percées dans les plaques', () => {
 describe("évacuation de l'eau : ouverture rectangulaire au ras du plancher, en face du conduit d'air", () => {
   const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
   const inner = one(sc0, /^Côté gauche int/), duct = one(sc0, /^Conduit d'air 2$/), floor = one(sc0, /^Plancher int/), floorTop = floor.pos[2] + t / 2;
-  const hole = duct.holes.find((h) => h.size === 28 && h.sh === 6)!;
-  it('« Conduit d\'air 2 » : trou de 28 × 6 dont le bas est le dessus de « Plancher int », ligaments ≥ 4,5 mm, à l\'écart de la fente d\'aération', () => {
+  const hole = duct.holes.find((h) => h.size === 26 && h.sh === 6)!;
+  it('« Conduit d\'air 2 » : trou de 26 × 6 dont le bas est le dessus de « Plancher int », ligaments ≥ 4,5 mm, à l\'écart de la fente d\'aération', () => {
     expect(hole).toBeTruthy(); expect(hole.poly).toBeUndefined();
     expect(duct.pos[2] + hole.y - 3).toBeCloseTo(floorTop, 5); expect(duct.pos[2] + hole.y + 3).toBeCloseTo(floorTop + 6, 5);
     expect(ligament(duct, hole).min).toBeGreaterThanOrEqual(4.5 - 1e-6);
@@ -637,10 +637,15 @@ describe("évacuation de l'eau : ouverture rectangulaire au ras du plancher, en 
     expect(dr[0] - (wy0 - b.c.y + inner.w / 2)).toBeLessThanOrEqual(0.01); expect(dr[1] - (wy1 - b.c.y + inner.w / 2)).toBeGreaterThanOrEqual(-0.01); // couvre le trou du conduit
     const before = bn.filter((x) => x !== dr && x[1] <= dr[0] + 0.01).pop()!, after = bn.find((x) => x !== dr && x[0] >= dr[1] - 0.01)!;
     expect(before[0]).toBeLessThanOrEqual(0.01); // cran de coin gardé : le coin reste en bois (pas d'encoche jusqu'au coin)
-    expect(dr[0] - before[1]).toBeCloseTo(0, 5); expect(after[0] - dr[1]).toBeCloseTo(0, 5); // aucun moignon de dent entre les crans et l'encoche
-    expect(after[1] - after[0]).toBeGreaterThan(14.5); expect(before[1]).toBeGreaterThan(14.9);
+    expect(dr[0] - before[1]).toBeCloseTo(0, 5); // aucun moignon de dent entre le cran de coin et l'encoche
+    expect(after[0] - dr[1]).toBeGreaterThanOrEqual(3 - 1e-6); // au moins 3 mm de bois (une dent entière) entre l'encoche et le cran suivant
+    expect(before[1]).toBeGreaterThan(13.9);
+    // centres alignés : encoche, fentes de la grille, fente 34 × 30 et trou d'évacuation du conduit sont sur le même axe y (monde) à 0,01 mm
+    const cN = b.c.y + (dr[0] + dr[1]) / 2 - inner.w / 2, grid = airSlot(inner)!, cG = b.c.y + grid.x, slot34 = duct.holes.find((h) => h.size === 34 && h.sh === 30)!, cS = duct.pos[1] + slot34.x, cD = duct.pos[1] + hole.x;
+    for (const c of [cG, cS, cD]) expect(Math.abs(c - cN), 'centre ' + c).toBeLessThanOrEqual(0.01);
+    expect(Math.abs(cN - (duct.pos[1]))).toBeLessThanOrEqual(0.01); // = centre du conduit (AIR_CY)
     const slot = (lx0: number, lx1: number) => floor.holes.some((h) => !h.poly && Math.abs(h.x - inner.pos[0]) < 3 && Math.abs(h.y - (inner.pos[1] + (lx0 + lx1) / 2 - inner.w / 2)) < (lx1 - lx0) / 2 + (h.sh ?? h.size) / 2 - 0.01);
-    expect(slot(dr[0] - 3, dr[0]), 'plus de fente pour un moignon').toBe(false); expect(slot(dr[1], dr[1] + 3), 'plus de fente pour un moignon').toBe(false);
+    expect(slot(dr[0] - 3, dr[0]), 'plus de fente pour un moignon').toBe(false); const combF = floor.holes.find((h) => h.poly)!, ty = inner.pos[1] + (dr[1] + 4 - inner.w / 2); expect(inPoly([inner.pos[0] - floor.pos[0], ty - floor.pos[1]], combF.poly!), 'la dent entière à droite garde sa fente (fondue au passage)').toBe(true);
   });
   it("l'eau tombe dans le conduit : le plancher intérieur est ouvert sous le trou, le fond extérieur aussi, et rien n'est posé dans le trou", () => {
     const comb = floor.holes.find((h) => h.poly && h.size > 29 && h.sh! > 46)!, bottom = one(sc0, /^Dessous ext/);

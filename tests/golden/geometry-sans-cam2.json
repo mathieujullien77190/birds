@@ -1627,13 +1627,13 @@
   "geo": {
    "n": 684,
    "idx": 0,
-   "pos": "f124fef2aa5c01c0",
+   "pos": "06bde275b4d2ccbb",
    "col": "baa92f72760e490e"
   },
   "edges": {
    "n": 240,
    "idx": 0,
-   "pos": "c691c03e0b69c0ec",
+   "pos": "e49a654cb79a9f74",
    "col": null
   }
  },
@@ -2451,15 +2451,15 @@
  },
  "175 Plancher int": {
   "geo": {
-   "n": 2388,
+   "n": 2424,
    "idx": 0,
-   "pos": "fb6de907e53c80bf",
-   "col": "42aeab62e352b980"
+   "pos": "786c324ebe3f2ae2",
+   "col": "d71404bbe03737e7"
   },
   "edges": {
-   "n": 888,
+   "n": 912,
    "idx": 0,
-   "pos": "9166b5fba458aaa7",
+   "pos": "c6e78efd4b2fa91e",
    "col": null
   }
  },
@@ -2507,15 +2507,15 @@
  },
  "179 Côté gauche int": {
   "geo": {
-   "n": 1056,
+   "n": 1080,
    "idx": 0,
-   "pos": "367cdd81d91596f2",
-   "col": "a967b8dd11e0f4d4"
+   "pos": "fccd9675b8519172",
+   "col": "ebdac825f692d810"
   },
   "edges": {
-   "n": 400,
+   "n": 408,
    "idx": 0,
-   "pos": "ca24694c5610a624",
+   "pos": "a5109d52604d7067",
    "col": null
   }
  },
