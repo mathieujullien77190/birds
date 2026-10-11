@@ -314,3 +314,21 @@ describe("prise d'air basse : incrustée dans le fond, ligaments de bois", () =>
     expect(inner.pos[0] - t / 2 - (w2.pos[0] + t / 2)).toBeGreaterThan(4); expect(w1.pos[0]).toBeLessThan(w2.pos[0]); // jour de 4,7 mm entre le conduit et la paroi, comblé par le manchon
   });
 });
+
+describe('capteur BME280 dans le compartiment de la caméra', () => {
+  it('le logement et le capteur sont dans le compartiment, ses fils montent par son ouverture sans traverser l\'isolant, ligaments ≥ 4,5 mm', () => {
+    const sensor = one(sc0, /^Capteur température/), walls = by(sc0, /^(Face avant|Face arrière|Côté droit|Côté gauche) caméra/), floor = one(sc0, /^Dessous toit/), top = one(sc0, /^Dessus toit/);
+    const cb = union(walls, t); // empreinte extérieure du compartiment
+    const x0 = cb.min.x + t, x1 = cb.max.x - t, y0 = cb.min.y + t, y1 = cb.max.y - t; // intérieur
+    expect(sensor.pos[0] - 9.75).toBeGreaterThan(x0); expect(sensor.pos[0] + 9.75).toBeLessThan(x1); expect(sensor.pos[1] - 9.25).toBeGreaterThan(y0); expect(sensor.pos[1] + 9.25).toBeLessThan(y1);
+    const hole = floor.holes.find((h) => h.shape === 'square' && Math.abs(h.x - sensor.pos[0]) < 0.01 && Math.abs(h.size - 19.5) < 0.01)!;
+    expect(hole).toBeTruthy(); expect(ligament(floor, hole).min).toBeGreaterThanOrEqual(4.5 - 1e-6);
+    // l'ouverture du dessus couvre tout l'intérieur du compartiment ; plus de fente à part pour les fils du capteur
+    const open = top.holes.find((h) => h.shape === 'square' && Math.abs(h.size - (x1 - x0)) < 0.5 && Math.abs((h.sh ?? 0) - (y1 - y0)) < 0.5);
+    expect(open).toBeTruthy(); expect(top.holes.some((h) => h.size === 12 && h.sh === 6)).toBe(false);
+    const roofTop = top.pos[2] + t / 2, roofFloorTop = floor.pos[2] + t / 2;
+    const wires = by(sc0, /^Fil (3,3 V|SDA|SCL|masse) \((rouge|jaune|vert|noir)\)$/).filter((w) => w.path && w.path[0][0] > sensor.pos[0] - 6 && w.path[0][0] < x1 && w.path[0][2] < roofFloorTop + 10);
+    expect(wires).toHaveLength(4);
+    for (const w of wires) for (const pt of pathItems([w])[0].pts) if (pt.z < roofTop) { expect(pt.x, w.name).toBeGreaterThan(x0); expect(pt.x).toBeLessThan(x1); expect(pt.y).toBeGreaterThan(y0); expect(pt.y).toBeLessThan(y1); } // sous le dessus du toit, jamais hors du compartiment
+  });
+});

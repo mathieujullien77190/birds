@@ -1081,7 +1081,7 @@
   "geo": {
    "n": 1521,
    "idx": 8064,
-   "pos": "0be62666509a569f",
+   "pos": "08fb5096e99a4937",
    "col": "9d6be67da6d54369"
   },
   "edges": {
@@ -1095,7 +1095,7 @@
   "geo": {
    "n": 1521,
    "idx": 8064,
-   "pos": "e9f3abb461b2b8fb",
+   "pos": "a8355b6844ad9b1f",
    "col": "c0a4a7a38745bff9"
   },
   "edges": {
@@ -1109,7 +1109,7 @@
   "geo": {
    "n": 1521,
    "idx": 8064,
-   "pos": "52528801953d2455",
+   "pos": "2d371a66e57555a5",
    "col": "9593bc6beb5ef4ab"
   },
   "edges": {
@@ -1123,7 +1123,7 @@
   "geo": {
    "n": 1521,
    "idx": 8064,
-   "pos": "71346958532025f4",
+   "pos": "034314f8a9ceb839",
    "col": "4cebacff4b6fadee"
   },
   "edges": {
@@ -2355,13 +2355,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "441261eef87b22f1",
+   "pos": "13b99e775894bd5d",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "8ba18754c99b4e0f",
+   "pos": "5b935089546f2a1a",
    "col": null
   }
  },
@@ -2369,13 +2369,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "c0a5223b43cea9b7",
+   "pos": "d7345e50abe53e8f",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "2a6dd73aa43e6f4b",
+   "pos": "79dabb0608a8749b",
    "col": null
   }
  },
@@ -2383,13 +2383,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "3e0d1546635fd250",
+   "pos": "8332e070968c516d",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "b3a0a168563ee17b",
+   "pos": "30393bc9740b1353",
    "col": null
   }
  },
@@ -2815,29 +2815,29 @@
  },
  "201 Dessus toit": {
   "geo": {
-   "n": 600,
+   "n": 540,
    "idx": 0,
-   "pos": "530200cdbf9edf13",
-   "col": "c4bffc6926555c88"
+   "pos": "61f5b35612db5ead",
+   "col": "ec8e10abbbe3750b"
   },
   "edges": {
-   "n": 224,
+   "n": 200,
    "idx": 0,
-   "pos": "1bbf0105c38eb001",
+   "pos": "2592bc572ca9877b",
    "col": null
   }
  },
  "202 Dessous toit": {
   "geo": {
-   "n": 3306,
+   "n": 3408,
    "idx": 0,
-   "pos": "11b1074ecea0d9f1",
-   "col": "cb8cf5c4daf0627a"
+   "pos": "908313c9cc952d21",
+   "col": "5fc4502da34bdc7a"
   },
   "edges": {
-   "n": 1160,
+   "n": 1208,
    "idx": 0,
-   "pos": "3920d62eb18d545e",
+   "pos": "b9371f5303a9c977",
    "col": null
   }
  },
@@ -3011,29 +3011,29 @@
  },
  "215 Face avant caméra 1": {
   "geo": {
-   "n": 180,
+   "n": 228,
    "idx": 0,
-   "pos": "f4273a767fd3dfd3",
-   "col": "a758a2cd79ddaf56"
+   "pos": "5bbd58148d6e02db",
+   "col": "7d604a6d4bd7c0e5"
   },
   "edges": {
-   "n": 64,
+   "n": 80,
    "idx": 0,
-   "pos": "254a73d690512230",
+   "pos": "87cfde77316231fb",
    "col": null
   }
  },
  "216 Face arrière caméra 1": {
   "geo": {
-   "n": 180,
+   "n": 228,
    "idx": 0,
-   "pos": "f4273a767fd3dfd3",
-   "col": "a758a2cd79ddaf56"
+   "pos": "5bbd58148d6e02db",
+   "col": "7d604a6d4bd7c0e5"
   },
   "edges": {
-   "n": 64,
+   "n": 80,
    "idx": 0,
-   "pos": "254a73d690512230",
+   "pos": "87cfde77316231fb",
    "col": null
   }
  },

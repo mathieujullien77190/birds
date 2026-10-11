@@ -773,13 +773,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "731b041e55708d6c",
+   "pos": "cd4db823ce2b58c2",
    "col": "ba544e2bc0658952"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "8fda1ea9bed85eb1",
+   "pos": "de70a8dfe030c8e1",
    "col": null
   }
  },
@@ -941,7 +941,7 @@
   "geo": {
    "n": 1521,
    "idx": 8064,
-   "pos": "b3f01b5c630d9e07",
+   "pos": "4b2a41eb00d74be5",
    "col": "9d6be67da6d54369"
   },
   "edges": {
@@ -955,7 +955,7 @@
   "geo": {
    "n": 1521,
    "idx": 8064,
-   "pos": "8f8273032b4d4bef",
+   "pos": "40f67dcdc245b425",
    "col": "c0a4a7a38745bff9"
   },
   "edges": {
@@ -969,7 +969,7 @@
   "geo": {
    "n": 1521,
    "idx": 8064,
-   "pos": "1dd358dc8b680e3e",
+   "pos": "8b7ddbf496aebf49",
    "col": "9593bc6beb5ef4ab"
   },
   "edges": {
@@ -983,7 +983,7 @@
   "geo": {
    "n": 1521,
    "idx": 8064,
-   "pos": "44da284eb7f9a40e",
+   "pos": "6b93ef86868f43ac",
    "col": "4cebacff4b6fadee"
   },
   "edges": {
@@ -2201,13 +2201,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "4283519ada0b1ffe",
+   "pos": "209070975b343b71",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "4995288ff3b9b408",
+   "pos": "bc8566874f4b4c80",
    "col": null
   }
  },
@@ -2215,13 +2215,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "29fe07f820cb88e5",
+   "pos": "fa9429b1b0c66646",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "20aa6a754778185c",
+   "pos": "59db01ba7a102da4",
    "col": null
   }
  },
@@ -2229,13 +2229,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "73b3e5148c1c0212",
+   "pos": "ef010f45297ce831",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "a2744ca1c5cfea36",
+   "pos": "49fb5bd7af37bbc8",
    "col": null
   }
  },
@@ -2243,17 +2243,31 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "272b4c42bdc9d81c",
+   "pos": "697b16f925685203",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "b57eef95e327b270",
+   "pos": "9801fe4cf371a16c",
    "col": null
   }
  },
- "161 Entrée 1": {
+ "161 Isolant toit 7": {
+  "geo": {
+   "n": 24,
+   "idx": 36,
+   "pos": "146214c2934ac81b",
+   "col": "952b3713c1187e61"
+  },
+  "edges": {
+   "n": 24,
+   "idx": 0,
+   "pos": "9ef9a5fc62e69262",
+   "col": null
+  }
+ },
+ "162 Entrée 1": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2267,7 +2281,7 @@
    "col": null
   }
  },
- "162 Entrée 2": {
+ "163 Entrée 2": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2281,7 +2295,7 @@
    "col": null
   }
  },
- "163 Entrée 3": {
+ "164 Entrée 3": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2295,7 +2309,7 @@
    "col": null
   }
  },
- "164 Entrée 4": {
+ "165 Entrée 4": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2309,7 +2323,7 @@
    "col": null
   }
  },
- "165 Entrée 5": {
+ "166 Entrée 5": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2323,7 +2337,7 @@
    "col": null
   }
  },
- "166 Entrée 6": {
+ "167 Entrée 6": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2337,7 +2351,7 @@
    "col": null
   }
  },
- "167 Entrée 7": {
+ "168 Entrée 7": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2351,7 +2365,7 @@
    "col": null
   }
  },
- "168 Entrée 8": {
+ "169 Entrée 8": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2365,7 +2379,7 @@
    "col": null
   }
  },
- "169 Entrée 9": {
+ "170 Entrée 9": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2379,7 +2393,7 @@
    "col": null
   }
  },
- "170 Entrée 10": {
+ "171 Entrée 10": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2393,7 +2407,7 @@
    "col": null
   }
  },
- "171 Entrée 11": {
+ "172 Entrée 11": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2407,7 +2421,7 @@
    "col": null
   }
  },
- "172 Entrée 12": {
+ "173 Entrée 12": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2421,7 +2435,7 @@
    "col": null
   }
  },
- "173 Entrée 13": {
+ "174 Entrée 13": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2435,7 +2449,7 @@
    "col": null
   }
  },
- "174 Entrée 14": {
+ "175 Entrée 14": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2449,7 +2463,7 @@
    "col": null
   }
  },
- "175 Entrée 15": {
+ "176 Entrée 15": {
   "geo": {
    "n": 432,
    "idx": 0,
@@ -2463,7 +2477,7 @@
    "col": null
   }
  },
- "176 Face avant ext": {
+ "177 Face avant ext": {
   "geo": {
    "n": 1464,
    "idx": 0,
@@ -2477,7 +2491,7 @@
    "col": null
   }
  },
- "177 Face arrière ext": {
+ "178 Face arrière ext": {
   "geo": {
    "n": 1620,
    "idx": 0,
@@ -2491,7 +2505,7 @@
    "col": null
   }
  },
- "178 Côté droit ext": {
+ "179 Côté droit ext": {
   "geo": {
    "n": 1296,
    "idx": 0,
@@ -2505,7 +2519,7 @@
    "col": null
   }
  },
- "179 Côté gauche ext": {
+ "180 Côté gauche ext": {
   "geo": {
    "n": 1296,
    "idx": 0,
@@ -2519,7 +2533,7 @@
    "col": null
   }
  },
- "180 Dessous ext": {
+ "181 Dessous ext": {
   "geo": {
    "n": 2268,
    "idx": 0,
@@ -2533,7 +2547,7 @@
    "col": null
   }
  },
- "181 Plancher int": {
+ "182 Plancher int": {
   "geo": {
    "n": 2484,
    "idx": 0,
@@ -2547,7 +2561,7 @@
    "col": null
   }
  },
- "182 Face avant int": {
+ "183 Face avant int": {
   "geo": {
    "n": 756,
    "idx": 0,
@@ -2561,7 +2575,7 @@
    "col": null
   }
  },
- "183 Face arrière int": {
+ "184 Face arrière int": {
   "geo": {
    "n": 708,
    "idx": 0,
@@ -2575,7 +2589,7 @@
    "col": null
   }
  },
- "184 Côté droit int": {
+ "185 Côté droit int": {
   "geo": {
    "n": 708,
    "idx": 0,
@@ -2589,7 +2603,7 @@
    "col": null
   }
  },
- "185 Côté gauche int": {
+ "186 Côté gauche int": {
   "geo": {
    "n": 768,
    "idx": 0,
@@ -2603,7 +2617,7 @@
    "col": null
   }
  },
- "186 Face avant toit": {
+ "187 Face avant toit": {
   "geo": {
    "n": 564,
    "idx": 0,
@@ -2617,7 +2631,7 @@
    "col": null
   }
  },
- "187 Face arrière toit": {
+ "188 Face arrière toit": {
   "geo": {
    "n": 768,
    "idx": 0,
@@ -2631,7 +2645,7 @@
    "col": null
   }
  },
- "188 Côté droit toit": {
+ "189 Côté droit toit": {
   "geo": {
    "n": 612,
    "idx": 0,
@@ -2645,7 +2659,7 @@
    "col": null
   }
  },
- "189 Côté gauche toit": {
+ "190 Côté gauche toit": {
   "geo": {
    "n": 612,
    "idx": 0,
@@ -2659,49 +2673,35 @@
    "col": null
   }
  },
- "190 Dessus toit": {
+ "191 Dessus toit": {
   "geo": {
-   "n": 600,
+   "n": 540,
    "idx": 0,
-   "pos": "4aaaf3deb8420e87",
-   "col": "c4bffc6926555c88"
+   "pos": "0a18b990b57705a0",
+   "col": "ec8e10abbbe3750b"
   },
   "edges": {
-   "n": 224,
+   "n": 200,
    "idx": 0,
-   "pos": "67e615fb64d7e711",
+   "pos": "7e34af700861b0f3",
    "col": null
   }
  },
- "191 Dessous toit": {
+ "192 Dessous toit": {
   "geo": {
-   "n": 2730,
+   "n": 2832,
    "idx": 0,
-   "pos": "043141acd3e32e54",
-   "col": "5ee3dd218cc1a8ac"
+   "pos": "3b73e50cef1c209d",
+   "col": "5f956b0c4869f528"
   },
   "edges": {
-   "n": 968,
+   "n": 1016,
    "idx": 0,
-   "pos": "2519c2ee4dca0528",
+   "pos": "d9eff20e0a735327",
    "col": null
   }
  },
- "192 Tasseau gauche": {
-  "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "a341604afca5209b",
-   "col": "ba544e2bc0658952"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "e8948dd8eb90deaa",
-   "col": null
-  }
- },
- "193 Tasseau droite": {
+ "193 Tasseau gauche": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2715,7 +2715,21 @@
    "col": null
   }
  },
- "194 Tasseau avant": {
+ "194 Tasseau droite": {
+  "geo": {
+   "n": 24,
+   "idx": 36,
+   "pos": "a341604afca5209b",
+   "col": "ba544e2bc0658952"
+  },
+  "edges": {
+   "n": 24,
+   "idx": 0,
+   "pos": "e8948dd8eb90deaa",
+   "col": null
+  }
+ },
+ "195 Tasseau avant": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2729,7 +2743,7 @@
    "col": null
   }
  },
- "195 Tasseau arrière 1": {
+ "196 Tasseau arrière 1": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2743,7 +2757,7 @@
    "col": null
   }
  },
- "196 Tasseau arrière 2": {
+ "197 Tasseau arrière 2": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -2757,7 +2771,7 @@
    "col": null
   }
  },
- "197 Cadre toit haut": {
+ "198 Cadre toit haut": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -2771,7 +2785,7 @@
    "col": null
   }
  },
- "198 Cadre toit milieu": {
+ "199 Cadre toit milieu": {
   "geo": {
    "n": 672,
    "idx": 0,
@@ -2785,7 +2799,7 @@
    "col": null
   }
  },
- "199 Cadre toit bas": {
+ "200 Cadre toit bas": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -2799,7 +2813,7 @@
    "col": null
   }
  },
- "200 Barre avant gauche": {
+ "201 Barre avant gauche": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2813,7 +2827,7 @@
    "col": null
   }
  },
- "201 Barre avant droite": {
+ "202 Barre avant droite": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2827,7 +2841,7 @@
    "col": null
   }
  },
- "202 Barre arrière gauche": {
+ "203 Barre arrière gauche": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2841,7 +2855,7 @@
    "col": null
   }
  },
- "203 Barre arrière droite": {
+ "204 Barre arrière droite": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2855,49 +2869,35 @@
    "col": null
   }
  },
- "204 Face avant caméra 1": {
+ "205 Face avant caméra 1": {
   "geo": {
-   "n": 180,
+   "n": 228,
    "idx": 0,
-   "pos": "f4273a767fd3dfd3",
-   "col": "a758a2cd79ddaf56"
+   "pos": "5bbd58148d6e02db",
+   "col": "7d604a6d4bd7c0e5"
   },
   "edges": {
-   "n": 64,
+   "n": 80,
    "idx": 0,
-   "pos": "254a73d690512230",
+   "pos": "87cfde77316231fb",
    "col": null
   }
  },
- "205 Face arrière caméra 1": {
+ "206 Face arrière caméra 1": {
   "geo": {
-   "n": 180,
+   "n": 228,
    "idx": 0,
-   "pos": "f4273a767fd3dfd3",
-   "col": "a758a2cd79ddaf56"
+   "pos": "5bbd58148d6e02db",
+   "col": "7d604a6d4bd7c0e5"
   },
   "edges": {
-   "n": 64,
+   "n": 80,
    "idx": 0,
-   "pos": "254a73d690512230",
+   "pos": "87cfde77316231fb",
    "col": null
   }
  },
- "206 Côté droit caméra 1": {
-  "geo": {
-   "n": 180,
-   "idx": 0,
-   "pos": "2f162e49671bf329",
-   "col": "a758a2cd79ddaf56"
-  },
-  "edges": {
-   "n": 64,
-   "idx": 0,
-   "pos": "2234a65fe6b43ac1",
-   "col": null
-  }
- },
- "207 Côté gauche caméra 1": {
+ "207 Côté droit caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2911,7 +2911,21 @@
    "col": null
   }
  },
- "208 Caméra": {
+ "208 Côté gauche caméra 1": {
+  "geo": {
+   "n": 180,
+   "idx": 0,
+   "pos": "2f162e49671bf329",
+   "col": "a758a2cd79ddaf56"
+  },
+  "edges": {
+   "n": 64,
+   "idx": 0,
+   "pos": "2234a65fe6b43ac1",
+   "col": null
+  }
+ },
+ "209 Caméra": {
   "geo": {
    "n": 396,
    "idx": 0,
@@ -2925,7 +2939,7 @@
    "col": null
   }
  },
- "209 LED infrarouges": {
+ "210 LED infrarouges": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2939,7 +2953,7 @@
    "col": null
   }
  },
- "210 Raspberry Pi": {
+ "211 Raspberry Pi": {
   "geo": {
    "n": 4104,
    "idx": 0,
@@ -2953,7 +2967,7 @@
    "col": null
   }
  },
- "211 Cale Pi 1": {
+ "212 Cale Pi 1": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2967,7 +2981,7 @@
    "col": null
   }
  },
- "212 Cale Pi 2": {
+ "213 Cale Pi 2": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2981,7 +2995,7 @@
    "col": null
   }
  },
- "213 Cale Pi 3": {
+ "214 Cale Pi 3": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -2995,7 +3009,7 @@
    "col": null
   }
  },
- "214 Cale Pi 4": {
+ "215 Cale Pi 4": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3009,7 +3023,7 @@
    "col": null
   }
  },
- "215 Cale Pi 5": {
+ "216 Cale Pi 5": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3023,7 +3037,7 @@
    "col": null
   }
  },
- "216 Cale Pi 6": {
+ "217 Cale Pi 6": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3037,7 +3051,7 @@
    "col": null
   }
  },
- "217 Nappe caméra": {
+ "218 Nappe caméra": {
   "geo": {
    "n": 242,
    "idx": 720,
@@ -3051,7 +3065,7 @@
    "col": null
   }
  },
- "218 Fil 5 V (rouge)": {
+ "219 Fil 5 V (rouge)": {
   "geo": {
    "n": 1521,
    "idx": 8064,
@@ -3065,7 +3079,7 @@
    "col": null
   }
  },
- "219 Fil masse (noir)": {
+ "220 Fil masse (noir)": {
   "geo": {
    "n": 1305,
    "idx": 6912,

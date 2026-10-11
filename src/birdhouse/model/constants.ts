@@ -19,7 +19,7 @@ export const CAM_Y = -10;
 export const FAN = 60, FAN_T = 25, FAN_OPEN = 56, FAN_PLOT = 3;
 
 /** Capteur température / humidité (carte type BME280 / DHT22, 15 × 11) fixé à l'intérieur du mur arrière, fils vers le GPIO du Pi. */
-export const SENSOR_X = 30, SENSOR_Y = -17; // décalé de 1 cm vers le centre : la fente de ses fils (12 × 6 en x = 30,25) reste dans le compartiment, elle passait sous son mur droit (x = 43) // collé sous le plafond (le dessous du plancher du toit), à droite de la caméra, hors de la plaque alu
+export const SENSOR_X = 33, SENSOR_Y = -14; // DANS le compartiment de la caméra (agrandi vers l'est) : ≥ 4,5 mm de bois entre son logement, la fenêtre des LED et les fentes des murs du compartiment ; // décalé de 1 cm vers le centre : la fente de ses fils (12 × 6 en x = 30,25) reste dans le compartiment, elle passait sous son mur droit (x = 43) // collé sous le plafond (le dessous du plancher du toit), à droite de la caméra, hors de la plaque alu
 
 /** Trou de l'objectif dans le plafond intérieur, trou du câble dans le toit extérieur (mm). */
 export const LENS_HOLE = 10;

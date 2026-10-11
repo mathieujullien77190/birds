@@ -149,13 +149,14 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const AIR_X0 = r2(-(W / 2 - t) + 4.7), AIR_X1 = r2(-(n.l / 2 + t) - 4.7), AIR_CX = r2((AIR_X0 + AIR_X1) / 2), AIR_LX = r2(AIR_X1 - AIR_X0), AIR_LY = 52; // ≥ 4,5 mm de bois entre le conduit et les fentes de dents voisines (mur extérieur à l'ouest, mur intérieur à l'est) ; plus long vers l'AVANT // empreinte extérieure du conduit
   const AIR_CY = r2(-n.L / 2 + 25), AIR_ZS = Math.round((e + t + bodyH) / 2), AIR_SH = 30, AIR_SW = 34; // centre en y, hauteur de la fente (mi-hauteur du nid), taille de la fente
   const AIR_ZT = AIR_ZS + AIR_SH / 2, AIR_ZTOP = AIR_ZT + 8; // haut de la fente ; haut du conduit (≥ 4,5 mm de bois entre la fente et les crans du haut)
+  // compartiment de la caméra (intérieur) : agrandi vers l'est pour contenir le capteur BME280 (logement 19,5 × 18,5), avec 4,5 mm de bois autour de son logement
+  const CAMX0 = -n.cam / 2, CAMX1 = r2(SENSOR_X + 19.5 / 2 + 4.5), CAMW = r2(CAMX1 - CAMX0), CAMCX = r2((CAMX0 + CAMX1) / 2);
   const roofParts0 = roofBox.planks.map((p) => {
     const q: Plank = { ...p, name: p.name.replace(/ (\d+)$/, ' toit $1'), pos: [p.pos[0], p.pos[1], p.pos[2] + bodyH] as Vec3, group: roofGroup };
     if (/^Dessous/.test(p.name)) q.holes = [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: SENSOR_X, y: SENSOR_Y, size: 19.5, sh: 18.5 }), // logement du capteur, incrusté à fleur du plafond (ses broches sortent dans l'isolant)
       fitHole(q, { id: uid(), shape: 'square' as const, x: FANX, y: FOP_YC, size: FAN_OPEN, sh: FOP_H })]; // ouverture du ventilateur dans le plafond du nid (56 de large)
-    if (/^Dessus/.test(p.name)) q.holes = [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: SENSOR_X + 0.25, y: SENSOR_Y + 8, size: 12, sh: 6 }),]; // les fils du capteur montent vers le Pi
     if (n.cam <= 0) return q;
-    if (/^Dessus/.test(p.name)) return { ...q, holes: [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: 0, y: CAM_Y, size: n.cam, sh: n.cam })] }; // on accède au compartiment par le haut
+    if (/^Dessus/.test(p.name)) return { ...q, holes: [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: CAMCX, y: CAM_Y, size: CAMW, sh: n.cam })] }; // on accède au compartiment par le haut
     if (/^Dessous/.test(p.name)) return { ...q, holes: [...q.holes, fitHole(q, { id: uid(), shape: 'round' as const, x: CAM_X, y: CAM_Y, size: LENS_HOLE }), fitHole(q, { id: uid(), shape: 'square' as const, x: IR_X, y: CAM_Y, size: 10, sh: 20 })] };
     return q;
   });
@@ -182,9 +183,9 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   })();
   const floorTop = bodyH + t; // dessus du plancher du toit
   const camParts: Plank[] = n.cam > 0
-    ? makeBox(n.cam + 2 * t, n.cam + 2 * t, n.ins, t, fit, start).planks.filter(isWall).map((p) => {
+    ? makeBox(CAMW + 2 * t, n.cam + 2 * t, n.ins, t, fit, start).planks.filter(isWall).map((p) => {
       const cast = { ...(p.cast ?? {}) }; delete cast.top; cast.bottom = { n: teethFor(p.w), phase: 0 }; // le dessus du toit fait office de couvercle ; EN BAS, des dents qui s'enfoncent dans le plancher du toit (le plafond du nid) par des fentes
-      return recastAll({ ...p, name: p.name.replace(/ (\d+)$/, ' caméra $1'), h: p.h + t, pos: [p.pos[0], p.pos[1] + CAM_Y, p.pos[2] + floorTop - t / 2] as Vec3, group: roofGroup, cast, notches: p.notches.filter((x) => x.edge !== 'top' && x.edge !== 'bottom') }, t, fit);
+      return recastAll({ ...p, name: p.name.replace(/ (\d+)$/, ' caméra $1'), h: p.h + t, pos: [p.pos[0] + CAMCX, p.pos[1] + CAM_Y, p.pos[2] + floorTop - t / 2] as Vec3, group: roofGroup, cast, notches: p.notches.filter((x) => x.edge !== 'top' && x.edge !== 'bottom') }, t, fit);
     })
     : [];
   // deuxième caméra, DEHORS : mini boîte en contreplaqué (37 × 30 × 36, ouverte au-dessus) accrochée sous le débord du toit en chêne, à l'avant gauche ; elle est inclinée vers le bas et tournée
@@ -341,7 +342,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     ...block('Isolant avant droite', wide, xi, -yo, -yi, z0, z1),
     ...block("Isolant sous le bloc d'entrée", -wide, wide, -yo, -yi, z0, holeZ - OPEN / 2 - 6),
     // le toit : des pavés autour du compartiment caméra et du siège du ventilateur
-    ...carveRects([-xo, -yo, xo, yo], [...(n.cam > 0 ? [[-cc, CAM_Y - cc, cc, CAM_Y + cc] as [number, number, number, number]] : []), [FANX - FO / 2, FY0, FANX + FO / 2, yo] as [number, number, number, number]])
+    ...carveRects([-xo, -yo, xo, yo], [...(n.cam > 0 ? [[CAMX0 - t, CAM_Y - cc, CAMX1 + t, CAM_Y + cc] as [number, number, number, number]] : []), [FANX - FO / 2, FY0, FANX + FO / 2, yo] as [number, number, number, number]])
       .flatMap(([x0, y0, x1, y1], k) => block(`Isolant toit ${k + 1}`, x0, x1, y0, y1, bodyH + t, bodyH + roofH - t)),
   ];
   // outils pour les pièces de l'électronique (groupe Électronique) : pavé et fil
@@ -368,7 +369,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     part('Cale batterie avant', 128, 3, t, BX, BY - 35 - 1.5, topZ + t / 2, 'block', '#a16207'),
     ...((): Plank[] => { // la cale arrière saute l'ouverture du compartiment si elle passe au-dessus (elle ne doit pas être dans le vide)
       const y = BY + 35 + 1.5, cut = y > CAM_Y - cc - t && y < CAM_Y + cc + t;
-      const segs: [number, number][] = cut ? ([[BX - 64, -cc - t], [cc + t, BX + 64]] as [number, number][]).filter(([a, b]) => b - a > 2) : [[BX - 64, BX + 64]];
+      const segs: [number, number][] = cut ? ([[BX - 64, CAMX0 - 2 * t], [CAMX1 + 2 * t, BX + 64]] as [number, number][]).filter(([a, b]) => b - a > 2) : [[BX - 64, BX + 64]];
       return segs.map(([a, b], k) => part(`Cale batterie arrière${segs.length > 1 ? ' ' + (k + 1) : ''}`, r2(b - a), 3, t, r2((a + b) / 2), y, topZ + t / 2, 'block', '#a16207'));
     })(),
     part('Batterie LiFePO4 12,8 V 6 Ah (4 × 32700, 128 × 70 × 32)', 128, 70, 32, BX, BY, topZ + 3 + 16, 'block', '#047857'), // dans le grenier, coin avant droit, à 1 cm du mur de droite et du mur avant
@@ -390,7 +391,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     { id: uid(), name: 'Capteur température / humidité (BME280, 19 × 18)', w: 19, h: 18, pos: [SENSOR_X, SENSOR_Y, bodyH + 2.2] as Vec3, rot: [180, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'sensor' as const },
     ...([['Fil 3,3 V (rouge)', '#dc2626', 0, 0], ['Fil SDA (jaune)', '#eab308', 1, 1], ['Fil SCL (vert)', '#16a34a', 2, 2], ['Fil masse (noir)', '#111827', 4, 3]] as const).map(([nm, color, pinIdx, k]): Plank => {
       const sx = SENSOR_X - 3.75 + k * 2.5, px = PI_PIN_X0 + pinIdx * 2.54, hh = topZ + 24 + k * 2;
-      return wire(nm, color, [[sx, SENSOR_Y - 7.5, bodyH + 6], [sx, SENSOR_Y - 4, bodyH + 12], [sx, SENSOR_Y + 4, bodyH + 20], [sx, SENSOR_Y + 8, bodyH + roofH - 6], [sx, SENSOR_Y + 8, hh], [...pw(px, PI_PIN_Y - 2.54), hh], [...pw(px, PI_PIN_Y - 2.54), piZ + 3.5]] as Vec3[]);
+      return wire(nm, color, [[sx, SENSOR_Y - 7.5, bodyH + 6], [sx, SENSOR_Y - 4, bodyH + 12], [sx, SENSOR_Y + 2, bodyH + 22], [sx, SENSOR_Y + 2, topZ + 6], [sx, SENSOR_Y + 2, hh], [...pw(px, PI_PIN_Y - 2.54), hh], [...pw(px, PI_PIN_Y - 2.54), piZ + 3.5]] as Vec3[]);
     }),
   ];
   // ===== VENTILATEUR =====
@@ -622,7 +623,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     return out;
   };
   const oakHoles: [number, number, number, number][] = [];
-  if (n.cam > 0) oakHoles.push([-n.cam / 2, CAM_Y - n.cam / 2, n.cam / 2, CAM_Y + n.cam / 2], [SENSOR_X + 0.25 - 6, SENSOR_Y + 8 - 3, SENSOR_X + 0.25 + 6, SENSOR_Y + 8 + 3]);
+  if (n.cam > 0) oakHoles.push([CAMX0, CAM_Y - n.cam / 2, CAMX1, CAM_Y + n.cam / 2]);
   const oak: Plank[] = n.chene
     ? carve([-(W / 2 + OV_OAK), -(D / 2 + OV_OAK), W / 2 + OV_OAK, D / 2 + OV_OAK], oakHoles).map(([x0, y0, x1, y1], k): Plank => (
       { id: uid(), name: `Planche chêne ${k + 1}`, w: r2(x1 - x0), h: r2(y1 - y0), depth: OAK, pos: [r2((x0 + x1) / 2), r2((y0 + y1) / 2), r2(roofTop + OAK / 2)] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: roofGroup, special: 'block' as const, color: '#c4a574' }))

@@ -109,7 +109,7 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 | LED infrarouges | Pi broche 4 (5 V) | Carte 4 LED IR | Masse par le module MOSFET (OUT1) : le Pi les allume ou les éteint |
 | LED infrarouges extérieures | Pi broche 2 (5 V) | Carte 4 LED IR à côté de la caméra 2 | Masse par le module MOSFET (OUT2) ; les fils suivent la nappe et sortent par la même fente |
 | Module MOSFET | Pi GPIO23 (broche 16), GPIO24 (broche 18), masse broche 6 | Module 2 canaux (MOSFET logique 3,3 V) | Coupe la masse de chaque carte de LED ; 5 V direct, courant des LED hors du GPIO |
-| Capteur température / humidité | Pi broches 1 (3,3 V), 3 (SDA), 5 (SCL), 9 (masse) | Capteur collé sous le plafond | Liaison I2C, 4 fils |
+| Capteur température / humidité | Pi broches 1 (3,3 V), 3 (SDA), 5 (SCL), 9 (masse) | Capteur dans le compartiment de la caméra, à fleur du plafond | Liaison I2C, 4 fils |
 | Prise d'air basse | — (pas d'électronique) | Conduit de contreplaqué dans l'isolant du mur gauche avant, fente dans la paroi intérieure à mi-hauteur | Section libre 10,9 cm² ; clapet à gravité et grillage sur la fente, sous-boîte isolante amovible par le dessous (lèvre de 11 mm sous le fond) |
 
 ## Explication, bloc par bloc
@@ -268,7 +268,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Bus | I2C (SDA, SCL), adresse 0x76 ou 0x77 | broches 3 et 5 |
 | Mesures | température, humidité et pression | — |
 | Dimensions de la carte | environ 19 × 18 mm (jusqu'à 25 × 18 selon la marque) | 19 × 18 mm |
-| Contrainte | la condensation est possible sous le plafond : choisir un capteur protégé ou le vernir | collé sous le plafond |
+| Contrainte | la condensation est possible sous le plafond : choisir un capteur protégé ou le vernir | à fleur du plafond, dans le compartiment de la caméra (x = 33, y = −14), ses fils sortent par l'ouverture du dessus du toit, sans passer dans l'isolant ; ≥ 4,5 mm de bois autour de son logement |
 | Rôle | donne au Pi la température du nid pour piloter le ventilateur ; toujours présent | oui |
 
 ### Module 2 × MOSFET (LED infrarouges)
@@ -312,7 +312,7 @@ Contrôle fait par calcul sur le modèle : recouvrement entre chaque composant e
 | Raspberry Pi | passe (13 mm sous la pente) ; environ 5 mm d'écart avec le siège du ventilateur |
 | Convertisseur 12 → 5 V | ajouté à l'avant, taille estimée ; il passe sous la pente avec très peu de jeu |
 | Nappe de la caméra 1 | corrigée pour contourner le siège du ventilateur : elle passe devant lui, au-dessus des fils des LED |
-| Caméra 1, capteur | passent |
+| Caméra 1, capteur | passent ; le compartiment de la caméra est agrandi vers l'est (intérieur 66,25 × 38 mm au lieu de 38 × 38) pour contenir le capteur |
 | Prise d'air basse | le conduit (35 × 46 mm) traverse l'isolant sous le plancher, le fond intérieur (par un passage découpé) et l'isolant du mur gauche ; libre dessous, loin du régulateur |
 | Fils et nappes | corrigé : plusieurs fils sortaient de 0,5 à 5 mm au-dessus de la pente, ils sont maintenant ramenés dessous |
 | Pièces en bois | contrôle de recouvrement par boîtes orientées : les seuls recouvrements restants sont voulus (dents dans leurs fentes, parois du siège et de la cassette qui traversent le dessus du toit par son encoche, conduit d'air dans le passage du fond) |
