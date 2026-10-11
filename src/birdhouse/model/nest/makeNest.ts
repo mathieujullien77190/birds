@@ -34,7 +34,7 @@ export function carveRects(r: [number, number, number, number], holes: [number, 
 }
 
 /** Pièces de la ventilation (noms avant `unnumber`) : regroupées dans le groupe « Ventilation ». */
-const VENT_PIECES = /^(Goulotte ventilateur|Cassette ventilateur|Poignée cassette|Joint cassette|Plot caoutchouc ventilateur|Ventilateur Noctua|Grille de protection ventilateur|Grillage inox maille 5 mm|Joue grillage sortie|Clapet de ventilation|Plaque de connexion cassette|Entretoise plaque de connexion|Barrette 4 broches plaque de connexion|Fiche 4 broches toit|Soudure plaque de connexion|Module interrupteur 12 V ventilateur|Cale interrupteur|Fil (PWM|tachymètre|commande interrupteur|masse commune|interrupteur →|Wago \+ → interrupteur|masse interrupteur|ventilateur)|Conduit d'air|Auvent prise d'air|Cale auvent|Bouchon prise d'air|Clapet prise d'air)/;
+const VENT_PIECES = /^(Goulotte ventilateur|Cassette ventilateur|Poignée cassette|Joint cassette|Plot caoutchouc ventilateur|Ventilateur Noctua|Grille de protection ventilateur|Grillage inox maille 5 mm|Plaque de connexion cassette|Entretoise plaque de connexion|Barrette 4 broches plaque de connexion|Fiche 4 broches toit|Soudure plaque de connexion|Module interrupteur 12 V ventilateur|Cale interrupteur|Fil (PWM|tachymètre|commande interrupteur|masse commune|interrupteur →|Wago \+ → interrupteur|masse interrupteur|ventilateur)|Conduit d'air|Bouchon prise d'air|Clapet prise d'air)/;
 
 export function makeNest(n0: NestParams, t: number, fit: number, start: number): { planks: Plank[]; group: string; name: string; groupNames: Record<string, string> } {
   const n: NestParams = { ...n0, l: Math.max(120, n0.l), L: Math.max(120, n0.l), hole: Math.min(n0.hole, Math.max(120, n0.l) - 26), cam: 38, ins: 39, pente: true, lambris: true }; // toit TOUJOURS en pente, habillage TOUJOURS présent (puces retirées : le régulateur sous le nichoir est protégé par l'habillage) ; // intérieur TOUJOURS CARRÉ (un seul curseur), 120 mm au minimum (le fond) ; trou plafonné pour que le bloc d'entrée (trou + 16) tienne dans la paroi intérieure ; compartiment caméra fixe à 38 (curseur retiré) ; // isolant TOUJOURS 39 (le curseur a été retiré à la demande de l'utilisateur) ; compartiment caméra plafonné à 38 // le compartiment caméra est limité à 38 : la batterie (et sa cale) est posée juste à côté, sur le dessus du toit
@@ -421,17 +421,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const plotsAt: [number, number, number, number][] = [[FANX, FANY - FAN / 2 + 1, 12, 2], [FANX, FANY + FAN / 2 - 1, 12, 2], [FANX - FAN / 2 + 1, FANY, 2, 12], [FANX + FAN / 2 - 1, FANY, 2, 12]]; // sur le bord du cadre, hors de l'ouverture
   const plots: Plank[] = plotsAt.map(([x, y, w, h], k) => blk(`Plot caoutchouc ventilateur ${k + 1}`, w, h, FAN_PLOT, [x, y, ZB + t + GUARD_T + FAN_PLOT / 2], elecGroup, '#6b7280'));
   const fanPart: Plank = { id: uid(), name: 'Ventilateur Noctua NF-A6x25 PWM (60 × 60 × 25)', w: FAN, h: FAN, depth: FAN_T, pos: [FANX, FANY, FAN_Z] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'fan' as const, color: '#8b5a2b' };
-  // sortie : grillage inox à grosses mailles et clapet à gravité (film léger articulé en haut), dehors, sous le débord du toit en chêne
-  // caisson de sortie : le grillage inox (maille 5 mm) est porté à 20 mm de la plaque arrière par quatre joues de contreplaqué ; le clapet (contre la plaque, charnière en haut) y a la place de s'ouvrir d'environ 15° (bas écarté de ≈ 12 mm)
-  const NET_D = 20, NET_IW = EXW + 4, NET_IH = VENT_H + 3; // profondeur, largeur et hauteur intérieures
-  const exitNet = blk('Grillage inox maille 5 mm — sortie ventilation', NET_IW, 0.8, NET_IH, [FANX, D / 2 + NET_D + 0.4, EXZ], roofGroup, '#b6bcc6', { transparent: true });
-  const cheeks: Plank[] = [
-    wood('Joue grillage sortie 1 (haut)', NET_IW + 2 * t, NET_D, [FANX, D / 2 + NET_D / 2, EXZ + NET_IH / 2 + t / 2], [0, 0, 0], roofGroup),
-    wood('Joue grillage sortie 2 (bas)', NET_IW + 2 * t, NET_D, [FANX, D / 2 + NET_D / 2, EXZ - NET_IH / 2 - t / 2], [0, 0, 0], roofGroup),
-    wood('Joue grillage sortie 3 (gauche)', NET_D, NET_IH, [FANX - NET_IW / 2 - t / 2, D / 2 + NET_D / 2, EXZ], sideRot, roofGroup),
-    wood('Joue grillage sortie 4 (droite)', NET_D, NET_IH, [FANX + NET_IW / 2 + t / 2, D / 2 + NET_D / 2, EXZ], sideRot, roofGroup),
-  ];
-  const flap = blk('Clapet de ventilation', EXW, 0.6, VENT_H + 1, [FANX, D / 2 + 0.3, EXZ + 0.3 - 0.5], roofGroup, '#d6b98c'); // film opaque contre la plaque arrière, sous le grillage
+  // sortie : un grillage inox à grosses mailles posé À PLAT contre la face extérieure de la plaque arrière (dans l'épaisseur du lambris, jamais en saillie) ; pas de clapet (supprimé à la demande de l'utilisateur)
+  const exitNet = blk('Grillage inox maille 5 mm — sortie ventilation', EXW + 4, 0.8, VENT_H + 4, [FANX, D / 2 + 0.4, EXZ], roofGroup, '#b6bcc6', { transparent: true });
   // le BLOC ISOLANT d'hiver : même empreinte que la cassette, une pièce de rechange (cachée par défaut) qui remplace le ventilateur et comble l'ouverture du plafond
   const wGroup = uid(), wZ0 = ZB + t, wH = 36;
   const winter: Plank[] = [
@@ -487,7 +478,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     toPi('Fil commande interrupteur ventilateur (orange)', '#f97316', 0, [[SWX + 3, SWY + 10, topZ + 11.5], [SWX + 4, YREAR - 3.5, topZ + 19], [CONX + 5, YREAR - 3.5, topZ + 19], [CONX + 4, YREAR - 3.5, bodyH + 110.3]], YREAR - 3.5, 6, PI_PIN_Y - 2.54, false), // GPIO27 (broche 13) : par le nord de la gaine, par-dessus la cassette
   ];
   const fanSet: Plank[] = [fanPart, ...plots, ...swFan, ...connection, ...fanWires, ...cassette.filter((p) => p.group === elecGroup), ...winter];
-  const fanWood: Plank[] = [...seat, exitNet, ...cheeks, flap, ...cassette.filter((p) => p.group === roofGroup)];
+  const fanWood: Plank[] = [...seat, exitNet, ...cassette.filter((p) => p.group === roofGroup)];
   // ===== PRISE D'AIR BASSE =====
   const ZB0 = t, airH = r2(AIR_ZT - ZB0), airZc = r2((ZB0 + AIR_ZT) / 2);
   const airWall = (name: string, w: number, pos: Vec3, rot: Vec3, holes: Hole[] = []): Plank => wood(name, w, airH, pos, rot, group, holes);
@@ -497,13 +488,10 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     airWall("Conduit d'air 3", AIR_LX - 2 * t, [AIR_CX, AIR_CY - AIR_LY / 2 + t / 2, airZc], faceRot),
     airWall("Conduit d'air 4", AIR_LX - 2 * t, [AIR_CX, AIR_CY + AIR_LY / 2 - t / 2, airZc], faceRot),
     wood("Conduit d'air 5 (couvercle)", AIR_LX, AIR_LY, [AIR_CX, AIR_CY, AIR_ZT + t / 2], [0, 0, 0], group),
-    wood("Auvent prise d'air", AIR_LX + 12, AIR_LY + 10, [AIR_CX, AIR_CY, -9.5], [0, 0, 0], group), // chicane : la pluie ne monte pas droit dans l'ouverture
   ];
   const airBlocks: Plank[] = [
     blk("Grillage inox maille 5 mm — prise d'air", AIR_LX - 2 * t + 2, AIR_LY - 2 * t + 2, 0.8, [AIR_CX, AIR_CY, -0.4], group, '#b6bcc6', { transparent: true }),
-    blk('Cale auvent gauche', 3, AIR_LY + 10, 8, [AIR_CX - (AIR_LX + 12) / 2 + 1.5, AIR_CY, -4], group, '#a16207'),
-    blk('Cale auvent droite', 3, AIR_LY + 10, 8, [AIR_CX + (AIR_LX + 12) / 2 - 1.5, AIR_CY, -4], group, '#a16207'),
-    blk("Bouchon prise d'air (à enfoncer dans l'ouverture pour la condamner)", AIR_LX - 2 * t - 0.6, AIR_LY - 2 * t - 0.6, 7, [AIR_CX, AIR_CY, -4.4], group, '#d97706'),
+    blk("Bouchon prise d'air (à enfoncer dans l'ouverture pour la condamner)", AIR_LX - 2 * t - 0.6, AIR_LY - 2 * t - 0.6, 7, [AIR_CX, AIR_CY, 3.6], group, '#d97706'),
     blk("Grillage inox maille 5 mm — fente", 0.8, AIR_SW + 2, AIR_SH + 2, [-n.l / 2 + 0.4, AIR_CY, AIR_ZS], group, '#b6bcc6', { transparent: true }),
     blk("Clapet prise d'air", 0.6, AIR_SW + 2, AIR_SH + 4, [-n.l / 2 + 1.1, AIR_CY, AIR_ZS - 1], group, '#fca5a5', { transparent: true }),
   ];
@@ -551,8 +539,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       } else out.push(prism(`Lambris droite ${i + 1}`, [[xe, y0], [xe + LAM_T, y0o], [xe + LAM_T, y1o], [xe, y1]], -LAM_DOWN, sideA, 0, slope));
       out.push(prism(`Lambris gauche ${i + 1}`, [[-xe - LAM_T, ly0i], [-xe, ly0i], [-xe, ly1i], [-xe - LAM_T, ly1i]], -LAM_DOWN, sideA, 0, slope));
     }
-    const exitWin = [FANX - (FI - 0.4) / 2 - 6.5, bodyH + VENT_Z - (VENT_H + 14) / 2, FANX + (FI - 0.4) / 2 + 6.5, bodyH + VENT_Z + (VENT_H + 14) / 2] as [number, number, number, number]; // fenêtre de sortie du ventilateur (le caisson et ses joues la traversent)
-    const windows: [number, number, number, number][] = n.pente ? [...VENT_XS.map((vx): [number, number, number, number] => [vx - (VENT_W + 8) / 2, bodyH + VENT_Z - (VENT_H + 8) / 2, vx + (VENT_W + 8) / 2, bodyH + VENT_Z + (VENT_H + 8) / 2]), exitWin, ...(n.cam > 0 ? [[PORT_X0 - 4, bodyH + PORT_Z0 - 4, PORT_X1 + 4, bodyH + PORT_Z1 + 4] as [number, number, number, number]] : [])] : []; // fenêtres des grilles d'aération (à l'arrière)
+    const windows: [number, number, number, number][] = n.pente ? [...VENT_XS.map((vx): [number, number, number, number] => [vx - (VENT_W + 8) / 2, bodyH + VENT_Z - (VENT_H + 8) / 2, vx + (VENT_W + 8) / 2, bodyH + VENT_Z + (VENT_H + 8) / 2]), [FANX - (FI - 0.4) / 2 - 4, bodyH + VENT_Z - (VENT_H + 8) / 2, FANX + (FI - 0.4) / 2 + 4, bodyH + VENT_Z + (VENT_H + 8) / 2] as [number, number, number, number], ...(n.cam > 0 ? [[PORT_X0 - 4, bodyH + PORT_Z0 - 4, PORT_X1 + 4, bodyH + PORT_Z1 + 4] as [number, number, number, number]] : [])] : []; // fenêtres des grilles d'aération (à l'arrière)
     const frontWindows: [number, number, number, number][] = n.cam2 && n.pente ? [[cam2X - 10 - 16, bodyH + roofH + 28 - 6, cam2X - 10 + 16, bodyH + roofH + 28 + 6]] : []; // fenêtre 24 × 12 dans l'habillage avant, en face de la fente de la nappe de la caméra 2 (20 × 4)
     // les fenêtres sont AIMANTÉES aux joints entre lames et entre elles (à moins de 6 mm) : sinon il restait des lamelles de 2 ou 3 mm entre une fenêtre et un joint, ou entre deux fenêtres
     const jointsF = Array.from({ length: k - 1 }, (_, i) => fx0 + (i + 1) * sx), jointsB = Array.from({ length: k - 1 }, (_, i) => bx0l + (i + 1) * sx);
@@ -561,7 +548,6 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       for (const a of ws) for (const b of ws) { if (a !== b && Math.abs(a[2] - b[0]) < 10) b[0] = a[2]; }
     };
     snapWins(windows, jointsB); snapWins(frontWindows, jointsF);
-    exitWin[0] = Math.min(exitWin[0], FANX - NET_IW / 2 - t - 1.5); exitWin[2] = Math.max(exitWin[2], FANX + NET_IW / 2 + t + 1.5); // l'aimantation ne doit pas rétrécir la fenêtre sous les joues du caisson
     for (const x of RIB_XS) windows.push([x - RIB_T / 2 - 0.25, RIB_Z0 - 1, x + RIB_T / 2 + 0.25, RIB_Z1 + 1]); // les nervures de fixation traversent les lames arrière par une fente de 3,5 (ajoutées APRÈS l'aimantation : une fente de 3,5 ne doit pas être élargie jusqu'au joint)
     // façade et arrière : CHAQUE LAME EST UNE SEULE PLANCHE de largeur fixe (sx), percée de ses fenêtres (trous rectangulaires) ; une fenêtre qui mord sur le bord d'une lame
     // devient une encoche de ce bord ; seule une fenêtre qui traverse TOUTE la largeur d'une lame (la grande aération) la coupe en deux planches (dessous / dessus)

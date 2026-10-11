@@ -36,7 +36,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(by(sc0, /^Plot caoutchouc ventilateur/)).toHaveLength(4);
     expect(by(sc0, /^Goulotte ventilateur/)).toHaveLength(3);
     expect(by(sc0, /^Cassette ventilateur/).length).toBeGreaterThanOrEqual(6);
-    one(sc0, /^Clapet de ventilation/); one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/); one(sc0, /^Plaque de connexion cassette/); one(sc0, /^Barrette 4 broches plaque de connexion/); one(sc0, /^Fiche 4 broches toit/);
+    one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/); one(sc0, /^Plaque de connexion cassette/); one(sc0, /^Barrette 4 broches plaque de connexion/); one(sc0, /^Fiche 4 broches toit/);
     one(sc0, /^Module interrupteur 12 V ventilateur \(côté \+, commande 3,3 V\)/);
     expect(by(sc0, /^Cale interrupteur/)).toHaveLength(4);
     const guard = one(sc0, /^Grille de protection ventilateur 60 mm \(fil d'acier\)/);
@@ -140,9 +140,9 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(Math.abs(cassWin!.size - exit!.size)).toBeLessThan(1);
     const exitWin = wins.filter((h) => h !== exit);
     for (const h of exitWin) expect(Math.abs(h.x - exit!.x) - (h.size + exit!.size) / 2).toBeGreaterThanOrEqual(0); // les deux fenêtres ne se recouvrent pas
-    const flap = one(sc0, /^Clapet de ventilation/), net = one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/);
-    expect(flap.pos[1]).toBeGreaterThan(back.pos[1]); expect(net.pos[1]).toBeGreaterThan(back.pos[1]); expect(net.pos[1]).toBeGreaterThan(flap.pos[1]); expect(flap.transparent).toBeFalsy(); // le grillage est le plus à l'extérieur, le clapet est opaque // dehors, sous le débord du toit en chêne
-    expect(Math.abs(flap.pos[0] - net.pos[0])).toBeLessThan(0.1);
+    const net = one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/), joint = one(sc0, /^Joint cassette arrière/);
+    expect(net.pos[1]).toBeGreaterThan(back.pos[1]); expect(net.pos[1]).toBeGreaterThan(joint.pos[1]); // dehors, sous le débord du toit en chêne ; plus extérieur que le joint de mousse
+    expect(Math.abs(cass.pos[0] - net.pos[0])).toBeLessThan(0.1);
   });
 });
 
@@ -159,33 +159,15 @@ describe('bloc isolant d\'hiver', () => {
   });
 });
 
-describe('caisson de sortie du ventilateur', () => {
-  it('le grillage est à 20 mm de la plaque sur quatre joues, sous le débord du toit en chêne, le clapet a la place de s ouvrir', () => {
-    const back = one(sc0, /^Face arrière toit/), outer = back.pos[1] + t / 2, flap = one(sc0, /^Clapet de ventilation/), net = one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/);
-    const cheeks = by(sc0, /^Joue grillage sortie/);
-    expect(cheeks).toHaveLength(4); expect(cheeks.every((c) => !c.special)).toBe(true); // contreplaqué découpé au laser
-    const depth = net.pos[1] + net.h / 2 - outer;
-    expect(depth).toBeGreaterThanOrEqual(19); expect(depth).toBeLessThanOrEqual(30 - 5); // débord arrière du toit en chêne : 30 mm
-    const open15 = flap.depth! * Math.sin((15 * Math.PI) / 180); // débattement du bas du clapet ouvert à 15°
-    expect(open15).toBeLessThan(depth - (flap.pos[1] - outer) - 2);
-    // les joues entourent le clapet sans le toucher (largeur et hauteur)
-    const box = aabb(flap, t);
-    for (const c of cheeks) { const b = aabb(c, t); expect(gap(box, b), c.name).toBeGreaterThan(0.5); expect(b.max.y).toBeLessThanOrEqual(net.pos[1] + 0.5); }
-    // le dessous du toit en chêne est plus haut que le haut du caisson d'au moins 5 mm (pente de 8° comprise)
-    const front = one(sc0, /^Face avant toit/), base = front.pos[2] - front.h / 2, top = Math.max(...cheeks.map((c) => aabb(c, t).max.z));
-    const oakUnder = base + front.h + ((net.pos[1] - front.pos[1]) * (back.h - front.h)) / (back.pos[1] - front.pos[1]);
-    expect(oakUnder - top).toBeGreaterThanOrEqual(5);
-  });
-  it('les joues passent par la fenêtre du lambris arrière sans recouper une lame', () => {
+describe('sortie du ventilateur : rien ne dépasse derrière', () => {
+  it('ni clapet ni joue de grillage ; le grillage est à plat contre la plaque, dans l épaisseur du lambris', () => {
+    expect(by(sc0, /^Clapet de ventilation|^Joue grillage/)).toEqual([]);
+    const back = one(sc0, /^Face arrière toit/), outer = back.pos[1] + t / 2, net = one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/);
+    expect(net.h).toBeCloseTo(0.8, 5); expect(net.pos[1] - net.h / 2 - outer).toBeGreaterThanOrEqual(-0.01); expect(net.pos[1] + net.h / 2 - outer).toBeLessThanOrEqual(1.5); // collé sur la face extérieure
     const lames = by(sc0, /^Lambris arrière/).filter((p) => p.poly);
     const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
-    const inHole = (pt: [number, number], h: Plank['holes'][number]) => Math.abs(pt[0] - h.x) <= h.size / 2 && Math.abs(pt[1] - h.y) <= (h.sh ?? h.size) / 2;
-    for (const c of by(sc0, /^Joue grillage sortie/)) {
-      const b = aabb(c, t);
-      for (let x = b.min.x + 0.2; x <= b.max.x; x += 1) for (let z = b.min.z + 0.2; z <= b.max.z; z += 1) {
-        for (const l of lames) { const local: [number, number] = [x - l.pos[0], z - l.pos[2]]; expect(inPoly(local, l.poly!) && !l.holes.some((h) => inHole(local, h)), c.name + ' dans ' + l.name).toBe(false); }
-      }
-    }
+    const b = aabb(net, t);
+    for (let x = b.min.x + 0.2; x <= b.max.x; x += 1) for (let z = b.min.z + 0.2; z <= b.max.z; z += 1) for (const l of lames) { const local: [number, number] = [x - l.pos[0], z - l.pos[2]]; expect(inPoly(local, l.poly!) && !l.holes.some((h) => Math.abs(local[0] - h.x) <= h.size / 2 && Math.abs(local[1] - h.y) <= (h.sh ?? h.size) / 2), 'grillage dans ' + l.name).toBe(false); }
   });
 });
 
@@ -209,14 +191,16 @@ describe("prise d'air basse", () => {
     const floor = one(sc0, /^Dessous toit/), open = floor.holes.find((h) => h.size === 56)!;
     expect(Math.hypot(sx - (floor.pos[0] + open.x), sy - (floor.pos[1] + open.y))).toBeGreaterThan(l / 2);
     expect(inner.pos[2] + slot.y).toBeGreaterThan(one(sc0, /^Plancher int/).pos[2]); // au-dessus du fond du nid
-    expect(one(sc0, /^Clapet prise d'air/)); expect(one(sc0, /^Grillage inox maille 5 mm — fente/)); expect(one(sc0, /^Grillage inox maille 5 mm — prise d'air$/)); expect(one(sc0, /^Auvent prise d'air/));
+    expect(one(sc0, /^Clapet prise d'air/)); expect(one(sc0, /^Grillage inox maille 5 mm — fente/)); expect(one(sc0, /^Grillage inox maille 5 mm — prise d'air$/)); expect(by(sc0, /^Auvent|^Cale auvent/)).toEqual([]);
   });
   it("l'ouverture est dans « Dessous ext » (le fond intérieur n'a que le passage du conduit) et rien ne la bouche dessous", () => {
     const bottom = one(sc0, /^Dessous ext/), opening = bottom.holes.find((h) => h.shape === 'square' && Math.abs(h.x - one(sc0, /^Conduit d'air 5/).pos[0]) < 0.1)!;
     expect(opening).toBeTruthy();
     const box = { min: new Vector3(opening.x - opening.size / 2, bottom.pos[1] + opening.y - (opening.sh ?? 0) / 2, -400), max: new Vector3(opening.x + opening.size / 2, bottom.pos[1] + opening.y + (opening.sh ?? 0) / 2, 0) };
-    const mine = /^(Auvent|Cale auvent|Grillage inox maille 5 mm — prise|Bouchon prise|Conduit d'air)/;
+    const mine = /^(Grillage inox maille 5 mm — prise|Bouchon prise|Conduit d'air)/;
     for (const p of sc0.planks) { if (mine.test(p.name) || p.special === 'doc' || p.path) continue; const b = aabb(p, t); if (b.max.z > 0.01) continue; expect(gap(box, b), p.name).toBeGreaterThan(0.5); }
+    expect(aabb(one(sc0, /^Grillage inox maille 5 mm — prise d'air$/), t).min.z).toBeGreaterThanOrEqual(-0.85); // la seule pièce sous le fond, à plat
+    expect(aabb(one(sc0, /^Bouchon prise d'air/), t).min.z).toBeGreaterThanOrEqual(-0.01); // le bouchon s'enfonce, sans saillie
     const reg = aabb(one(sc0, /^Régulateur de charge/), t);
     expect(gap(box, reg)).toBeGreaterThan(20);
     expect(one(sc0, /^Plancher int/).holes.some((h) => h.size > 30 && h.sh! > 40)).toBe(true);
