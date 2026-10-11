@@ -40,7 +40,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(by(sc0, /^Cassette ventilateur/).length).toBeGreaterThanOrEqual(6);
     one(sc0, /^Grille de sortie ventilation/); one(sc0, /^Prise 4 broches du ventilateur/); one(sc0, /^Rallonge ventilateur 4 broches/);
     one(sc0, /^Module interrupteur 12 V ventilateur \(côté \+, commande 3,3 V\)/);
-    expect(by(sc0, /^Cale interrupteur/)).toHaveLength(4);
+    expect(by(sc0, /^Cale /)).toEqual([]); // plus de cales de bois : des baguettes de contreplaqué à couper au montage (tests/wedge-strips.test.ts)
     const guard = one(sc0, /^Grille de protection ventilateur 60 mm \(fil d'acier\)/);
     expect(guard.special).toBe('block'); expect(guard.holes).toEqual([]); // composant acheté, pas une plaque de contreplaqué percée
     expect(by(sc0, /^Grille ventilateur$/)).toEqual([]);
@@ -57,7 +57,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(Math.abs(open!.x - fan.pos[0])).toBeLessThan(0.1);
     expect(top.notches.some((n) => n.edge === 'top' && n.width > 66)).toBe(true);
   });
-  it('le siège, la cassette et le ventilateur restent dans le toit, loin de la batterie, à environ 1 cm de la gaine, à 4 mm au moins des cales du Pi', () => {
+  it('le siège, la cassette et le ventilateur restent dans le toit, loin de la batterie, à environ 1 cm de la gaine, ', () => {
     const seat = union([...by(sc0, /^Goulotte ventilateur/), ...by(sc0, /^Cassette ventilateur/), one(sc0, /^Ventilateur Noctua/)], t);
     const W = 2 * (one(sc0, /^Face droite|^Côté droit toit/).pos[0] + t / 2), roofBack = one(sc0, /^Face arrière toit/), roofFloor = one(sc0, /^Dessous toit/);
     expect(seat.min.x).toBeGreaterThan(-W / 2); expect(seat.max.x).toBeLessThan(W / 2);
@@ -67,8 +67,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     const gaineBox = { min: new Vector3(55, 76, 0), max: new Vector3(71, 92, 400) }; // le chemin de la gaine est un fil : boîte du tube Ø 16 posée sur son axe
     void gaine;
     expect(gap(seat, gaineBox)).toBeGreaterThan(7);
-    for (const p of by(sc0, /^Batterie LiFePO4|^Cale batterie/)) expect(gap(seat, aabb(p, t)), p.name).toBeGreaterThan(30);
-    for (const p of by(sc0, /^Cale Pi /)) expect(gap(seat, aabb(p, t)), p.name).toBeGreaterThan(4);
+    for (const p of by(sc0, /^Batterie LiFePO4/)) expect(gap(seat, aabb(p, t)), p.name).toBeGreaterThan(30);
     for (const p of by(sc0, /^Fusible/)) expect(gap(seat, aabb(p, t)), p.name).toBeGreaterThan(9);
   });
   it('aucun fil du ventilateur ne traverse le siège, la cassette ou une nappe (les quatre fils vers le Pi sont exemptés des croisements avec les nappes et les autres fils)', () => {

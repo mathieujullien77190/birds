@@ -1,6 +1,6 @@
 import { type Vec3, type Pt, type Edge, type Notch, type Hole, type Plank, type PlankScene, type NestParams } from '../types';
 import { r2, uid } from '../util';
-import { SENSOR_CHIP_DX, SENSOR_X, LENS_HOLE, CAM_W, IR_W, CAM_X, PI_CSI2, PI_W, PI_CSI, PI_PIN_Y, PI_PIN_X0, CAM_Y, SENSOR_Y, CAM_H, IR_H, IR_X, OKOUME_T, OKOUME_COLOR, PI_H, FAN, FAN_T, FAN_OPEN, FAN_PLOT } from '../constants';
+import { SENSOR_CHIP_DX, SENSOR_X, LENS_HOLE, CAM_W, IR_W, CAM_X, PI_CSI2, PI_W, PI_CSI, PI_PIN_Y, PI_PIN_X0, CAM_Y, SENSOR_Y, CAM_H, IR_H, IR_X, OKOUME_T, OKOUME_COLOR, PI_H, FAN, FAN_T, FAN_OPEN, FAN_PLOT, STRIP } from '../constants';
 import { fitHole, rectUnion } from '../geometry/holes';
 import { teethFor, recastAll } from '../geometry/castellation';
 import { outline } from '../geometry/outline';
@@ -8,7 +8,7 @@ import { rotFromBasis, transformPlanks } from '../geometry/transform';
 import { slotsForTeeth } from '../geometry/face';
 import { makeBox } from './box';
 import { CAMERA_NAMES } from './cameras';
-import { summerLayout, PLUG_HANDLE } from './winter';
+import { summerLayout, PLUG_HANDLE, SPARE_GAP } from './winter';
 import { fromAxisAngle, multiply, invert, rotate } from '../math/rotation';
 
 /**
@@ -35,7 +35,7 @@ export function carveRects(r: [number, number, number, number], holes: [number, 
 }
 
 /** Pièces de la ventilation (noms avant `unnumber`) : regroupées dans le groupe « Ventilation ». */
-const VENT_PIECES = /^(Goulotte ventilateur|Conduit de sortie|Cassette ventilateur|Poignée cassette|Plot caoutchouc ventilateur|Ventilateur Noctua|Grille de protection ventilateur|Grille de sortie ventilation|Grillage inox maille 5 mm|Prise 4 broches du ventilateur|Rallonge ventilateur 4 broches|Module interrupteur 12 V ventilateur|Cale interrupteur|Fil (PWM|tachymètre|commande interrupteur|masse commune|interrupteur →|Wago \+ → interrupteur|masse interrupteur|ventilateur)|Conduit d'air|Clapet prise d'air)/;
+const VENT_PIECES = /^(Goulotte ventilateur|Conduit de sortie|Cassette ventilateur|Poignée cassette|Plot caoutchouc ventilateur|Ventilateur Noctua|Grille de protection ventilateur|Grille de sortie ventilation|Grillage inox maille 5 mm|Prise 4 broches du ventilateur|Rallonge ventilateur 4 broches|Module interrupteur 12 V ventilateur|Fil (PWM|tachymètre|commande interrupteur|masse commune|interrupteur →|Wago \+ → interrupteur|masse interrupteur|ventilateur)|Conduit d'air|Clapet prise d'air)/;
 
 export function makeNest(n0: NestParams, t: number, fit: number, start: number): { planks: Plank[]; group: string; name: string; groupNames: Record<string, string> } {
   const n: NestParams = { ...n0, l: Math.max(120, n0.l), L: Math.max(120, n0.l), hole: Math.min(n0.hole, Math.max(120, n0.l) - 26), cam: 38, ins: 39, pente: true, lambris: true, solar: true }; // toit TOUJOURS en pente, habillage TOUJOURS présent, système solaire TOUJOURS présent (puce retirée : réglage ancien ignoré en silence) (puces retirées : le régulateur sous le nichoir est protégé par l'habillage) ; // intérieur TOUJOURS CARRÉ (un seul curseur), 120 mm au minimum (le fond) ; trou plafonné pour que le bloc d'entrée (trou + 16) tienne dans la paroi intérieure ; compartiment caméra fixe à 38 (curseur retiré) ; // isolant TOUJOURS 39 (le curseur a été retiré à la demande de l'utilisateur) ; compartiment caméra plafonné à 38 // le compartiment caméra est limité à 38 : la batterie (et sa cale) est posée juste à côté, sur le dessus du toit
@@ -244,11 +244,11 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const roofTop = bodyH + roofH;
   const OAK = n.chene ? 18 : 0, topZ = roofTop + OAK; // dessus de la planche de chêne : tout ce qui est « sur le toit » (Pi, boîtier, toit en pente) se pose dessus
   const piZ = topZ + 7; // centre de la carte : sur des entretoises de 6 mm au-dessus du dessus du toit (les composants du dessous dépassent de 2,9)
+  const wedgeNeed: number[] = []; // longueurs (mm) des cales de bois d'autrefois, une par côté de composant : le besoin que les baguettes de cale (3 × ce besoin) doivent couvrir
+  if (n.cam > 0) wedgeNeed.push(16, 16, 16, 16, 16, 16); // Pi : six cales de 16 mm, deux par grand côté et une à chaque bout
   const pi: Plank[] = n.cam > 0 ? [
     { id: uid(), name: 'Raspberry Pi', w: PI_W, h: PI_H, pos: [piX, piY, piZ] as Vec3, rot: [0, 0, 90] as Vec3, notches: [], holes: [], group: elecGroup, special: 'pi' as const },
-    // six cales de bois collées sur le toit, serrées contre le boîtier : deux sur chaque grand côté, une à chaque bout
-    ...([[-25, -(PI_H / 2 + 2), 16, 4], [25, -(PI_H / 2 + 2), 16, 4], [-25, PI_H / 2 + 2, 16, 4], [25, PI_H / 2 + 2, 16, 4], [-(PI_W / 2 + 2), 0, 4, 16], [PI_W / 2 + 6.5, 0, 4, 16]] as const).map(([x, y, w, h], k): Plank => (
-      { id: uid(), name: `Cale Pi ${k + 1}`, w: h, h: w, pos: [...pw(x, y), topZ + t / 2] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'bar' as const })),
+    // plus de cales de bois autour du Pi : des baguettes de contreplaqué à couper au montage (`wedgeNeed`, groupe « Baguettes de cale (à couper) »)
   ] : [];
   // la nappe de la caméra (câble plat) : du connecteur de la caméra, elle monte par l'ouverture du toit puis court sur le toit jusqu'au connecteur du Pi
   // la nappe sort à l'HORIZONTALE du connecteur de la caméra (côté arrière), monte par l'ouverture, puis arrive à l'horizontale dans le connecteur du Pi par le côté gauche
@@ -352,25 +352,18 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const WGF = r2(WGX + 10 - WG_W), WGBX = r2(WGF + WG_W / 2), FUY = r2(FY - 1.5), WGP_Y = FUY, WGM_Y = r2(WGP_Y - WG_L3 / 2 - 1.5 - WG_L5 / 2), WG_Z = r2(topZ + 3 + WG_H / 2); // le fusible est dans l'axe de l'entrée du milieu du Wago +
   const wgPort = (cy: number, n: number, i: number) => r2(cy + WG_PITCH * ((n - 1) / 2 - i)); // y de l'entrée i (0 = au nord) d'un Wago de n entrées centré en cy
   const wgEnd = (y: number, from: [number, number, number][]): Vec3[] => [...from, [r2(WGF + 2.5), y, WG_Z]] as Vec3[]; // les ≥ 12 derniers mm sont rectilignes, perpendiculaires à la face, au niveau des orifices ; 2,5 mm dans l'orifice
+  { // besoin en cales du convertisseur (66 + 66 + 36 + 36) et de la batterie (côtés 76 + 76, avant 128, arrière 128 ou deux morceaux autour de l'ouverture du compartiment caméra) : plus de pièces, seulement des longueurs
+    wedgeNeed.push(66, 66, 36, 36, 76, 76, 128);
+    const y = BY + 35 + 1.5, cutBack = y > CAM_Y - cc - t && y < CAM_Y + cc + t;
+    const segs: [number, number][] = cutBack ? ([[BX - 64, CAMX0 - 2 * t], [CAMX1 + 2 * t, BX + 64]] as [number, number][]).filter(([a0, b0]) => b0 - a0 > 2) : [[BX - 64, BX + 64]];
+    for (const [a0, b0] of segs) wedgeNeed.push(r2(b0 - a0));
+  }
   // alimentation : toujours présente (le Pi en a besoin) — batterie 4 × 32700, fusible, deux Wago du rail 12 V, convertisseur 12 → 5 V, leurs cales et leurs fils
   const power: Plank[] = [
     part('Convertisseur 12 V → 5 V 5 A USB-C (taille à confirmer, ≈ 60 × 36 × 16)', 36, 60, 16, CVX, CVY, topZ + 3 + 8, 'block', '#0e7490'), // centré dans la place libre de l'avant gauche, calé
-    part('Cale convertisseur gauche', 3, 66, t, CVX - 18 - 1.5, CVY, topZ + t / 2, 'block', '#a16207'),
-    part('Cale convertisseur droite', 3, 66, t, CVX + 18 + 1.5, CVY, topZ + t / 2, 'block', '#a16207'),
-    part('Cale convertisseur avant', 36, 3, t, CVX, CVY - 30 - 1.5, topZ + t / 2, 'block', '#a16207'),
-    part('Cale convertisseur arrière', 36, 3, t, CVX, CVY + 30 + 1.5, topZ + t / 2, 'block', '#a16207'),
     part('Fusible lame 15 A (19 × 18 × 5, posé à plat)', 19, 18.5, 5, FX, FUY, topZ + 2.5, 'block', '#dc2626'), // près de la sortie de la gaine
     part('Wago 221-413 (3 entrées) rail 12 V +', WG_W, WG_L3, WG_H, WGBX, WGP_Y, WG_Z, 'block', '#f97316'), // bornier du rail 12 V : le fusible, l'interrupteur du ventilateur, le convertisseur
     part('Wago 221-415 (5 entrées) rail 12 V −', WG_W, WG_L5, WG_H, WGBX, WGM_Y, WG_Z, 'block', '#9ca3af'), // batterie −, convertisseur −, ventilateur −, masse de l'interrupteur (+ 1 entrée libre) ; taille à vérifier sur la fiche WAGO
-    // cales de bois autour de la batterie (tous les côtés ; à gauche, la cale suit le compartiment de la caméra)
-    part('Cale batterie droite', 3, 76, t, BX + 64 + 1.5, BY, topZ + t / 2, 'block', '#a16207'), // cale tout autour (3 mm de large, 3 de haut) ; la batterie est à 1 cm du mur de droite et du mur avant
-    part('Cale batterie gauche', 3, 76, t, BX - 64 - 1.5, BY, topZ + t / 2, 'block', '#a16207'),
-    part('Cale batterie avant', 128, 3, t, BX, BY - 35 - 1.5, topZ + t / 2, 'block', '#a16207'),
-    ...((): Plank[] => { // la cale arrière saute l'ouverture du compartiment si elle passe au-dessus (elle ne doit pas être dans le vide)
-      const y = BY + 35 + 1.5, cut = y > CAM_Y - cc - t && y < CAM_Y + cc + t;
-      const segs: [number, number][] = cut ? ([[BX - 64, CAMX0 - 2 * t], [CAMX1 + 2 * t, BX + 64]] as [number, number][]).filter(([a, b]) => b - a > 2) : [[BX - 64, BX + 64]];
-      return segs.map(([a, b], k) => part(`Cale batterie arrière${segs.length > 1 ? ' ' + (k + 1) : ''}`, r2(b - a), 3, t, r2((a + b) / 2), y, topZ + t / 2, 'block', '#a16207'));
-    })(),
     part('Batterie LiFePO4 12,8 V 6 Ah (4 × 32700, 128 × 70 × 32)', 128, 70, 32, BX, BY, topZ + 3 + 16, 'block', '#047857'), // dans le grenier, coin avant droit, à 1 cm du mur de droite et du mur avant
     wire('Fil fusible → batterie + (rouge)', '#dc2626', [[FX - 7.5, FUY, topZ + 5], [FX - 8, FUY - 7, topZ + 14], [(FX + BX) / 2, (FUY + BY) / 2, topZ + 34], [BX - 8, BY + 46, topZ + 22], [BX - 8, BY + 38, topZ + 19], [BX - 8, BY + 31, topZ + 19]] as Vec3[], 3.6),
     wire('Fil fusible → Wago + (rouge)', '#dc2626', wgEnd(wgPort(WGP_Y, 3, 1), [[FX + 3, FUY, WG_Z]]), 3.6), // le + sort du fusible, droit dans l'axe de l'entrée du milieu du Wago +
@@ -448,12 +441,9 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     blk('Rallonge ventilateur 4 broches : prise mâle (mâle ⇄ femelle, câble ≈ 300 mm)', 8.5, 10.2, 6, [FANX - 2.25, PBY, PLUG_Z], elecGroup, '#374151'),
   ];
   // module interrupteur 12 V (côté +), près du Wago + : le Noctua tourne encore à ≈ 20 % quand le PWM est à 0 %, il faut pouvoir couper son 12 V ; côté + (pas la masse) : une masse coupée ferait remonter 12 V dans les fils PWM / tachymètre
+  wedgeNeed.push(31, 31, 17, 17); // besoin en cales de l'interrupteur
   const swFan: Plank[] = [
     part('Module interrupteur 12 V ventilateur (côté +, commande 3,3 V)', 17, 25, 8, SWX, SWY, topZ + 3 + 4, 'block', '#7e22ce'),
-    part('Cale interrupteur gauche', 3, 31, t, SWX - 8.5 - 1.5, SWY, topZ + t / 2, 'block', '#a16207'),
-    part('Cale interrupteur droite', 3, 31, t, SWX + 8.5 + 1.5, SWY, topZ + t / 2, 'block', '#a16207'),
-    part('Cale interrupteur avant', 17, 3, t, SWX, SWY - 12.5 - 1.5, topZ + t / 2, 'block', '#a16207'),
-    part('Cale interrupteur arrière', 17, 3, t, SWX, SWY + 12.5 + 1.5, topZ + t / 2, 'block', '#a16207'),
   ];
   // fils : côté cassette (câble d'origine du ventilateur : quatre fils par le trou du couvercle jusqu'à sa prise), côté toit (de la prise mâle de la rallonge au module, au Wago −, et au Pi par-dessus le toit)
   const cw = (nm: string, color: string, k: number): Plank => wire(nm, color, ([[FANX - 20, pinYk(k), FAN_Z + FAN_T / 2], [FANX - 20, pinYk(k), FAN_Z + FAN_T / 2 + 4], [FANX - 20, pinYk(k), DUCT_Z1 - 4], [FANX - 20, pinYk(k), LID + 1.2], [FANX - 16, pinYk(k), PLUG_Z], [FANX - 12, pinYk(k), PLUG_Z]] as Vec3[]).map((q) => q.map(r2) as Vec3), k === 0 || k === 3 ? 1.6 : 1.2); // points au centième : la cassette se range et se remet en place sans écart
@@ -635,6 +625,11 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     ? carve([-(W / 2 + OV_OAK), -(D / 2 + OV_OAK), W / 2 + OV_OAK, D / 2 + OV_OAK], oakHoles).map(([x0, y0, x1, y1], k): Plank => (
       { id: uid(), name: `Planche chêne ${k + 1}`, w: r2(x1 - x0), h: r2(y1 - y0), depth: OAK, pos: [r2((x0 + x1) / 2), r2((y0 + y1) / 2), r2(roofTop + OAK / 2)] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: roofGroup, special: 'block' as const, color: '#c4a574' }))
     : [];
+  // BAGUETTES DE CALE : à la place des petites cales de bois collées contre les composants, de longues baguettes de contreplaqué 3 mm, de la longueur maximale qui tient sur la planche, que l'on coupe à la demande au montage ;
+  // le TRIPLE du besoin ; rangées au sol, côte à côte, à gauche des pièces d'hiver (hors du nichoir, jamais sous lui)
+  const stripGroup = uid();
+  const stripCount = Math.ceil((STRIP.spare * wedgeNeed.reduce((a, b) => a + b, 0)) / STRIP.length);
+  const strips: Plank[] = Array.from({ length: stripCount }, (_, k): Plank => ({ id: uid(), name: `Baguette de cale ${k + 1}`, w: STRIP.length, h: STRIP.width, pos: [r2(-W / 2 - SPARE_GAP - 60 - k * STRIP.pitch), 0, r2(t / 2)] as Vec3, rot: [0, 0, 90] as Vec3, notches: [], holes: [], group: stripGroup }));
   const planks = [
     ...oak,
     ...lambris, ...pitched,
@@ -644,6 +639,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     ...sensorSet, ...fanSet, ...fanWood, ...airWood, ...sleeve, ...airBlocks, ...plugBox,
     ...insulation,
     ...entry,
+    ...strips,
     ...slotted.map((p) => ({ ...p, group, name: p.name.replace(/ (\d+)$/, ' ext $1') })),
     { ...floorSlotted, group },
     ...innerParts.map((p) => ({ ...p, name: p.name.replace(/ (\d+)$/, ' int $1') })),
@@ -686,5 +682,5 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const unnumber = (nm: string) => (start === 1 ? nm.replace(/^((?:Face avant|Face arrière|Côté droit|Côté gauche|Dessus|Dessous)(?: (?:ext|int|toit|compartiment))?|Grille anti-insectes) 1$/, "$1") : nm); // un seul nichoir : plus de « 1 » derrière les plaques des boîtes (les numéros des séries — lambris, cales, isolant… — restent)
   const ventGroup = uid(); // groupe « Ventilation » : tout ce qui sert à ventiler (cassette du ventilateur, siège, grilles, clapets, interrupteur 12 V, fils, prise d'air basse) ; le bloc isolant d'hiver garde son groupe
   const finalPlanks = planks.map((p) => { let q = p.group && merged.has(p.group) ? { ...p, group: elecGroup, name: unnumber(p.name) } : { ...p, name: unnumber(p.name) }; if (q.path && q.special !== 'solar' && q.name !== 'Câble 12 V vers le toit') q = { ...q, path: q.path.map(underRoof) }; const l = LINKS.find(([re]) => re.test(q.name)); if (VENT_PIECES.test(q.name)) q = { ...q, group: ventGroup }; return l ? { ...q, url: l[1] } : q; });
-  return { planks: summerLayout({ t, fit, planks: finalPlanks }).planks, group, name: 'Corps', groupNames: { [group]: 'Corps', [roofGroup]: 'Toit', [elecGroup]: 'Électronique', [docGroupId]: 'Schéma électronique', ...(n.lambris && n.pente ? { [coverGroup]: 'Couvercle' } : {}), [entryGroup]: 'Entrée', [isoGroup]: 'Isolant', [wGroup]: "Pièces d'hiver (rechange)", [ventGroup]: 'Ventilation', ...(n.lambris ? { [lamGroup]: 'Habillage' } : {}) } }; // un seul nichoir : groupes sans numéro, le corps s'appelle « Corps »
+  return { planks: summerLayout({ t, fit, planks: finalPlanks }).planks, group, name: 'Corps', groupNames: { [group]: 'Corps', [roofGroup]: 'Toit', [elecGroup]: 'Électronique', [docGroupId]: 'Schéma électronique', ...(n.lambris && n.pente ? { [coverGroup]: 'Couvercle' } : {}), [entryGroup]: 'Entrée', [isoGroup]: 'Isolant', [wGroup]: "Pièces d'hiver (rechange)", [stripGroup]: 'Baguettes de cale (à couper)', [ventGroup]: 'Ventilation', ...(n.lambris ? { [lamGroup]: 'Habillage' } : {}) } }; // un seul nichoir : groupes sans numéro, le corps s'appelle « Corps »
 }

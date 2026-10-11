@@ -40,3 +40,8 @@ export const PI_CSI: [number, number, number] = [4, -16.5, 6.1];
 export const PI_PIN_Y = 25.77; // rangée extérieure du GPIO (broches paires : 2, 4, 6…)
 export const PI_PIN_X0 = -35.4 + 1.27; // broche 2 (x de la première colonne)
 export const SENSOR_CHIP_DX = -1.5; // décalage de la puce par rapport au centre de la carte du capteur (sensor.ts)
+
+/** Planche de découpe par défaut (mm) et marge sur ses bords : une seule source pour le réglage de la découpe laser (`DEFAULT_CUT_CFG`) et pour la longueur des baguettes de cale. */
+export const DEFAULT_SHEET = { W: 410, H: 400, margin: 8 };
+/** Baguettes de cale (contreplaqué 3 mm) : longueur MAX qui tient sur la planche (plus grande dimension utile = 394), largeur, écart de rangement au sol, et facteur du besoin (on en fait le triple). */
+export const STRIP = { length: Math.max(DEFAULT_SHEET.W, DEFAULT_SHEET.H) - 2 * DEFAULT_SHEET.margin, width: 5, pitch: 15, spare: 3 };
