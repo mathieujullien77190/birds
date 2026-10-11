@@ -18,8 +18,8 @@ Un nichoir à mésanges isolé, dessiné en 3D dans le navigateur et découpé a
 - **Pilotage de la laser** (Sculpfun S30 Pro) depuis le navigateur : connexion USB, déplacements, cadre à vide, génération du G-code, planche d'essai, envoi avec pause et arrêt, et une machine simulée pour essayer sans rien brancher.
 
 **Surveiller et commander le nichoir** (programme sur le Raspberry Pi, site React + TypeScript)
-- Température et humidité du nid et de l'extérieur (météo en ligne), température du dissipateur.
-- Peltier en froid / chaud / arrêt avec sécurités (coupure à 55 °C, sonde en panne, batterie faible).
+- Température et humidité du nid et de l'extérieur (météo en ligne).
+- Ventilateur de 60 mm manuel ou **automatique** (démarre quand le nid dépasse un seuil et qu'il fait plus chaud que dehors, réglable), mode hiver, alerte au-dessus de 35 °C, sécurités (capteur muet, ventilateur en panne, batterie faible).
 - Niveau de la batterie, consommation estimée selon ce qui est allumé et recharge solaire.
 - Deux caméras en direct avec LED infrarouges, chacune allumable et éteignable.
 - **Simulateur** de ce site dans l'app (bouton « 🐍 Pi ») : le vrai programme Python tourne dans le navigateur, avec un terminal, des flux vidéo pris depuis les caméras de la 3D (noir et blanc infrarouge la nuit) et des essais de pannes.
@@ -29,12 +29,14 @@ Un nichoir à mésanges isolé, dessiné en 3D dans le navigateur et découpé a
 
 ## Documentation
 
-Trois documents Markdown dans [`docs/`](docs/), lisibles aussi dans l'application (pièce « Schéma électronique » du volet « Pièces ») :
+Cinq documents Markdown dans [`docs/`](docs/), lisibles aussi dans l'application (pièce « Schéma électronique » du volet « Pièces ») :
 
 | Document | Contenu |
 | --- | --- |
 | [`docs/schema-electronique.md`](docs/schema-electronique.md) | **Schéma électronique** : schéma général (branchements fil par fil, broches du Raspberry Pi), paramètres à respecter pour chaque composant, vérification des branchements, poids, prix par groupe (cases à cocher dans l'app), stratégie d'énergie. |
-| [`docs/logiciel.md`](docs/logiciel.md) | **Logiciel** : programme Python sur le Pi (capteurs, Peltier, LED, caméras), sécurités (coupure à 55 °C, batterie faible), météo extérieure, niveau de batterie et consommation, page web React, simulateur et essais, service systemd, accès à distance. |
+| [`docs/logiciel.md`](docs/logiciel.md) | **Logiciel** : programme Python sur le Pi (capteurs, ventilateur, LED, caméras), sécurités (alerte à 35 °C, capteur muet, ventilateur en panne, batterie faible), météo extérieure, niveau de batterie et consommation, page web React, simulateur et essais, service systemd, accès à distance. |
+| [`docs/architecture-3d.md`](docs/architecture-3d.md) | **Architecture 3D** : modèle pur et couche Three.js, comment ajouter une pièce, libération des ressources, tests. |
+| [`docs/checklist-changements.md`](docs/checklist-changements.md) | **Checklist** : quand je change X, quels fichiers mettre à jour et quelle commande vérifie. |
 | [`docs/laser.md`](docs/laser.md) | **Pilotage de la laser** (Sculpfun S30 Pro, GRBL) : branchement USB, mise en place pas à pas, cadre à vide, réglages de coupe à calibrer, sécurité, convention d'axes. |
 
 ## Lancer en local

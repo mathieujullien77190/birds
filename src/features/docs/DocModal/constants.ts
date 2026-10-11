@@ -2,10 +2,11 @@ import schema from '../../../../docs/schema-electronique.md?raw';
 import logiciel from '../../../../docs/logiciel.md?raw';
 import laser from '../../../../docs/laser.md?raw';
 import architecture3d from '../../../../docs/architecture-3d.md?raw';
+import checklist from '../../../../docs/checklist-changements.md?raw';
 import type { DocDef } from './types';
 
 /** Documents lisibles dans l'app (fichiers Markdown du dossier docs/). */
-export const DOCS: DocDef[] = [{ id: 'schema', title: 'Schéma électronique', md: schema }, { id: 'logiciel', title: 'Logiciel (Pi, page web)', md: logiciel }, { id: 'laser', title: 'Laser (pilotage)', md: laser }, { id: 'archi3d', title: 'Architecture 3D', md: architecture3d }, { id: 'code', title: 'Code', md: '' }];
+export const DOCS: DocDef[] = [{ id: 'schema', title: 'Schéma électronique', md: schema }, { id: 'logiciel', title: 'Logiciel (Pi, page web)', md: logiciel }, { id: 'laser', title: 'Laser (pilotage)', md: laser }, { id: 'archi3d', title: 'Architecture 3D', md: architecture3d }, { id: 'checklist', title: 'Checklist', md: checklist }, { id: 'code', title: 'Code', md: '' }];
 
 export const DOC_CSS = `
 .doc-md{font:15px/1.65 system-ui,sans-serif;color:#1c1917}

@@ -40,6 +40,31 @@ Plusieurs outils dans la même app, choisis au démarrage (`src/tools.ts`, `src/
 
 **Groupe « Ventilation »** (`VENT_PIECES` dans `src/birdhouse/model/nest/makeNest.ts`) : siège (goulotte), cassette amovible, plots, grille, ventilateur, connecteur, interrupteur 12 V et ses cales, clapet et grillage de sortie, fils du ventilateur, et la prise d'air basse (conduit, grillages, clapet, auvent, bouchon) sont regroupés dans un groupe à part, comme le « Bloc d'hiver » qui garde le sien.
 
+## Quand je change X → je mets à jour Y (checklist)
+Le dépôt a beaucoup de fichiers qui vont ensemble. **La liste complète, avec le fichier réel et la commande qui vérifie chaque ligne, est dans `docs/checklist-changements.md`** (onglet « Checklist » des documents de l'app) ; `tests/coherence.test.ts` échoue quand un oubli est détectable. Résumé :
+
+| Je change… | Je mets aussi à jour… | Ça se vérifie par |
+|---|---|---|
+| une **pièce** du nichoir (`makeNest.ts`) | fabrique 3D (`three/factories/part/`), `Plank['special']`, `VENT_PIECES`, `HIDDEN_AT_CREATION`, `LINKS`, golden (`UPDATE_GOLDEN=1`, **relire le diff**), `docs/schema-electronique.md`, `SchemaPanel` (`MAP`, `FICHES`) | `npm test`, `tests/coherence.test.ts` |
+| un **fil / broche** | schéma mermaid (**`linkStyle` refait dans l'ordre des flèches**, `classDef`), tableau des branchements, `MAP`, `pi/nichoir.py`, `pi/README.md`, `docs/logiciel.md` | `tests/wiresSolid.test.ts`, `tests/coherence.test.ts` |
+| le **programme du Pi** (`pi/nichoir.py`) | `pi/site` (`DeviceState`, `api/`, composants), **`npm run build:pi` + commit de `pi/web/`**, `PiSimulator.tsx` (`BOOT`, `PI_TESTS`, `PiState`), `pi/tests/`, `docs/logiciel.md` | `pytest`, `npm run check` |
+| une **route** de l'API / un **réglage auto** | `pi/nichoir.py` (`AUTO_DEFAUT` / `AUTO_LIMITES`), `pi/site/src/api/index.ts`, `AUTO_FIELDS`, simulateur | `pi/tests/test_coherence.py` |
+| le **pilotage laser** | `laser-control/` (source de vérité), `src/features/laser/adapter.ts`, copies de `ui/` `hooks/` `lib/`, `docs/laser.md` | tests des deux projets, `tests/coherence.test.ts` |
+| un **prix / lien / achat** | tableau « Prix » du document (4 colonnes, lien vérifié), `LINKS`, « Montage sans soudure » | `tests/docLinks.test.ts`, `tests/docModal.test.ts` |
+| une **couleur / constante 3D** | `three/registry/palette.ts`, `three/constants.ts`, golden de géométrie | `tests/parts.golden.test.ts` |
+| un **fichier déplacé / renommé** | alias `@/` et `@laser` (tsconfig, vite, vitest), `eslint.config.js`, tableaux de dossiers (README, CLAUDE), `NOTE` de `CodeBrowser` | `tests/coherence.test.ts` |
+| une **dépendance** | les 3 `package.json` (mêmes versions), lockfiles, `tools/lint` | `tests/coherence.test.ts` |
+| avant de **publier** | `npm run check`, relire les diffs de golden et de `pi/web`, commit Conventional en anglais sans `Co-Authored-By` | `npm run check` |
+
+**Skills du projet** (`.claude/skills/`, committés) : `nichoir-piece` (changer une pièce), `pi-program` (Python, site, simulateur), `laser-control`, `docs-et-prix` (prix, liens, schéma), `verifier-et-publier` (`npm run check`, commit, rappel de régénérer le nichoir), `regles-du-projet` (langue, `fit` = 0, pas de `any`, ne jamais « Tout supprimer » dans le navigateur de l'utilisateur, `localStorage` partagé, origine `[::1]:5174`, onglet masqué = vue figée). Chacun renvoie à la checklist plutôt que de la dupliquer.
+
+## Vérifier et mesurer (tests, couverture)
+- **`npm run check`** (`scripts/check.mjs`) : une seule commande, résumé ✔ / ✘ par étape avec les temps, code de sortie non nul s'il y a un échec : `tsc`, lint, tests racine **avec couverture et seuils**, pytest (`pi/tests`, ignoré avec un avertissement si Python / pytest / flask / pytest-cov manquent : variable `NICHOIR_PYTHON` pour désigner un Python précis ; `python -m pip install -r pi/requirements-dev.txt`), `build`, `build:pi` (avertit si `pi/web` compilé diffère de ce que git suit), `pi/site` et `laser-control` (typecheck, tests avec couverture, build ; ignorés avec la commande d'installation si leur `node_modules` manque). `-- --fast` saute les builds ; `-- --only=<mot>` ne lance que les étapes dont le nom contient le mot.
+- **`npm run coverage`** : tests + rapport (`coverage/`, ignoré par git) ; `node scripts/coverage-table.mjs [dossier]` (une ligne par dossier ; `--files` : seulement les fichiers sous 100 %) lit `coverage/coverage-summary.json`. Même `npm run coverage` dans `pi/site/` et `laser-control/` ; Python : `cd pi && python -m pytest tests --cov=nichoir --cov-branch` (`pi/.coveragerc` : `fail_under = 100`).
+- **Seuils** : ils échouent si la couverture baisse. **Chaque exclusion de la mesure est écrite avec sa raison** dans la config (`vitest.config.ts`, `pi/site/vitest.config.ts`, `laser-control/vitest.config.ts`) : composants React (rendu pur, logique extraite dans des `helpers` / hooks mesurés), WebGL (`createScene`, `interactions/`, `useThreeView`, `useSceneSync`), Web Serial réel, chargement du modèle du Pi, simulateur Pyodide. Ne jamais exclure en silence.
+- Dépendances de test : `vitest` + `@vitest/coverage-v8` (v2) dans les trois projets ; `jsdom` et `@testing-library/react` (+ `dom`) à la racine et dans `pi/site` ; `pytest`, `pytest-cov`, `flask` pour Python. Les hooks se testent avec `// @vitest-environment jsdom` en tête de fichier.
+- Tests de **cohérence** (`tests/coherence.test.ts`, `pi/tests/test_coherence.py`) : nombre de `linkStyle` = nombre de flèches, `FICHES` / `MAP` ↔ schéma, `VENT_PIECES` / `LINKS` / `HIDDEN_AT_CREATION` ↔ pièces générées, `special` ↔ fabriques, fils ↔ `MAP`, `docs/*.md` ↔ `DOCS` / README / CLAUDE, clés `STORAGE` figées, alias, versions npm, copies de `laser-control/src/ui`, skills, clés de `etat` ↔ `DeviceState`, routes ↔ client.
+
 ## Dossiers
 | Dossier | Rôle |
 |---|---|
@@ -48,6 +73,8 @@ Plusieurs outils dans la même app, choisis au démarrage (`src/tools.ts`, `src/
 | `archives/autres-outils/` | `src/App.tsx` (visionneuse STL), `src/engine/`, `src/store/`, `src/birdhouse/` (pavé isolé, nichoir complet), `src/Launcher.tsx`, `src/tools.ts`. **Archive, lecture seule, non compilée.** |
 | `archives/editeur-oiseaux/` | Ancien éditeur d'oiseaux low poly (avec son `CLAUDE.md`, `docs/`, `node_modules`). **Archive, lecture seule.** |
 | `archives/ancien-monde-lowpoly/` | Tout premier projet (monde low poly). Lecture seule. |
+| `.claude/skills/` | Skills du projet (committés) : `nichoir-piece`, `pi-program`, `laser-control`, `docs-et-prix`, `verifier-et-publier`, `regles-du-projet`. |
+| `scripts/` | `dev.mjs` (lancement), `check.mjs` (`npm run check`), `coverage-table.mjs` (tableau de couverture). |
 | racine | L'app Nichoir high tech (`src/birdhouse/`, `src/ui/`, `docs/`, `public/models/`). |
 
 ## Stack
@@ -90,6 +117,9 @@ Vite + React 19 + TypeScript + Tailwind v4 + Three.js. Alias `@/` → `src/`. Pa
 npm run dev        # http://localhost:5174
 npm run typecheck
 npm test           # vitest : tests golden du modèle et de la géométrie 3D (UPDATE_GOLDEN=1 pour régénérer)
+npm run coverage   # tests + couverture avec seuils (coverage/, ignoré par git)
+npm run test:py    # pytest du programme du Pi (pi/tests)
+npm run check      # TOUT : tsc, lint, tests + couverture, pytest, builds, pi/site, laser-control
 npm run lint       # ESLint (après `npm --prefix tools/lint install`)
 npm run build
 ```
