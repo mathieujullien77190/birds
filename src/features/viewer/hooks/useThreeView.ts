@@ -1,10 +1,8 @@
 import { useEffect, type Dispatch, type MutableRefObject, type RefObject, type SetStateAction } from 'react';
-import { AmbientLight, Color, DirectionalLight, Group, MOUSE, PerspectiveCamera, Plane, Raycaster, Scene, Vector2, Vector3, WebGLRenderer } from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { Plane, Raycaster, Vector2, Vector3 } from 'three';
 import { pullFace, moveWithGroup, r2, type FaceAxis, type PlankScene, type Vec3 } from '@/birdhouse/model';
-import { disposeAll } from '@/birdhouse/three/registry/materials';
-import { AMBIENCE, SUN_POSITION, VIEW } from '@/birdhouse/three/constants';
 import { isPlankMesh } from '@/birdhouse/three/factories/plank';
+import { createScene } from '@/birdhouse/three/scene/createScene';
 import { AXIS_N, SNAP, type Cut, type View } from '@/birdhouse/three/types';
 
 /** Ce que la vue 3D lit ou écrit dans le composant : uniquement des refs et des setters stables (l'effet de création ne tourne qu'une fois). */
@@ -28,36 +26,15 @@ export interface ThreeViewDeps {
 export function useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickRef, setSc, setCut, setCtx, setSelectedId, setHover, pushEntry }: ThreeViewDeps) {
   // ----- vue 3D -----
   useEffect(() => {
-    const el = host.current!;
-    const scene = new Scene();
-    scene.background = new Color(AMBIENCE.day.background);
-    const ambient = new AmbientLight(AMBIENCE.day.ambient, AMBIENCE.day.ambientI);
-    scene.add(ambient);
-    const sun = new DirectionalLight(AMBIENCE.day.sun, AMBIENCE.day.sunI);
-    sun.position.set(...SUN_POSITION);
-    scene.add(sun);
-    const camera = new PerspectiveCamera(VIEW.fov, 1, VIEW.near, VIEW.far);
-    camera.up.set(0, 0, 1); // Z = hauteur, comme la visionneuse STL
-    camera.position.set(...VIEW.position); // vue de départ en 3/4 tournée de 180° (demande de l'utilisateur), assez loin pour voir le nichoir ET le panneau solaire
-    const renderer = new WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, VIEW.maxPixelRatio));
-    el.appendChild(renderer.domElement);
-    const orbit = new OrbitControls(camera, renderer.domElement);
-    orbit.mouseButtons = { LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.ROTATE, RIGHT: MOUSE.PAN };
-    orbit.target.set(...VIEW.target);
-    orbit.enableDamping = true;
-    const labels = new Group();
-    const handles = new Group(); // ronds aux coins de l'élément choisi : on les tire pour déplacer l'élément par ce coin
-    const targets = new Group(); // ronds aux coins des autres pièces (demi-transparents), visibles pendant un tel glissé : le coin tiré s'y aimante
-    targets.visible = false;
-    scene.add(labels, handles, targets);
-    const holeMark = new Group(); // le trou en cours de réglage, en pointillés ambre sur les deux faces de la plaque
-    renderer.localClippingEnabled = true;
-    const cutMark = new Group(); // le plan de coupe (carré bleu transparent), qu'on glisse le long de son axe
-    scene.add(cutMark);
-    const pullMark = new Group(); // la face double-cliquée, en pointillés bleus : on la tire ou on la pousse
-    scene.add(holeMark, pullMark);
-    const v: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, handles, targets, holeMark, pullMark, cutMark, dragging: false };
+    const el = host.current;
+    if (!el) return;
+    const { view: v, dispose } = createScene(el);
+    const { camera, renderer, orbit, handles, targets } = v;
+    const offs: (() => void)[] = []; // désinscriptions : mêmes références que les inscriptions
+    const listen = <K extends keyof HTMLElementEventMap>(type: K, fn: (e: HTMLElementEventMap[K]) => void, capture = false) => {
+      renderer.domElement.addEventListener(type, fn, capture);
+      offs.push(() => renderer.domElement.removeEventListener(type, fn, capture));
+    };
     // glissé de la face : le long de sa normale
     let pullDrag: { total: number; s0: number; P0: Vector3; N: Vector3 } | null = null;
     const lineParam = (P0: Vector3, N: Vector3): number | null => { // paramètre du point de la droite (P0, N) le plus proche du rayon souris
@@ -126,12 +103,12 @@ export function useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickR
       setCut((c) => (c.pos === pos ? c : { ...c, pos }));
     };
     const onCutUp = () => { if (!cutDrag) return; cutDrag = null; orbit.enabled = true; setTimeout(() => { v.dragging = false; }, 0); };
-    renderer.domElement.addEventListener('pointerdown', onCutDown, true);
-    renderer.domElement.addEventListener('pointermove', onCutMove);
-    renderer.domElement.addEventListener('pointerup', onCutUp);
-    renderer.domElement.addEventListener('pointerdown', onPullDown, true);
-    renderer.domElement.addEventListener('pointermove', onPullMove);
-    renderer.domElement.addEventListener('pointerup', onPullUp);
+    listen('pointerdown', onCutDown, true);
+    listen('pointermove', onCutMove);
+    listen('pointerup', onCutUp);
+    listen('pointerdown', onPullDown, true);
+    listen('pointermove', onPullMove);
+    listen('pointerup', onPullUp);
     // glissé par un coin
     let cornerDrag: { anchorId: string; start: Vector3; plane: Plane; startPos: Vec3; rot: Vec3 } | null = null;
     const rayAt = (e: PointerEvent) => {
@@ -175,9 +152,9 @@ export function useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickR
       setSc((s) => { const n = moveWithGroup(s, anchorId, pos, rot); scRef.current = n; return n; });
     };
     const onCornerUp = () => { if (!cornerDrag) return; cornerDrag = null; orbit.enabled = true; targets.visible = false; setTimeout(() => { v.dragging = false; }, 0); };
-    renderer.domElement.addEventListener('pointerdown', onCornerDown, true);
-    renderer.domElement.addEventListener('pointermove', onCornerMove);
-    renderer.domElement.addEventListener('pointerup', onCornerUp);
+    listen('pointerdown', onCornerDown, true);
+    listen('pointermove', onCornerMove);
+    listen('pointerup', onCornerUp);
     // un clic (sans glissé) choisit une plaque ; dans le vide, désélectionne
     const ray = new Raycaster();
     let down: { x: number; y: number } | null = null;
@@ -213,21 +190,13 @@ export function useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickR
       renderer.domElement.style.cursor = id ? 'pointer' : '';
       if (id !== hov) { hov = id; setHover(id ? { plank: id } : null); }
     };
-    renderer.domElement.addEventListener('pointermove', onHover);
-    renderer.domElement.addEventListener('pointerleave', () => { if (hov) { hov = null; setHover(null); } });
-    renderer.domElement.addEventListener('pointerdown', onDown);
-    renderer.domElement.addEventListener('pointerup', onUp);
-    renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
-    const resize = () => { const w = el.clientWidth, h = el.clientHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); };
-    const ro = new ResizeObserver(resize);
-    ro.observe(el);
-    resize();
-    let raf = 0;
-    const loop = () => {
-      orbit.update(); renderer.render(scene, camera); raf = requestAnimationFrame(loop);
-    };
-    loop();
+    const onLeave = () => { if (hov) { hov = null; setHover(null); } };
+    listen('pointermove', onHover);
+    listen('pointerleave', onLeave);
+    listen('pointerdown', onDown);
+    listen('pointerup', onUp);
+    listen('contextmenu', (e) => e.preventDefault());
     view.current = v;
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); orbit.dispose(); renderer.dispose(); renderer.domElement.remove(); disposeAll(); view.current = null; };
+    return () => { offs.forEach((off) => off()); dispose(); view.current = null; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 }

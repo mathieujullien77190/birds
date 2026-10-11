@@ -2,10 +2,9 @@ import { useEffect, type MutableRefObject } from 'react';
 import { BufferGeometry, Float32BufferAttribute, Line, LineLoop, MathUtils, Mesh, Plane, PlaneGeometry, Sprite, Vector3 } from 'three';
 import { bounds, extents, holeOutline, outline, type PlankScene, type Vec3 } from '@/birdhouse/model';
 import { EMISSIVE, MARK } from '@/birdhouse/three/constants';
-import { materials } from '@/birdhouse/three/registry/materials';
+import { materials, textures } from '@/birdhouse/three/registry/materials';
 import { PALETTE } from '@/birdhouse/three/registry/palette';
 import { dimension } from '@/birdhouse/three/factories/dimension';
-import { oakTexture } from '@/birdhouse/three/oakTexture';
 import { createPlankMesh } from '@/birdhouse/three/factories/plank';
 import { AXIS_I, AXIS_N, type Cut, type View } from '@/birdhouse/three/types';
 import type { FaceAxis } from '@/birdhouse/model';
@@ -48,7 +47,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       const chosen = groupSel ? p.group === groupSel : p.id === selectedId; // boîte choisie : toutes ses plaques
       mat.emissive.set(hovered ? EMISSIVE.hover : chosen ? EMISSIVE.chosen : extra.has(p.id) ? EMISSIVE.extra : EMISSIVE.none); // survolé dans la liste : ambre
       mat.emissiveIntensity = hovered ? EMISSIVE.hoverIntensity : EMISSIVE.baseIntensity;
-      if (p.name === 'Toit en chêne') { if (!mat.map) { mat.map = oakTexture(); mat.vertexColors = false; mat.color.set(PALETTE.white); mat.roughness = 0.7; mat.needsUpdate = true; } } // le pan de toit en chêne porte une texture de bois (le reste garde ses couleurs par sommets)
+      if (p.name === 'Toit en chêne') { if (!mat.map) { mat.map = textures.oak(); mat.vertexColors = false; mat.color.set(PALETTE.white); mat.roughness = 0.7; mat.needsUpdate = true; } } // le pan de toit en chêne porte une texture de bois (le reste garde ses couleurs par sommets)
       mat.transparent = !!p.transparent;
       mat.opacity = p.transparent ? 0.3 : 1;
       mat.depthWrite = !p.transparent;

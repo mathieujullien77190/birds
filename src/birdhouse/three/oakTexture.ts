@@ -1,9 +1,7 @@
 import { CanvasTexture, RepeatWrapping, SRGBColorSpace } from 'three';
 
-/** Texture de chêne procédurale (une seule, partagée) : fond chêne clair, veines sinueuses plus sombres, grain fin, quelques maillures claires — dessinée dans un canvas. */
-let oakTex: CanvasTexture | null = null;
-export function oakTexture(): CanvasTexture {
-  if (oakTex) return oakTex;
+/** Texture de chêne procédurale : fond chêne clair, veines sinueuses plus sombres, grain fin, quelques maillures claires — dessinée dans un canvas. Une seule est créée, par le registre (`textures.oak()`). */
+export function makeOakTexture(): CanvasTexture {
   const S = 512, cv = document.createElement('canvas'); cv.width = S; cv.height = S;
   const ctx = cv.getContext('2d')!, img = ctx.createImageData(S, S), d = img.data;
   const base = [196, 154, 96], dark = [132, 92, 48], light = [222, 190, 140];
@@ -25,6 +23,6 @@ export function oakTexture(): CanvasTexture {
     d[i + 3] = 255;
   }
   ctx.putImageData(img, 0, 0);
-  oakTex = new CanvasTexture(cv); oakTex.wrapS = oakTex.wrapT = RepeatWrapping; oakTex.colorSpace = SRGBColorSpace; oakTex.anisotropy = 8;
-  return oakTex;
+  const tex = new CanvasTexture(cv); tex.wrapS = tex.wrapT = RepeatWrapping; tex.colorSpace = SRGBColorSpace; tex.anisotropy = 8;
+  return tex;
 }

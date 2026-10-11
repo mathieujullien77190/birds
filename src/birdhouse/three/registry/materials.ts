@@ -1,12 +1,16 @@
-import { DoubleSide, LineBasicMaterial, LineDashedMaterial, MeshBasicMaterial, type Material } from 'three';
+import { DoubleSide, LineBasicMaterial, LineDashedMaterial, MeshBasicMaterial, type CanvasTexture, type Material } from 'three';
+import { makeOakTexture } from '../oakTexture';
 import { PALETTE } from './palette';
 
+/** Une ressource GPU libérable (matériau, texture). */
+interface Disposable { dispose(): void }
+
 /**
- * Registre des matériaux PARTAGÉS de la 3D : créés à la demande, une seule fois, libérés ensemble par `disposeAll()` (fermeture de la vue).
- * Règle : un matériau qui vient d'ici ne doit jamais être libéré par la suppression d'une pièce (voir `isShared`).
+ * Registre des ressources PARTAGÉES de la 3D (matériaux, textures) : créées à la demande, une seule fois, libérées ensemble par `disposeAll()` (fermeture de la vue).
+ * Règle : une ressource qui vient d'ici ne doit jamais être libérée par la suppression d'une pièce (voir `isShared`).
  */
-const cache = new Map<string, Material>();
-function shared<T extends Material>(key: string, make: () => T): T {
+const cache = new Map<string, Disposable>();
+function shared<T extends Disposable>(key: string, make: () => T): T {
   let m = cache.get(key);
   if (!m) { m = make(); cache.set(key, m); }
   return m as T;
@@ -26,13 +30,19 @@ export const materials = {
   dimExtension: () => shared('dimExtension', () => new LineBasicMaterial({ color: PALETTE.dimExt })),
 };
 
-/** Ce matériau appartient-il au registre (donc à ne pas libérer avec une pièce) ? */
-export function isShared(m: Material): boolean {
+/** Textures partagées. */
+export const textures = {
+  /** Chêne procédurale du pan de toit (une seule pour tout le monde). */
+  oak: (): CanvasTexture => shared('oak', makeOakTexture),
+};
+
+/** Cette ressource (matériau, texture) appartient-elle au registre (donc à ne pas libérer avec une pièce) ? */
+export function isShared(m: Material | Disposable): boolean {
   for (const x of cache.values()) if (x === m) return true;
   return false;
 }
 
-/** Libère tous les matériaux partagés ; le prochain appel en recrée. */
+/** Libère toutes les ressources partagées ; le prochain appel en recrée. */
 export function disposeAll(): void {
   for (const m of cache.values()) m.dispose();
   cache.clear();
