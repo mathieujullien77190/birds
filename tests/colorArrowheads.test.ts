@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { colorArrowheads } from '@/lib';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -30,5 +30,30 @@ describe('colorArrowheads', () => {
     const host = document.createElement('div');
     host.innerHTML = `<svg xmlns="${NS}"><path class="flowchart-link" marker-end="url(#absent)" style="stroke:red"/></svg>`;
     expect(() => colorArrowheads(host)).not.toThrow();
+  });
+});
+
+describe('colorArrowheads : cas limites', () => {
+  it('accepte un <svg> directement, ignore les traits sans couleur, les flèches sans pointe et les pointes sans id', () => {
+    const host = document.createElement('div');
+    host.innerHTML = `<svg xmlns="${NS}"><defs><marker id="m"><path d="M0 0"/></marker></defs>
+      <path class="flowchart-link" id="nocolor" marker-end="url(#m)"/>
+      <path class="flowchart-link" id="empty" marker-end="url(#m)"/>
+      <path class="flowchart-link" id="nomarker" style="stroke:rgb(1, 2, 3)"/>
+      <path class="flowchart-link" id="badref" marker-end="none" style="stroke:rgb(1, 2, 3)"/>
+      <path class="flowchart-link" id="ok" marker-end="url(#m)" style="stroke:rgb(1, 2, 3)"/></svg>`;
+    const real = window.getComputedStyle.bind(window);
+    const spy = vi.spyOn(window, 'getComputedStyle').mockImplementation((el: Element) => {
+      if (el.id === 'nocolor') return { stroke: 'none' } as CSSStyleDeclaration;
+      if (el.id === 'empty') return { stroke: '' } as CSSStyleDeclaration;
+      return real(el);
+    });
+    colorArrowheads(host.querySelector('svg') as SVGSVGElement);
+    spy.mockRestore();
+    expect(host.querySelector('#nocolor')!.getAttribute('marker-end')).toBe('url(#m)');
+    expect(host.querySelector('#empty')!.getAttribute('marker-end')).toBe('url(#m)');
+    expect(host.querySelector('#nomarker')!.getAttribute('marker-end')).toBeNull();
+    expect(host.querySelector('#badref')!.getAttribute('marker-end')).toBe('none');
+    expect(host.querySelector('#ok')!.getAttribute('marker-end')).not.toBe('url(#m)');
   });
 });
