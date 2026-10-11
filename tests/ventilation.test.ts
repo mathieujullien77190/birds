@@ -36,7 +36,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(by(sc0, /^Plot caoutchouc ventilateur/)).toHaveLength(4);
     expect(by(sc0, /^Goulotte ventilateur/)).toHaveLength(3);
     expect(by(sc0, /^Cassette ventilateur/).length).toBeGreaterThanOrEqual(6);
-    one(sc0, /^Grille ventilateur/); one(sc0, /^Clapet de ventilation/); one(sc0, /^Grillage sortie ventilation/); one(sc0, /^Connecteur ventilateur \(4 broches\)/);
+    one(sc0, /^Grille ventilateur/); one(sc0, /^Clapet de ventilation/); one(sc0, /^Grillage sortie ventilation/); one(sc0, /^Plaque de connexion cassette/); one(sc0, /^Barrette 4 broches plaque de connexion/); one(sc0, /^Fiche 4 broches toit/);
     one(sc0, /^Module interrupteur 12 V ventilateur \(côté \+, commande 3,3 V\)/);
     expect(by(sc0, /^Cale interrupteur/)).toHaveLength(4);
     const grille = one(sc0, /^Grille ventilateur/);
@@ -92,6 +92,27 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
         if (pt.distanceTo(end) < 14 || pt.distanceTo(start) < 8) continue; // les bouts entrent dans la broche du Pi et le module
         for (const s2 of solids) expect(inside(pt, obb(s2, t), -0.2), w.name + ' dans ' + s2.name).toBe(false);
       }
+    }
+  });
+  it('plaque de connexion de la cassette : barrette et fiche alignées, dans le couvercle, loin de la poignée, sous la pente, avec une boucle de câble de 120 mm au moins', () => {
+    const board = one(sc0, /^Plaque de connexion cassette/), head = one(sc0, /^Barrette 4 broches plaque de connexion/), plug = one(sc0, /^Fiche 4 broches toit/), lid = one(sc0, /^Cassette ventilateur couvercle/), handle = one(sc0, /^Poignée cassette/);
+    expect(board.special).toBe('block'); // un composant acheté, pas du bois découpé
+    expect(by(sc0, /^Entretoise plaque de connexion/)).toHaveLength(2); expect(by(sc0, /^Soudure plaque de connexion/)).toHaveLength(4);
+    expect(Math.abs(plug.pos[1] - head.pos[1])).toBeLessThan(0.1); expect(Math.abs(plug.pos[2] - head.pos[2])).toBeLessThan(0.1); // même axe d'embrochage (horizontal)
+    expect(plug.pos[0] - head.pos[0]).toBeGreaterThan(5); expect(plug.pos[0] - plug.w / 2).toBeGreaterThanOrEqual(head.pos[0] + head.w / 2 - 0.1); // emboîtée à la suite de la barrette
+    const lidB = aabb(lid, t), bb = aabb(board, t);
+    expect(bb.min.x).toBeGreaterThanOrEqual(lidB.min.x); expect(bb.max.x).toBeLessThanOrEqual(lidB.max.x); expect(bb.min.y).toBeGreaterThanOrEqual(lidB.min.y); expect(bb.max.y).toBeLessThanOrEqual(lidB.max.y);
+    expect(gap(bb, aabb(handle, t))).toBeGreaterThan(1.5);
+    const front = one(sc0, /^Face avant toit/), back = one(sc0, /^Face arrière toit/), base = front.pos[2] - front.h / 2;
+    const plane = (y: number) => base + front.h + ((y - front.pos[1]) * (back.h - front.h)) / (back.pos[1] - front.pos[1]);
+    const marge = plane(plug.pos[1]) - (plug.pos[2] + plug.depth! / 2);
+    expect(marge).toBeGreaterThanOrEqual(2); expect(marge).toBeLessThan(15);
+    expect(plane(handle.pos[1]) - (handle.pos[2] + handle.depth! / 2)).toBeGreaterThanOrEqual(2);
+    const loops = ['Fil interrupteur → ventilateur + (rouge)', 'Fil ventilateur − (noir)', 'Fil PWM ventilateur (bleu)', 'Fil tachymètre ventilateur (jaune)', 'Fil masse commune ventilateur (noir)'].map((n) => one(sc0, new RegExp('^' + n.replace(/[()+−→]/g, '.') + '$')));
+    for (const w of loops) {
+      const pts = pathItems([w])[0].pts; let len = 0;
+      for (let i2 = 1; i2 < pts.length; i2++) { const m = pts[i2]; if (Math.abs(m.x - lid.pos[0]) <= lid.w / 2 && Math.abs(m.y - lid.pos[1]) <= lid.h / 2 && m.z > lid.pos[2]) len += m.distanceTo(pts[i2 - 1]); }
+      expect(len, w.name).toBeGreaterThanOrEqual(120);
     }
   });
   it('les broches du Pi : 12 (PWM), 11 (tachymètre), 14 (masse), 13 (commande de l\'interrupteur) sont chacune utilisées une seule fois', () => {

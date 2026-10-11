@@ -34,7 +34,7 @@ flowchart TB
   RAIL --> BUCK
   BUCK -->|"5 V USB-C"| PI
   RAIL -->|"12 V + / −"| SWF
-  SWF -->|"12 V commuté (connecteur 4 broches)"| FAN
+  SWF -->|"12 V commuté (fiche 4 broches)"| FAN
   RAIL -->|"12 V − (masse)"| FAN
   PI -->|"GPIO27 (broche 13) commande<br/>3,3 V"| SWF
   PI -->|"GPIO18 (broche 12) PWM 25 kHz<br/>GPIO17 (broche 11) tachymètre<br/>masse broche 14"| FAN
@@ -102,8 +102,8 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 | Rail 12 V | Batterie / fusible | Convertisseur 12 → 5 V et ventilateur (par son interrupteur) | Fils rouge (+) et noir (−), répartis par **deux Wago 221 à 3 entrées** (un pour le +, un pour le −, posés à droite du fusible) : un fil entre (le + par le fusible, le − par la borne de la batterie), deux repartent : un vers le convertisseur, un vers le ventilateur (le + par l'interrupteur, le − directement) |
 | Alimentation du Pi | Convertisseur 12 → 5 V | Prise USB-C du Pi 5 | 5 V, 5 A recommandés pour le Pi 5 |
 | Interrupteur du ventilateur | Wago + (12 V) ; Pi GPIO27 (broche 13) ; masse sur le Wago − | Entrée, commande 3,3 V et masse du module interrupteur 12 V (côté +) | Le Noctua ne s'arrête pas à 0 % de PWM (il tourne à environ 20 %) : on coupe son 12 V. Côté **+**, pas côté masse : une masse coupée ferait remonter jusqu'à 12 V dans les fils PWM et tachymètre vers les GPIO |
-| 12 V du ventilateur | Sortie de l'interrupteur (+, rouge) ; Wago − (−, noir) | Connecteur 4 broches du ventilateur | Fils de 1,6 mm de diamètre ; le connecteur se débranche à la main (cassette amovible) |
-| Commande du ventilateur | Pi GPIO18 (broche 12, PWM matériel 25 kHz), GPIO17 (broche 11, tachymètre), masse commune broche 14 | Fils PWM (bleu) et tachymètre (jaune) du Noctua, par le connecteur | Le PWM est référencé à la masse du ventilateur : d'où le fil de masse commune vers la broche 14. Le tachymètre est collecteur ouvert : tirage interne du GPIO17 (pull-up logiciel) |
+| 12 V du ventilateur | Sortie de l'interrupteur (+, rouge) ; Wago − (−, noir) | Fiche 4 broches sur la plaque de connexion de la cassette | Fils de 1,6 mm de diamètre ; la fiche se débranche à la main (cassette amovible) |
+| Commande du ventilateur | Pi GPIO18 (broche 12, PWM matériel 25 kHz), GPIO17 (broche 11, tachymètre), masse commune broche 14 | Fils PWM (bleu) et tachymètre (jaune) du Noctua, par la fiche 4 broches | Le PWM est référencé à la masse du ventilateur : d'où le fil de masse commune vers la broche 14. Le tachymètre est collecteur ouvert : tirage interne du GPIO17 (pull-up logiciel) |
 | Caméra 1 | Pi, port CSI CAM0 | Camera Module 3 NoIR, dans le nid | Courte nappe, passe par l'ouverture du toit |
 | Caméra 2 | Pi, port CSI CAM1 | Caméra 2, dehors sous le débord | Longue nappe, sort par une fente rectangulaire 20 × 4 mm de la plaque avant |
 | LED infrarouges | Pi broche 4 (5 V) | Carte 4 LED IR | Masse par le module MOSFET (OUT1) : le Pi les allume ou les éteint |
@@ -122,7 +122,7 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 
 **Cerveau.** Le Raspberry Pi 5 est posé sur des entretoises de 6 mm dans le coin arrière gauche du toit, avec des cales de bois sur tous les côtés. Il pilote le ventilateur (PWM, tachymètre, interrupteur 12 V), lit le capteur, commande les deux caméras et allume les LED infrarouges. Ses prises (USB, Ethernet, HDMI) regardent la plaque arrière, percée d'une fenêtre : on branche sans ouvrir le nichoir. Il lui faut un convertisseur 12 V → 5 V capable de fournir 5 A.
 
-**Ventilation.** Un ventilateur silencieux de 60 mm (Noctua NF-A6x25 PWM) aspire l'air chaud du nid à travers le plafond et le rejette à l'arrière, sous le débord du toit en chêne ; l'air frais entre par le trou d'envol et par une prise d'air basse dans l'isolant (voir la fiche « Prise d'air basse »). Le ventilateur n'est pas dans la zone de l'électronique : il tourne dans une **cassette amovible à la main** (quatre parois de contreplaqué, un cadre, un couvercle à poignée, le ventilateur posé sur quatre plots en caoutchouc) qui se pose par gravité dans un **siège fixe** collé sur le plancher du toit (la goulotte : trois parois, la plaque arrière du toit fait la quatrième). La cassette a une fenêtre de sortie en face de celle de la plaque arrière (joint de mousse entre les deux) ; dehors, un grillage anti-insectes et un clapet à gravité en film léger (articulé en haut) s'ouvre sous le flux et retombe quand le ventilateur s'arrête. Un petit connecteur 4 broches relie la cassette au toit (12 V commuté, masse, PWM, tachymètre) : on le débranche à la main. Le Pi allume le ventilateur seulement quand il fait chaud : il règle sa vitesse par PWM, et peut couper son 12 V avec l'interrupteur (le Noctua tourne encore à environ 20 % à 0 % de PWM). **Été / hiver, en 4 lignes** : 1) retirer le toit en chêne (on accède au grenier) ; 2) débrancher le connecteur 4 broches et sortir la cassette à la main ; 3) poser à sa place le bloc isolant d'hiver (même empreinte, mousse de 35 mm : il rend au plafond son isolation) ; 4) l'été, faire l'inverse et rebrancher le connecteur.
+**Ventilation.** Un ventilateur silencieux de 60 mm (Noctua NF-A6x25 PWM) aspire l'air chaud du nid à travers le plafond et le rejette à l'arrière, sous le débord du toit en chêne ; l'air frais entre par le trou d'envol et par une prise d'air basse dans l'isolant (voir la fiche « Prise d'air basse »). Le ventilateur n'est pas dans la zone de l'électronique : il tourne dans une **cassette amovible à la main** (quatre parois de contreplaqué, un cadre, un couvercle à poignée, le ventilateur posé sur quatre plots en caoutchouc) qui se pose par gravité dans un **siège fixe** collé sur le plancher du toit (la goulotte : trois parois, la plaque arrière du toit fait la quatrième). La cassette a une fenêtre de sortie en face de celle de la plaque arrière (joint de mousse entre les deux) ; dehors, un grillage anti-insectes et un clapet à gravité en film léger (articulé en haut) s'ouvre sous le flux et retombe quand le ventilateur s'arrête. Une petite plaque de prototypage fixée sur le couvercle de la cassette (embase 4 broches) reçoit la fiche 4 broches des fils du toit (12 V commuté, masse, PWM, tachymètre) : on la débranche à la main. Le Pi allume le ventilateur seulement quand il fait chaud : il règle sa vitesse par PWM, et peut couper son 12 V avec l'interrupteur (le Noctua tourne encore à environ 20 % à 0 % de PWM). **Été / hiver, en 4 lignes** : 1) retirer le toit en chêne (on accède au grenier) ; 2) débrancher la fiche 4 broches et sortir la cassette à la main ; 3) poser à sa place le bloc isolant d'hiver (même empreinte, mousse de 35 mm : il rend au plafond son isolation) ; 4) l'été, faire l'inverse et rebrancher la fiche.
 
 **Vision.** La caméra 1 regarde dans le nid, éclairée par 4 LED infrarouges ; la caméra 2 est dehors, sous le débord du toit en chêne, à l'avant gauche, tournée vers le trou d'entrée, avec une seconde carte de 4 LED infrarouges à côté d'elle pour éclairer le trou la nuit. Sa longue nappe part du Pi, traverse le toit et sort par la fente de la plaque avant.
 
@@ -210,7 +210,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Arrêt | il tourne encore à environ 20 % quand le PWM est à 0 % : couper son 12 V avec l'interrupteur | module interrupteur côté + |
 | Commande | PWM 25 kHz (matériel du Pi) sur GPIO18 (broche 12) ; tachymètre 2 impulsions par tour sur GPIO17 (broche 11) avec tirage interne ; masse commune sur la broche 14 | fils bleu, jaune, noir |
 | Montage | cassette amovible à la main : quatre parois + cadre du bas + couvercle à poignée (contreplaqué 3 mm), quatre plots en caoutchouc de 12 × 2 × 3 mm sous le ventilateur, joint de mousse sous la cassette et derrière | oui, dans un siège fixe (la goulotte) |
-| Connecteur | 4 broches (type Molex / JST), fils fixes côté toit avec une boucle assez longue pour sortir la cassette | bloc noir 6 × 10 × 6 mm entre la cassette et le toit |
+| Connecteur 4 broches (embase sur la plaque de la cassette + fiche côté toit) | plaque de prototypage 30 × 15 × 1,6 mm (pas 2,54, composant acheté) posée sur deux entretoises de 4 mm sur le couvercle de la cassette, à côté de la poignée ; les 4 fils du ventilateur y sont soudés ; une barrette 4 broches à plat reçoit une fiche Dupont 4 broches (emboîtement horizontal) reliée aux fils fixes du toit, qui font une boucle en U de ≈ 130 mm sur le couvercle (de quoi sortir la cassette fiche débranchée) | plaque, barrette et fiche : hauteur totale 8 mm sur le couvercle, marge de 5 mm sous la pente du toit |
 | Ouverture du plafond | 56 de large ; la profondeur (environ 21 mm) est limitée par le mur du nid et le compartiment de la caméra : le débit réel est à mesurer, une grille de contreplaqué (trous Ø 6, pas 8) protège les pales, encastrée à fleur dans le plafond (même épaisseur, collée sur le chant) | 56 × 21 mm |
 | Sortie d'air | fenêtre de 60 × 45 mm dans la cassette puis dans la plaque arrière, grillage anti-insectes et clapet à gravité dehors, sous le débord du toit en chêne ; aucune communication avec la zone du Pi et de la batterie | oui |
 | Hiver | remplacer la cassette par le bloc isolant d'hiver (même empreinte, mousse de 35 mm) pour supprimer la déperdition de chaleur par l'ouverture | pièce de rechange cachée par défaut |
@@ -341,7 +341,7 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 | Régulateur de charge Genasun | 0,25 kg |
 | Raspberry Pi 5 + carte microSD | 0,05 kg |
 | Caméras, LED, capteur, convertisseur, modules, fusible | 0,15 kg |
-| Ventilateur, connecteur, interrupteur, plots, mousse, bloc d'hiver | 0,15 kg |
+| Ventilateur, plaque de connexion, interrupteur, plots, mousse, bloc d'hiver | 0,15 kg |
 | Câbles, gaine, nappes | 0,15 kg |
 | Cales, barres, étriers, clavettes | 0,1 kg |
 | **Total accroché à l'arbre** | **≈ 5,9 kg** |
@@ -361,7 +361,7 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Capteur BME280 | 5 € |
 | Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € |
 | Électronique | Module interrupteur 12 V côté + (P-MOSFET, commande 3,3 V) | 4 € |
-| Électronique | Connecteur 4 broches (mâle + femelle) | 2 € |
+| Électronique | Plaque de prototypage 30 × 15 + barrette 4 broches + fiche Dupont 4 broches | 2 € |
 | Électronique | Module 2 × MOSFET | 5 € |
 | Électronique | Convertisseur 12 V → 5 V 5 A USB-C | 15 € |
 | Électronique | 4 cellules LiFePO4 32700 + BMS 4S + support | 40 € |
