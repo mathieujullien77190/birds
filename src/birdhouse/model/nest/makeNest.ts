@@ -120,7 +120,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const tallRoof = (p: Plank): Plank => {
     if (!n.pente) return p;
     const base = p.notches.filter((x) => x.edge === 'bottom');
-    if (/^Face avant/.test(p.name)) return { ...p, holes: n.cam2 ? [{ id: uid(), shape: 'square' as const, x: cam2X - 10, y: r2(roofH + 28 - Hf / 2), size: 28, sh: 4 }] : p.holes, h: Hf, pos: [p.pos[0], p.pos[1], bodyH + Hf / 2] as Vec3, cast: undefined, notches: [...base, ...verticalTeeth('left', Hf, 0), ...verticalTeeth('right', Hf, 0)] };
+    if (/^Face avant/.test(p.name)) return { ...p, holes: n.cam2 ? [{ id: uid(), shape: 'square' as const, x: cam2X - 10, y: r2(Math.min(roofH + 28, Hf - 3) - Hf / 2), size: 28, sh: 4 }] : p.holes, h: Hf, pos: [p.pos[0], p.pos[1], bodyH + Hf / 2] as Vec3, cast: undefined, notches: [...base, ...verticalTeeth('left', Hf, 0), ...verticalTeeth('right', Hf, 0)] }; // Math.min : pour l >= 260, Hf < roofH + 30 et la fente de la nappe sortait par le haut de la plaque
     if (/^Face arrière/.test(p.name)) { // deux ouvertures d'aération au-dessus du dessus du toit (grilles dessus)
       const q: Plank = { ...p, h: Hb, pos: [p.pos[0], p.pos[1], bodyH + Hb / 2] as Vec3, cast: undefined, notches: [...base, ...verticalTeeth('left', Hb, 0), ...verticalTeeth('right', Hb, 0)] };
       const portWin = n.cam > 0 ? [fitHole(q, { id: uid(), shape: 'square' as const, x: r2(piX), y: r2((PORT_Z0 + PORT_Z1) / 2 - Hb / 2), size: PORT_X1 - PORT_X0, sh: PORT_Z1 - PORT_Z0 })] : []; // fenêtre des prises du Pi
@@ -545,7 +545,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       poly: plan.map(([x, y]) => [r2(x - cx), r2(y - cy)] as [number, number]), top: { z0: r2(A + Bx * cx + By * cy - zc), bx: Bx, by: By } };
   };
   const lambris: Plank[] = n.lambris ? (() => {
-    const xe = W / 2, ye = D / 2, k = Math.max(1, Math.round((W + 2 * LAM_T) / LAM_W)), kd = Math.max(1, Math.round(D / LAM_W)), sx = (2 * xe + 2 * LAM_T) / k, sy = (2 * ye) / kd; // façade et arrière : W + 2·LAM_T (elles recouvrent les bouts des côtés) ; côtés : D ; une largeur fixe par face
+    const xe = W / 2, ye = D / 2, span = W + 2 * LAM_T, k0 = Math.max(1, Math.round(span / LAM_W)), k = k0 % 2 ? k0 : (k0 > 1 && Math.abs(span / (k0 - 1) - LAM_W) < Math.abs(span / (k0 + 1) - LAM_W) ? k0 - 1 : k0 + 1), kd = Math.max(1, Math.round(D / LAM_W)), sx = (2 * xe + 2 * LAM_T) / k, sy = (2 * ye) / kd; // façade et arrière : W + 2·LAM_T (elles recouvrent les bouts des côtés) ; côtés : D ; une largeur fixe par face // k IMPAIR : une lame est centrée sur x = 0 et porte le trou d'envol (avec k pair un joint tombait au milieu et la façade n'était pas percée)
     const fx0 = -(xe + LAM_T), bx0l = -(xe + LAM_T), ry0 = -ye, ly0 = -ye; // début des lames : façade et arrière de −(xe + LAM_T) à xe + LAM_T, côtés de −ye à ye
     const out: Plank[] = [];
     // les lames MONTENT JUSQU'AU TOIT : à plat sur la façade (hauteur Hf du toit) et l'arrière (Hb), en DIAGONALE sur les côtés (elles suivent le haut des côtés du toit) ;
