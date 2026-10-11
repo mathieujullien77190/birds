@@ -26,7 +26,7 @@ function findPython() {
   for (const c of candidates) {
     if (c.includes('/') || c.includes('\\')) if (!existsSync(c)) continue;
     const q = c.includes(' ') ? `"${c}"` : c;
-    if (run(`${q} -c "import pytest, flask"`).ok) return q;
+    if (run(`${q} -c "import pytest, flask, pytest_cov"`).ok) return q;
   }
   return null;
 }
@@ -37,18 +37,19 @@ const missing = (dir, label) => (existsSync(join(root, dir, 'node_modules')) ? n
 const steps = [
   { name: 'tsc (racine)', cmd: 'npx tsc --noEmit -p .' },
   { name: 'lint', skip: existsSync(join(root, 'tools/lint/node_modules')) ? null : 'tools/lint/node_modules absent. Installer avec : npm --prefix tools/lint install', cmd: 'npm run lint --silent' },
-  { name: 'tests racine', cmd: 'npm test --silent' },
+  { name: 'tests racine + couverture', cmd: 'npm run coverage --silent' },
   {
-    name: 'tests Python (pytest pi/tests)',
+    name: 'tests Python (pytest + couverture 100 %)',
     get skip() {
       if (!existsSync(join(root, 'pi/tests'))) return 'pi/tests absent';
       this.py ??= findPython();
       return this.py ? null : 'Python avec pytest et flask introuvable. Installer : python -m pip install -r pi/requirements-dev.txt (ou définir NICHOIR_PYTHON)';
     },
     get cmd() {
-      return `${this.py} -m pytest pi/tests -q`;
+      return `${this.py} -m pytest tests -q --cov=nichoir --cov-branch --cov-report=term:skip-covered`;
     },
     env: { NICHOIR_MOCK: '1' },
+    cwd: join(root, 'pi'),
   },
   { name: 'build racine', cmd: 'npm run build --silent', skip: fast ? '--fast' : null },
   {
@@ -62,9 +63,9 @@ const steps = [
     },
   },
   { name: 'pi/site typecheck', skip: missing('pi/site', 'pi/site'), cmd: 'npm run typecheck --silent', cwd: join(root, 'pi/site') },
-  { name: 'pi/site tests', skip: missing('pi/site', 'pi/site'), cmd: 'npm test --silent', cwd: join(root, 'pi/site') },
+  { name: 'pi/site tests + couverture', skip: missing('pi/site', 'pi/site'), cmd: 'npm run coverage --silent', cwd: join(root, 'pi/site') },
   { name: 'laser-control typecheck', skip: missing('laser-control', 'laser-control'), cmd: 'npm run typecheck --silent', cwd: join(root, 'laser-control') },
-  { name: 'laser-control tests', skip: missing('laser-control', 'laser-control'), cmd: 'npm test --silent', cwd: join(root, 'laser-control') },
+  { name: 'laser-control tests + couverture', skip: missing('laser-control', 'laser-control'), cmd: 'npm run coverage --silent', cwd: join(root, 'laser-control') },
   { name: 'laser-control build', skip: fast ? '--fast' : missing('laser-control', 'laser-control'), cmd: 'npm run build --silent', cwd: join(root, 'laser-control') },
 ];
 
