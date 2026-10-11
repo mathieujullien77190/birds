@@ -21,6 +21,8 @@ Plusieurs outils dans la même app, choisis au démarrage (`src/tools.ts`, `src/
 
 **Faisceaux infrarouges visibles** : quand les LED infrarouges sont allumées dans le simulateur du Pi (`etat.led_nid` / `led_ext`, prop `onLeds`), un cône rose-rouge translucide, une lueur et un projecteur partent de la carte de LED (`IrBeams` dans `three/irBeam.ts`, `view.ir`, hook `useIrBeams`) ; masqués pendant les prises de vue des caméras du simulateur, ni survolables ni sélectionnables ; voir `docs/architecture-3d.md`.
 
+**Fenêtres du lambris arrière alignées sur une bande commune** (`BAND_Z0` / `BAND_Z1` dans `makeNest` : fenêtre de sortie du ventilateur et fenêtre des prises du Pi, marge de 4 mm autour) : toutes les lames coupées s'arrêtent au même niveau et reprennent au même niveau (testé) ; les fenêtres de la plaque arrière du toit gardent leur taille.
+
 **Montage sans soudure** (l'utilisateur ne peut pas souder) : le document décrit composant par composant les achats (cordons Dupont, borniers à vis, Wago 221, prises d'origine, composants à broches ou fils pré-soudés), une liste de courses et trois conseils ; voir la section « Montage sans soudure » de `docs/schema-electronique.md`.
 
 ## Règle : le document suit le modèle

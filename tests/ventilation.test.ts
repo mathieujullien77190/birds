@@ -203,6 +203,22 @@ describe('habillage arrière plan', () => {
   });
 });
 
+describe('habillage arrière : fenêtres sur une bande commune', () => {
+  it("toutes les lames coupées par une fenêtre s'arrêtent au même niveau et reprennent au même niveau", () => {
+    const lames = by(sc0, /^Lambris arrière/), bot = Math.min(...lames.map((l) => aabb(l, t).min.z)), top = Math.max(...lames.map((l) => aabb(l, t).max.z));
+    const stops = lames.filter((l) => aabb(l, t).max.z < top - 1).map((l) => aabb(l, t).max.z), restarts = lames.filter((l) => aabb(l, t).min.z > bot + 1).map((l) => aabb(l, t).min.z);
+    expect(stops.length).toBeGreaterThanOrEqual(2); expect(restarts.length).toBeGreaterThanOrEqual(2);
+    for (const z of stops) expect(Math.abs(z - stops[0]), 'arrêt des lames').toBeLessThanOrEqual(0.01);
+    for (const z of restarts) expect(Math.abs(z - restarts[0]), 'reprise des lames').toBeLessThanOrEqual(0.01);
+    expect(restarts[0]).toBeGreaterThan(stops[0]);
+    // les lames entaillées de côté (fenêtre des prises, de la sortie) ont leurs encoches sur la même bande
+    for (const l of lames.filter((q) => q.poly && q.poly.length > 4)) {
+      const zs = new Set(l.poly!.map(([, y]) => Math.round((l.pos[2] + y) * 100) / 100)); // lame debout (rot x = 90) : le y du contour est la hauteur
+      for (const z of zs) expect([bot, top, stops[0], restarts[0]].some((v) => Math.abs(v - z) < 0.011) || Math.abs(z - 134.5) < 40, 'encoche de ' + l.name + ' à ' + z).toBe(true); // hors la fente des nervures (tout en bas)
+    }
+  });
+});
+
 describe('bloc isolant d\'hiver', () => {
   it("cassette isolante = même enveloppe que la cassette ventilateur, boîte fermée crénelée qui enferme la laine, comble l'ouverture, visible", () => {
     const scW = setWinterCassette(sc0, true); // le bloc est mis dans le siège
