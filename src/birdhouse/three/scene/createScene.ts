@@ -5,6 +5,7 @@ import { CameraShooter } from '../cameraShooter';
 import { clearGroup, disposeObject3D } from '../dispose';
 import { disposeAll } from '../registry/materials';
 import type { View } from '../types';
+import { startRenderLoop } from './renderLoop';
 
 /** La vue 3D créée, et de quoi la défaire. */
 export interface SceneHandle {
@@ -51,12 +52,10 @@ export function createScene(host: HTMLElement): SceneHandle {
   const ro = new ResizeObserver(resize);
   ro.observe(host);
   resize();
-  let raf = 0;
-  const loop = () => { orbit.update(); renderer.render(scene, camera); raf = requestAnimationFrame(loop); };
-  loop();
+  const stopLoop = startRenderLoop(() => { orbit.update(); renderer.render(scene, camera); }); // ne rend rien tant que la page est cachée
 
   const dispose = () => {
-    cancelAnimationFrame(raf);
+    stopLoop();
     ro.disconnect();
     orbit.dispose();
     view.shooter.dispose();
