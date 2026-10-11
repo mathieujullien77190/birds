@@ -1,7 +1,7 @@
 import type { View } from './types';
 
 /** Opacité de la cassette « fantôme » (le ventilateur tourne : on le voit à travers ses parois) et durée du fondu (s). */
-export const GHOST = { opacity: 0.28, fade: 0.2 } as const;
+export const GHOST = { opacity: 0.5, fade: 0.2 } as const;
 
 /** Plaques de la cassette du ventilateur (parois, cadre du bas, couvercle) : la poignée, la grille, les plots et le ventilateur restent visibles ; le bloc d'hiver n'est pas concerné. */
 export const isGhostPart = (name: string): boolean => /^Cassette ventilateur( \d| cadre du bas| couvercle)/.test(name);
