@@ -46,6 +46,10 @@ export class PlankMesh extends Mesh<BufferGeometry, MeshStandardMaterial> {
   readonly edges: LineSegments<BufferGeometry, LineBasicMaterial>;
   /** Partie tournante (rotor du ventilateur), enfant de la mesh : même matériau que la plaque, arêtes en enfant ; absente pour les autres pièces. */
   rotor: Mesh<BufferGeometry, MeshStandardMaterial> | null = null;
+  /** Plaque de la cassette du ventilateur : devient translucide quand le ventilateur tourne (`three/ghost.ts`) ; posé par `useSceneSync` d'après le nom. */
+  ghost = false;
+  /** La plaque est demandée translucide par le modèle (`Plank.transparent`) : le fantôme ne la rend pas opaque. */
+  baseTransparent = false;
   /** Clé de la forme actuellement construite (voir `plankShapeKey`). */
   shapeKey = '';
 

@@ -6,6 +6,7 @@ import { clearGroup, disposeObject3D } from '../dispose';
 import { disposeAll } from '../registry/materials';
 import type { View } from '../types';
 import { spinRotors } from '../fanSpin';
+import { stepGhost } from '../ghost';
 import { IrBeams } from '../irBeam';
 import { startRenderLoop } from './renderLoop';
 
@@ -51,14 +52,14 @@ export function createScene(host: HTMLElement): SceneHandle {
   const ir = new IrBeams(); // faisceaux des LED infrarouges : le projecteur reste dans la scène (intensité 0 éteint)
   scene.add(ir.group, ir.lights);
   shooter.beams = ir;
-  const view: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, holeMark, pullMark, cutMark, shooter, dragging: false, fan: { pct: 0, angle: 0 }, ir };
+  const view: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, holeMark, pullMark, cutMark, shooter, dragging: false, fan: { pct: 0, angle: 0 }, ir, ghost: { level: 1 } };
 
   const resize = () => { const w = host.clientWidth, h = host.clientHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); };
   const ro = new ResizeObserver(resize);
   ro.observe(host);
   resize();
   let last = performance.now();
-  const stopLoop = startRenderLoop(() => { const now = performance.now(), dt = (now - last) / 1000; last = now; spinRotors(view, dt); ir.update(Math.min(dt, 0.1)); orbit.update(); renderer.render(scene, camera); }); // ne rend rien tant que la page est cachée
+  const stopLoop = startRenderLoop(() => { const now = performance.now(), dt = (now - last) / 1000; last = now; spinRotors(view, dt); stepGhost(view, Math.min(dt, 0.1)); ir.update(Math.min(dt, 0.1)); orbit.update(); renderer.render(scene, camera); }); // ne rend rien tant que la page est cachée
 
   const dispose = () => {
     stopLoop();

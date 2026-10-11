@@ -4,6 +4,7 @@ import type { FaceAxis, PlankScene } from '@/birdhouse/model';
 import { EMISSIVE } from '@/birdhouse/three/constants';
 import { clearGroup, disposeObject3D } from '@/birdhouse/three/dispose';
 import { cutMarkObject, habillageDimensions, holeMarkObjects, pullMarkObject } from '@/birdhouse/three/factories/marks';
+import { isGhostPart } from '@/birdhouse/three/ghost';
 import { createPlankMesh } from '@/birdhouse/three/factories/plank';
 import { AXIS_N, type Cut, type View } from '@/birdhouse/three/types';
 
@@ -45,6 +46,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       m.rotation.set(MathUtils.degToRad(p.rot[0]), MathUtils.degToRad(p.rot[1]), MathUtils.degToRad(p.rot[2]));
       const mat = m.material;
       m.setOak(p.name === 'Toit en chêne'); // le pan de toit en chêne porte une texture de bois (le reste garde ses couleurs par sommets)
+      m.ghost = isGhostPart(p.name); m.baseTransparent = !!p.transparent; // la cassette du ventilateur devient translucide quand il tourne
       mat.transparent = !!p.transparent;
       mat.opacity = p.transparent ? 0.3 : 1;
       mat.depthWrite = !p.transparent;
