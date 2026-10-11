@@ -7,11 +7,11 @@ import { r2 } from '../util';
  * Les déplacements sont des translations au centième : l'aller-retour est exact.
  */
 
-const CASSETTE = [/^Cassette ventilateur/, /^Poignée cassette/, /^Plot caoutchouc ventilateur/, /^Grille de protection ventilateur/, /^Ventilateur Noctua/, /^Plaque de connexion cassette/, /^Entretoise plaque de connexion/, /^Barrette 4 broches plaque de connexion/, /^Soudure plaque de connexion/, /^Fil cassette/];
+const CASSETTE = [/^Cassette ventilateur/, /^Poignée cassette/, /^Plot caoutchouc ventilateur/, /^Grille de protection ventilateur/, /^Ventilateur Noctua/, /^Prise 4 broches du ventilateur/, /^Fil cassette/];
 const BLOCK = [/^Bloc isolant d'hiver/, /^Isolant bloc d'hiver/, /^Poignée bloc d'hiver/];
-const PLUG = [/^Bouchon-boîte prise d'air/, /^Laine bouchon prise d'air/];
-/** Dépassement de la lèvre de la sous-boîte sous le fond quand elle est insérée, et distance entre le nichoir et les pièces rangées. */
-export const PLUG_DROP = 11, SPARE_GAP = 150;
+const PLUG = [/^Bouchon-boîte prise d'air/, /^Laine bouchon prise d'air/, /^Poignée bouchon prise d'air/];
+/** Distance entre le nichoir et les pièces rangées. */
+export const SPARE_GAP = 150;
 
 const by = (s: PlankScene, re: RegExp) => s.planks.find((p) => re.test(p.name));
 const isIn = (p: Plank, res: RegExp[]) => res.some((re) => re.test(p.name));
@@ -24,7 +24,7 @@ function layout(s: PlankScene): Layout | null {
   if (!gl || !gr || !gf || !floor || !outerL || !lid || !bottom) return null;
   const co = Math.abs(gr.pos[0] - gl.pos[0]) - s.t, seat: [number, number] = [r2((gl.pos[0] + gr.pos[0]) / 2), r2(gf.pos[1] + s.t / 2 + co / 2)];
   const ex = r2(outerL.pos[0] - s.t / 2 - SPARE_GAP);
-  return { seat, floorTop: r2(floor.pos[2] + s.t / 2), slotA: [ex, 0], slotB: [ex, -80], duct: [lid.pos[0], lid.pos[1]], lipBottom: r2(bottom.pos[2] - s.t / 2 - PLUG_DROP) };
+  return { seat, floorTop: r2(floor.pos[2] + s.t / 2), slotA: [ex, 0], slotB: [ex, -80], duct: [lid.pos[0], lid.pos[1]], lipBottom: r2(bottom.pos[2] - s.t / 2) };
 }
 
 /** Translate des pièces (leur position, et les points de leur chemin pour les fils) au centième. */
@@ -65,7 +65,7 @@ export function setAirPlug(s: PlankScene, plugged: boolean): PlankScene {
   if (!l || !lip) return s;
   const inside = Math.hypot(lip.pos[0] - l.duct[0], lip.pos[1] - l.duct[1]) < 1;
   if (inside === plugged) return s;
-  const out: Vec3 = [l.slotB[0] - l.duct[0], l.slotB[1] - l.duct[1], -l.lipBottom]; // la lèvre passe de −11 mm à z = 0
+  const out: Vec3 = [l.slotB[0] - l.duct[0], l.slotB[1] - l.duct[1], -l.lipBottom]; // le fond de la sous-boîte (à fleur du dessous) passe à z = 0 sur le sol
   return plugged ? shift(s, PLUG, [-out[0], -out[1], -out[2]]) : shift(s, PLUG, out);
 }
 
