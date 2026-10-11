@@ -22,7 +22,7 @@ describe('le Peltier est parti', () => {
     });
   }
   it('le capteur BME280 et ses quatre fils sont toujours là, les deux Wago aussi', () => {
-    for (const over of [{}, { solar: false }, { cam2: false }]) {
+    for (const over of [{}, { cam2: false }]) {
       const sc = buildNest(over);
       expect(by(sc, /^Capteur température/)).toHaveLength(1);
       expect(by(sc, /^Fil (3,3 V|SDA|SCL|masse) \(/).filter((p) => /^Fil (3,3 V \(rouge\)|SDA|SCL|masse \(noir\))/.test(p.name)).length).toBeGreaterThanOrEqual(4);

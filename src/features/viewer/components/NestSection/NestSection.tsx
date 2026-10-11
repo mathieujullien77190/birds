@@ -13,7 +13,6 @@ export function NestSection({ sc, nest, setNest, addNest }: { sc: PlankScene; ne
       <Slider label="Hauteur au-dessus du trou" value={nest.above} min={0} max={100} step={1} unit=" mm" onChange={(above) => setNest({ ...nest, above })} />
       <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-stone-700">
         Options
-        <Chip active={nest.solar} onClick={() => setNest({ ...nest, solar: !nest.solar })} title="Panneau solaire de 100 W déporté sur deux poteaux, câble vers le toit ; batterie et régulateur dans le toit">Solaire</Chip>
         <Chip active={nest.cam2} onClick={() => setNest({ ...nest, cam2: !nest.cam2 })} title="Deuxième caméra dans une mini boîte en contreplaqué sous le toit à gauche, tournée vers le trou d'entrée">2ᵉ caméra</Chip>
       </div>
       <Btn variant="primary" onClick={addNest} disabled={sc.planks.length > 0} title={sc.planks.length > 0 ? "Un nichoir est déjà là : « Tout supprimer » dans « Pièces » pour en créer un autre" : undefined}>Créer le nichoir ({W} × {D} × {H})</Btn>

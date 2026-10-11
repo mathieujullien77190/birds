@@ -12,7 +12,6 @@ export const GOLDEN_DIR = join(here, 'golden');
 export const VARIANTS: Record<string, Partial<NestParams>> = {
   default: {},
   'sans-cam2': { cam2: false },
-  'sans-solaire': { solar: false },
   'trou-120': { hole: 120 },
   'interieur-200': { l: 200, L: 200 },
 };
