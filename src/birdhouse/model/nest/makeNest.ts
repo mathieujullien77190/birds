@@ -148,7 +148,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // PRISE D'AIR BASSE : un conduit de contreplaqué (4 parois + couvercle) dans l'isolant du mur GAUCHE, à l'AVANT, du dessous de la boîte à mi-hauteur du nid, puis une fente dans la paroi intérieure
   const AIR_X0 = r2(-(W / 2 - t) + 3), AIR_X1 = r2(-(n.l / 2 + t) - 1), AIR_CX = r2((AIR_X0 + AIR_X1) / 2), AIR_LX = r2(AIR_X1 - AIR_X0), AIR_LY = 46; // empreinte extérieure du conduit
   const AIR_CY = r2(-n.L / 2 + 30), AIR_ZS = Math.round((e + t + bodyH) / 2), AIR_SH = 30, AIR_SW = 36; // centre en y, hauteur de la fente (mi-hauteur du nid), taille de la fente
-  const AIR_ZT = AIR_ZS + AIR_SH / 2; // haut des parois du conduit
+  const AIR_ZT = AIR_ZS + AIR_SH / 2, AIR_ZTOP = AIR_ZT + 6; // haut de la fente ; haut du conduit (3 mm de bois au-dessus de la fente, sous les crans du haut)
   const roofParts0 = roofBox.planks.map((p) => {
     const q: Plank = { ...p, name: p.name.replace(/ (\d+)$/, ' toit $1'), pos: [p.pos[0], p.pos[1], p.pos[2] + bodyH] as Vec3, group: roofGroup };
     if (/^Dessous/.test(p.name)) q.holes = [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: SENSOR_X, y: SENSOR_Y, size: 19.5, sh: 18.5 }), // logement du capteur, incrusté à fleur du plafond (ses broches sortent dans l'isolant)
@@ -332,7 +332,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const insulation: Plank[] = [
     ...carveRects([-xo, -yo, xo, yo], [[AIR_X0, AIR_CY - AIR_LY / 2, AIR_X1, AIR_CY + AIR_LY / 2]]).flatMap(([x0, y0, x1, y1], k) => block(`Isolant sous le plancher ${k + 1}`, x0, x1, y0, y1, t, e)),
     ...carveRects([-xo, -yo, -xi, yo], [[AIR_X0, AIR_CY - AIR_LY / 2, AIR_X1, AIR_CY + AIR_LY / 2]]).flatMap(([x0, y0, x1, y1], k) => block(`Isolant gauche ${k + 1}`, x0, x1, y0, y1, z0, z1)), // découpé autour du conduit de la prise d'air
-    ...block('Isolant gauche dessus conduit', AIR_X0, AIR_X1, AIR_CY - AIR_LY / 2, AIR_CY + AIR_LY / 2, AIR_ZT + t, z1),
+    ...block('Isolant gauche dessus conduit', AIR_X0, AIR_X1, AIR_CY - AIR_LY / 2, AIR_CY + AIR_LY / 2, AIR_ZTOP, z1),
     ...block('Isolant droite', xi, xo, -yo, yo, z0, z1), // pavé plein : la gaine se pousse dans la laine (plus de découpe, demande de l'utilisateur)
     ...block('Isolant arrière', -xi, xi, yi, yo, z0, z1),
     ...block('Isolant avant gauche', -xi, -wide, -yo, -yi, z0, z1),
@@ -480,14 +480,15 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const fanSet: Plank[] = [fanPart, ...plots, ...swFan, ...connection, ...fanWires, ...cassette.filter((p) => p.group === elecGroup), ...winter];
   const fanWood: Plank[] = [...seat, exitNet, ...cassette.filter((p) => p.group === roofGroup)];
   // ===== PRISE D'AIR BASSE =====
-  const ZB0 = t, airH = r2(AIR_ZT - ZB0), airZc = r2((ZB0 + AIR_ZT) / 2);
-  const airWall = (name: string, w: number, pos: Vec3, rot: Vec3, holes: Hole[] = []): Plank => wood(name, w, airH, pos, rot, group, holes);
-  const airWood: Plank[] = [
-    airWall("Conduit d'air 1", AIR_LY, [AIR_X0 + t / 2, AIR_CY, airZc], sideRot),
-    airWall("Conduit d'air 2", AIR_LY, [AIR_X1 - t / 2, AIR_CY, airZc], sideRot, [{ id: uid(), shape: 'square' as const, x: 0, y: r2(AIR_ZS - airZc), size: AIR_SW, sh: AIR_SH }]), // côté nid : la fente
-    airWall("Conduit d'air 3", AIR_LX - 2 * t, [AIR_CX, AIR_CY - AIR_LY / 2 + t / 2, airZc], faceRot),
-    airWall("Conduit d'air 4", AIR_LX - 2 * t, [AIR_CX, AIR_CY + AIR_LY / 2 - t / 2, airZc], faceRot),
-    wood("Conduit d'air 5 (couvercle)", AIR_LX, AIR_LY, [AIR_CX, AIR_CY, AIR_ZT + t / 2], [0, 0, 0], group),
+  // le conduit est une vraie BOÎTE crénelée comme celles du nichoir (`makeBox`), ouverte en dessous : quatre parois qui s'emboîtent par des dents verticales et un couvercle qui s'emboîte dans leur haut
+  const ZB0 = t, airHt = r2(AIR_ZTOP - ZB0);
+  const airKey: Record<string, string> = { 'Côté gauche': "Conduit d'air 1", 'Côté droit': "Conduit d'air 2", 'Face avant': "Conduit d'air 3", 'Face arrière': "Conduit d'air 4", Dessus: "Conduit d'air 5 (couvercle)" };
+  const airWood: Plank[] = [...makeBox(AIR_LX, AIR_LY, airHt, t, fit, start).planks.filter((p) => !/^Dessous/.test(p.name)).map((p) => {
+    const key = airKey[p.name.replace(/ \d+$/, '')], cast = { ...(p.cast ?? {}) }; if (!p.name.startsWith('Dessus')) delete cast.bottom; // ouverte en dessous : le bas des parois est droit
+    let q = recastAll({ ...p, name: key, pos: [r2(p.pos[0] + AIR_CX), r2(p.pos[1] + AIR_CY), r2(p.pos[2] + ZB0)] as Vec3, group, cast }, t, fit);
+    if (key === "Conduit d'air 2") q = { ...q, holes: [fitHole(q, { id: uid(), shape: 'square' as const, x: 0, y: r2(AIR_ZS - q.pos[2]), size: AIR_SW, sh: AIR_SH })] }; // côté nid : la fente
+    return q;
+  }),
   ];
   const airBlocks: Plank[] = [
     blk("Grillage inox maille 5 mm — prise d'air", AIR_LX - 2 * t + 2, AIR_LY - 2 * t + 2, 0.8, [AIR_CX, AIR_CY, -0.4], group, '#b6bcc6', { transparent: true }),

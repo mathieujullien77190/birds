@@ -4,6 +4,7 @@ import type { Plank, PlankScene } from '@/birdhouse/model';
 import { HIDDEN_AT_CREATION } from '@/features/viewer/constants';
 import { VARIANTS, buildNest } from './helpers';
 import { aabb, gap, inside, obb, pathContacts, pathItems, ribbonPoints, thick } from './geomChecks';
+import { outline } from '@/birdhouse/model';
 
 const by = (sc: PlankScene, re: RegExp): Plank[] => sc.planks.filter((p) => re.test(p.name));
 const one = (sc: PlankScene, re: RegExp): Plank => { const l = by(sc, re); expect(l, String(re)).toHaveLength(1); return l[0]; };
@@ -219,3 +220,32 @@ function overlapXY(a: Plank, b: Plank): number {
   return dx > 0 && dy > 0 ? dx * dy : 0;
 }
 void thick;
+
+describe("conduit de la prise d'air : boîte crénelée", () => {
+  const w = [1, 2, 3, 4].map((i) => one(sc0, new RegExp(`^Conduit d'air ${i}$`))), cover = one(sc0, /^Conduit d'air 5/), all = [...w, cover];
+  const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
+  const solid = (p: Plank, pt: Vector3, m = 0): boolean => { const b = obb(p, t), d = pt.clone().sub(b.c), lx = d.dot(b.ax[0]), ly = d.dot(b.ax[1]), lz = d.dot(b.ax[2]); return Math.abs(lz) <= t / 2 - m && inPoly([lx, ly], outline(p)) && !p.holes.some((h) => Math.abs(lx - h.x) <= h.size / 2 && Math.abs(ly - h.y) <= (h.sh ?? h.size) / 2); };
+  it('quatre parois à dents verticales et un couvercle : chaque arête réunit un bord de phase 0 et un bord de phase 1', () => {
+    for (const p of w) { expect(p.cast?.left?.n, p.name).toBeGreaterThan(1); expect(p.cast?.right?.n).toBe(p.cast?.left?.n); expect(p.cast?.top?.phase).toBe(0); expect(p.cast?.bottom).toBeUndefined(); expect(p.notches.length, p.name).toBeGreaterThan(3); } // ouverte en dessous
+    expect(w[0].cast!.left!.phase).toBe(1); expect(w[1].cast!.left!.phase).toBe(1); expect(w[2].cast!.left!.phase).toBe(0); expect(w[3].cast!.left!.phase).toBe(0); // côtés (1, 2) contre faces (3, 4)
+    expect(w[0].cast!.left!.n).toBe(w[2].cast!.left!.n);
+    for (const e of ['top', 'bottom', 'left', 'right'] as const) expect(cover.cast![e]!.phase).toBe(1); // le couvercle s'emboîte dans le haut des parois
+    expect(cover.cast!.top!.n).toBe(w[2].cast!.top!.n); expect(cover.cast!.left!.n).toBe(w[0].cast!.top!.n);
+  });
+  it('les plaques ne se recouvrent pas (matière réelle, dents comprises) et la section libre reste ≥ 8 cm²', () => {
+    for (let i = 0; i < all.length; i++) for (let j = i + 1; j < all.length; j++) {
+      const a = all[i], b = all[j], ob = obb(a, t);
+      for (let x = -a.w / 2 + 0.3; x < a.w / 2; x += 1.1) for (let y = -a.h / 2 + 0.3; y < a.h / 2; y += 1.1) {
+        const pt = ob.c.clone().addScaledVector(ob.ax[0], x).addScaledVector(ob.ax[1], y);
+        if (solid(a, pt) && solid(b, pt, 0.05)) throw new Error(`${a.name} recoupe ${b.name} en ${pt.toArray().map((v) => v.toFixed(1))}`);
+      }
+    }
+    expect(Math.abs(w[1].pos[0] - w[0].pos[0]) - t, 'largeur libre').toBeGreaterThanOrEqual(25);
+    expect(((Math.abs(w[1].pos[0] - w[0].pos[0]) - t) * (Math.abs(w[3].pos[1] - w[2].pos[1]) - t)) / 100).toBeGreaterThanOrEqual(8);
+  });
+  it('la fente de la paroi côté nid ne touche aucun cran', () => {
+    const p = w[1], h = p.holes[0], poly = outline(p);
+    for (let dx = -h.size / 2 - 1.5; dx <= h.size / 2 + 1.5; dx += 1) for (const dy of [-(h.sh! / 2 + 1.5), h.sh! / 2 + 1.5]) expect(inPoly([h.x + dx, h.y + dy], poly), 'marge de bois autour de la fente').toBe(true);
+    for (let dy = -h.sh! / 2 - 1.5; dy <= h.sh! / 2 + 1.5; dy += 1) for (const dx of [-(h.size / 2 + 1.5), h.size / 2 + 1.5]) expect(inPoly([h.x + dx, h.y + dy], poly), 'marge de bois autour de la fente').toBe(true);
+  });
+});
