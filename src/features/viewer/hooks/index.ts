@@ -9,3 +9,4 @@ export * from './useThreeView';
 export * from './useKeyboardShortcuts';
 export * from './usePiCameraShot';
 export * from './useFanSpeed';
+export * from './useIrBeams';

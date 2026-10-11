@@ -12,5 +12,6 @@ export function useDayNight(view: MutableRefObject<View | null>, night: boolean)
     v.scene.background = new Color(a.background);
     v.ambient.color.set(a.ambient); v.ambient.intensity = a.ambientI;
     v.sun.color.set(a.sun); v.sun.intensity = a.sunI;
+    v.ir.setNight(night); // les faisceaux infrarouges sont plus discrets de jour
   }, [view, night]);
 }

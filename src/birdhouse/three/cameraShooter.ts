@@ -36,6 +36,8 @@ export class CameraShooter {
   /** Lampe des LED infrarouges : permanente (ajoutée puis retirée à chaque prise, elle faisait recompiler les shaders), éteinte (intensité 0) hors prise de vue infrarouge. */
   private readonly lamp = new PointLight(CAMERA_SHOT.lamp.color, 0, CAMERA_SHOT.lamp.distance, CAMERA_SHOT.lamp.decay);
   private target: WebGLRenderTarget | null = null;
+  /** Faisceaux infrarouges visibles dans la vue : cachés (et projecteurs éteints) le temps d'une prise de vue, la lampe ci-dessus simule déjà cet éclairage. */
+  beams?: { suspend(): () => void };
 
   /** `overlays` : les repères de la vue (cotes, trou, face, coupe), cachés pendant la prise de vue. */
   constructor(private readonly scene: Scene, private readonly renderer: ShotRenderer, private readonly overlays: readonly Object3D[]) {
@@ -59,7 +61,7 @@ export class CameraShooter {
     const was = hide.map((o) => o.visible);
     // vision nocturne : les LED infrarouges de la caméra éclairent la scène (la lampe est posée à l'objectif et allumée le temps de la prise de vue)
     const lamp = this.lamp;
-    const prev = r.getRenderTarget(), px = new Uint8Array(w * h * 4);
+    const prev = r.getRenderTarget(), px = new Uint8Array(w * h * 4), resumeBeams = this.beams?.suspend();
     try {
       hide.forEach((o) => { o.visible = false; });
       lamp.position.copy(cam.position);
@@ -69,6 +71,7 @@ export class CameraShooter {
       r.readRenderTargetPixels(target, 0, 0, w, h, px);
     } finally { // quoi qu'il arrive : la vue retrouve son état (cible de rendu, lampe, visibilités)
       r.setRenderTarget(prev);
+      resumeBeams?.();
       lamp.intensity = 0;
       hide.forEach((o, i) => { o.visible = was[i]; });
     }

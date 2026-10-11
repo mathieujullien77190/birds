@@ -19,6 +19,8 @@ Plusieurs outils dans la même app, choisis au démarrage (`src/tools.ts`, `src/
 
 **Rotor du ventilateur qui tourne** : le rotor (9 pales + moyeu) est un maillage à part (`PlankMesh.rotor`), il tourne dans la 3D quand le ventilateur est allumé dans le simulateur du Pi (`PiSimulator` → prop `onFanSpeed`, `etat.ventilo.alimente ? pourcent : 0` chaque seconde → `useFanSpeed` → `view.fan.pct` → `spinRotors` dans la boucle de rendu ; 3 tours/s au plus à 100 %) ; voir `docs/architecture-3d.md`.
 
+**Faisceaux infrarouges visibles** : quand les LED infrarouges sont allumées dans le simulateur du Pi (`etat.led_nid` / `led_ext`, prop `onLeds`), un cône rose-rouge translucide, une lueur et un projecteur partent de la carte de LED (`IrBeams` dans `three/irBeam.ts`, `view.ir`, hook `useIrBeams`) ; masqués pendant les prises de vue des caméras du simulateur, ni survolables ni sélectionnables ; voir `docs/architecture-3d.md`.
+
 **Montage sans soudure** (l'utilisateur ne peut pas souder) : le document décrit composant par composant les achats (cordons Dupont, borniers à vis, Wago 221, prises d'origine, composants à broches ou fils pré-soudés), une liste de courses et trois conseils ; voir la section « Montage sans soudure » de `docs/schema-electronique.md`.
 
 ## Règle : le document suit le modèle

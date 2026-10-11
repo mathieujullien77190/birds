@@ -6,6 +6,7 @@ import { clearGroup, disposeObject3D } from '../dispose';
 import { disposeAll } from '../registry/materials';
 import type { View } from '../types';
 import { spinRotors } from '../fanSpin';
+import { IrBeams } from '../irBeam';
 import { startRenderLoop } from './renderLoop';
 
 /** La vue 3D créée, et de quoi la défaire. */
@@ -47,20 +48,24 @@ export function createScene(host: HTMLElement): SceneHandle {
   const pullMark = new Group(); // la face double-cliquée, en pointillés bleus : on la tire ou on la pousse
   scene.add(holeMark, pullMark);
   const shooter = new CameraShooter(scene, renderer, [labels, holeMark, pullMark, cutMark]);
-  const view: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, holeMark, pullMark, cutMark, shooter, dragging: false, fan: { pct: 0, angle: 0 } };
+  const ir = new IrBeams(); // faisceaux des LED infrarouges : le projecteur reste dans la scène (intensité 0 éteint)
+  scene.add(ir.group, ir.lights);
+  shooter.beams = ir;
+  const view: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, holeMark, pullMark, cutMark, shooter, dragging: false, fan: { pct: 0, angle: 0 }, ir };
 
   const resize = () => { const w = host.clientWidth, h = host.clientHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); };
   const ro = new ResizeObserver(resize);
   ro.observe(host);
   resize();
   let last = performance.now();
-  const stopLoop = startRenderLoop(() => { const now = performance.now(), dt = (now - last) / 1000; last = now; spinRotors(view, dt); orbit.update(); renderer.render(scene, camera); }); // ne rend rien tant que la page est cachée
+  const stopLoop = startRenderLoop(() => { const now = performance.now(), dt = (now - last) / 1000; last = now; spinRotors(view, dt); ir.update(Math.min(dt, 0.1)); orbit.update(); renderer.render(scene, camera); }); // ne rend rien tant que la page est cachée
 
   const dispose = () => {
     stopLoop();
     ro.disconnect();
     orbit.dispose();
     view.shooter.dispose();
+    ir.dispose();
     for (const m of view.meshes.values()) { scene.remove(m); disposeObject3D(m); }
     view.meshes.clear();
     for (const g of [labels, holeMark, pullMark, cutMark]) clearGroup(g);
