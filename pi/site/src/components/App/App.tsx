@@ -1,5 +1,4 @@
 import { CameraCard } from '@/components/CameraCard';
-import { HeatsinkCard } from '@/components/HeatsinkCard';
 import { Header } from '@/components/Header';
 import { NestCard } from '@/components/NestCard';
 import { PeltierCard } from '@/components/PeltierCard';
@@ -14,7 +13,6 @@ export function App() {
       <Header state={state} unreachable={unreachable} />
       <div className="grid">
         <NestCard state={state} />
-        <HeatsinkCard state={state} />
         <PeltierCard state={state} onCommand={peltier} />
         <BatteryCard state={state} />
         <ConsumptionCard state={state} />

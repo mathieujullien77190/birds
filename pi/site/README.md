@@ -17,7 +17,7 @@ Raccourci à la racine du dépôt : `npm run build:pi`.
 
 ## Structure (`src/`, alias `@/`)
 - `ui/` : briques génériques répétées (`Banner`, `Card`, `ErrorLine`, `Gauge`, `Stat`, `ToggleButton`).
-- `components/` : composants métier qui assemblent ces briques (`App`, `Header`, `NestCard`, `HeatsinkCard`, `PeltierCard`, `BatteryCard` (jauge verte > 50 %, orange 20-50 %, rouge < 20 %, tension, Wh restants sur 76,8, solaire), `ConsumptionCard` (total en W, une barre par élément, autonomie estimée), `CameraCard`).
+- `components/` : composants métier qui assemblent ces briques (`App`, `Header`, `NestCard`, `PeltierCard`, `BatteryCard` (jauge verte > 50 %, orange 20-50 %, rouge < 20 %, tension, Wh restants sur 76,8, solaire), `ConsumptionCard` (total en W, une barre par élément, autonomie estimée), `CameraCard`).
 - `api/` client typé de l'API Flask ; `hooks/` (`useDeviceState` : relecture toutes les 5 s et commandes) ; `types/` (`DeviceState`, miroir de `etat` en Python) ; `constants/` ; `utils/`.
 
 Convention : un dossier par composant (ui ou métier) avec `<Nom>.tsx`, `index.ts`, et seulement au besoin `helpers.ts`, `constants.ts`, `types.ts`, `use<Truc>.ts`, `<Nom>.css`.
