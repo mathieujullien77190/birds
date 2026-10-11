@@ -7,6 +7,7 @@ import { outline } from '../geometry/outline';
 import { rotFromBasis, transformPlanks } from '../geometry/transform';
 import { slotsForTeeth } from '../geometry/face';
 import { makeBox } from './box';
+import { CAMERA_NAMES } from './cameras';
 import { fromAxisAngle, invert, multiply, rotate } from '../math/rotation';
 
 /**
@@ -198,7 +199,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       const q: Plank = { ...p, name: p.name.replace(/ (\d+)$/, ' mini-boîte caméra 2'), pos: [p.pos[0], p.pos[1], p.pos[2] - CAM2_H / 2] as Vec3, group: roofGroup };
       return /^Face avant/.test(p.name) ? { ...q, holes: [...q.holes, fitHole(q, { id: uid(), shape: 'round' as const, x: 0, y: 0, size: 12 })] } : q;
     });
-    const cam2: Plank = { id: uid(), name: 'Caméra 2', w: CAM_W, h: CAM_H, pos: [0, -CAM2_D / 2 + t + 10, 0] as Vec3, rot: [-90, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'camera' };
+    const cam2: Plank = { id: uid(), name: CAMERA_NAMES[1], w: CAM_W, h: CAM_H, pos: [0, -CAM2_D / 2 + t + 10, 0] as Vec3, rot: [-90, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'camera' };
     const ir2: Plank = { id: uid(), name: 'LED infrarouges extérieures', w: IR_W, h: IR_H, pos: [r2(irOff[0]), r2(-CAM2_D / 2 + t + 10 + irOff[1]), r2(irOff[2])] as Vec3, rot: [-90, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir' }; // à côté de la caméra 2, tournée comme elle
     const all = [...planksBox, cam2, ir2], ids = new Set(all.map((p) => p.id));
     return transformPlanks({ t, fit, planks: all }, ids, [cam2X, cam2Y, cam2Cz], cam2Q, [0, 0, 0]).planks;
@@ -222,7 +223,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   }));
   const keys: Plank[] = RIB_XS.flatMap((x, k) => RIB_TEETH_Z.slice(0, 2).map(([za, zb], j): Plank => ({ id: uid(), name: `Clavette fixation ${k + 1}.${j + 1}`, w: r2(RIB_T + 6), h: r2(zb - za - 12 - 0.5), pos: [x, r2(D / 2 - t - RIB_KEY / 2), r2((za + zb) / 2)] as Vec3, rot: rotFromBasis([1, 0, 0], [0, 0, 1]), notches: [], holes: [], group }))); // clavette de 3, contre la face intérieure du mur : traverse les trois plaques par leur trou, dépasse de 3 de chaque côté seulement, contre la face intérieure du mur
   const camera: Plank[] = n.cam > 0 ? [
-    { id: uid(), name: 'Caméra', w: CAM_W, h: CAM_H, pos: [CAM_X, CAM_Y, floorTop + 6.6] as Vec3, rot: [0, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'camera' },
+    { id: uid(), name: CAMERA_NAMES[0], w: CAM_W, h: CAM_H, pos: [CAM_X, CAM_Y, floorTop + 6.6] as Vec3, rot: [0, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'camera' },
     { id: uid(), name: 'LED infrarouges', w: IR_W, h: IR_H, pos: [IR_X, CAM_Y, floorTop + 0.8] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir' },
   ] : [];
   // cadre sous le toit, en trois planches collées : une planche haute et une basse, et entre elles une planche percée de fentes rectangulaires
