@@ -325,13 +325,13 @@
   "geo": {
    "n": 36,
    "idx": 0,
-   "pos": "f64d3e6886de412b",
+   "pos": "d5296fcd55039ea6",
    "col": "dff38860b9a69b37"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "d62337edce063654",
+   "pos": "35b410dacdc1de9d",
    "col": null
   }
  },
@@ -353,13 +353,13 @@
   "geo": {
    "n": 144,
    "idx": 0,
-   "pos": "12c80a993ea7ab2c",
+   "pos": "9248da90e529632f",
    "col": "db20a2926f1ee2d7"
   },
   "edges": {
    "n": 72,
    "idx": 0,
-   "pos": "71fab13ce1642497",
+   "pos": "04b31a3d836ef573",
    "col": null
   }
  },
@@ -1471,99 +1471,99 @@
  },
  "105 Cassette ventilateur 1": {
   "geo": {
-   "n": 36,
+   "n": 516,
    "idx": 0,
-   "pos": "68a99c7c2a775b01",
-   "col": "81ee9ae44ff8baa2"
+   "pos": "2223576c5a9f7f0d",
+   "col": "8ce8044555c3a251"
   },
   "edges": {
-   "n": 24,
+   "n": 176,
    "idx": 0,
-   "pos": "4e9e0184683345e6",
+   "pos": "c9290024b1927e73",
    "col": null
   }
  },
  "106 Cassette ventilateur 2": {
   "geo": {
-   "n": 84,
+   "n": 576,
    "idx": 0,
-   "pos": "bf001172430659ab",
-   "col": "850698afdd6b04da"
+   "pos": "7acb0474fa384ea9",
+   "col": "38867fe6226ec93d"
   },
   "edges": {
-   "n": 48,
+   "n": 200,
    "idx": 0,
-   "pos": "ab3d8054602b04c7",
+   "pos": "ba1c63f5e3bcfce2",
    "col": null
   }
  },
- "107 Cassette ventilateur 3": {
+ "107 Cassette ventilateur 4": {
   "geo": {
-   "n": 36,
+   "n": 516,
    "idx": 0,
-   "pos": "d60a794f6a183cb2",
-   "col": "81ee9ae44ff8baa2"
+   "pos": "bb2436c8a7293fc3",
+   "col": "8ce8044555c3a251"
   },
   "edges": {
-   "n": 24,
+   "n": 176,
    "idx": 0,
-   "pos": "fa462c9f52aad58a",
+   "pos": "9b2047236083ad40",
    "col": null
   }
  },
- "108 Cassette ventilateur 4": {
+ "108 Cassette ventilateur 3": {
   "geo": {
-   "n": 36,
+   "n": 516,
    "idx": 0,
-   "pos": "d60a794f6a183cb2",
-   "col": "81ee9ae44ff8baa2"
+   "pos": "bb2436c8a7293fc3",
+   "col": "8ce8044555c3a251"
   },
   "edges": {
-   "n": 24,
+   "n": 176,
    "idx": 0,
-   "pos": "fa462c9f52aad58a",
+   "pos": "9b2047236083ad40",
    "col": null
   }
  },
- "109 Cassette ventilateur cadre du bas": {
+ "109 Cassette ventilateur couvercle": {
   "geo": {
-   "n": 96,
+   "n": 588,
    "idx": 0,
-   "pos": "8a914354631387a0",
-   "col": "d3bf62603824e931"
+   "pos": "5dc44f04ea6ec409",
+   "col": "5e562c2951f34fcb"
   },
   "edges": {
-   "n": 48,
+   "n": 216,
    "idx": 0,
-   "pos": "40d34128707aa9d1",
+   "pos": "def6bdadf980df06",
    "col": null
   }
  },
- "110 Cassette ventilateur couvercle": {
+ "110 Cassette ventilateur cadre du bas": {
   "geo": {
-   "n": 96,
+   "n": 480,
    "idx": 0,
-   "pos": "850d643fbe1b1928",
-   "col": "d3bf62603824e931"
+   "pos": "ee81b2a9559ffdf0",
+   "col": "b3c21710c1aaaba1"
   },
   "edges": {
-   "n": 48,
+   "n": 168,
    "idx": 0,
-   "pos": "214a788f9b3cfbf1",
+   "pos": "864da1918dd12f84",
    "col": null
   }
  },
  "111 Poignée cassette": {
   "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "b1f11721032a5f06",
-   "col": "ba544e2bc0658952"
+   "n": 84,
+   "idx": 0,
+   "pos": "ed005152f91915af",
+   "col": "850698afdd6b04da"
   },
   "edges": {
-   "n": 24,
+   "n": 48,
    "idx": 0,
-   "pos": "eadacf052cfb6eba",
+   "pos": "04029a305321d745",
    "col": null
   }
  },
@@ -1639,15 +1639,15 @@
  },
  "117 Bloc isolant d'hiver couvercle": {
   "geo": {
-   "n": 420,
+   "n": 528,
    "idx": 0,
-   "pos": "bae6e5619531f810",
-   "col": "f3753b714a5acb7d"
+   "pos": "4238b6db893cad63",
+   "col": "50ac4df646a949b1"
   },
   "edges": {
-   "n": 144,
+   "n": 192,
    "idx": 0,
-   "pos": "674ace4b92bf7369",
+   "pos": "b3951bfef146ccfc",
    "col": null
   }
  },
@@ -1681,15 +1681,15 @@
  },
  "120 Poignée bloc d'hiver": {
   "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "b1f11721032a5f06",
-   "col": "ba544e2bc0658952"
+   "n": 84,
+   "idx": 0,
+   "pos": "ed005152f91915af",
+   "col": "850698afdd6b04da"
   },
   "edges": {
-   "n": 24,
+   "n": 48,
    "idx": 0,
-   "pos": "eadacf052cfb6eba",
+   "pos": "04029a305321d745",
    "col": null
   }
  },
@@ -1739,13 +1739,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "96a6024b87c064af",
+   "pos": "487fedbf5a95f05f",
    "col": "6fdb65fc39eb0796"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "d71bdc4d67f558a7",
+   "pos": "089fad47b08d2cdc",
    "col": null
   }
  },
@@ -1975,29 +1975,29 @@
  },
  "141 Bouchon-boîte prise d'air fond": {
   "geo": {
-   "n": 228,
+   "n": 348,
    "idx": 0,
-   "pos": "fc2f0c1061416a26",
-   "col": "7d604a6d4bd7c0e5"
+   "pos": "2a5200c5d393e3ae",
+   "col": "a900a96677cce6b1"
   },
   "edges": {
-   "n": 80,
+   "n": 128,
    "idx": 0,
-   "pos": "cf4810c1a5649ef3",
+   "pos": "ce4bc3be4020e06e",
    "col": null
   }
  },
  "142 Poignée bouchon prise d'air": {
   "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "e4e7e036413f4e34",
-   "col": "ba544e2bc0658952"
+   "n": 84,
+   "idx": 0,
+   "pos": "b40f886928b4ed91",
+   "col": "850698afdd6b04da"
   },
   "edges": {
-   "n": 24,
+   "n": 48,
    "idx": 0,
-   "pos": "41afbefbe52e41c6",
+   "pos": "4f481ba78f7ecf73",
    "col": null
   }
  },
@@ -2719,13 +2719,13 @@
   "geo": {
    "n": 912,
    "idx": 0,
-   "pos": "97fac2540cda3a44",
+   "pos": "ea55206a6479e182",
    "col": "cb4df596ff7708c5"
   },
   "edges": {
    "n": 320,
    "idx": 0,
-   "pos": "be23b634149f3df9",
+   "pos": "b98c203e12c016a1",
    "col": null
   }
  },
