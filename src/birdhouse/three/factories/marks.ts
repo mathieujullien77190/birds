@@ -1,5 +1,5 @@
 import { BufferGeometry, Float32BufferAttribute, LineLoop, Mesh, PlaneGeometry, Vector3, type Object3D } from 'three';
-import { bounds, extents, holeOutline, outline, type FaceAxis, type Hole, type Plank, type PlankScene } from '../../model';
+import { bounds, extents, holeHalf, holeOutline, outline, type FaceAxis, type Hole, type Plank, type PlankScene } from '../../model';
 import { MARK } from '../constants';
 import { materials } from '../registry/materials';
 import { AXIS_I, AXIS_N, type Cut } from '../types';
@@ -22,7 +22,7 @@ export function holeMarkObjects(p: Plank, h: Hole, t: number): Object3D[] {
     line.renderOrder = MARK.holeRenderOrder;
     out.push(line);
   }
-  const hw = h.shape === 'square' ? h.size / 2 : h.size / 2, hh = h.shape === 'square' ? (h.sh ?? h.size) / 2 : h.size / 2;
+  const [hw, hh] = holeHalf(h); // rond : size / 2 des deux côtés ; rectangle : size / 2 en largeur (x), sh / 2 en hauteur (y), comme le contour du trou
   const z = t / 2 + MARK.holeDimensionOffset, X = new Vector3(1, 0, 0), Yv = new Vector3(0, 1, 0), none = new Vector3();
   const r1 = (v: number) => `${+v.toFixed(2)}`; // valeur exacte au centième, sans zéros inutiles
   out.push(

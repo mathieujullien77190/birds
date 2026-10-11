@@ -2,7 +2,7 @@ import { type Pt, type Hole, type Plank } from '../types';
 import { r2 } from '../util';
 
 /** Demi-dimensions d'un trou. */
-const holeHalf = (h: Hole): [number, number] => (h.shape === 'square' ? [h.size / 2, (h.sh ?? h.size) / 2] : [h.size / 2, h.size / 2]);
+export const holeHalf = (h: Hole): [number, number] => (h.shape === 'square' ? [h.size / 2, (h.sh ?? h.size) / 2] : [h.size / 2, h.size / 2]);
 
 /**
  * Ramène un trou entièrement dans la plaque (1 mm de bord au moins) : un trou qui sort du contour casse la triangulation
