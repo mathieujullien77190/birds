@@ -21,7 +21,6 @@ export default function Planks() {
   useEffect(() => { if (mobile !== firstMobile.current) window.location.reload(); }, [mobile]); // la vue 3D est liée à son élément : changer de disposition (rotation du téléphone, fenêtre redimensionnée) recharge la page, tout est enregistré
   const [mSettings, setMSettings] = useState(false); // téléphone : feuille des réglages
   const [mParts, setMParts] = useState(false); // téléphone : feuille « Pièces » (afficher / cacher)
-  const [mSchema, setMSchema] = useState(false); // téléphone : schéma en plein écran (fermé au départ)
   const [sc, setSc] = useState<PlankScene>(() => loadScene());
   const scRef = useRef(sc);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -171,7 +170,7 @@ export default function Planks() {
       <div className="flex h-full w-full flex-col overflow-hidden bg-stone-100 text-stone-800">
         <MobileBar settingsOn={mSettings} onSettings={() => { setMSettings((v) => !v); setMParts(false); }} partsOn={mParts} onParts={() => { setMParts((v) => !v); setMSettings(false); }}
           backLabel={backLabel} onBack={back} winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug}
-          schemaOn={mSchema} onToggleSchema={() => setMSchema((v) => !v)} onOpenPi={openPi} cutOn={cut.on} onToggleCut={toggleCut} />
+          cutOn={cut.on} onToggleCut={toggleCut} />
         <main className="relative min-h-0 flex-1">
           <div ref={host} className="h-full w-full touch-none" />
           {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
@@ -184,12 +183,6 @@ export default function Planks() {
           {mParts && <PartsSheet sc={sc} hidden={hidden} toggleHidden={toggleHidden} setHidden={setHidden} onClose={() => setMParts(false)}
             onPick={(id, g) => { setSelectedId(id); setExtra(new Set()); setGroupSel(g); }} />}
         </main>
-        {mSchema && (
-          <div className="fixed inset-0 z-30 flex flex-col bg-white">
-            <div className="flex items-center justify-between border-b border-stone-200 px-3 py-2"><span className="text-sm font-semibold text-emerald-900">Schéma électrique</span><button type="button" onClick={() => setMSchema(false)} className="rounded px-2 py-1 text-lg leading-none text-stone-500">×</button></div>
-            <div className="min-h-0 flex-1 [&>.schema-panel]:!w-full"><SchemaPanel hover={hover} planks={sc.planks} onHover={(id) => setHover(id ? { plank: id } : null)} /></div>
-          </div>
-        )}
         {modals}
       </div>
     );
@@ -203,7 +196,7 @@ export default function Planks() {
         <div ref={host} className="h-full w-full" />
         {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
         <UndoBar backLabel={backLabel} onBack={back} />
-        <ViewToolbar winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={() => { setPiMounted(true); setPiOpen(true); }} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
+        <ViewToolbar winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={openPi} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
         {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
         {pull && <PullBar cutOn={cut.on} onDone={() => setPull(null)} />}
         {extra.size > 0 && <SelectionBar count={extra.size + (selectedId ? 1 : 0)} onLink={linkSelection} onUnlink={unlinkSelection} onCancel={() => setExtra(new Set())} />}
