@@ -86,6 +86,7 @@ export function slotsForTeeth(s: PlankScene, id: string): { scene: PlankScene; a
     if (Math.abs(vdot(nB, ax.z)) > 0.1) continue; // A doit être perpendiculaire à B
     const a = vdot(nB, ax.x), b = vdot(nB, ax.y), c = vdot(nB, vsub(A.pos, posB));
     const n2 = a * a + b * b;
+    /* v8 ignore next -- garde défensive inatteignable : |nB·az| ≤ 0,1 et a² + b² + (nB·az)² = 1 donnent n2 ≥ 0,99 */
     if (n2 < 0.5) continue;
     const norm = Math.sqrt(n2), p0: Pt = [-c * a / n2, -c * b / n2], dir: Pt = [-b / norm, a / norm];
     // intersections du contour de A avec la droite (plan médian de B) p0 + s·dir

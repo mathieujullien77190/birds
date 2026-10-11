@@ -53,6 +53,6 @@ export function rectUnion(rs: [number, number, number, number][]): Pt[] {
   const next = new Map<string, Pt>(); for (const [a, b] of E.values()) next.set(`${a[0]},${a[1]}`, b);
   const first = [...E.values()][0]; if (!first) return [];
   const loop: Pt[] = [first[0]]; let cur = first[1];
-  while (cur[0] !== first[0][0] || cur[1] !== first[0][1]) { loop.push(cur); const n = next.get(`${cur[0]},${cur[1]}`); if (!n) break; cur = n; }
+  while (cur[0] !== first[0][0] || cur[1] !== first[0][1]) { loop.push(cur); const n = next.get(`${cur[0]},${cur[1]}`); /* v8 ignore next -- garde défensive inatteignable : chaque sommet de l'union a une arête sortante (les arêtes opposées s'annulent par paires) */ if (!n) break; cur = n; }
   return loop.filter((p, i) => { const a = loop[(i + loop.length - 1) % loop.length], b = loop[(i + 1) % loop.length]; return (p[0] - a[0]) * (b[1] - p[1]) - (p[1] - a[1]) * (b[0] - p[0]) !== 0; }); // sans les points alignés
 }
