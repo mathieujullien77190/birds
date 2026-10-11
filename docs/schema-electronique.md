@@ -1,6 +1,6 @@
 # Schéma électronique du nichoir isolé
 
-Un panneau solaire de 100 W charge une batterie LiFePO4 12,8 V ; la batterie alimente un Raspberry Pi 5 (via un convertisseur 12 V → 5 V) et un pont en H qui inverse le courant du Peltier : froid le jour, chaud la nuit, pour garder environ 5 °C d'écart. Ce document décrit le montage tel qu'il est modélisé dans l'outil « Plaques » (groupe « Électronique »), puis donne, composant par composant, les paramètres à respecter.
+Un panneau solaire de 100 W charge une batterie LiFePO4 12,8 V ; la batterie alimente un Raspberry Pi 5 (via un convertisseur 12 V → 5 V) et un ventilateur silencieux de 60 mm qui aspire l'air chaud du nid à travers le toit (l'entrée d'air est le trou d'envol et une prise d'air basse dans l'isolant). Le ventilateur ne tourne que quand il fait chaud : le Pi le pilote en PWM et peut couper son 12 V par un petit interrupteur. Ce document décrit le montage tel qu'il est modélisé dans l'outil « Plaques » (groupe « Électronique »), puis donne, composant par composant, les paramètres à respecter. (Le Peltier, son pont en H et son filtre ont été retirés le 2026-10-11 : trop faible en refroidissement.)
 
 ## Schéma général
 
@@ -19,10 +19,8 @@ flowchart TB
     BUCK["Convertisseur 12 V → 5 V 5 A<br/>sortie USB-C"]
     PI["Raspberry Pi 5"]
     SW["Module 2 MOSFET<br/>LED on / off"]
-    HB["Pont en H Pololu VNH5019"]
-    FILT["Filtre LC<br/>100 µH + 1000 µF"]
-    TEC["Peltier TEC1-12706<br/>+ plaque alu + dissipateur"]
-    HOT["Sonde DS18B20<br/>sur le dissipateur"]
+    SWF["Interrupteur 12 V du ventilateur<br/>MOSFET côté +"]
+    FAN["Ventilateur Noctua NF-A6x25 PWM<br/>60 mm, 12 V, cassette amovible"]
   end
   subgraph NID["Dans le nid (sous le plafond)"]
     CAM1["Caméra 1 (NoIR)"]
@@ -35,10 +33,11 @@ flowchart TB
   FUSE --> RAIL
   RAIL --> BUCK
   BUCK -->|"5 V USB-C"| PI
-  RAIL -->|"12 V + / −"| HB
-  HB -->|"OUTA / OUTB (PWM 20 kHz)"| FILT
-  FILT -->|"courant lissé, sens réversible"| TEC
-  PI -->|"GPIO18 (broche 12) PWM<br/>GPIO13 (broche 33) INA<br/>GPIO19 (broche 35) INB<br/>3,3 V broche 17 → VDD<br/>masse broche 14"| HB
+  RAIL -->|"12 V + / −"| SWF
+  SWF -->|"12 V commuté (connecteur 4 broches)"| FAN
+  RAIL -->|"12 V − (masse)"| FAN
+  PI -->|"GPIO27 (broche 13) commande<br/>3,3 V"| SWF
+  PI -->|"GPIO18 (broche 12) PWM 25 kHz<br/>GPIO17 (broche 11) tachymètre<br/>masse broche 14"| FAN
   PI -->|"nappe CSI → CAM0"| CAM1
   PI -->|"longue nappe CSI → CAM1<br/>par la fente de la plaque avant"| CAM2
   PI -->|"GPIO23 (broche 16) IN1<br/>GPIO24 (broche 18) IN2<br/>masse broche 6"| SW
@@ -47,7 +46,6 @@ flowchart TB
   SW -->|"masse commutée OUT1"| IR
   SW -->|"masse commutée OUT2"| IR2
   PI -->|"I2C : 3,3 V broche 1, SDA 3, SCL 5, masse 9"| SENS
-  HOT -->|"1-Wire : 3,3 V broche 1, données GPIO4 broche 7, masse broche 25"| PI
   linkStyle 0 stroke:#111827,stroke-width:2.5px
   linkStyle 1 stroke:#dc2626,stroke-width:2.5px
   linkStyle 2 stroke:#dc2626,stroke-width:2.5px
@@ -56,17 +54,17 @@ flowchart TB
   linkStyle 5 stroke:#dc2626,stroke-width:2.5px
   linkStyle 6 stroke:#dc2626,stroke-width:2.5px
   linkStyle 7 stroke:#dc2626,stroke-width:2.5px
-  linkStyle 8 stroke:#dc2626,stroke-width:2.5px
-  linkStyle 9 stroke:#7c3aed,stroke-width:2.5px
-  linkStyle 10 stroke:#d97706,stroke-width:2.5px
+  linkStyle 8 stroke:#111827,stroke-width:2.5px
+  linkStyle 9 stroke:#f97316,stroke-width:2.5px
+  linkStyle 10 stroke:#2563eb,stroke-width:2.5px
   linkStyle 11 stroke:#d97706,stroke-width:2.5px
-  linkStyle 12 stroke:#6b7280,stroke-width:2.5px
-  linkStyle 13 stroke:#dc2626,stroke-width:2.5px
+  linkStyle 12 stroke:#d97706,stroke-width:2.5px
+  linkStyle 13 stroke:#6b7280,stroke-width:2.5px
   linkStyle 14 stroke:#dc2626,stroke-width:2.5px
-  linkStyle 15 stroke:#111827,stroke-width:2.5px
+  linkStyle 15 stroke:#dc2626,stroke-width:2.5px
   linkStyle 16 stroke:#111827,stroke-width:2.5px
-  linkStyle 17 stroke:#eab308,stroke-width:2.5px
-  linkStyle 18 stroke:#2563eb,stroke-width:2.5px
+  linkStyle 17 stroke:#111827,stroke-width:2.5px
+  linkStyle 18 stroke:#eab308,stroke-width:2.5px
   classDef pv fill:#1e3a8a,stroke:#1c1917,color:#fff
   classDef mppt fill:#1d4ed8,stroke:#1c1917,color:#fff
   classDef fuse fill:#dc2626,stroke:#1c1917,color:#fff
@@ -74,10 +72,8 @@ flowchart TB
   classDef buck fill:#0e7490,stroke:#1c1917,color:#fff
   classDef pi fill:#15803d,stroke:#1c1917,color:#fff
   classDef sw fill:#1f2937,stroke:#1c1917,color:#fff
-  classDef hb fill:#b91c1c,stroke:#1c1917,color:#fff
-  classDef filt fill:#374151,stroke:#1c1917,color:#fff
-  classDef tec fill:#e2e8f0,stroke:#1c1917,color:#1c1917
-  classDef hot fill:#111827,stroke:#1c1917,color:#fff
+  classDef swf fill:#7e22ce,stroke:#1c1917,color:#fff
+  classDef fan fill:#8b5a2b,stroke:#1c1917,color:#fff
   classDef cam fill:#166534,stroke:#1c1917,color:#fff
   classDef ir fill:#7f1d1d,stroke:#1c1917,color:#fff
   classDef sens fill:#1d4ed8,stroke:#1c1917,color:#fff
@@ -88,16 +84,14 @@ flowchart TB
   class BUCK buck
   class PI pi
   class SW sw
-  class HB hb
-  class FILT filt
-  class TEC tec
-  class HOT hot
+  class SWF swf
+  class FAN fan
   class CAM1,CAM2 cam
   class IR,IR2 ir
   class SENS sens
 ```
 
-Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régulateur bleu, fusible rouge, batterie verte, convertisseur bleu-vert, Pi vert, pont en H rouge, Peltier blanc, LED brun-rouge…). Couleur des traits = couleur des fils dans la 3D : rouge pour le + (12 V, 5 V), noir pour la masse et le câble du panneau, violet pour la commande du pont en H, jaune pour l'I2C, bleu pour le 1-Wire, gris pour la commande des LED, orange pour les nappes caméra.
+Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régulateur bleu, fusible rouge, batterie verte, convertisseur bleu-vert, Pi vert, interrupteur violet, ventilateur brun, LED brun-rouge…). Couleur des traits = couleur des fils dans la 3D : rouge pour le + (12 V, 5 V), noir pour la masse et le câble du panneau, orange (violet-orangé) pour la commande de l'interrupteur, bleu pour le PWM du ventilateur, jaune pour l'I2C, gris pour la commande des LED, orange foncé pour les nappes caméra.
 
 ## Branchements, fil par fil
 
@@ -105,17 +99,18 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 | --- | --- | --- | --- |
 | Câble 12 V | Panneau solaire | Régulateur de charge, sous le nichoir | Longe le sol et arrive sous le nichoir, à l'abri du lambris |
 | Charge | Régulateur | Batterie, via le fusible | Deux fils (rouge et noir) montent dans une gaine de Ø 16 mm, dans l'isolant du coin arrière droit (à 1 cm du mur arrière, pile sur le joint entre la plaque d'isolant du mur droit et celle du mur arrière) : ils traversent le fond, le plancher intérieur, le cadre du toit et le plancher du toit par des trous de 16 mm, pile le diamètre de la gaine, puis arrivent sur le dessus du toit. Le fusible protège la batterie et le câblage |
-| Rail 12 V | Batterie / fusible | Convertisseur 12 → 5 V et pont en H | Fils rouge (+) et noir (−), répartis par **deux Wago 221 à 3 entrées** (**seulement avec le Peltier** : sans lui il n'y a qu'un seul départ, le fusible et la batterie vont droit au convertisseur, sans Wago) (un pour le +, un pour le −, posés à droite du fusible) : un fil entre (le + par le fusible, le − par la borne de la batterie), deux repartent |
+| Rail 12 V | Batterie / fusible | Convertisseur 12 → 5 V et ventilateur (par son interrupteur) | Fils rouge (+) et noir (−), répartis par **deux Wago 221 à 3 entrées** (un pour le +, un pour le −, posés à droite du fusible) : un fil entre (le + par le fusible, le − par la borne de la batterie), deux repartent : un vers le convertisseur, un vers le ventilateur (le + par l'interrupteur, le − directement) |
 | Alimentation du Pi | Convertisseur 12 → 5 V | Prise USB-C du Pi 5 | 5 V, 5 A recommandés pour le Pi 5 |
-| Puissance Peltier | Pont en H, sorties OUTA / OUTB | Filtre LC puis Peltier TEC1-12706 | Le filtre lisse le PWM en courant continu ; inverser le sens du courant change la face froide |
-| Commande du pont en H | Pi GPIO18 (broche 12, PWM), GPIO13 (broche 33, INA), GPIO19 (broche 35, INB), 3,3 V (broche 17) | Entrées PWM, INA, INB et VDD (alimentation logique) du VNH5019 | Masse commune : broche 14. INA / INB choisissent le sens, PWM la puissance ; ENA / ENB sont tirés à l'état haut sur la carte Pololu |
+| Interrupteur du ventilateur | Wago + (12 V) ; Pi GPIO27 (broche 13) ; masse sur le Wago − | Entrée, commande 3,3 V et masse du module interrupteur 12 V (côté +) | Le Noctua ne s'arrête pas à 0 % de PWM (il tourne à environ 20 %) : on coupe son 12 V. Côté **+**, pas côté masse : une masse coupée ferait remonter jusqu'à 12 V dans les fils PWM et tachymètre vers les GPIO |
+| 12 V du ventilateur | Sortie de l'interrupteur (+, rouge) ; Wago − (−, noir) | Connecteur 4 broches du ventilateur | Fils de 1,6 mm de diamètre ; le connecteur se débranche à la main (cassette amovible) |
+| Commande du ventilateur | Pi GPIO18 (broche 12, PWM matériel 25 kHz), GPIO17 (broche 11, tachymètre), masse commune broche 14 | Fils PWM (bleu) et tachymètre (jaune) du Noctua, par le connecteur | Le PWM est référencé à la masse du ventilateur : d'où le fil de masse commune vers la broche 14. Le tachymètre est collecteur ouvert : tirage interne du GPIO17 (pull-up logiciel) |
 | Caméra 1 | Pi, port CSI CAM0 | Camera Module 3 NoIR, dans le nid | Courte nappe, passe par l'ouverture du toit |
 | Caméra 2 | Pi, port CSI CAM1 | Caméra 2, dehors sous le débord | Longue nappe, sort par une fente rectangulaire 20 × 4 mm de la plaque avant |
 | LED infrarouges | Pi broche 4 (5 V) | Carte 4 LED IR | Masse par le module MOSFET (OUT1) : le Pi les allume ou les éteint |
 | LED infrarouges extérieures | Pi broche 2 (5 V) | Carte 4 LED IR à côté de la caméra 2 | Masse par le module MOSFET (OUT2) ; les fils suivent la nappe et sortent par la même fente |
 | Module MOSFET | Pi GPIO23 (broche 16), GPIO24 (broche 18), masse broche 6 | Module 2 canaux (MOSFET logique 3,3 V) | Coupe la masse de chaque carte de LED ; 5 V direct, courant des LED hors du GPIO |
 | Capteur température / humidité | Pi broches 1 (3,3 V), 3 (SDA), 5 (SCL), 9 (masse) | Capteur collé sous le plafond | Liaison I2C, 4 fils |
-| Sonde du dissipateur | Pi broches 1 (3,3 V), 7 (GPIO4, données 1-Wire), 25 (masse) | DS18B20 glissée entre deux ailettes, sur le dissipateur | Sécurité : le Pi coupe le Peltier si la face chaude dépasse environ 60 °C ; résistance de 4,7 kΩ entre données et 3,3 V |
+| Prise d'air basse | — (pas d'électronique) | Conduit de contreplaqué dans l'isolant du mur gauche avant, fente dans la paroi intérieure à mi-hauteur | Section libre 11,6 cm² ; clapet à gravité et grillage sur la fente, bouchon amovible sous la boîte |
 
 ## Explication, bloc par bloc
 
@@ -125,9 +120,9 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 
 **Régulation.** Le régulateur de charge reçoit le panneau, charge la batterie et empêche la surcharge. Un fusible placé juste après la batterie protège tout le reste.
 
-**Cerveau.** Le Raspberry Pi 5 est posé sur des entretoises de 6 mm dans le coin arrière gauche du toit, avec des cales de bois sur tous les côtés. Il pilote le pont en H, lit le capteur, commande les deux caméras et allume les LED infrarouges. Ses prises (USB, Ethernet, HDMI) regardent la plaque arrière, percée d'une fenêtre avec un petit tunnel de contreplaqué : on branche sans ouvrir le nichoir. Il lui faut un convertisseur 12 V → 5 V capable de fournir 5 A.
+**Cerveau.** Le Raspberry Pi 5 est posé sur des entretoises de 6 mm dans le coin arrière gauche du toit, avec des cales de bois sur tous les côtés. Il pilote le ventilateur (PWM, tachymètre, interrupteur 12 V), lit le capteur, commande les deux caméras et allume les LED infrarouges. Ses prises (USB, Ethernet, HDMI) regardent la plaque arrière, percée d'une fenêtre : on branche sans ouvrir le nichoir. Il lui faut un convertisseur 12 V → 5 V capable de fournir 5 A.
 
-**Climatisation.** Le Peltier est collé sur une plaque d'aluminium (la face froide, côté nid) ; son dissipateur (face chaude) est dans le compartiment unique du toit (70 × 115 mm, ouvert au-dessus), qu'il partage avec la caméra 1, les LED et les fils du capteur. Le pont en H VNH5019 envoie le courant dans un sens le jour (la plaque refroidit le nid) et dans l'autre la nuit (elle le chauffe). Le Pi règle l'intensité par PWM d'après le capteur de température du nid, et coupe tout si la sonde posée sur le dissipateur dépasse environ 55 °C : un Peltier sans refroidissement se détruit en une minute. L'eau de condensation ruisselle dans une gouttière et sort par un trou Ø 4 dans le coin arrière droit du fond.
+**Ventilation.** Un ventilateur silencieux de 60 mm (Noctua NF-A6x25 PWM) aspire l'air chaud du nid à travers le plafond et le rejette à l'arrière, sous le débord du toit en chêne ; l'air frais entre par le trou d'envol et par une prise d'air basse dans l'isolant (voir la fiche « Prise d'air basse »). Le ventilateur n'est pas dans la zone de l'électronique : il tourne dans une **cassette amovible à la main** (quatre parois de contreplaqué, un cadre, un couvercle à poignée, le ventilateur posé sur quatre plots en caoutchouc) qui se pose par gravité dans un **siège fixe** collé sur le plancher du toit (la goulotte : trois parois, la plaque arrière du toit fait la quatrième). La cassette a une fenêtre de sortie en face de celle de la plaque arrière (joint de mousse entre les deux) ; dehors, un grillage anti-insectes et un clapet à gravité en film léger (articulé en haut) s'ouvre sous le flux et retombe quand le ventilateur s'arrête. Un petit connecteur 4 broches relie la cassette au toit (12 V commuté, masse, PWM, tachymètre) : on le débranche à la main. Le Pi allume le ventilateur seulement quand il fait chaud : il règle sa vitesse par PWM, et peut couper son 12 V avec l'interrupteur (le Noctua tourne encore à environ 20 % à 0 % de PWM). **Été / hiver, en 4 lignes** : 1) retirer le toit en chêne (on accède au grenier) ; 2) débrancher le connecteur 4 broches et sortir la cassette à la main ; 3) poser à sa place le bloc isolant d'hiver (même empreinte, mousse de 35 mm : il rend au plafond son isolation) ; 4) l'été, faire l'inverse et rebrancher le connecteur.
 
 **Vision.** La caméra 1 regarde dans le nid, éclairée par 4 LED infrarouges ; la caméra 2 est dehors, sous le débord du toit en chêne, à l'avant gauche, tournée vers le trou d'entrée, avec une seconde carte de 4 LED infrarouges à côté d'elle pour éclairer le trou la nuit. Sa longue nappe part du Pi, traverse le toit et sort par la fente de la plaque avant.
 
@@ -168,7 +163,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Tension de charge max | 14,6 V (3,65 V par cellule) | — |
 | Tension de coupure basse | environ 10 à 10,5 V (2,5 V par cellule ; certaines fiches annoncent 2 V) | — |
 | Capacité | 6 Ah, soit environ 77 Wh | 6 Ah |
-| Courant de décharge continu du BMS | au moins 10 A (Peltier, Pi et marge) | — |
+| Courant de décharge continu du BMS | au moins 5 A (Pi, caméras, ventilateur et marge) | — |
 | BMS | obligatoire : équilibrage, coupure haute et basse, court-circuit | — |
 | Température de charge | pas de charge sous 0 °C : BMS avec protection basse température (important pour un nichoir dehors) | — |
 | Dimensions du pack | environ 70 × 128 × 32 mm pour 4 cellules côte à côte | 128 × 70 × 32 mm (vraie taille), dans le grenier |
@@ -201,42 +196,35 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Ports caméra | 2 ports CSI/DSI de 22 broches : nappes adaptatrices vers la caméra | position provisoire |
 | Dimensions | 85 × 56 mm, hauteur du composant environ 17 mm | 85 × 56 mm |
 | Stockage | carte microSD ou SSD | — |
-| Refroidissement | dissipateur ou ventilateur d'origine si le toit chauffe | — |
+| Refroidissement | dissipateur ou ventilateur d'origine si le toit chauffe (le Pi est dans le grenier, que le ventilateur du nid ne refroidit pas) | — |
 
-### Pont en H Pololu VNH5019
-
-| Paramètre | Valeur à viser | Dans le modèle |
-| --- | --- | --- |
-| Tension de puissance | 5,5 à 24 V (12 V ici) | 12 V |
-| Courant | 12 A continus, 30 A en pointe (le Peltier en prend environ 6) | — |
-| Logique | niveaux 2,5 à 5 V : compatible avec les GPIO 3,3 V du Pi (le BTS7960, lui, a un buffer 5 V qui lit mal le 3,3 V : c'est pour ça qu'il est écarté) | — |
-| Broches à câbler | VIN et GND (puissance), OUTA / OUTB (Peltier), VDD, PWM, INA, INB, GND ; ENA / ENB, CS et DIAG facultatives | VDD, PWM, INA, INB et GND |
-| Fréquence PWM | jusqu'à 20 kHz | — |
-| Protections | inversion de polarité (jusqu'à −16 V), surtension, sous-tension, surchauffe, surintensité | — |
-| Dimensions | environ 38 × 28 mm, hauteur 8 mm sans connecteurs (10 mm avec borniers) | 38 × 28 × 10 mm |
-
-### Filtre LC du Peltier
+### Ventilateur Noctua NF-A6x25 PWM
 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
-| Rôle | transformer le PWM à 20 kHz du pont en H en courant presque continu : un Peltier alimenté en impulsions pompe moins de chaleur à puissance égale | — |
-| Self | 100 µH, 10 A, faible résistance (self de puissance torique ou blindée) | — |
-| Condensateur | 1 000 µF, 25 V, faible ESR, aux bornes du Peltier | — |
-| Montage | en série sur un fil, condensateur en parallèle sur le Peltier, après le pont (le courant change de sens : condensateur non polarisé ou deux électrolytiques tête-bêche, ou film) | bloc 28 × 18 × 20, derrière le fusible |
-| Alternative | sans filtre, ça marche aussi mais avec 10 à 20 % de rendement en moins | — |
+| Modèle | Noctua NF-A6x25 PWM, 4 fils (+12 V, masse, tachymètre, PWM), silencieux | oui |
+| Dimensions | 60 × 60 × 25 mm | 60 × 60 × 25 mm |
+| Tension | 12 V (la fiche annonce 10,8 à 13,2 V) | 12 V commuté par l'interrupteur |
+| Puissance | environ 0,6 W (environ 0,05 A) : négligeable pour la batterie | — |
+| Vitesse et bruit | environ 3 000 tr/min, environ 19 dB(A) à pleine vitesse (à vérifier à l'achat) ; à vitesse réduite il est quasi inaudible | — |
+| Arrêt | il tourne encore à environ 20 % quand le PWM est à 0 % : couper son 12 V avec l'interrupteur | module interrupteur côté + |
+| Commande | PWM 25 kHz (matériel du Pi) sur GPIO18 (broche 12) ; tachymètre 2 impulsions par tour sur GPIO17 (broche 11) avec tirage interne ; masse commune sur la broche 14 | fils bleu, jaune, noir |
+| Montage | cassette amovible à la main : quatre parois + cadre du bas + couvercle à poignée (contreplaqué 3 mm), quatre plots en caoutchouc de 12 × 2 × 3 mm sous le ventilateur, joint de mousse sous la cassette et derrière | oui, dans un siège fixe (la goulotte) |
+| Connecteur | 4 broches (type Molex / JST), fils fixes côté toit avec une boucle assez longue pour sortir la cassette | bloc noir 6 × 10 × 6 mm entre la cassette et le toit |
+| Ouverture du plafond | 56 de large ; la profondeur (environ 21 mm) est limitée par le mur du nid et le compartiment de la caméra : le débit réel est à mesurer, une grille de contreplaqué (trous Ø 6, pas 8) protège les pales côté nid | 56 × 21 mm |
+| Sortie d'air | fenêtre de 60 × 45 mm dans la cassette puis dans la plaque arrière, grillage anti-insectes et clapet à gravité dehors, sous le débord du toit en chêne ; aucune communication avec la zone du Pi et de la batterie | oui |
+| Hiver | remplacer la cassette par le bloc isolant d'hiver (même empreinte, mousse de 35 mm) pour supprimer la déperdition de chaleur par l'ouverture | pièce de rechange cachée par défaut |
 
-### Peltier TEC1-12706
+### Interrupteur 12 V du ventilateur (côté +)
 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
-| Tension | 12 V nominal, maximum 14,4 à 16,4 V selon la température | 12 V |
-| Courant | maximum 6,4 A | — |
-| Puissance de refroidissement max | environ 50 W (face chaude à 25 °C) | — |
-| Écart de température max | environ 66 °C à vide | — |
-| Résistance | environ 2 Ω | — |
-| Dimensions | 40 × 40 × 3,8 mm | 40 × 40 × 3,8 mm |
-| Contrainte | dissipateur obligatoire sur la face chaude, jamais à pleine puissance sans lui | dissipateur 40 × 40 × 30 mm |
-| À déterminer | rapport cyclique PWM pour tenir 5 °C d'écart : à mesurer, il sera bien inférieur à 100 % | — |
+| Rôle | couper complètement le 12 V du ventilateur (le Noctua ne s'arrête pas à 0 % de PWM) | oui |
+| Côté | **côté +12 V** (« high-side »), pas côté masse : couper la masse ferait remonter jusqu'à 12 V dans les fils PWM et tachymètre, vers les GPIO du Pi (qui ne tolèrent que 3,3 V) | côté + |
+| Type | module « high side switch » à P-MOSFET avec son petit étage de commande, ou module « load switch » 12 V | module violet 17 × 25 × 8 mm |
+| Tension et courant | 12 V (la batterie va de 10 à 14,6 V), 1 A au moins (le ventilateur prend 0,05 A) | — |
+| Commande | logique 3,3 V compatible, sur GPIO27 (broche 13) du Pi | broche 13 |
+| Montage | à côté du Wago +, dans le coin arrière droit du grenier, quatre cales de bois basses | oui |
 
 ### Caméras (Camera Module 3 NoIR)
 
@@ -248,15 +236,18 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Caméra 2 : longueur de nappe | longue ; au-delà d'environ 30 cm, le signal peut devenir instable : à valider ou utiliser une nappe protégée / un prolongateur | longue nappe de 16 mm de large |
 | Caméra 2 : étanchéité | protéger l'objectif de la pluie sous le débord | sous le débord du toit |
 
-### Sonde de température du dissipateur (DS18B20)
+### Prise d'air basse (conduit dans l'isolant)
 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
-| Modèle | DS18B20 en boîtier TO-92 (ou version étanche en tube inox) | bloc 5 × 5 × 6 |
-| Alimentation | 3,3 V, liaison 1-Wire sur GPIO4 avec résistance de 4,7 kΩ vers le 3,3 V | broches 1, 7, 25 |
-| Plage | −55 à +125 °C, ± 0,5 °C | — |
-| Fixation | glissée entre deux ailettes, sur le dissipateur, avec un point de pâte thermique | sur le dessus, au centre |
-| Seuil | couper le Peltier au-dessus d'environ 55 °C (le haut des ailettes est un peu plus froid que la semelle), le relancer sous 40 °C | à régler dans le programme |
+| Rôle | une entrée d'air de plus, en bas, pour que l'air traverse le nid jusqu'au ventilateur (à l'arrière) ; le trou d'envol reste l'entrée principale. À faire dès la construction : impossible à rajouter une fois monté | oui, toujours présente |
+| Électronique | aucune | — |
+| Position | dans l'épaisseur d'isolant (39 mm) du mur gauche, à l'avant (centre à 30 mm du mur avant, côté opposé au ventilateur), du dessous de la boîte à mi-hauteur du nid | fente à 74 à 104 mm au-dessus du fond du nid, sous le trou d'envol |
+| Section libre | au moins 8 cm² | 29 × 40 mm = 11,6 cm² |
+| Pièces | 4 parois de contreplaqué + couvercle (« Conduit d'air 1 à 5 »), étanches à l'air et à l'humidité de la laine ; ouverture dans le fond extérieur (le fond intérieur n'a que le passage du conduit) ; fente de 36 × 30 mm dans la paroi intérieure gauche | oui |
+| Protection | grillage fin sur l'ouverture du dessous et sur la fente, clapet léger à gravité à l'intérieur (s'ouvre sous l'aspiration, retombe sinon), auvent sous la boîte contre la pluie | oui |
+| Bouchon | un bouchon de bois amovible enfoncé dans l'ouverture du dessous la condamne de l'extérieur (hiver) | pièce cachée par défaut |
+| Habillage | le lambris descend de 10 mm (45 mm avec le solaire) sous la boîte : il ne ferme pas le dessous, l'air entre par en bas ; le régulateur solaire est à droite et ne bouche pas l'ouverture | oui |
 
 ### Carte de 4 LED infrarouges
 
@@ -277,6 +268,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 | Mesures | température, humidité et pression | — |
 | Dimensions de la carte | environ 19 × 18 mm (jusqu'à 25 × 18 selon la marque) | 19 × 18 mm |
 | Contrainte | la condensation est possible sous le plafond : choisir un capteur protégé ou le vernir | collé sous le plafond |
+| Rôle | donne au Pi la température du nid pour piloter le ventilateur ; toujours présent | oui |
 
 ### Module 2 × MOSFET (LED infrarouges)
 
@@ -291,19 +283,20 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas).
 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
-| Rôle | répartir le + et le − de la batterie vers le pont en H et le convertisseur (un fil entre, deux repartent) | deux blocs 20 × 13 × 11 mm |
+| Rôle | répartir le + et le − de la batterie vers l'interrupteur du ventilateur et le convertisseur (un fil entre, deux repartent) | deux blocs 20 × 13 × 11 mm |
 | Modèle | Wago 221-413, 3 entrées à levier, fil de 0,2 à 4 mm² | — |
-| Courant | 32 A annoncés, nous sommes à environ 8 A | — |
+| Courant | 32 A annoncés, nous sommes à environ 1 A | — |
 | Précaution | enfoncer les fils jusqu'au fond ; pour un montage définitif, bornier à vis ou cosses serties | à droite du fusible |
 
 ### Câblage
 
 | Paramètre | Valeur à viser |
 | --- | --- |
-| Puissance 12 V (Peltier, pont en H, batterie) | au moins 2,5 mm², le plus court possible |
+| Puissance 12 V (batterie, fusible, rail) | au moins 2,5 mm², le plus court possible |
+| Ventilateur (12 V commuté) | 0,25 mm² suffit (0,05 A) ; fils du Noctua d'origine |
 | Panneau vers régulateur | environ 4 mm² (tirage d'environ 70 cm à plusieurs mètres) |
-| Signaux (PWM, I2C) | 0,25 mm² environ |
-| Masse | commune entre le Pi, le pont en H et le rail 12 V |
+| Signaux (PWM, tachymètre, commande de l'interrupteur, I2C) | 0,25 mm² environ |
+| Masse | commune entre le Pi, le ventilateur (broche 14) et le rail 12 V |
 
 ## Vérification que rien ne coince
 
@@ -311,26 +304,27 @@ Contrôle fait par calcul sur le modèle : recouvrement entre chaque composant e
 
 | Composant | Résultat |
 | --- | --- |
-| Pont en H | déplacé à droite derrière la batterie ; corrigé : le BTS7960 dépassait de 9 mm de la pente à l'avant ; le VNH5019 passe avec 9 mm de jeu |
+| Ventilateur et son siège | cassette (66 × 66 mm, 97 mm de haut) posée dans un siège de 73 × 72 mm collé sur le plancher du toit, contre la plaque arrière : à environ 8 mm de la gaine, à environ 5 mm des cales du Pi, loin de la batterie (plus de 5 cm) ; la poignée de la cassette est à environ 3 mm sous la pente du toit |
 | Régulateur | sous le nichoir, à plat (61 × 137 × 33 mm), sans conflit : le lambris descend de 45 mm pour le protéger. Sans le lambris (option « Habillage »), il est exposé |
 | Fusible | passe (9 mm de jeu sous la pente) |
 | Batterie | vraie taille (128 × 70 × 32 mm), montée dans le grenier, dans le coin avant droit, à 1 cm du mur de droite et du mur avant, sur le dessus du toit, avec une cale de bois de 3 mm tout autour : le toit a été relevé (58 → 84 mm devant) pour elle, 6 mm de jeu sous la pente ; le compartiment caméra est réduit à 38 mm pour que la cale ne soit pas dans le vide |
-| Raspberry Pi | passe (13 mm sous la pente) ; 5 mm d'écart avec le compartiment du Peltier |
+| Raspberry Pi | passe (13 mm sous la pente) ; environ 5 mm d'écart avec le siège du ventilateur |
 | Convertisseur 12 → 5 V | ajouté à l'avant, taille estimée ; il passe sous la pente avec très peu de jeu |
-| Peltier et dissipateur | passent, dans le compartiment unique (avec la caméra et le capteur), loin sous la pente. Le dissipateur chaud partage l'air de la caméra : l'aération arrière évacue la chaleur, la caméra supporte environ 50 °C |
+| Nappe de la caméra 1 | corrigée pour contourner le siège du ventilateur : elle passe devant lui, au-dessus des fils des LED |
 | Caméra 1, capteur | passent |
-| Tunnel des prises du Pi | corrigé : les côtés dépassaient dans la plaque du haut |
+| Prise d'air basse | le conduit (35 × 46 mm) traverse l'isolant sous le plancher, le fond intérieur (par un passage découpé) et l'isolant du mur gauche ; libre dessous, loin du régulateur |
 | Fils et nappes | corrigé : plusieurs fils sortaient de 0,5 à 5 mm au-dessus de la pente, ils sont maintenant ramenés dessous |
-| Pièces en bois (88 : murs, planchers, cadres du toit, barres, tasseaux, cales, tunnel des prises) | contrôle de recouvrement réel, trous et encoches compris : aucune paire de pièces ne se chevauche (les barres du toit étaient en contact exact avec le cadre, sans recouvrement) |
+| Pièces en bois | contrôle de recouvrement par boîtes orientées : les seuls recouvrements restants sont voulus (dents dans leurs fentes, parois du siège et de la cassette qui traversent le dessus du toit par son encoche, conduit d'air dans le passage du fond) |
 | Caméra 2 | dehors, ne touche pas le toit ; sa nappe passe par la fente de la plaque avant |
 
-Limite du contrôle : les formes des pièces sont des boîtes, donc les trous et encoches ne sont pas pris en compte. Les composants sont dessinés à leur vraie taille même quand ils ne tiennent pas : les chevauchements restants (régulateur, batterie) sont à corriger en choisissant d'autres emplacements ou composants.
+Contrôle des fils : aucun fil du ventilateur ne traverse une nappe ni un autre fil (distance mesurée sur les courbes réelles) ; les fils vers le Pi courent en partie dans l'isolant, sous le dessus du toit, pour contourner le siège. Limite du contrôle : les formes des pièces sont des boîtes, donc les trous et encoches ne sont pas pris en compte. Les composants sont dessinés à leur vraie taille même quand ils ne tiennent pas : les chevauchements restants (régulateur, batterie) sont à corriger en choisissant d'autres emplacements ou composants.
 
 ## Stratégie d'énergie (décision : on commence comme ça)
 
 - Batterie de 6 Ah (4 cellules 32700, 77 Wh) conservée pour le premier montage.
-- Le Peltier est piloté en PWM faible par le Pi pour tenir environ 5 °C d'écart, jamais à pleine puissance (60 W = la batterie vidée en une heure).
-- Le Pi coupe le Peltier la nuit dès que la batterie descend sous 12 V, et le relance quand le panneau recharge.
+- Consommation moyenne d'environ 7 W : Pi 3,5 W + caméras 1,4 W + LED, plus 0,6 W de ventilateur quand il tourne : la batterie de 77 Wh et le panneau de 100 W sont largement dimensionnés, sans changer le matériel.
+- Le ventilateur ne tourne que quand il fait chaud (le Pi le règle en PWM, et coupe son 12 V par l'interrupteur quand il est inutile).
+- Le Peltier (60 W à pleine puissance) a été retiré : trop faible en refroidissement, et gros consommateur.
 - Si la marge est trop courte à l'usage, passer à 12 Ah (8 cellules) : à mesurer avec le vrai matériel avant de conclure.
 
 ## Poids (estimation)
@@ -339,7 +333,7 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 
 | Élément | Poids |
 | --- | --- |
-| Contreplaqué 3 mm (108 pièces, 0,67 m²) | 0,95 kg |
+| Contreplaqué 3 mm (73 pièces, 0,88 m²) | 1,23 kg |
 | Habillage lambris 10 mm (0,33 m²) | 1,6 kg |
 | Toit en chêne 18 mm | 1,1 kg |
 | Isolant laine de bois 39 mm (murs, fond, toit) | 0,55 kg |
@@ -347,13 +341,13 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 | Régulateur de charge Genasun | 0,25 kg |
 | Raspberry Pi 5 + carte microSD | 0,05 kg |
 | Caméras, LED, capteur, convertisseur, modules, fusible | 0,15 kg |
-| Peltier, dissipateur, plaque alu | 0,12 kg |
+| Ventilateur, connecteur, interrupteur, plots, mousse, bloc d'hiver | 0,15 kg |
 | Câbles, gaine, nappes | 0,15 kg |
 | Cales, barres, étriers, clavettes | 0,1 kg |
-| **Total accroché à l'arbre** | **≈ 5,6 kg** |
+| **Total accroché à l'arbre** | **≈ 5,9 kg** |
 | Panneau solaire 100 W (au sol, à part) | 8 kg |
 
-**Tenue de la fixation.** 5,6 kg font 55 N. Ils sont repris par 4 dents de 9 × 32 mm dans du contreplaqué de 3 mm : la pression sur le bois reste sous 1 MPa, pour une résistance d'au moins 20 MPa. Le centre de gravité est à environ 11 cm du dos, ce qui ajoute un couple de 6 N·m, soit un effort d'environ 60 N sur la dent du haut : toujours loin de la limite. Les 4 vis Ø 5 dans le tronc (ou une sangle) tiennent cela sans difficulté. Les points à soigner : le collage des 3 plaques de chaque nervure, et des vis inox de 5 × 60 dans du bois sain.
+**Tenue de la fixation.** 5,9 kg font 58 N. Ils sont repris par 4 dents de 9 × 32 mm dans du contreplaqué de 3 mm : la pression sur le bois reste sous 1 MPa, pour une résistance d'au moins 20 MPa. Le centre de gravité est à environ 11 cm du dos, ce qui ajoute un couple de 6 N·m, soit un effort d'environ 60 N sur la dent du haut : toujours loin de la limite. Les 4 vis Ø 5 dans le tronc (ou une sangle) tiennent cela sans difficulté. Les points à soigner : le collage des 3 plaques de chaque nervure, et des vis inox de 5 × 60 dans du bois sain.
 
 ## Prix (ordre de grandeur, 2026)
 
@@ -365,11 +359,9 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | 2 × Camera Module 3 NoIR + 2 nappes adaptatrices 22 → 15 broches | 70 € |
 | Électronique | 2 × carte 4 LED infrarouges 850 nm | 10 € |
 | Électronique | Capteur BME280 | 5 € |
-| Électronique | Sonde DS18B20 + résistance 4,7 kΩ | 3 € |
-| Électronique | Peltier TEC1-12706 + dissipateur 40 × 40 × 30 + pâte thermique | 12 € |
-| Électronique | Plaque alu 116 × 43 × 3 | 8 € |
-| Électronique | Pont en H Pololu VNH5019 | 30 € |
-| Électronique | Filtre LC (self 100 µH 10 A + condensateur 1000 µF) | 8 € |
+| Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € |
+| Électronique | Module interrupteur 12 V côté + (P-MOSFET, commande 3,3 V) | 4 € |
+| Électronique | Connecteur 4 broches (mâle + femelle) | 2 € |
 | Électronique | Module 2 × MOSFET | 5 € |
 | Électronique | Convertisseur 12 V → 5 V 5 A USB-C | 15 € |
 | Électronique | 4 cellules LiFePO4 32700 + BMS 4S + support | 40 € |
@@ -381,27 +373,28 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Corps | Contreplaqué peuplier 3 mm (10 planches de 41 × 40 cm) | 20 € |
 | Corps | Laine de bois 40 mm (0,3 m²) | 10 € |
 | Corps | Colle, vis inox | 8 € |
+| Corps | Bloc isolant d'hiver (mousse de 35 mm + cadre de contreplaqué) et joints de mousse | 7 € |
+| Corps | Prise d'air basse (contreplaqué, grillage fin, bouchon) | 4 € |
 | Habillage | Chêne 18 mm (27 × 30 cm) | 12 € |
 | Habillage | Lambris pin 10 mm (0,35 m²) | 15 € |
 | Habillage | Peinture blanche | 7 € |
 
-Le poste le plus cher est le régulateur Genasun (120 €) : un régulateur PWM LiFePO4 à 20 € ferait le travail avec un rendement moindre, et enlèverait 100 € au total. La découpe laser n'est pas comptée.
+Le ventilateur et son interrupteur coûtent environ 21 € (le Peltier, son pont en H, son filtre, sa sonde et sa plaque en coûtaient 61 €). Le poste le plus cher est le régulateur Genasun (120 €) : un régulateur PWM LiFePO4 à 20 € ferait le travail avec un rendement moindre, et enlèverait 100 € au total. La découpe laser n'est pas comptée.
 
 ## Points à vérifier avant de construire
 
-- **Bilan d'énergie.** Un TEC1-12706 à pleine puissance consomme environ 60 W, soit moins d'une heure sur 77 Wh. Il faut le limiter fortement par PWM (un écart de 5 °C n'en demande qu'une petite fraction) ou prévoir une batterie plus grosse. À mesurer avec le vrai matériel.
+- **Débit du ventilateur.** L'ouverture du plafond sous le ventilateur ne fait que 56 × 21 mm (le mur du nid et le compartiment de la caméra limitent la profondeur) : le débit réel est à mesurer avec le vrai matériel, et la température du nid à surveiller. Un joint de mousse ou de silicone autour des plots évite que l'air chaud rejeté ne revienne à l'aspiration.
+- **Batterie au-dessus du compartiment de la caméra.** La batterie dépasse de 7 mm au-dessus de l'ouverture du compartiment de la caméra (sa cale arrière saute l'ouverture) : à vérifier au montage.
 - **Taille de la batterie.** Le pack de 4 cellules 32700 (70 × 128 × 32 mm) est dessiné à sa vraie taille et dépasse du mur droit. Choix à faire : pack 2×2 ou batterie hors du toit.
 - **Régulateur sous le nichoir.** Il n'est protégé que par le lambris : sans l'option « Habillage », rien ne le couvre. Il chauffe de 2 à 5 W, donc ne pas le noyer dans l'isolant. La gaine de Ø 16 mm traverse sept plaques par des trous de 16 mm, serrés : elle tient sans jeu. Le nichoir doit être posé assez haut pour que le régulateur (33 mm) ne touche pas le sol.
 - **Convertisseur 12 → 5 V.** Dessiné avec une taille estimée, à confirmer avec le module acheté.
-- **Pont en H.** Le BTS7960 (50 × 50 × 43 mm) a été remplacé par un Pololu VNH5019 (38 × 28 × 8 mm) : le grenier est trop bas à l'avant (environ 13 mm sous la pente au-dessus du dessus du toit) pour le BTS7960 avec son radiateur.
 - **Pi 5.** Le modèle 3D n'est pas encore intégré : les ports caméra sont à une position provisoire.
 
 ## Liens des composants
 
 - [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/)
 - [Camera Module 3](https://www.raspberrypi.com/products/camera-module-3/)
-- [Peltier TEC1-12706, fiche HB](https://www.radiolocman.com/datasheet/pdf.html?di=173597)
-- [Pont en H Pololu VNH5019](https://www.pololu.com/product/1451)
+- [Ventilateur Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm)
 - [Cellule LiFePO4 32700](https://robu.in/?p=2024523)
 - [Régulateur Genasun GV-10-Li](https://azcus.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948)
 - [Capteur BME280, fiche Bosch](https://cdn.sparkfun.com/assets/5/3/0/f/7/BME280_Datasheet.pdf)

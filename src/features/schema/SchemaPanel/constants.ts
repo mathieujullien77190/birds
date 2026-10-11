@@ -5,7 +5,7 @@ import type { Keys } from './types';
 export const MERMAID_SRC = (/```mermaid\n([\s\S]*?)```/.exec(schemaMd)?.[1] ?? 'flowchart TB\n  X["schéma introuvable"]').trim();
 
 /** Options du nichoir dont les blocs disparaissent du schéma quand elles sont absentes. */
-export const OPTION_NODES = { clim: ['HB', 'FILT', 'TEC', 'HOT', 'SENS', 'RAIL'], cam2: ['CAM2', 'IR2'], solar: ['PV', 'MPPT'] } as const;
+export const OPTION_NODES = { cam2: ['CAM2', 'IR2'], solar: ['PV', 'MPPT'] } as const;
 
 /** Pièce (nom) → nœuds et flèches du schéma. Les flèches sont [de, vers] comme dans la source mermaid. */
 export const MAP: [RegExp, Keys][] = [
@@ -15,10 +15,8 @@ export const MAP: [RegExp, Keys][] = [
   [/^LED infrarouges extérieures/, { nodes: ['IR2'], edges: [] }],
   [/^LED infrarouges$/, { nodes: ['IR'], edges: [] }],
   [/^Capteur température/, { nodes: ['SENS'], edges: [] }],
-  [/^Sonde température/, { nodes: ['HOT'], edges: [] }],
-  [/^(Peltier|Dissipateur|Plaque froide)/, { nodes: ['TEC'], edges: [] }],
-  [/^Pont en H/, { nodes: ['HB'], edges: [] }],
-  [/^Filtre LC/, { nodes: ['FILT'], edges: [] }],
+  [/^(Ventilateur|Cassette ventilateur|Goulotte ventilateur|Grille ventilateur|Plot caoutchouc|Joint cassette|Poignée cassette|Connecteur ventilateur|Clapet de ventilation|Grillage sortie|Bloc isolant d'hiver|Isolant bloc d'hiver|Poignée bloc d'hiver)/, { nodes: ['FAN'], edges: [] }],
+  [/^(Module interrupteur 12 V|Cale interrupteur)/, { nodes: ['SWF'], edges: [] }],
   [/^Module 2 MOSFET/, { nodes: ['SW'], edges: [] }],
   [/^Convertisseur/, { nodes: ['BUCK'], edges: [] }],
   [/^Batterie/, { nodes: ['BAT'], edges: [] }],
@@ -29,11 +27,12 @@ export const MAP: [RegExp, Keys][] = [
   [/^(Gaine des fils|Fil régulateur → batterie)/, { nodes: [], edges: [['MPPT', 'FUSE']] }],
   [/^Fil fusible → batterie/, { nodes: [], edges: [['FUSE', 'BAT']] }],
   [/^Fil (fusible|batterie −) → convertisseur/, { nodes: [], edges: [['FUSE', 'BUCK']] }],
-  [/^Fil rail → pont en H/, { nodes: [], edges: [['RAIL', 'HB']] }],
+  [/^Fil (Wago + → interrupteur|masse interrupteur)/, { nodes: [], edges: [['RAIL', 'SWF']] }],
+  [/^Fil (cassette +|interrupteur → ventilateur)/, { nodes: [], edges: [['SWF', 'FAN']] }],
+  [/^Fil (cassette −|ventilateur −)/, { nodes: [], edges: [['RAIL', 'FAN']] }],
+  [/^Fil commande interrupteur/, { nodes: [], edges: [['PI', 'SWF']] }],
+  [/^Fil (cassette (PWM|tachymètre)|PWM ventilateur|tachymètre ventilateur|masse commune ventilateur)/, { nodes: [], edges: [['PI', 'FAN']] }],
   [/^Fil rail → convertisseur/, { nodes: [], edges: [['RAIL', 'BUCK']] }],
-  [/^Fil Peltier/, { nodes: [], edges: [['FILT', 'TEC']] }],
-  [/^Fil filtre → pont en H/, { nodes: [], edges: [['HB', 'FILT']] }],
-  [/^Fil (PWM|INA|INB|masse commande|VDD)/, { nodes: [], edges: [['PI', 'HB']] }],
   [/^Nappe caméra 2/, { nodes: [], edges: [['PI', 'CAM2']] }],
   [/^Nappe caméra$/, { nodes: [], edges: [['PI', 'CAM1']] }],
   [/^Fil 5 V LED extérieures/, { nodes: [], edges: [['PI', 'IR2']] }],
@@ -42,12 +41,11 @@ export const MAP: [RegExp, Keys][] = [
   [/^Fil masse \(noir\)/, { nodes: [], edges: [['SW', 'IR'], ['PI', 'SENS']] }], // deux fils portent ce nom : la masse des LED du nid et celle du capteur
   [/^Fil (IN1|IN2|masse module)/, { nodes: [], edges: [['PI', 'SW']] }],
   [/^Fil (3,3 V|SDA|SCL)/, { nodes: [], edges: [['PI', 'SENS']] }],
-  [/^Fil sonde/, { nodes: [], edges: [['HOT', 'PI']] }],
 ];
 /** Fiches des composants : les sections « ### … » du document (tableaux de paramètres), repérées par le début de leur titre. */
 export const FICHES: Record<string, string> = {
-  PV: 'Panneau solaire', MPPT: 'Régulateur de charge', BAT: 'Batterie', FUSE: 'Fusible', BUCK: 'Convertisseur', PI: 'Raspberry Pi', HB: 'Pont en H', FILT: 'Filtre LC',
-  TEC: 'Peltier', HOT: 'Sonde de température', CAM1: 'Caméras', CAM2: 'Caméras', IR: 'Carte de 4 LED', IR2: 'Carte de 4 LED', SENS: 'Capteur de température', SW: 'Module 2 × MOSFET', RAIL: 'Wago 221',
+  PV: 'Panneau solaire', MPPT: 'Régulateur de charge', BAT: 'Batterie', FUSE: 'Fusible', BUCK: 'Convertisseur', PI: 'Raspberry Pi', FAN: 'Ventilateur', SWF: 'Interrupteur 12 V du ventilateur',
+  CAM1: 'Caméras', CAM2: 'Caméras', IR: 'Carte de 4 LED', IR2: 'Carte de 4 LED', SENS: 'Capteur de température', SW: 'Module 2 × MOSFET', RAIL: 'Wago 221',
 };
 export const SECTIONS = (() => {
   const out: { title: string; md: string }[] = [];

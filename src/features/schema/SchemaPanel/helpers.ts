@@ -2,9 +2,9 @@ import { MAP, FICHES, MERMAID_SRC, OPTION_NODES, SECTIONS } from './constants';
 import type { Keys, SchemaOptions } from './types';
 
 /** Schéma DYNAMIQUE : on part du schéma complet du document et on enlève les blocs et les flèches des options absentes de la scène
- *  (Peltier + capteur : HB, FILT, TEC, HOT, SENS ; 2ᵉ caméra : CAM2, IR2 ; Solaire : PV, MPPT), puis les zones devenues vides. Les couleurs des traits suivent leur flèche. */
+ *  (2ᵉ caméra : CAM2, IR2 ; Solaire : PV, MPPT), puis les zones devenues vides. Les couleurs des traits suivent leur flèche. */
 export function buildSchema(opts: SchemaOptions): string {
-  const gone = new Set<string>([...(opts.clim ? [] : OPTION_NODES.clim), ...(opts.cam2 ? [] : OPTION_NODES.cam2), ...(opts.solar ? [] : OPTION_NODES.solar)]);
+  const gone = new Set<string>([...(opts.cam2 ? [] : OPTION_NODES.cam2), ...(opts.solar ? [] : OPTION_NODES.solar)]);
   if (!gone.size) return MERMAID_SRC;
   const lines = MERMAID_SRC.split('\n');
   const colors = lines.filter((l) => /^\s*linkStyle \d+ /.test(l)).map((l) => /stroke:([^,]+)/.exec(l)?.[1] ?? '#444');
@@ -18,7 +18,6 @@ export function buildSchema(opts: SchemaOptions): string {
     if (isEdge(l)) {
       edge++;
       const m = /^\s*([A-Z0-9]+)\s*(?:-->|---)(?:\|[^|]*\|)?\s*([A-Z0-9]+)/.exec(l);
-      if (!opts.clim && m && m[1] === 'FUSE' && m[2] === 'RAIL') { out.push('  FUSE --> BUCK'); keptColors.push(colors[edge] ?? '#444'); kept++; continue; } // sans Peltier : pas de Wago, le fusible va droit au convertisseur
       if (m && (gone.has(m[1]) || gone.has(m[2]))) continue;
       out.push(l); keptColors.push(colors[edge] ?? '#444'); kept++;
       continue;

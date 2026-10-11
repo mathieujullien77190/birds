@@ -20,8 +20,8 @@ export function SchemaPanel({ hover, planks, onHover }: { hover: Hover | null; p
   const [svg, setSvg] = useState<string>('');
   const [fiche, setFiche] = useState<string | null>(null); // module dont on affiche les caractéristiques par-dessus le schéma
   const ficheHtml = useMemo(() => { const f = fiche ? ficheOf(fiche) : undefined; return f ? (marked.parse(f.md, { async: false }) as string) : ''; }, [fiche]);
-  const opts = useMemo((): SchemaOptions => ({ clim: planks.some((p) => /^Peltier/.test(p.name)), cam2: planks.some((p) => p.name === 'Caméra 2'), solar: planks.some((p) => /^Régulateur/.test(p.name)) }), [planks]);
-  const src = useMemo(() => buildSchema(opts), [opts.clim, opts.cam2, opts.solar]); // eslint-disable-line react-hooks/exhaustive-deps
+  const opts = useMemo((): SchemaOptions => ({ cam2: planks.some((p) => p.name === 'Caméra 2'), solar: planks.some((p) => /^Régulateur/.test(p.name)) }), [planks]);
+  const src = useMemo(() => buildSchema(opts), [opts.cam2, opts.solar]); // eslint-disable-line react-hooks/exhaustive-deps
   const renders = useRef(0);
   useEffect(() => {
     let off = false;
