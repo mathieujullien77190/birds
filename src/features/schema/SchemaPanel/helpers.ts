@@ -11,13 +11,13 @@ export function buildSchema(opts: SchemaOptions): string {
   const out: string[] = [];
   let edge = -1, kept = 0;
   const keptColors: string[] = [];
-  const isEdge = (l: string) => /-->|---/.test(l) && !/^\s*(subgraph|%%)/.test(l);
+  const isEdge = (l: string) => /<?-->|---/.test(l) && !/^\s*(subgraph|%%)/.test(l);
   const idOf = (l: string) => /^\s*([A-Z0-9]+)(\[|\(\()/.exec(l)?.[1];
   for (const l of lines) {
     if (/^\s*linkStyle /.test(l)) continue; // refait plus bas
     if (isEdge(l)) {
       edge++;
-      const m = /^\s*([A-Z0-9]+)\s*(?:-->|---)(?:\|[^|]*\|)?\s*([A-Z0-9]+)/.exec(l);
+      const m = /^\s*([A-Z0-9]+)\s*(?:<?-->|---)(?:\|[^|]*\|)?\s*([A-Z0-9]+)/.exec(l);
       if (m && (gone.has(m[1]) || gone.has(m[2]))) continue;
       out.push(l); keptColors.push(colors[edge] ?? '#444'); kept++;
       continue;

@@ -18,8 +18,8 @@ const exists = (p: string) => existsSync(join(root, p));
 // ---------- le schéma électronique ----------
 
 const lines = MERMAID_SRC.split('\n');
-const isArrow = (l: string) => /-->|---/.test(l) && !/^\s*(subgraph|%%)/.test(l);
-const arrows = lines.filter(isArrow).map((l) => /^\s*([A-Z0-9]+)\s*(?:-->|---)(?:\|[^|]*\|)?\s*([A-Z0-9]+)/.exec(l)).map((m) => (m ? ([m[1], m[2]] as [string, string]) : null));
+const isArrow = (l: string) => /<?-->|---/.test(l) && !/^\s*(subgraph|%%)/.test(l);
+const arrows = lines.filter(isArrow).map((l) => /^\s*([A-Z0-9]+)\s*(?:<?-->|---)(?:\|[^|]*\|)?\s*([A-Z0-9]+)/.exec(l)).map((m) => (m ? ([m[1], m[2]] as [string, string]) : null));
 const nodeIds = lines.map((l) => /^\s*([A-Z0-9]+)(\[|\(\()/.exec(l)?.[1]).filter((x): x is string => !!x);
 
 describe('cohérence : schéma mermaid de docs/schema-electronique.md', () => {
