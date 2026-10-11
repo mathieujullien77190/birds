@@ -11,7 +11,7 @@ export function enhancePrices(root: HTMLElement) {
   for (const table of Array.from(root.querySelectorAll('table'))) {
     const head = Array.from(table.querySelectorAll('thead th')).map((th) => th.textContent?.trim());
     if (head[0] !== 'Groupe' || head[2] !== 'Prix') continue;
-    const rows = Array.from(table.querySelectorAll('tbody tr')).map((tr) => { const c = tr.querySelectorAll('td'); return { group: c[0].textContent!.trim(), label: c[1].textContent!.trim(), html: c[1].innerHTML, link: c[3]?.innerHTML ?? '', price: parseFloat((c[2].textContent ?? '').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0 }; });
+    const rows = Array.from(table.querySelectorAll('tbody tr')).map((tr) => { const c = tr.querySelectorAll('td'); return { group: c[0].textContent!.trim(), label: c[1].textContent!.trim(), html: c[1].innerHTML, link: c[3]?.innerHTML ?? '', price: parseFloat((c[2].textContent!).replace(/[^0-9.,]/g, '').replace(',', '.')) || 0 }; });
     const groups = [...new Set(rows.map((r) => r.group))];
     const fmt = (v: number) => v.toLocaleString('fr-FR') + ' €';
     const thead = table.querySelector('thead')!; thead.innerHTML = '<tr><th></th><th>Élément</th><th>Prix</th><th>Modèle exact / lien</th></tr>';
