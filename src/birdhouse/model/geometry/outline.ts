@@ -58,5 +58,21 @@ export function outline(p: Plank): Pt[] {
     }
     if (after) pts.push(...after.path);
   }
-  return pts;
+  return dropSpikes(pts);
+}
+
+/** Retire les points doubles et les allers-retours exacts le long d'un même segment (deux crans de profondeurs différentes qui se touchent laissent une pointe de largeur nulle) : le contour reste une marche d'escalier propre. */
+function dropSpikes(pts: Pt[]): Pt[] {
+  let out = pts.slice(), changed = true;
+  while (changed && out.length > 3) {
+    changed = false;
+    for (let i = 0; i < out.length; i++) {
+      const a = out[(i + out.length - 1) % out.length], b = out[i], c = out[(i + 1) % out.length];
+      const dup = Math.abs(b[0] - c[0]) < 1e-9 && Math.abs(b[1] - c[1]) < 1e-9;
+      const abx = b[0] - a[0], aby = b[1] - a[1], bcx = c[0] - b[0], bcy = c[1] - b[1];
+      const back = Math.abs(abx * bcy - aby * bcx) < 1e-9 && abx * bcx + aby * bcy < -1e-9 && (abx !== 0 || aby !== 0);
+      if (dup || back) { out = out.filter((_, k) => k !== i); changed = true; break; }
+    }
+  }
+  return out;
 }

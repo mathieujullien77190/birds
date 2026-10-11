@@ -81,11 +81,27 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const outerParts = outerBox.planks.filter((p) => !/^Dessus/.test(p.name)).map((p) => { let q = isWall(p) ? noTop(p) : p; if (n.solar && /^Dessous/.test(p.name)) q = { ...q, holes: [...q.holes, ...U_YS.flatMap((y) => [RGX - U_W / 2 + U_ARM / 2, RGX + U_W / 2 - U_ARM / 2].map((x) => fitHole(q, { id: uid(), shape: 'square' as const, x: r2(x), y: r2(y), size: U_ARM, sh: t })))] };/* fentes des tenons des étriers du régulateur */ if (/^Face arrière/.test(p.name)) q = { ...q, holes: [...q.holes, ...RIB_XS.flatMap((x) => RIB_TEETH_Z.slice(0, 2).map(([za, zb]) => fitHole(q, { id: uid(), shape: 'square' as const, x, y: r2((za + zb) / 2 - q.pos[2]), size: RIB_T + 0.5, sh: zb - za })))] }; /* fentes 9,5 × 32 des deux dents basses des nervures de fixation */ return /^Face avant/.test(p.name) ? hole(q) : q; });
   const AIR_CY = r2(-n.L / 2 + 25), AIR_ZS = Math.round((e + t + bodyH) / 2), AIR_SH = 30, AIR_SW = 34; // centre en y, hauteur de la fente (mi-hauteur du nid), taille de la fente
   const DRAIN_Z = e + t, DRAIN_H = 6; // évacuation de l'eau : ouverture rectangulaire (AIR_SW de large, DRAIN_H de haut), dont le bas est au dessus du plancher intérieur, dans « Côté gauche int » et « Conduit d'air 2 » : l'eau coule du plancher dans le conduit, ouvert en bas
-  // évacuation de l'eau dans le mur intérieur gauche : un cran dans son bord bas, AIR_SW de large, centré sur le conduit d'air, jusqu'à DRAIN_H au-dessus du plancher (bas à fleur du plancher : pas de seuil) ;
-  // il absorbe les dents (et crans) du bord bas qu'il touche, en un seul cran : les fentes de ces dents ne sont plus percées dans le plancher
+  // évacuation de l'eau dans le mur intérieur gauche : une ENCOCHE dans son bord bas, centrée près du conduit d'air, jusqu'à DRAIN_H au-dessus du plancher (bas à fleur du plancher : pas de seuil) ;
+  // elle va de DRAIN_LO à DRAIN_HI (depuis la position du conduit sur le bord) et couvre le trou de « Conduit d'air 2 » (DRAIN_HOLE) ; elle absorbe les crans du bord bas qu'elle recouvre (ces dents ne sont plus percées dans le plancher),
+  // mais JAMAIS un cran qui touche un coin de la plaque ; les deux moignons de dent de 3 mm (« 3 mm d'espace ») qui restaient de chaque côté sont supprimés à la demande de l'utilisateur (« les deux mini encoches… vire-les, et les trous équivalents de la plaque ») : les crans voisins [0 ; 17] et [53 ; 70] touchent l'encoche, le bois reste plein et le plancher n'a plus leurs fentes
+  const DRAIN_LO = -11, DRAIN_HI = 25, DRAIN_HOLE: [number, number] = [-9.5, 18.5], DRAIN_KEEP = 3;
   const drain = (q: Plank): Plank => {
-    const c = r2(AIR_CY - q.pos[1] + q.w / 2); let s0 = c - AIR_SW / 2, s1 = c + AIR_SW / 2, rest = q.notches.filter((x) => x.edge === 'bottom');
-    for (let again = true; again;) { again = false; for (const x of rest) if (x.pos - x.width / 2 <= s1 + 0.01 && x.pos + x.width / 2 >= s0 - 0.01) { s0 = Math.min(s0, x.pos - x.width / 2); s1 = Math.max(s1, x.pos + x.width / 2); rest = rest.filter((y) => y !== x); again = true; break; } }
+    const c = r2(AIR_CY - q.pos[1] + q.w / 2); let s0 = c + DRAIN_LO, s1 = c + DRAIN_HI, rest = q.notches.filter((x) => x.edge === 'bottom');
+    for (let again = true; again;) {
+      again = false;
+      for (const x of rest) {
+        const x0 = x.pos - x.width / 2, x1 = x.pos + x.width / 2;
+        if (x0 < s1 && x1 > s0) { // recouvre l'encoche
+          if (x0 <= 0.01) { s0 = Math.max(s0, x1 + DRAIN_KEEP); again = true; break; } // cran de coin : on le garde, on recule l'encoche
+          if (x1 >= q.w - 0.01) { s1 = Math.min(s1, x0 - DRAIN_KEEP); again = true; break; }
+          s0 = Math.min(s0, x0); s1 = Math.max(s1, x1); rest = rest.filter((y) => y !== x); again = true; break;
+        }
+        if (x1 <= s0 && s0 - x1 < DRAIN_KEEP - 1e-6) { s0 = x1 + DRAIN_KEEP; again = true; break; } // moignon de dent trop étroit
+        if (x0 >= s1 && x0 - s1 < DRAIN_KEEP - 1e-6) { s1 = x0 - DRAIN_KEEP; again = true; break; }
+      }
+    }
+    // plus de moignon de dent : un cran voisin qui s'arrête à DRAIN_KEEP au plus de l'encoche est prolongé jusqu'à elle (le bois reste plein entre le coin ou le cran suivant et l'encoche ; ces dents n'existent plus, le plancher n'a pas leurs fentes)
+    rest = rest.map((x) => { const x0 = x.pos - x.width / 2, x1 = x.pos + x.width / 2; if (x1 <= s0 + 0.01 && s0 - x1 <= DRAIN_KEEP + 0.01) return { ...x, pos: r2((x0 + s0) / 2), width: r2(s0 - x0) }; if (x0 >= s1 - 0.01 && x0 - s1 <= DRAIN_KEEP + 0.01) return { ...x, pos: r2((s1 + x1) / 2), width: r2(x1 - s1) }; return x; });
     return { ...q, notches: [...q.notches.filter((x) => x.edge !== 'bottom'), ...rest, { id: uid(), edge: 'bottom' as const, pos: r2((s0 + s1) / 2), width: r2(s1 - s0), depth: r2(t + DRAIN_H) }] };
   };
   const innerParts = innerBox.planks.filter(isWall).map((p) => { let q = noTop({ ...p, pos: [p.pos[0], p.pos[1], p.pos[2] + e] as Vec3, group }); return /^Face avant/.test(p.name) ? hole(q) : /^Côté gauche/.test(p.name) ? drain(q) : q; });
@@ -455,7 +471,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       ...DUCT_TEETH.map(([a, b]): [number, number, number, number] => [a, WIN_BOT + VENT_H, b, WIN_BOT + VENT_H + t]), // plaque du haut
       ...DUCT_SIDE_TEETH.flatMap(([a, b]): [number, number, number, number][] => [[-EXW / 2 - t, zc + a, -EXW / 2, zc + b], [EXW / 2, zc + a, EXW / 2 + t, zc + b]])]) }; // plaques gauche et droite
   };
-  const cassHoles = (key: string): Hole[] => key === 'Face arrière' ? [exitComb()] : key === 'Dessous' ? [{ id: uid(), shape: 'square' as const, x: 0, y: 0, size: CASS_OPEN, sh: CASS_OPEN }] : key === 'Dessus' ? [{ id: uid(), shape: 'square' as const, x: -20, y: 16, size: 6, sh: 12 }, ...uSlots()] : [];
+  const cassHoles = (key: string): Hole[] => key === 'Face arrière' ? [exitComb()] : key === 'Dessous' ? [{ id: uid(), shape: 'square' as const, x: 0, y: 0, size: CASS_OPEN, sh: CASS_OPEN }] : key === 'Dessus' ? [{ id: uid(), shape: 'square' as const, x: 0, y: -21, size: 12, sh: 6 }, ...uSlots()] : [];
   const cassette: Plank[] = [
     ...makeBox(CO, CO, cbH, t, fit, start).planks.map((p) => { const key = p.name.replace(/ \d+$/, ''); return { ...p, name: cassKey[key], pos: [r2(p.pos[0] + FANX), r2(p.pos[1] + FANY), r2(p.pos[2] + ZB)] as Vec3, group: elecGroup, holes: cassHoles(key) }; }),
     ...uHandle('Poignée cassette', elecGroup),
@@ -475,41 +491,42 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     blk("Isolant bloc d'hiver", CO - 2 * t, blockL - 2 * t, blockH - 2 * t - 0.4, [FANX, blockY, ZB + blockH / 2], wGroup, '#f59e0b', { transparent: true }), // laine de bois enfermée : remplit l'intérieur
     ...uHandle("Poignée bloc d'hiver", wGroup, blockY), // comme la poignée de la cassette, centrée sur le couvercle du bloc
   ];
-  // PRISE D'ORIGINE du ventilateur + RALLONGE : le câble d'origine du Noctua (≈ 30 cm, quatre fils) monte dans la cassette, traverse le couvercle par un petit passage et finit par sa prise 4 broches femelle d'origine, posée sur le couvercle ;
-  // la rallonge 4 broches (mâle ⇄ femelle, ≈ 30 cm) s'y emboîte : sa prise mâle reste sur le toit (posée sur le couvercle de la cassette, ou du bloc d'hiver quand la cassette est sortie) ; pas de plaque ni de soudure, rien à fabriquer
-  const LID = DUCT_Z1 + t, PBY = FANY + 14, PLUG_Z = LID + 3, XPLUG = r2(FANX + 2.5);
-  const pinYk = (k: number) => r2(PBY + (1.5 - k) * 2.54); // + (rouge), PWM (bleu), tachymètre (jaune), − (noir) : du nord au sud
+  // PRISE D'ORIGINE du ventilateur + RALLONGE : le câble d'origine du Noctua (≈ 30 cm, quatre fils) monte dans la cassette, traverse le couvercle par un petit passage près de son bord AVANT et finit par sa prise 4 broches femelle,
+  // collée sur le bord avant du couvercle, qui dépasse devant le siège ; la prise MÂLE de la rallonge est COLLÉE sur la face avant (extérieure, côté bloc caméra) de la paroi avant du siège (« Goulotte ventilateur avant »),
+  // contre son haut, dans l'espace de 10 mm entre le siège et le bloc caméra : la femelle se pose dessus à la verticale, la cassette (et sa prise) se retire par le haut ; on débranche la prise à la main, une seule fois (le câble d'origine fait 30 cm)
+  // les fils de la rallonge sortent de la face avant de la prise mâle, dans cet espace, et CONTOURNENT le siège par l'ouest ou par l'est (jamais par-dessus la cassette, ni dans l'ouverture du plafond, ni derrière le conduit de sortie)
+  const LID = DUCT_Z1 + t, PLUG_FY = FY0, PW = 10.2, PX = (k: number) => r2(FANX + (1.5 - k) * 2.54), ZL = (j: number) => r2(DUCT_Z1 + 0.3 - 1.4 * j), yG = r2(FY0 - 8), HOLE_Y = -21; // + (rouge), PWM (bleu), tachymètre (jaune), − (noir) : de l'est à l'ouest ; ZL = niveaux des cinq fils, yG = leur ordonnée dans l'espace devant le siège
   const connection: Plank[] = [
-    blk("Prise 4 broches du ventilateur (d'origine, femelle)", 6, 10.2, 6, [FANX - 9, PBY, PLUG_Z], elecGroup, '#111827'),
-    blk('Rallonge ventilateur 4 broches : prise mâle (mâle ⇄ femelle, câble ≈ 300 mm)', 8.5, 10.2, 6, [FANX - 2.25, PBY, PLUG_Z], elecGroup, '#374151'),
+    blk("Prise 4 broches du ventilateur (d'origine, femelle)", PW, 6, 6, [FANX, PLUG_FY, r2(DUCT_Z1 + 3.5)], elecGroup, '#111827'), // sur le couvercle de la cassette, dépasse de 6 mm devant elle, juste au-dessus de la prise mâle
+    blk('Rallonge ventilateur 4 broches : prise mâle (mâle ⇄ femelle, câble ≈ 300 mm)', PW, 6, 6, [FANX, r2(PLUG_FY - 3), r2(DUCT_Z1 - 2.5)], elecGroup, '#374151'), // collée sur la face avant de la paroi avant du siège
   ];
   // module interrupteur 12 V (côté +), près du Wago + : le Noctua tourne encore à ≈ 20 % quand le PWM est à 0 %, il faut pouvoir couper son 12 V ; côté + (pas la masse) : une masse coupée ferait remonter 12 V dans les fils PWM / tachymètre
   wedgeNeed.push(31, 31, 17, 17); // besoin en cales de l'interrupteur
   const swFan: Plank[] = [
     part('Module interrupteur 12 V ventilateur (côté +, commande 3,3 V)', 17, 25, 8, SWX, SWY, topZ + 3 + 4, 'block', '#7e22ce'),
   ];
-  // fils : côté cassette (câble d'origine du ventilateur : quatre fils par le trou du couvercle jusqu'à sa prise), côté toit (de la prise mâle de la rallonge au module, au Wago −, et au Pi par-dessus le toit)
-  const cw = (nm: string, color: string, k: number): Plank => wire(nm, color, ([[FANX - 20, pinYk(k), FAN_Z + FAN_T / 2], [FANX - 20, pinYk(k), FAN_Z + FAN_T / 2 + 4], [FANX - 20, pinYk(k), DUCT_Z1 - 4], [FANX - 20, pinYk(k), LID + 1.2], [FANX - 16, pinYk(k), PLUG_Z], [FANX - 12, pinYk(k), PLUG_Z]] as Vec3[]).map((q) => q.map(r2) as Vec3), k === 0 || k === 3 ? 1.6 : 1.2); // points au centième : la cassette se range et se remet en place sans écart
-  // boucle de câble des fils fixes : de la fiche, par-dessus le couvercle, une boucle en U (aller à l'ouest, retour à l'est) le long du bord nord du couvercle ; ≈ 120 mm de fil au moins avant de quitter la cassette
-  const lvl = [PLUG_Z - 0.15, PLUG_Z + 1.05, PLUG_Z + 3.45, PLUG_Z + 5.85]; // niveaux relatifs à la prise (qui suit la hauteur du toit)
-  const NY = (v: number): number => r2(FANY + v - 68.8); // ordonnées des fils au-dessus de la cassette, relatives à son centre (68,8 dans le nichoir de base)
-  const out = (k: number, yN: number): Vec3[] => [[XPLUG, pinYk(k), PLUG_Z], [XPLUG + 3, pinYk(k), lvl[k]], [XPLUG + 7, yN, lvl[k]]]; // de la fiche, un seul arc doux vers le nord-est (le dessus de la plaque est trop bas pour passer dessus)
-  // les quatre fils vers le Pi restent SUR le dessus du toit, sous la pente : ils passent PAR-DESSUS la cassette (le siège barre le chemin direct), un niveau par fil ; à l'ouest du siège ils redescendent à un niveau
-  // plus bas (la pente est plus basse devant) puis longent le Pi jusqu'à leur broche ; les broches 12 et 14 (rangée extérieure) sont abordées par l'ouest, la 11 et la 13 par l'est
-  const toPi = (nm: string, color: string, j: number, pre: Vec3[], yN: number, idx: number, py: number, west: boolean, d = 1.2): Plank => {
-    const [xp, yp] = pw(PI_PIN_X0 + idx * 2.54, py), hN = j === 0 ? bodyH + 110.3 : topZ + 56 + 2.4 * j, hS = topZ + 36 + 3 * j, xl = -64 - 3 * j;
-    return wire(nm, color, [...pre, [xl, yN, hN], [xl, yN, hS], ...(west ? [[xl, 33.5 + 1.5 * j, hS], [-96 - j, 33.5 + 1.5 * j, hS], [-96 - j, yp, hS]] : [[xl, yp, hS]]), [xp, yp, hS], [xp, yp, piZ + 8], [xp, yp, piZ + 3.5]] as Vec3[], d);
+  // fils : côté cassette (câble d'origine du ventilateur : quatre fils du ventilateur par le trou du couvercle jusqu'à la prise femelle), côté toit (de la prise mâle au module, au Wago − et au Pi, en contournant le siège)
+  const cw = (nm: string, color: string, k: number): Plank => wire(nm, color, ([[PX(k), FANY + HOLE_Y, FAN_Z + FAN_T / 2], [PX(k), FANY + HOLE_Y, FAN_Z + FAN_T / 2 + 4], [PX(k), FANY + HOLE_Y, DUCT_Z1 - 4], [PX(k), FANY + HOLE_Y, LID + 1.2], [PX(k), CASS_Y0 + 3, LID + 1.2], [PX(k), CASS_Y0 - 1.5, LID + 1.2]] as Vec3[]).map((q) => q.map(r2) as Vec3), k === 0 || k === 3 ? 1.6 : 1.2); // points au centième : la cassette se range et se remet en place sans écart
+  const plugExit = (k: number, j: number): Vec3[] => [[PX(k), r2(PLUG_FY - 4), ZL(j)], [PX(k), yG, ZL(j)]]; // de la prise mâle, par sa face avant, dans l'espace devant le siège
+  // les fils vers le Pi quittent la prise mâle vers l'OUEST dans l'espace devant le siège (à un niveau chacun, sous la pente), puis descendent à l'ouest du siège et longent le Pi jusqu'à leur broche ;
+  // les broches 12 et 14 (rangée extérieure) sont abordées par l'ouest, la 11 et la 13 par l'est
+  const toPi = (nm: string, color: string, j: number, pre: Vec3[], yN: number, idx: number, py: number, west: boolean, hN: number, d = 1.2): Plank => {
+    const [xp, yp] = pw(PI_PIN_X0 + idx * 2.54, py), hS = topZ + 36 + 3 * j, xl = -64 - 3 * j;
+    const pts = ([...pre, [xl, yN, hN], [xl, yN, hS], ...(west ? [[xl, 33.5 + 1.5 * j, hS], [-96 - j, 33.5 + 1.5 * j, hS], [-96 - j, yp, hS]] : [[xl, yp, hS]]), [xp, yp, hS], [xp, yp, piZ + 8], [xp, yp, piZ + 3.5]] as Vec3[]).filter((q, i, all) => i === 0 || q.some((v, k) => v !== all[i - 1][k])); // sans point double (la courbe lissée se tordrait)
+    return wire(nm, color, pts, d);
   };
   const fanWires: Plank[] = [
     cw('Fil cassette + (rouge)', '#dc2626', 0), cw('Fil cassette PWM (bleu)', '#2563eb', 1), cw('Fil cassette tachymètre (jaune)', '#eab308', 2), cw('Fil cassette − (noir)', '#111827', 3),
     wire('Fil Wago + → interrupteur ventilateur (rouge)', '#dc2626', [...wgEnd(wgPort(WGP_Y, 3, 0), [[r2(WGF - 29), r2(WGP_Y + 17.5), topZ + 14], [r2(WGF - 29), wgPort(WGP_Y, 3, 0), WG_Z]]).reverse(), [SWX + 4, SWY - 17, topZ + 15], [SWX + 4, SWY - 12.5, topZ + 11.5]] as Vec3[], 1.6),
-    wire('Fil interrupteur → ventilateur + (rouge)', '#dc2626', [[SWX - 3, SWY + 10, topZ + 11.5], [SWX - 6, YREAR - 1.5, topZ + 14], [Math.max(66, CONX + 6), YREAR - 1.5, topZ + 14], [CONX, YREAR - 3, topZ + 14], [CONX, YREAR - 3, lvl[0]], [XPLUG + 14, NY(90), lvl[0]], ...out(0, NY(88)).slice(0, 2).reverse()] as Vec3[], 1.6),
-    wire('Fil ventilateur − (noir)', '#111827', [...out(3, NY(79)).slice(0, 2), [XPLUG + 12, NY(79), lvl[3]], [CONX - 1, NY(80), lvl[3]], [CONX - 1, NY(80), topZ + 9], [CONX, r2(WGP_Y - 8.5), topZ + 9], ...wgEnd(wgPort(WGM_Y, 5, 1), [[r2(WGF - 25.2), r2(WGP_Y - 11), topZ + 9], [r2(WGF - 25.2), wgPort(WGM_Y, 5, 1), WG_Z]])] as Vec3[], 1.6),
+    // 12 V commuté : de l'interrupteur, par le couloir à l'est du siège (x = CONX, entre le siège et la gaine), jusqu'à l'espace devant le siège puis la prise mâle
+    wire('Fil interrupteur → ventilateur + (rouge)', '#dc2626', [[SWX - 3, SWY + 10, topZ + 11.5], [SWX - 6, YREAR - 1.5, topZ + 14], [SWX - 6, YREAR - 1.5, ZL(0)], [CONX, YREAR - 3, ZL(0)], [CONX, yG, ZL(0)], ...plugExit(0, 0).reverse()] as Vec3[], 1.6),
+    wire('Fil ventilateur − (noir)', '#111827', [...plugExit(3, 3), [CONX - 2, yG, ZL(3)], [CONX - 2, r2(WGP_Y - 8.5), ZL(3)], [CONX - 2, r2(WGP_Y - 8.5), topZ + 9], [CONX, r2(WGP_Y - 8.5), topZ + 9], ...wgEnd(wgPort(WGM_Y, 5, 1), [[r2(WGF - 25.2), r2(WGP_Y - 11), topZ + 9], [r2(WGF - 25.2), wgPort(WGM_Y, 5, 1), WG_Z]])] as Vec3[], 1.6),
     wire('Fil masse interrupteur → Wago − (noir)', '#111827', [[SWX - 2, SWY - 12.5, topZ + 11.5], [SWX - 4, SWY - 16, topZ + 14], [r2(WGF + 2.8), r2(WGP_Y + 11.5), topZ + 22], [r2(WGF - 20.7), r2(WGP_Y + 11.5), topZ + 22], ...wgEnd(wgPort(WGM_Y, 5, 0), [[r2(WGF - 20.7), wgPort(WGM_Y, 5, 0), WG_Z]])] as Vec3[], 1.6),
-    toPi('Fil PWM ventilateur (bleu)', '#2563eb', 1, out(1, NY(91)), NY(91), 5, PI_PIN_Y, true),
-    toPi('Fil tachymètre ventilateur (jaune)', '#eab308', 2, out(2, NY(93.4)), NY(93.4), 5, PI_PIN_Y - 2.54, false),
-    toPi('Fil masse commune ventilateur (noir)', '#111827', 3, out(3, NY(95.8)), NY(95.8), 6, PI_PIN_Y, true),
-    toPi('Fil commande interrupteur ventilateur (orange)', '#f97316', 0, [[SWX + 3, SWY + 10, topZ + 11.5], [SWX + 4, YREAR - 6.5, topZ + 19], [CONX + 5, YREAR - 6.5, topZ + 19], [CONX + 4, YREAR - 6.5, bodyH + 110.3]], YREAR - 6.5, 6, PI_PIN_Y - 2.54, false), // GPIO27 (broche 13) : par le nord de la gaine, par-dessus la cassette ; à 6,5 mm de la plaque arrière (et non 3,5) : la baguette arrière du couvercle descend de 10 mm sous le pan, contre la plaque
+    toPi('Fil PWM ventilateur (bleu)', '#2563eb', 1, plugExit(1, 1), yG, 5, PI_PIN_Y, true, ZL(1)),
+    toPi('Fil tachymètre ventilateur (jaune)', '#eab308', 2, plugExit(2, 2), yG, 5, PI_PIN_Y - 2.54, false, ZL(2)),
+    toPi('Fil masse commune ventilateur (noir)', '#111827', 3, plugExit(3, 4), yG, 6, PI_PIN_Y, true, ZL(4)),
+    // GPIO27 (broche 13) : de l'interrupteur, par le couloir à l'est du siège (x = CONX + 2), puis devant le siège vers l'ouest (plus par-dessus la cassette)
+    toPi('Fil commande interrupteur ventilateur (orange)', '#f97316', 0, [[SWX + 3, SWY + 10, topZ + 11.5], [SWX + 4, YREAR - 6.5, topZ + 19], [CONX + 2, YREAR - 6.5, topZ + 19], [CONX + 2, yG - 1, topZ + 19], [CONX + 2, yG - 1, topZ + 36]], yG - 1, 6, PI_PIN_Y - 2.54, false, topZ + 36),
   ];
   // CONDUIT DE SORTIE : petit tube de contreplaqué (makeBox sans ses deux faces avant / arrière : quatre plaques crénelées) FIXE, collé à la face intérieure de la plaque arrière autour de sa fenêtre ;
   // la cassette (descendue par le haut) s'appuie sur son autre bout : fenêtre de la cassette, intérieur du conduit et fenêtre de la plaque ont la même section EXW × VENT_H
@@ -542,7 +559,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const airWood: Plank[] = [...makeBox(AIR_LX, AIR_LY, airHt, t, fit, start).planks.filter((p) => !/^Dessous/.test(p.name)).map((p) => {
     const key = airKey[p.name.replace(/ \d+$/, '')], cast = { ...(p.cast ?? {}) }, wall = key !== "Conduit d'air 5 (couvercle)"; if (wall) delete cast.bottom; // ouvert en dessous, bas droit : aucune dent dans le fond (« Dessous ext » n'a qu'une ouverture)
     let q = recastAll({ ...p, name: key, pos: [r2(p.pos[0] + AIR_CX), r2(p.pos[1] + AIR_CY), r2(p.pos[2] + ZB0)] as Vec3, group, cast, notches: wall ? p.notches.filter((x) => x.edge !== 'bottom') : p.notches }, t, fit);
-    if (key === "Conduit d'air 2") q = { ...q, holes: [fitHole(q, { id: uid(), shape: 'square' as const, x: 0, y: r2(AIR_ZS - q.pos[2]), size: AIR_SW, sh: AIR_SH }), fitHole(q, { id: uid(), shape: 'square' as const, x: 0, y: r2(DRAIN_Z + DRAIN_H / 2 - q.pos[2]), size: AIR_SW, sh: DRAIN_H })] }; // côté nid : la fente, en face de la grille de la paroi intérieure, et l'ouverture d'évacuation de l'eau, au ras du plancher intérieur (rien dedans)
+    if (key === "Conduit d'air 2") q = { ...q, holes: [fitHole(q, { id: uid(), shape: 'square' as const, x: 0, y: r2(AIR_ZS - q.pos[2]), size: AIR_SW, sh: AIR_SH }), fitHole(q, { id: uid(), shape: 'square' as const, x: r2((DRAIN_HOLE[0] + DRAIN_HOLE[1]) / 2), y: r2(DRAIN_Z + DRAIN_H / 2 - q.pos[2]), size: DRAIN_HOLE[1] - DRAIN_HOLE[0], sh: DRAIN_H })] }; // côté nid : la fente, en face de la grille de la paroi intérieure, et l'ouverture d'évacuation de l'eau, au ras du plancher intérieur (rien dedans)
     return q;
   }),
   ];
@@ -747,7 +764,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const merged = new Set([solGroupId]);
   const LINKS: [RegExp, string][] = [ // fiches de référence (constructeur ou revendeur)
     [/^Raspberry Pi/, 'https://www.raspberrypi.com/products/raspberry-pi-5/'],
-    [/^Caméra( 2)?$/, 'https://www.raspberrypi.com/products/camera-module-3/'],
+    [/^Caméra( 2)?$/, 'https://www.amazon.fr/dp/B0BRY3L9H7'],
     [/^(Ventilateur Noctua|Prise 4 broches du ventilateur|Rallonge ventilateur)/, 'https://www.amazon.fr/dp/B00VXTANZ4'],
     [/^Grille de protection ventilateur/, 'https://www.amazon.fr/dp/B0B1QRWHW3'],
     [/^Wago 221-413/, 'https://www.wago.com/221-413'],

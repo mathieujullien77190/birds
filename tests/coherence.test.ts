@@ -117,7 +117,7 @@ describe('cohérence : réglages et configuration', () => {
   it('clés localStorage : valeurs figées (les renommer efface les réglages enregistrés de l\'utilisateur)', () => {
     expect(STORAGE).toEqual({
       leftOpen: 'plaques-menu-gauche', rightOpen: 'plaques-menu-droit', night: 'plaques-nuit',
-      schema: 'plaques-schema', cut: 'plaques-coupe', hidden: 'plaques-caches', nest: 'plaques-nichoir-3', codes: 'plaques-codes',
+      schema: 'plaques-schema', cut: 'plaques-coupe', hidden: 'plaques-caches', nest: 'plaques-nichoir-3',
     });
     expect(new Set(Object.values(STORAGE)).size).toBe(Object.keys(STORAGE).length);
   });

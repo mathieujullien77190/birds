@@ -50,7 +50,7 @@ describe('loadScene / saveScene', () => {
     store.data.set('plaques-scene', JSON.stringify({ t: 4, fit: 0.7, up: 'z2', planks: [{ id: 'a', name: 'a', w: 1, h: 1, pos: [0, 0, 0], rot: [0, 0, 0] }] }));
     const s = loadScene();
     expect(s.fit).toBe(0);
-    expect(s.t).toBe(4);
+    expect(s.t).toBe(3); // l'épaisseur est fixée à 3 mm (norme 3 mm / 5 mm)
     expect(s.planks[0].notches).toEqual([]);
     expect(s.planks[0].holes).toEqual([]);
   });

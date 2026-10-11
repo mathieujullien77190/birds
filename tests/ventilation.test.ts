@@ -99,33 +99,44 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
       }
     }
   });
-  it('prise d origine du ventilateur sur le couvercle + prise mâle de la rallonge : alignées, sous la pente, avec 50 mm de mou au moins, sans plaque ni soudure', () => {
-    const head = one(sc0, /^Prise 4 broches du ventilateur/), plug = one(sc0, /^Rallonge ventilateur 4 broches : prise mâle/), lid = one(sc0, /^Cassette ventilateur couvercle/), handle = one(sc0, /^Poignée cassette 2$/);
+  it('prise mâle de la rallonge collée sur la face avant du siège, prise d origine (femelle) sur le bord avant du couvercle juste au-dessus : sous la pente, fils qui contournent le siège', () => {
+    const head = one(sc0, /^Prise 4 broches du ventilateur/), plug = one(sc0, /^Rallonge ventilateur 4 broches : prise mâle/), lid = one(sc0, /^Cassette ventilateur couvercle/), handle = one(sc0, /^Poignée cassette 2$/), seat = one(sc0, /^Goulotte ventilateur avant/);
     expect(by(sc0, /^(Plaque de connexion|Barrette|Soudure|Entretoise plaque|Fiche 4 broches)/)).toEqual([]); // plus de plaque de prototypage ni de soudure
     expect(head.special).toBe('block');
-    const passage = lid.holes.find((h) => Math.min(h.size, h.sh ?? h.size) <= 6 && Math.max(h.size, h.sh ?? h.size) >= 10)!; expect(passage).toBeTruthy(); // passage du câble d origine dans le couvercle
-    for (const re of [/^Fil cassette \+ \(rouge\)$/, /^Fil cassette PWM/, /^Fil cassette tachymètre/, /^Fil cassette − \(noir\)$/]) { const w = one(sc0, re); const e = w.path![w.path!.length - 1]; expect(Math.abs(e[0] - (head.pos[0] - head.w / 2))).toBeLessThan(0.6); expect(Math.abs(e[2] - head.pos[2])).toBeLessThan(0.6); } // le câble finit sur la face de la prise
-    expect(Math.abs(plug.pos[1] - head.pos[1])).toBeLessThan(0.1); expect(Math.abs(plug.pos[2] - head.pos[2])).toBeLessThan(0.1); // même axe d'embrochage (horizontal)
-    expect(plug.pos[0] - head.pos[0]).toBeGreaterThan(5); expect(plug.pos[0] - plug.w / 2).toBeGreaterThanOrEqual(head.pos[0] + head.w / 2 - 1); // emboîtée dans la prise (recouvrement < 1 mm)
-    const lidB = aabb(lid, t), bb = aabb(head, t);
-    expect(bb.min.x).toBeGreaterThanOrEqual(lidB.min.x); expect(bb.max.x).toBeLessThanOrEqual(lidB.max.x); expect(bb.min.y).toBeGreaterThanOrEqual(lidB.min.y); expect(bb.max.y).toBeLessThanOrEqual(lidB.max.y); // sur le couvercle
-    expect(gap(bb, aabb(handle, t))).toBeGreaterThan(1.5); expect(gap(aabb(plug, t), aabb(handle, t))).toBeGreaterThan(1.5);
+    const sb = aabb(seat, t), pb = aabb(plug, t), hb = aabb(head, t), lb = aabb(lid, t);
+    expect(Math.abs(pb.max.y - sb.min.y)).toBeLessThan(0.01); // collée sur la face avant (extérieure) de la paroi avant du siège
+    expect(pb.min.x).toBeGreaterThanOrEqual(sb.min.x); expect(pb.max.x).toBeLessThanOrEqual(sb.max.x); expect(pb.max.z).toBeGreaterThan(sb.max.z - 0.01); expect(pb.min.z).toBeGreaterThan(sb.max.z - 8); // en haut de la paroi
+    const camBack = Math.max(...by(sc0, /^(Face arrière|Face avant|Côté droit|Côté gauche) caméra/).map((p) => aabb(p, t).max.y));
+    expect(pb.min.y - camBack).toBeGreaterThanOrEqual(3.5); // dans l'espace de 10 mm entre le siège et le bloc caméra
+    expect(Math.abs(head.pos[0] - plug.pos[0])).toBeLessThan(0.1); expect(Math.abs(hb.min.z - pb.max.z)).toBeLessThan(0.01); // la femelle est posée à la verticale sur la mâle (la cassette se retire par le haut)
+    expect(Math.abs(hb.max.y - lb.min.y)).toBeLessThan(0.01); expect(hb.min.z).toBeLessThan(lb.max.z); expect(hb.max.z).toBeGreaterThan(lb.max.z); // collée sur la tranche avant du couvercle
+    expect(head.group).toBe(lid.group); expect(plug.group).toBe(lid.group);
+    expect(gap(hb, aabb(handle, t))).toBeGreaterThan(1.5); expect(gap(pb, aabb(handle, t))).toBeGreaterThan(1.5);
+    const passage = lid.holes.find((h) => Math.min(h.size, h.sh ?? h.size) <= 6 && Math.max(h.size, h.sh ?? h.size) >= 10)!; expect(passage).toBeTruthy(); expect(ligament(lid, passage).min).toBeGreaterThanOrEqual(4.5 - 1e-6); // passage du câble d origine, près du bord avant
+    for (const re of [/^Fil cassette [+] [(]rouge[)]$/, /^Fil cassette PWM/, /^Fil cassette tachymètre/, /^Fil cassette − [(]noir[)]$/]) { const w = one(sc0, re), e = new Vector3(...w.path![w.path!.length - 1]); expect(e.x).toBeGreaterThan(hb.min.x); expect(e.x).toBeLessThan(hb.max.x); expect(e.y).toBeGreaterThan(hb.min.y); expect(e.y).toBeLessThan(hb.max.y); expect(e.z).toBeGreaterThan(hb.min.z); expect(e.z).toBeLessThan(hb.max.z); } // le câble finit dans la prise
     const front = one(sc0, /^Face avant toit/), back = one(sc0, /^Face arrière toit/), base = front.pos[2] - front.h / 2;
     const plane = (y: number) => base + front.h + ((y - front.pos[1]) * (back.h - front.h)) / (back.pos[1] - front.pos[1]);
-    const marge = plane(plug.pos[1]) - (plug.pos[2] + plug.depth! / 2);
-    expect(marge).toBeGreaterThanOrEqual(2); expect(marge).toBeLessThan(15);
+    expect(plane(hb.max.y) - hb.max.z).toBeGreaterThanOrEqual(2); expect(plane(pb.min.y) - pb.max.z).toBeGreaterThanOrEqual(2);
     expect(plane(handle.pos[1]) - (handle.pos[2] + t / 2)).toBeGreaterThanOrEqual(2);
-    // mou : longueur de fil entre la fiche et le premier point où le fil quitte l'empreinte de la cassette ou descend sous son couvercle (≥ 50 mm : de quoi sortir la cassette fiche débranchée)
-    const loops = ['Fil interrupteur → ventilateur + (rouge)', 'Fil ventilateur − (noir)', 'Fil PWM ventilateur (bleu)', 'Fil tachymètre ventilateur (jaune)', 'Fil masse commune ventilateur (noir)'].map((n) => one(sc0, new RegExp('^' + n.replace(/[()+−→]/g, '.') + '$')));
-    const roofTopZ = one(sc0, /^Dessus toit/).pos[2] + t / 2, slack: Record<string, number> = {};
-    for (const w of loops) {
-      const pts = pathItems([w])[0].pts, plugEnd = new Vector3(plug.pos[0] + plug.w / 2, plug.pos[1], plug.pos[2]);
-      const startAtEnd = pts[pts.length - 1].distanceTo(plugEnd) < pts[0].distanceTo(plugEnd), seq = startAtEnd ? pts.slice().reverse() : pts;
-      let len = 0;
-      for (let i2 = 1; i2 < seq.length; i2++) { const m = seq[i2]; if (m.z < roofTopZ + 14) break; len += m.distanceTo(seq[i2 - 1]); } // jusqu'à ce que le fil soit fixé au toit
-      slack[w.name] = len; expect(len, w.name).toBeGreaterThanOrEqual(50);
-      // pas de tour : le fil ne revient pas sur lui-même en x sur la cassette (un seul sens après la fiche)
+    // les fils de la rallonge (et la commande de l'interrupteur) partent de la prise mâle et CONTOURNENT le siège : aucun point au-dessus de la cassette, du siège ni de l'ouverture du plafond, ni derrière le siège
+    const roofTopZ = one(sc0, /^Dessus toit/).pos[2] + t / 2, cb = aabb(one(sc0, /^Cassette ventilateur 2$/), t), duct = by(sc0, /^Conduit de sortie/);
+    const names = ['Fil interrupteur → ventilateur + (rouge)', 'Fil ventilateur − (noir)', 'Fil PWM ventilateur (bleu)', 'Fil tachymètre ventilateur (jaune)', 'Fil masse commune ventilateur (noir)', 'Fil commande interrupteur ventilateur (orange)'];
+    for (const n of names) {
+      const w = one(sc0, new RegExp('^' + n.replace(/[()+−→]/g, '.') + '$')), pts = pathItems([w])[0].pts;
+      for (const p of pts) {
+        const over = p.x > sb.min.x - 0.5 && p.x < sb.max.x + 0.5 && p.y > sb.min.y - 0.5 && p.y < cb.max.y + 0.5 && p.z > roofTopZ; // au-dessus de l'empreinte du siège (parois, cassette, ouverture du plafond)
+        expect(over && !(p.y < sb.min.y), w.name + ' par-dessus la cassette').toBe(false);
+        for (const d of duct) expect(inside(p, obb(d, t), 0), w.name + ' dans le conduit de sortie').toBe(false);
+      }
+      if (n !== names[5]) { const near = Math.min(...pts.map((p) => Math.hypot(p.x - plug.pos[0], p.y - plug.pos[1], p.z - plug.pos[2]))); expect(near, n + ' part de la prise mâle').toBeLessThan(8); }
     }
+  });
+  it('cassette sortie : la prise mâle et ses fils restent en place, la prise femelle et son câble partent avec la cassette (on la débranche à la main)', () => {
+    const out = setWinterCassette(sc0, true);
+    for (const re of [/^Rallonge ventilateur 4 broches : prise mâle/, /^Fil PWM ventilateur/, /^Fil interrupteur → ventilateur [+]/]) expect(one(out, re)).toEqual(one(sc0, re));
+    expect(one(out, /^Prise 4 broches du ventilateur/).pos).not.toEqual(one(sc0, /^Prise 4 broches du ventilateur/).pos);
+    expect(one(out, /^Fil cassette PWM/).path).not.toEqual(one(sc0, /^Fil cassette PWM/).path);
+    expect(by(out, /^Bloc isolant d'hiver/).some((p) => /prise/i.test(p.name))).toBe(false); // le bloc d'hiver n'a pas de prise
   });
   it("poignée en U de la cassette : centrée, pieds incrustés dans deux fentes du couvercle, ouverture libre, marge de 2 mm sous la pente", () => {
     const layers = by(sc0, /^Poignée cassette \d$/), u = one(sc0, /^Poignée cassette 2$/), lid = one(sc0, /^Cassette ventilateur couvercle/), ub = union(layers, t), lb = aabb(lid, t);
@@ -602,8 +613,8 @@ describe('grilles percées dans les plaques', () => {
 describe("évacuation de l'eau : ouverture rectangulaire au ras du plancher, en face du conduit d'air", () => {
   const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
   const inner = one(sc0, /^Côté gauche int/), duct = one(sc0, /^Conduit d'air 2$/), floor = one(sc0, /^Plancher int/), floorTop = floor.pos[2] + t / 2;
-  const hole = duct.holes.find((h) => h.size === 34 && h.sh === 6)!;
-  it('« Conduit d\'air 2 » : trou de 34 × 6 dont le bas est le dessus de « Plancher int », ligaments ≥ 4,5 mm, à l\'écart de la fente d\'aération', () => {
+  const hole = duct.holes.find((h) => h.size === 28 && h.sh === 6)!;
+  it('« Conduit d\'air 2 » : trou de 28 × 6 dont le bas est le dessus de « Plancher int », ligaments ≥ 4,5 mm, à l\'écart de la fente d\'aération', () => {
     expect(hole).toBeTruthy(); expect(hole.poly).toBeUndefined();
     expect(duct.pos[2] + hole.y - 3).toBeCloseTo(floorTop, 5); expect(duct.pos[2] + hole.y + 3).toBeCloseTo(floorTop + 6, 5);
     expect(ligament(duct, hole).min).toBeGreaterThanOrEqual(4.5 - 1e-6);
@@ -620,6 +631,16 @@ describe("évacuation de l'eau : ouverture rectangulaire au ras du plancher, en 
       expect(inPoly([lx, floorTop + 6.3 - b.c.z], o), 'au-dessus du cran : la paroi').toBe(true);
     }
     expect(inner.holes.filter((h) => h.size === 4 && h.sh === 30)).toHaveLength(6);
+    // une vraie ENCOCHE : le cran de coin est gardé (le coin reste en bois), plus aucun moignon de dent de chaque côté : les crans voisins touchent l'encoche, bois plein au-dessus, et le plancher n'a pas leurs fentes
+    const bn = inner.notches.filter((x) => x.edge === 'bottom').map((x) => [x.pos - x.width / 2, x.pos + x.width / 2, x.depth] as const).sort((p, q) => p[0] - q[0]);
+    const dr = bn.find((x) => x[2] > t + 5)!; expect(dr).toBeTruthy(); expect(dr[2]).toBeCloseTo(t + 6, 5);
+    expect(dr[0] - (wy0 - b.c.y + inner.w / 2)).toBeLessThanOrEqual(0.01); expect(dr[1] - (wy1 - b.c.y + inner.w / 2)).toBeGreaterThanOrEqual(-0.01); // couvre le trou du conduit
+    const before = bn.filter((x) => x !== dr && x[1] <= dr[0] + 0.01).pop()!, after = bn.find((x) => x !== dr && x[0] >= dr[1] - 0.01)!;
+    expect(before[0]).toBeLessThanOrEqual(0.01); // cran de coin gardé : le coin reste en bois (pas d'encoche jusqu'au coin)
+    expect(dr[0] - before[1]).toBeCloseTo(0, 5); expect(after[0] - dr[1]).toBeCloseTo(0, 5); // aucun moignon de dent entre les crans et l'encoche
+    expect(after[1] - after[0]).toBeGreaterThan(14.5); expect(before[1]).toBeGreaterThan(14.9);
+    const slot = (lx0: number, lx1: number) => floor.holes.some((h) => !h.poly && Math.abs(h.x - inner.pos[0]) < 3 && Math.abs(h.y - (inner.pos[1] + (lx0 + lx1) / 2 - inner.w / 2)) < (lx1 - lx0) / 2 + (h.sh ?? h.size) / 2 - 0.01);
+    expect(slot(dr[0] - 3, dr[0]), 'plus de fente pour un moignon').toBe(false); expect(slot(dr[1], dr[1] + 3), 'plus de fente pour un moignon').toBe(false);
   });
   it("l'eau tombe dans le conduit : le plancher intérieur est ouvert sous le trou, le fond extérieur aussi, et rien n'est posé dans le trou", () => {
     const comb = floor.holes.find((h) => h.poly && h.size > 29 && h.sh! > 46)!, bottom = one(sc0, /^Dessous ext/);

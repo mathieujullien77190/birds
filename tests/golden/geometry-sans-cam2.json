@@ -1025,13 +1025,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "34f2c5fea4b0f646",
+   "pos": "dd4ce7366d78905f",
    "col": "1e7ca23132a99a17"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "027445527aa16553",
+   "pos": "ebe8d1a5a191d3d6",
    "col": null
   }
  },
@@ -1039,13 +1039,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "2015fe006bb4cfdc",
+   "pos": "dd4ce7366d78905f",
    "col": "b108bdd4f2fad3de"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "b989aa794e665445",
+   "pos": "ebe8d1a5a191d3d6",
    "col": null
   }
  },
@@ -1053,7 +1053,7 @@
   "geo": {
    "n": 1305,
    "idx": 6912,
-   "pos": "5cb9b8e159e29a5f",
+   "pos": "cc666a17abc34e2b",
    "col": "71758049fa8ab873"
   },
   "edges": {
@@ -1067,7 +1067,7 @@
   "geo": {
    "n": 1305,
    "idx": 6912,
-   "pos": "2a1b2ac5bc76a71a",
+   "pos": "dfe3758b4dded7d2",
    "col": "4b370a19c72ca102"
   },
   "edges": {
@@ -1081,7 +1081,7 @@
   "geo": {
    "n": 1305,
    "idx": 6912,
-   "pos": "b3240540aede29bc",
+   "pos": "95bc0d79547fea77",
    "col": "d7878cded406a1a0"
   },
   "edges": {
@@ -1095,7 +1095,7 @@
   "geo": {
    "n": 1305,
    "idx": 6912,
-   "pos": "7c9195cef80856eb",
+   "pos": "5fe6aec2b85df732",
    "col": "cdc98593198e8204"
   },
   "edges": {
@@ -1121,10 +1121,10 @@
  },
  "080 Fil interrupteur → ventilateur + (rouge)": {
   "geo": {
-   "n": 1737,
-   "idx": 9216,
-   "pos": "4a4e789dd4aebb68",
-   "col": "1cce382b4b73b144"
+   "n": 1521,
+   "idx": 8064,
+   "pos": "3c4c76c99c8edf86",
+   "col": "9d6be67da6d54369"
   },
   "edges": {
    "n": 0,
@@ -1137,7 +1137,7 @@
   "geo": {
    "n": 1953,
    "idx": 10368,
-   "pos": "28d13598779d80b5",
+   "pos": "577bf153918a0d42",
    "col": "df3763041b185ab8"
   },
   "edges": {
@@ -1163,10 +1163,10 @@
  },
  "083 Fil PWM ventilateur (bleu)": {
   "geo": {
-   "n": 2385,
-   "idx": 12672,
-   "pos": "3cc891859b4d7471",
-   "col": "b64008c9afde796d"
+   "n": 2169,
+   "idx": 11520,
+   "pos": "b23a24c3f7a564c1",
+   "col": "2cb326ee6109bab6"
   },
   "edges": {
    "n": 0,
@@ -1177,10 +1177,10 @@
  },
  "084 Fil tachymètre ventilateur (jaune)": {
   "geo": {
-   "n": 1953,
-   "idx": 10368,
-   "pos": "d7adf98b77485fef",
-   "col": "acc39fbd40f310db"
+   "n": 1737,
+   "idx": 9216,
+   "pos": "0807981f47df7ad8",
+   "col": "03dc796036831d5a"
   },
   "edges": {
    "n": 0,
@@ -1191,10 +1191,10 @@
  },
  "085 Fil masse commune ventilateur (noir)": {
   "geo": {
-   "n": 2385,
-   "idx": 12672,
-   "pos": "a575e14d638b54dd",
-   "col": "0e21f6686bf790cd"
+   "n": 2169,
+   "idx": 11520,
+   "pos": "8e00d615404bd7a4",
+   "col": "8af7067d6e615856"
   },
   "edges": {
    "n": 0,
@@ -1207,7 +1207,7 @@
   "geo": {
    "n": 2169,
    "idx": 11520,
-   "pos": "70c42f42e25eb44a",
+   "pos": "e0dfa553fdbdcd63",
    "col": "b98f285c1031fce0"
   },
   "edges": {
@@ -1277,13 +1277,13 @@
   "geo": {
    "n": 588,
    "idx": 0,
-   "pos": "0463fe8be701df81",
+   "pos": "bde70213ac9cd19f",
    "col": "5e562c2951f34fcb"
   },
   "edges": {
    "n": 216,
    "idx": 0,
-   "pos": "b4bb03d654dcd430",
+   "pos": "8f4ed7b9b15c5711",
    "col": null
   }
  },
@@ -1627,13 +1627,13 @@
   "geo": {
    "n": 684,
    "idx": 0,
-   "pos": "f25693a49fc60ee5",
+   "pos": "f124fef2aa5c01c0",
    "col": "baa92f72760e490e"
   },
   "edges": {
    "n": 240,
    "idx": 0,
-   "pos": "947ca4f91d8d404e",
+   "pos": "c691c03e0b69c0ec",
    "col": null
   }
  },
@@ -2451,15 +2451,15 @@
  },
  "175 Plancher int": {
   "geo": {
-   "n": 2436,
+   "n": 2388,
    "idx": 0,
-   "pos": "1565fdea5ebe8162",
-   "col": "0481611f231f725f"
+   "pos": "fb6de907e53c80bf",
+   "col": "42aeab62e352b980"
   },
   "edges": {
-   "n": 912,
+   "n": 888,
    "idx": 0,
-   "pos": "4ff1e464ebdea074",
+   "pos": "9166b5fba458aaa7",
    "col": null
   }
  },
@@ -2509,13 +2509,13 @@
   "geo": {
    "n": 1056,
    "idx": 0,
-   "pos": "97287c98650bc98e",
+   "pos": "367cdd81d91596f2",
    "col": "a967b8dd11e0f4d4"
   },
   "edges": {
    "n": 400,
    "idx": 0,
-   "pos": "90f5c138f000aeb2",
+   "pos": "ca24694c5610a624",
    "col": null
   }
  },

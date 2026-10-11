@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { NEST_DEFAULT, bounds, findCameraPlank, makeNest, nestSheets, outline, sheetLabel, sheetSvg, sheetsPreviewSvg, setAirPlug, setWinterCassette, summerLayout, winterState, CAMERA_NAMES, carveRects, type NestParams, type Plank, type PlankScene } from '@/birdhouse/model';
+import { NEST_DEFAULT, bounds, findCameraPlank, makeNest, nestSheets, outline, sheetLabel, sheetSvg, sheetsPreviewSvg, setAirPlug, setCassetteMode, nextCassette, setWinterCassette, summerLayout, winterState, CAMERA_NAMES, carveRects, type NestParams, type Plank, type PlankScene } from '@/birdhouse/model';
 import { buildNest, normalizeIds, withoutBagSlots } from './helpers';
 
 const T = 3;
@@ -317,6 +317,21 @@ describe('pièces d\'hiver', () => {
   });
   it('winterState : scène sans ces pièces → null / null', () => {
     expect(winterState({ t: 3, fit: 0, planks: [] })).toEqual({ cassette: null, plug: null });
+  });
+  it('trois états : été, hiver, aucune (siège vide) ; aller-retour exact entre tous, bloc et cassette rangés sans se recouvrir', () => {
+    const s0 = nest(), modes = ['summer', 'winter', 'none'] as const, st = Object.fromEntries(modes.map((m) => [m, setCassetteMode(s0, m)]));
+    for (const m of modes) expect(winterState(st[m]).cassette).toBe(m);
+    expect(st.summer).toEqual(s0); // l'état par défaut est l'été
+    for (const a of modes) for (const b of modes) expect(setCassetteMode(st[a], b), a + ' → ' + b).toEqual(st[b]); // exact au centième, quel que soit le chemin
+    expect(setCassetteMode(setCassetteMode(setCassetteMode(st.none, 'winter'), 'summer'), 'none')).toEqual(st.none);
+    const seat = pos(s0, /^Cassette ventilateur 1$/), none = st.none, bf = pos(none, /^Bloc isolant d'hiver 1$/), fan = pos(none, /^Ventilateur Noctua/), cf = pos(none, /^Cassette ventilateur 1$/);
+    expect(Math.hypot(fan[0] - seat[0], fan[1] - seat[1])).toBeGreaterThan(100); // siège vide : ni cassette ni bloc
+    expect(Math.hypot(bf[0] - seat[0], bf[1] - seat[1])).toBeGreaterThan(100);
+    expect(bf[0]).toBeLessThan(-(210 / 2) - 100); expect(cf[0]).toBeLessThan(-(210 / 2) - 100); // les deux rangés à gauche du nichoir
+    expect(Math.abs(bf[1] - cf[1])).toBeGreaterThan(75); // à des endroits différents (pas de recouvrement : le bloc fait ≈ 77 mm de long)
+    // les pièces de rechange et les fils de la cassette suivent la cassette (chemins décalés), la prise d'air n'est pas touchée
+    expect(winterState(none).plug).toBe('open'); expect(nextCassette('summer')).toBe('winter'); expect(nextCassette('winter')).toBe('none'); expect(nextCassette('none')).toBe('summer');
+    expect(setCassetteMode({ t: 3, fit: 0, planks: [] }, 'none')).toEqual({ t: 3, fit: 0, planks: [] });
   });
   it('hiver : la cassette sort, le bloc isolant entre dans le siège ; aller-retour exact', () => {
     const s = nest();

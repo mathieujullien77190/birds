@@ -18,7 +18,7 @@ const BLOCK_FRONT = /^Bloc isolant d'hiver 1$/; // paroi avant du bloc : aligné
 const by = (s: PlankScene, re: RegExp) => s.planks.find((p) => re.test(p.name));
 const isIn = (p: Plank, res: RegExp[]) => !SPARE_RE.test(p.name) && res.some((re) => re.test(p.name)); // une rechange (« … (rechange 1) ») reste où elle est, même si son nom commence comme une pièce d'hiver
 
-interface Layout { seat: [number, number]; co: number; floorTop: number; slotA: [number, number]; slotB: [number, number]; duct: [number, number]; lipBottom: number }
+interface Layout { seat: [number, number]; co: number; floorTop: number; slotA: [number, number]; slotB: [number, number]; slotC: [number, number]; duct: [number, number]; lipBottom: number }
 
 /** Repères de la scène (null si les pièces nécessaires manquent). */
 function layout(s: PlankScene): Layout | null {
@@ -26,7 +26,7 @@ function layout(s: PlankScene): Layout | null {
   if (!gl || !gr || !gf || !floor || !outerL || !lid || !bottom) return null;
   const co = Math.abs(gr.pos[0] - gl.pos[0]) - s.t, seat: [number, number] = [r2((gl.pos[0] + gr.pos[0]) / 2), r2(gf.pos[1] + s.t / 2 + co / 2)];
   const ex = r2(outerL.pos[0] - s.t / 2 - SPARE_GAP);
-  return { seat, co, floorTop: r2(floor.pos[2] + s.t / 2), slotA: [ex, 0], slotB: [ex, -80], duct: [lid.pos[0], lid.pos[1]], lipBottom: r2(bottom.pos[2] - s.t / 2 - PLUG_HANDLE) };
+  return { seat, co, floorTop: r2(floor.pos[2] + s.t / 2), slotA: [ex, 0], slotB: [ex, -80], slotC: [ex, 85], duct: [lid.pos[0], lid.pos[1]], lipBottom: r2(bottom.pos[2] - s.t / 2 - PLUG_HANDLE) };
 }
 
 /** Translate des pièces (leur position, et les points de leur chemin pour les fils) au centième. */
@@ -36,7 +36,7 @@ function shift(s: PlankScene, res: RegExp[], d: Vec3): PlankScene {
 }
 
 /** État des pièces d'hiver (null : la scène n'a pas ces pièces). */
-export interface WinterState { cassette: 'summer' | 'winter' | null; plug: 'open' | 'plugged' | null }
+export interface WinterState { cassette: 'summer' | 'winter' | 'none' | null; plug: 'open' | 'plugged' | null }
 
 /** État : la cassette ventilateur est-elle dans le siège (« summer »), exposée (« winter ») ? null si la scène n'a pas ces pièces. */
 export function winterState(s: PlankScene): WinterState {
@@ -44,23 +44,40 @@ export function winterState(s: PlankScene): WinterState {
   const near = (p: Plank, c: [number, number]) => Math.hypot(p.pos[0] - c[0], p.pos[1] - c[1]) < 1;
   const block = by(s, BLOCK_FRONT);
   return {
-    cassette: l && fan && block ? (near(fan, l.seat) ? 'summer' : 'winter') : null,
+    cassette: l && fan && block ? (near(fan, l.seat) ? 'summer' : near(block, [l.seat[0], l.seat[1] - l.co / 2 + s.t / 2]) ? 'winter' : 'none') : null,
     plug: l && lip ? (near(lip, l.duct) ? 'plugged' : 'open') : null,
   };
 }
 
-/** Met en place la cassette isolante (winter) ou la cassette ventilateur (été) dans le siège ; l'autre est rangée à côté du nichoir. Ne fait rien sans ces pièces. */
-export function setWinterCassette(s: PlankScene, winter: boolean): PlankScene {
+/** Les trois états de la cassette : `summer` = ventilateur dans le siège (bloc isolant rangé en A), `winter` = bloc isolant dans le siège (cassette rangée en A), `none` = siège vide (cassette rangée en A, bloc rangé en C, à côté). */
+export type CassetteMode = 'summer' | 'winter' | 'none';
+
+/** État suivant du bouton « Cassette » : ventilateur → isolante → aucune → ventilateur. */
+export const nextCassette = (m: CassetteMode): CassetteMode => (m === 'summer' ? 'winter' : m === 'winter' ? 'none' : 'summer');
+
+/** Met la cassette dans l'un des trois états ; les pièces sorties sont rangées à côté du nichoir. Ne fait rien sans ces pièces. Chaque déplacement est une translation au centième : l'aller-retour est exact. */
+export function setCassetteMode(s: PlankScene, mode: CassetteMode): PlankScene {
   const l = layout(s), fan = by(s, /^Ventilateur Noctua/), block = by(s, BLOCK_FRONT);
   if (!l || !fan || !block) return s;
-  const out: Vec3 = [l.slotA[0] - l.seat[0], l.slotA[1] - l.seat[1], -l.floorTop]; // du siège vers le sol à côté
-  const inn: Vec3 = [-out[0], -out[1], -out[2]];
-  const near = (p: Plank) => Math.hypot(p.pos[0] - l.seat[0], p.pos[1] - l.seat[1]) < 1;
-  const nearBlock = (p: Plank) => Math.hypot(p.pos[0] - l.seat[0], p.pos[1] - (l.seat[1] - l.co / 2 + s.t / 2)) < 1; // le bloc est plus long que la cassette (il occupe aussi la place du conduit) : on compare sa paroi avant
+  const vec = (c: [number, number]): Vec3 => [r2(c[0] - l.seat[0]), r2(c[1] - l.seat[1]), -l.floorTop]; // du siège vers un rangement
+  const outA = vec(l.slotA), outC = vec(l.slotC);
+  const seatFront: [number, number] = [l.seat[0], l.seat[1] - l.co / 2 + s.t / 2]; // paroi avant du bloc dans le siège (le bloc est plus long que la cassette : on compare sa paroi avant)
+  const at = (p: Plank, c: [number, number]) => Math.hypot(p.pos[0] - c[0], p.pos[1] - c[1]) < 1;
+  const cassIn = at(fan, l.seat);
+  const blockPlace: 'seat' | 'A' | 'C' = at(block, seatFront) ? 'seat' : at(block, [seatFront[0] + outA[0], seatFront[1] + outA[1]]) ? 'A' : 'C';
+  const want = { cass: mode === 'summer', block: mode === 'winter' ? 'seat' : mode === 'summer' ? 'A' : 'C' } as const;
+  const off = { seat: [0, 0, 0] as Vec3, A: outA, C: outC };
   let r = s;
-  if (winter) { if (near(fan)) r = shift(r, CASSETTE, out); if (!nearBlock(block)) r = shift(r, BLOCK, inn); } // la cassette sort, le bloc entre
-  else { if (nearBlock(block)) r = shift(r, BLOCK, out); if (!near(fan)) r = shift(r, CASSETTE, inn); }
+  if (cassIn && !want.cass) r = shift(r, CASSETTE, outA); // la cassette sort
+  if (!cassIn && want.cass) r = shift(r, CASSETTE, [-outA[0], -outA[1], -outA[2]]); // la cassette rentre
+  const cur = off[blockPlace], tgt = off[want.block];
+  if (cur !== tgt) r = shift(r, BLOCK, [r2(tgt[0] - cur[0]), r2(tgt[1] - cur[1]), r2(tgt[2] - cur[2])]);
   return r;
+}
+
+/** Met en place la cassette isolante (winter) ou la cassette ventilateur (été) dans le siège ; l'autre est rangée à côté du nichoir. Ne fait rien sans ces pièces. */
+export function setWinterCassette(s: PlankScene, winter: boolean): PlankScene {
+  return setCassetteMode(s, winter ? 'winter' : 'summer');
 }
 
 /** Bouche la prise d'air (la sous-boîte entre dans le conduit) ou la rouvre (elle est rangée à côté du nichoir). */
