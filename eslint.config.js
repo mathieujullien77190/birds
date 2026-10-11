@@ -9,10 +9,10 @@ const tseslint = require('typescript-eslint');
 const reactHooks = require('eslint-plugin-react-hooks');
 
 export default tseslint.config(
-  { ignores: ['dist/**', 'archives/**', 'pi/**', 'public/**', 'scripts/**', 'tools/**', 'node_modules/**'] },
+  { ignores: ['dist/**', 'archives/**', 'pi/**', 'public/**', 'scripts/**', 'tools/**', 'node_modules/**', 'laser-control/node_modules/**', 'laser-control/dist/**'] },
   {
-    // le code 3D (modèle pur, Three.js, vue) et ses tests, plus le simulateur du Pi
-    files: ['src/birdhouse/**/*.{ts,tsx}', 'src/features/viewer/**/*.{ts,tsx}', 'tests/**/*.ts'],
+    // le code 3D (modèle pur, Three.js, vue) et ses tests, plus le simulateur du Pi et le pilotage de la laser (laser-control/)
+    files: ['src/birdhouse/**/*.{ts,tsx}', 'src/features/viewer/**/*.{ts,tsx}', 'src/features/laser/**/*.{ts,tsx}', 'laser-control/src/**/*.{ts,tsx}', 'laser-control/tests/**/*.ts', 'tests/**/*.ts'],
     extends: [tseslint.configs.base],
     plugins: { '@typescript-eslint': tseslint.plugin, 'react-hooks': reactHooks },
     rules: {

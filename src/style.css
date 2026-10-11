@@ -5,3 +5,6 @@ body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
 
 /* curseurs fins, ton pastel */
 input[type="range"] { accent-color: #6f9c8a; width: 100%; }
+
+/* le pilotage de la laser vient du projet autonome laser-control/ : ses classes Tailwind doivent être générées aussi */
+@source "../laser-control/src";
