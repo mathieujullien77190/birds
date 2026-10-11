@@ -21,8 +21,10 @@ import os
 import random
 import struct
 import sys
+import json
 import threading
 import time
+import urllib.request
 import zlib
 
 from flask import Flask, Response, jsonify, request, send_from_directory
@@ -36,6 +38,11 @@ def log(msg):
 HOT_MAX = 55.0      # °C sur le dissipateur : au-dessus, le Peltier est coupé
 PWM_MAX = 0.6       # puissance maximale du Peltier (batterie de 6 Ah)
 PERIODE = 5.0       # secondes entre deux lectures
+# FACULTATIF : météo extérieure (API gratuite Open-Meteo, sans clé). Sans connexion internet la page affiche « — » et le reste marche.
+# À RÉGLER : les coordonnées du nichoir (variables d'environnement NICHOIR_LAT / NICHOIR_LON, ou ici). Par défaut : Paris.
+LATITUDE = float(os.environ.get("NICHOIR_LAT", "48.85"))
+LONGITUDE = float(os.environ.get("NICHOIR_LON", "2.35"))
+METEO_PERIODE = 600   # secondes entre deux demandes (l'API met à jour toutes les 15 min : inutile d'insister)
 BATTERIE_BASSE = 20      # % : en dessous, le Peltier est coupé (et refusé) pour économiser l'énergie
 BATTERIE_CRITIQUE = 10   # % : en dessous, les caméras et les LED infrarouges sont coupées aussi (et refusées)
 CAPACITE_WH = 76.8  # batterie LiFePO4 12,8 V × 6 Ah
@@ -58,6 +65,7 @@ etat = {
     "led_nid": False, "led_ext": False,
     "batterie": {"pourcent": None, "tension": None, "source": None},   # niveau de charge (mesuré par l'INA219 si présent, sinon simulé)
     "conso": {"total_w": None, "detail": {}},                          # consommation estimée selon ce qui est allumé
+    "meteo": {"t_ext": None, "hum_ext": None, "nuages": None, "vent_kmh": None, "jour": None, "rayonnement": None, "source": None, "maj": None},   # météo extérieure
     "cam1": True, "cam2": True,   # caméras allumées (flux en direct) ou éteintes (économie d'énergie)
     "erreurs": {},        # nom du matériel → message, quand quelque chose manque
     "derniere_lecture": None,
@@ -253,6 +261,11 @@ if MOCK:
             apport = max(0.05 * apport, apport * (100 - pc) / 10)
         sim["wh"] = min(CAPACITE_WH, max(0.0, sim["wh"] + apport * PERIODE / 3600 * SIM_ACCEL))
         pc = 100 * sim["wh"] / CAPACITE_WH
+        if not os.environ.get("NICHOIR_MOCK_METEO_REEL"):  # météo inventée, cohérente avec le jour / la nuit et les nuages de la simulation
+            t_ext = (16 if not nuit else 9) + 3 * math.sin(time.time() / 900) + random.uniform(-0.1, 0.1)
+            etat["meteo"] = {"t_ext": round(t_ext, 1), "hum_ext": round(70 - 20 * sim["nuage"] + random.uniform(-1, 1)), "nuages": round(100 * (1 - sim["nuage"])),
+                             "vent_kmh": round(8 + 4 * math.sin(time.time() / 300), 1), "jour": not nuit, "rayonnement": 0 if nuit else round(800 * sim["nuage"]),
+                             "source": "simulée", "maj": time.strftime("%H:%M:%S")}
         etat["batterie"] = {"pourcent": round(pc, 1), "tension": round(tension_depuis_pourcent(pc), 2), "source": "simulée", "solaire_w": round(solaire, 1)}
 
 
@@ -312,6 +325,29 @@ def leds(nid=None, ext=None):
 # ---------------------------------------------------------------- lecture des capteurs, toutes les PERIODE secondes
 # REQUIS : c'est la boucle qui lit les capteurs et applique la coupure de sécurité. Elle tourne en tâche de fond.
 _lectures = [0]
+_meteo = {"dernier": 0.0}
+
+
+def maj_meteo():
+    """Demande la météo extérieure à Open-Meteo toutes les METEO_PERIODE secondes (échec silencieux : l'erreur s'affiche, le reste continue)."""
+    if MOCK and not os.environ.get("NICHOIR_MOCK_METEO_REEL"):
+        return  # en mode simulé la météo est inventée par simuler()
+    if time.time() - _meteo["dernier"] < METEO_PERIODE:
+        return
+    _meteo["dernier"] = time.time()
+    url = (f"https://api.open-meteo.com/v1/forecast?latitude={LATITUDE}&longitude={LONGITUDE}"
+           "&current=temperature_2m,relative_humidity_2m,cloud_cover,wind_speed_10m,is_day,shortwave_radiation&timezone=auto")
+    try:
+        with urllib.request.urlopen(url, timeout=8) as r:
+            c = json.load(r)["current"]
+        etat["meteo"] = {"t_ext": c["temperature_2m"], "hum_ext": c["relative_humidity_2m"], "nuages": c["cloud_cover"], "vent_kmh": c["wind_speed_10m"],
+                         "jour": bool(c["is_day"]), "rayonnement": c["shortwave_radiation"], "source": "Open-Meteo", "maj": time.strftime("%H:%M:%S")}
+        etat["erreurs"].pop("meteo", None)
+        log(f"Météo : {c['temperature_2m']} °C dehors, nuages {c['cloud_cover']} %")
+    except Exception as e:
+        etat["erreurs"]["meteo"] = f"météo indisponible : {e}"
+
+
 LOG_TOUS_LES = 10   # une ligne de situation toutes les 10 lectures (50 s sur le Pi, 10 s en mode simulé)
 
 
@@ -366,6 +402,7 @@ def lecture():
         etat["erreurs"]["delestage"] = f"Batterie à {pc} % : {niveau} pour économiser l'énergie"
     else:
         etat["erreurs"].pop("delestage", None)
+    maj_meteo()
     etat["conso"] = consommation()
     etat["derniere_lecture"] = time.strftime("%H:%M:%S")
     _lectures[0] += 1

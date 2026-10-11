@@ -9,7 +9,17 @@ Un nichoir à mésanges isolé, dessiné en 3D dans le navigateur et découpé a
 - Un seul écran : le nichoir en 3D (Three.js), réglable par quelques curseurs (intérieur carré, hauteur et diamètre du trou), avec les options Solaire, 2ᵉ caméra et Peltier + capteur.
 - Chaque pièce est une plaque de contreplaqué crénelée : cliquer une pièce dans la 3D la choisit et la montre dans le volet « Pièces » ; survoler un fil ou un composant le met en surbrillance dans le schéma électrique (bouton 🔌 Schéma) et inversement.
 - « Découpe laser » : les plaques sont rangées sur des planches de 410 × 400 mm (marge de 8 mm, 5 mm entre pièces) et exportées en SVG, un fichier par planche.
-- Deux documents intégrés (pièce « Schéma électronique » du volet « Pièces ») : le **schéma électronique** (branchements fil par fil, paramètres de chaque composant, poids, prix par groupe avec cases à cocher, liens vers les fiches) le **logiciel** (programme Python sur le Pi, service systemd, page web, accès à distance) et un explorateur du **code du Pi** (arborescence du dossier `pi/`, sources colorées).
+- Trois documents intégrés (pièce « Schéma électronique » du volet « Pièces ») : voir la section **Documentation** ci-dessous. L'app contient aussi un explorateur du **code du Pi** (arborescence du dossier `pi/`, sources colorées), un **simulateur de la page web du Pi** (bouton « 🐍 Pi » : le vrai programme Python tourne dans le navigateur, avec terminal, flux vidéo pris depuis les caméras de la 3D, essais de pannes, jour / nuit) et le **pilotage de la laser** (section « Découpe laser »).
+
+## Documentation
+
+Trois documents Markdown dans [`docs/`](docs/), lisibles aussi dans l'application (pièce « Schéma électronique » du volet « Pièces ») :
+
+| Document | Contenu |
+| --- | --- |
+| [`docs/schema-electronique.md`](docs/schema-electronique.md) | **Schéma électronique** : schéma général (branchements fil par fil, broches du Raspberry Pi), paramètres à respecter pour chaque composant, vérification des branchements, poids, prix par groupe (cases à cocher dans l'app), stratégie d'énergie. |
+| [`docs/logiciel.md`](docs/logiciel.md) | **Logiciel** : programme Python sur le Pi (capteurs, Peltier, LED, caméras), sécurités (coupure à 55 °C, batterie faible), météo extérieure, niveau de batterie et consommation, page web React, simulateur et essais, service systemd, accès à distance. |
+| [`docs/laser.md`](docs/laser.md) | **Pilotage de la laser** (Sculpfun S30 Pro, GRBL) : branchement USB, mise en place pas à pas, cadre à vide, réglages de coupe à calibrer, sécurité, convention d'axes. |
 
 ## Lancer en local
 
