@@ -9,7 +9,7 @@ import { type PartGeometry } from './geometry';
 /** Dessus (face +z de la plaque) clair, dessous un peu plus foncé, tranche (épaisseur) marron foncé : on voit tout de suite le sens et l'épaisseur. */
 const TOP = new Color(PALETTE.plywoodTop), BOTTOM = new Color(PALETTE.plywoodBottom), SIDE = new Color(PALETTE.plywoodSide);
 export function plankGeometry(p: Plank, t: number): PartGeometry {
-  if (p.special && p.special !== 'alu') return partGeometry(p, t);
+  if (p.special) return partGeometry(p, t);
   const pts = outline(p);
   const shape = new Shape(pts.map(([x, y]) => new Vector2(x, y)));
   for (const h of p.holes) shape.holes.push(new Path(holeOutline(h).map(([x, y]) => new Vector2(x, y))));
@@ -21,7 +21,6 @@ export function plankGeometry(p: Plank, t: number): PartGeometry {
     const z = nrm.getZ(i), c = z > 0.5 ? TOP : z < -0.5 ? BOTTOM : SIDE;
     col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b;
   }
-  if (p.special === 'alu') { const c = new Color(p.color ?? PALETTE.aluminium); for (let i = 0; i < nrm.count; i++) { const k = nrm.getZ(i) < -0.5 ? 0.9 : Math.abs(nrm.getZ(i)) <= 0.5 ? 0.8 : 1; col[3 * i] = c.r * k; col[3 * i + 1] = c.g * k; col[3 * i + 2] = c.b * k; } } // aluminium : une seule teinte
   geo.setAttribute('color', new Float32BufferAttribute(col, 3));
   const pos: number[] = [];
   for (const loop of [pts, ...p.holes.map(holeOutline)]) for (let i = 0; i < loop.length; i++) {

@@ -8,9 +8,7 @@ import { cameraBoardGeometry } from './camera';
 import { caseGeometry } from './case';
 import { driverGeometry } from './driver';
 import { fanGeometry } from './fan';
-import { heatsinkGeometry } from './heatsink';
 import { irBoardGeometry } from './ir';
-import { peltierGeometry } from './peltier';
 import { piGeometry } from './pi';
 import { sensorGeometry } from './sensor';
 import { solarGeometry } from './solar';
@@ -26,9 +24,7 @@ const FACTORIES: Partial<Record<Special, PartFactory>> = {
   case: caseGeometry,
   solar: solarGeometry,
   fan: fanGeometry,
-  peltier: peltierGeometry,
   driver: driverGeometry,
-  heatsink: heatsinkGeometry,
   sensor: sensorGeometry,
   block: (p, t) => (p.holes.length || p.poly ? shapedBlockGeometry(p, t) : blockGeometry(p, t)), // percé ou à contour libre : plaque épaisse ; sinon boîte pleine
   cable: ribbonGeometry,

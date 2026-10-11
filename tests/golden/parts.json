@@ -23,18 +23,6 @@
    "col": null
   }
  },
- "alu": {
-  "geo": {
-   "n": 36,
-   "pos": "f609fe6f8a119b95",
-   "col": "d31739913d3d3363"
-  },
-  "edges": {
-   "n": 24,
-   "pos": "39cb10ecb9d42c58",
-   "col": null
-  }
- },
  "case": {
   "geo": {
    "n": 216,
@@ -61,25 +49,13 @@
  },
  "fan": {
   "geo": {
-   "n": 864,
-   "pos": "2563160cd25e266a",
-   "col": "344c9fda3d99f019"
+   "n": 1440,
+   "pos": "c3ae37edee71385e",
+   "col": "e1e1b2a5a8543296"
   },
   "edges": {
-   "n": 384,
-   "pos": "ac44eb6a7bd00f98",
-   "col": null
-  }
- },
- "peltier": {
-  "geo": {
-   "n": 108,
-   "pos": "a23cf5dd85ea6d89",
-   "col": "429cf1af2c2235b3"
-  },
-  "edges": {
-   "n": 72,
-   "pos": "71fea6ba492cffa6",
+   "n": 592,
+   "pos": "e797b124b1e25e33",
    "col": null
   }
  },
@@ -92,18 +68,6 @@
   "edges": {
    "n": 192,
    "pos": "5c906d1061dbe350",
-   "col": null
-  }
- },
- "heatsink": {
-  "geo": {
-   "n": 432,
-   "pos": "c7a4897b5d15b3ef",
-   "col": "0dd35fd5d4c3e0fe"
-  },
-  "edges": {
-   "n": 288,
-   "pos": "1088cac5ecdbaa8c",
    "col": null
   }
  },

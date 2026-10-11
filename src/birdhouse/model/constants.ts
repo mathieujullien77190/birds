@@ -9,20 +9,15 @@ export const TOOTH = 16;
 
 export const DEFAULT_SCENE: PlankScene = { t: 3, fit: 0, planks: [], up: 'z2' }; // jeu 0 : crans ajustés exactement (le laser enlève déjà ~0,1 mm, ce qui donne le jeu)
 
-export const NEST_DEFAULT: NestParams = { l: 120, L: 120, floorToHole: 130, hole: 28, above: 20, ins: 39, cam: 38, chene: false, lambris: true, pente: true, clim: true, solar: true, cam2: true }; // lambris et toit en pente : retirés pour le moment (cases « Lambris » et « Toit en pente » pour les remettre)
+export const NEST_DEFAULT: NestParams = { l: 120, L: 120, floorToHole: 130, hole: 28, above: 20, ins: 39, cam: 38, chene: false, lambris: true, pente: true, solar: true, cam2: true }; // lambris et toit en pente : retirés pour le moment (cases « Lambris » et « Toit en pente » pour les remettre)
 
 
-/** Module Peltier (TEC1-12706 : 40 × 40 × 3,8) : plaque froide alu 60 × 60 × 3 dans le nid, bloc alu 40 × 40 qui traverse l'isolant, Peltier, radiateur alu 60 × 60 à ailettes à l'extérieur. Hauteur du centre (z) sur le mur arrière. */
-export const CLIM_Z = 170, TEC = 40, TEC_T = 3.8;
-/** Système Peltier dans le toit, derrière le compartiment caméra : position y du centre du Peltier, et du compartiment caméra (décalé un peu vers l'avant, côté trou d'entrée). */
-export const TEC_Y = 40, CAM_Y = -10, COLD = 60;
-/** Compartiment du Peltier dans le toit (comme celui de la caméra) : sans isolant, ouvert au-dessus ; le dissipateur de 40 est dedans avec de l'air autour. */
-/** Évacuation de l'eau de condensation : gouttère en diagonale sous la plaque froide (au fond du nid, en haut), trou dans les deux murs arrière, pile de carrés de bois percés qui traverse l'isolant. */
-export const DRAIN_X = 50, DRAIN_Y = 50, DRAIN_S = 16, DRAIN_HOLE = 4; // trou d'évacuation dans le coin arrière droit, percé VERS LE BAS à travers le fond : Ø 4
-export const TILT_DEG = 5; // inclinaison du bloc plaque froide + Peltier + dissipateur vers l'arrière
-export const TECW = 70, TECD = 70, TEC_CX = 8, TEC_CY = 51; // largeur réduite à 70 (et recentrée) pour laisser 1 cm de chaque côté de la batterie // intérieur du compartiment du dissipateur (40) : réduit (2,5 cm d'air autour en x, un peu moins en y), décalé vers la droite pour laisser le coin arrière gauche au Raspberry Pi
-/** Grande plaque froide en alu sous le plafond du nid : largeur (x), profondeur (y) et centre en y. */
-export const COLD_W = 116, COLD_D = 43, COLD_Y = 38.5; // derrière le compartiment caméra (jusqu'à y = 17) et jusqu'au mur arrière (y = 60) : la caméra n'est PAS dans la plaque // COLD : côté de l'ancienne plaque froide (encore utilisé par le lambris)
+/** Position y du centre du compartiment caméra dans le toit (décalé un peu vers l'avant, côté trou d'entrée). */
+export const CAM_Y = -10;
+/** Ventilateur d'extraction (Noctua NF-A6x25 PWM : 60 × 60 × 25, 12 V) qui aspire l'air chaud du nid à travers le toit : cadre, hauteur, ouverture carrée du plafond (côté nid),
+ *  hauteur des plots en caoutchouc entre le ventilateur et le plancher du toit, trous (Ø) et pas de la grille du plafond. */
+export const FAN = 60, FAN_T = 25, FAN_OPEN = 56, FAN_PLOT = 3, FAN_GRID_HOLE = 6, FAN_GRID_PITCH = 8;
+
 /** Capteur température / humidité (carte type BME280 / DHT22, 15 × 11) fixé à l'intérieur du mur arrière, fils vers le GPIO du Pi. */
 export const SENSOR_X = 30, SENSOR_Y = -17; // décalé de 1 cm vers le centre : la fente de ses fils (12 × 6 en x = 30,25) reste dans le compartiment, elle passait sous son mur droit (x = 43) // collé sous le plafond (le dessous du plancher du toit), à droite de la caméra, hors de la plaque alu
 

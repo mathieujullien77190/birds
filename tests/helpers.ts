@@ -11,7 +11,6 @@ export const GOLDEN_DIR = join(here, 'golden');
 /** Variantes de nichoir testées (les mêmes pour le modèle et la géométrie). */
 export const VARIANTS: Record<string, Partial<NestParams>> = {
   default: {},
-  'sans-clim': { clim: false },
   'sans-cam2': { cam2: false },
   'sans-solaire': { solar: false },
   'trou-120': { hole: 120 },

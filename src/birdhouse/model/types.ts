@@ -17,7 +17,7 @@ export interface Plank {
   poly?: [number, number][];
   /** Pavé à contour en plan : le haut est un plan incliné z = z0 + bx · x + by · y (repère de la plaque, z relatif au centre). */
   top?: { z0: number; bx: number; by: number };
-  special?: 'camera' | 'ir' | 'bar' | 'pi' | 'cable' | 'wire' | 'case' | 'block' | 'heatsink' | 'sensor' | 'fan' | 'peltier' | 'driver' | 'alu' | 'solar' | 'doc' | 'conduit';
+  special?: 'camera' | 'ir' | 'bar' | 'pi' | 'cable' | 'wire' | 'case' | 'block' | 'sensor' | 'fan' | 'driver' | 'solar' | 'doc' | 'conduit';
   /** « block » (pavé) : épaisseur réelle du pavé selon z, au lieu de l'épaisseur du bois. */
   depth?: number;
   /** « wire » : couleur du fil (CSS). */
@@ -55,4 +55,4 @@ export interface NestSheet { items: NestItem[]; used: number }
 export type FaceAxis = 'x' | 'y' | 'z';
 
 /** Réglages d'un nichoir à double paroi (mm) : intérieur utile l × L, hauteur du sol au bas du trou, trou, hauteur au-dessus du trou, épaisseur d'isolant. */
-export interface NestParams { l: number; L: number; floorToHole: number; hole: number; above: number; ins: number; /** côté intérieur du compartiment caméra dans l'isolant du toit (0 = aucun) */ cam: number; /** deuxième caméra dans une mini boîte en contreplaqué, sous le toit à gauche, tournée vers le trou d'entrée ; longue nappe jusqu'au 2ᵉ port caméra du Pi */ cam2: boolean; /** système solaire : panneau de 100 W sur poteaux, déporté ; batterie, régulateur et pont en H dans le toit */ solar: boolean; /** lambris : une couche de lames verticales sur les quatre côtés du corps */ chene: boolean; /** planche de chêne de 18 mm posée sur le toit, qui déborde de 15 mm */ lambris: boolean; /** toit en pente (deux pans en diagonale sur les côtés, au-dessus du toit plat) */ pente: boolean; /** module Peltier + radiateur alu sur la moitié haute du mur arrière + capteur de température / humidité */ clim: boolean }
+export interface NestParams { l: number; L: number; floorToHole: number; hole: number; above: number; ins: number; /** côté intérieur du compartiment caméra dans l'isolant du toit (0 = aucun) */ cam: number; /** deuxième caméra dans une mini boîte en contreplaqué, sous le toit à gauche, tournée vers le trou d'entrée ; longue nappe jusqu'au 2ᵉ port caméra du Pi */ cam2: boolean; /** système solaire : panneau de 100 W sur poteaux, déporté ; batterie et régulateur */ solar: boolean; /** lambris : une couche de lames verticales sur les quatre côtés du corps */ chene: boolean; /** planche de chêne de 18 mm posée sur le toit, qui déborde de 15 mm */ lambris: boolean; /** toit en pente (deux pans en diagonale sur les côtés, au-dessus du toit plat) */ pente: boolean; }
