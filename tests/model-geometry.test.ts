@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { rotate } from '@/birdhouse/model/math/rotation';
 import {
-  bounds, castellation, componentOf, corners, edgeLength, extents, fitHole, holeHalf, holeOutline, moveWithGroup, movingWith,
-  newNotch, newPlank, outline, pullFace, recastAll, rectUnion, rotFromBasis, slotsForTeeth, teethFor, toZUp, transformPlanks,
+  bounds, castellation, corners, edgeLength, extents, fitHole, holeHalf, holeOutline, moveWithGroup, movingWith,
+  outline, pullFace, recastAll, rectUnion, rotFromBasis, slotsForTeeth, teethFor, toZUp, transformPlanks,
   fromAxisAngle, fromEulerDeg, makeBox,
   type Hole, type Plank, type PlankScene, type Pt, type Vec3,
 } from '@/birdhouse/model';
@@ -12,19 +12,6 @@ const scene = (planks: Plank[], over: Partial<PlankScene> = {}): PlankScene => (
 /** Évite les -0 (toEqual distingue +0 et -0). */
 const nz = (v: number[]): number[] => v.map((x) => x + 0);
 const area = (poly: Pt[]): number => { let s = 0; for (let i = 0; i < poly.length; i++) { const [x0, y0] = poly[i], [x1, y1] = poly[(i + 1) % poly.length]; s += x0 * y1 - x1 * y0; } return s / 2; };
-
-describe('usine de plaques (newPlank, newNotch)', () => {
-  it('newPlank : debout, face à l\'avant, posée à n × 40 mm', () => {
-    const p = newPlank(3);
-    expect(p).toMatchObject({ name: 'Plaque 3', w: 120, h: 80, pos: [80, 0, 40], rot: [90, 0, 0], notches: [], holes: [] });
-    expect(newPlank(1, 50, 20)).toMatchObject({ w: 50, h: 20, pos: [0, 0, 10] });
-    expect(newPlank(1).id).not.toBe(newPlank(1).id);
-  });
-  it('newNotch : au milieu du bord haut, largeur t + jeu, profondeur h / 4', () => {
-    const p = mk({ id: 'a', w: 100, h: 50 });
-    expect(newNotch(p, 3, 0.25)).toMatchObject({ edge: 'top', pos: 50, width: 3.25, depth: 13 });
-  });
-});
 
 describe('castellation', () => {
   it('edgeLength : w pour haut / bas, h pour gauche / droite', () => {
@@ -220,12 +207,6 @@ describe('transformations (rotation, bornes)', () => {
     expect(many).toHaveLength(8);
     expect(many[0]).toEqual([-1, -2, -1]);
     expect(many[7]).toEqual([11, 2, 1]);
-  });
-  it('componentOf : le groupe de la plaque, elle seule sans groupe, [] si inconnue', () => {
-    const s = scene([mk({ id: 'a', group: 'g' }), mk({ id: 'b', group: 'g' }), mk({ id: 'c' }), mk({ id: 'd', group: 'h' })]);
-    expect(componentOf(s, 'a').map((p) => p.id)).toEqual(['a', 'b']);
-    expect(componentOf(s, 'c').map((p) => p.id)).toEqual(['c']);
-    expect(componentOf(s, 'zzz')).toEqual([]);
   });
   it('extents : encombrement arrondi, [0, 0, 0] pour rien', () => {
     expect(extents([], 3)).toEqual([0, 0, 0]);

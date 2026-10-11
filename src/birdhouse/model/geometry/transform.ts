@@ -60,13 +60,6 @@ export function corners(planks: Plank[], t: number): Vec3[] {
   return out;
 }
 
-/** Les plaques du composant de plus haut niveau qui contient `id` : son groupe, ou elle seule. */
-export function componentOf(s: PlankScene, id: string): Plank[] {
-  const p = s.planks.find((x) => x.id === id);
-  if (!p) return [];
-  return p.group ? s.planks.filter((x) => x.group === p.group) : [p];
-}
-
 /** Encombrement d'un ensemble de plaques : [largeur x, profondeur y, hauteur z] en mm, arrondis. */
 export function extents(planks: Plank[], t: number): [number, number, number] {
   if (!planks.length) return [0, 0, 0];

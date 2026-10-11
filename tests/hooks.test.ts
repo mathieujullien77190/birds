@@ -6,6 +6,8 @@ import { useRef, useState } from 'react';
 import { usePersistentFlag, usePersistentState, useEscapeKey } from '@/hooks';
 import { randomId, saveSvg, saveText } from '@/lib';
 import { useCutPlane } from '@/features/viewer/hooks/useCutPlane';
+import { AmbientLight, Color, DirectionalLight } from 'three';
+import { AMBIENCE } from '@/birdhouse/three/constants';
 import { useDayNight } from '@/features/viewer/hooks/useDayNight';
 import { useDrawer } from '@/features/viewer/hooks/useDrawer';
 import { useFanSpeed } from '@/features/viewer/hooks/useFanSpeed';
@@ -316,12 +318,16 @@ describe('useKeyboardShortcuts', () => {
 });
 
 describe('liens vue 3D ↔ simulateur du Pi', () => {
-  it('useDayNight : règle la nuit des faisceaux infrarouges ; sans vue, ne fait rien', () => {
+  it('useDayNight : règle l ambiance de la scène et la nuit des faisceaux ; sans vue, ne fait rien', () => {
     const setNight = vi.fn();
-    const { rerender } = renderHook(({ n }) => useDayNight(asView({ ir: { setNight } }), n), { initialProps: { n: false } });
+    const view = { ir: { setNight }, scene: { background: null as unknown }, ambient: new AmbientLight(), sun: new DirectionalLight() };
+    const { rerender } = renderHook(({ n }) => useDayNight(asView(view), n), { initialProps: { n: false } });
     expect(setNight).toHaveBeenLastCalledWith(false);
+    expect(view.sun.intensity).toBe(AMBIENCE.day.sunI);
     rerender({ n: true });
     expect(setNight).toHaveBeenLastCalledWith(true);
+    expect(view.sun.intensity).toBe(AMBIENCE.night.sunI);
+    expect((view.scene.background as Color).getHexString()).toBe(new Color(AMBIENCE.night.background).getHexString());
     expect(() => renderHook(() => useDayNight({ current: null }, true))).not.toThrow();
   });
   it('useFanSpeed : donne le pourcentage à la vue ; sans vue, ne fait rien', () => {

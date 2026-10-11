@@ -1,11 +1,19 @@
 import { useEffect, type MutableRefObject } from 'react';
+import { Color } from 'three';
+import { AMBIENCE } from '@/birdhouse/three/constants';
 import type { View } from '@/birdhouse/three/types';
 
-/** Jour / nuit de l'INTERFACE WEB du Pi : la vue 3D reste de jour ; la nuit n'assombrit que ce que voient les caméras du simulateur (`CameraShooter.lights`) et rend les faisceaux infrarouges pleinement visibles. */
+/** Jour / nuit du bouton de l'INTERFACE WEB du Pi : la nuit assombrit aussi la vue 3D générale (pour voir l'infrarouge simulé), rend les faisceaux infrarouges pleinement visibles et s'applique aux prises de vue des caméras. */
 export function useDayNight(view: MutableRefObject<View | null>, night: boolean) {
   useEffect(() => {
     const v = view.current;
     if (!v) return;
-    v.ir.setNight(night); // les faisceaux infrarouges sont plus discrets de jour
+    const a = night ? AMBIENCE.night : AMBIENCE.day;
+    v.scene.background = new Color(a.background);
+    v.ambient.color.set(a.ambient);
+    v.ambient.intensity = a.ambientI;
+    v.sun.color.set(a.sun);
+    v.sun.intensity = a.sunI;
+    v.ir.setNight(night);
   }, [view, night]);
 }

@@ -51,7 +51,7 @@ export function createScene(host: HTMLElement): SceneHandle {
   const ir = new IrBeams(); // faisceaux des LED infrarouges : le projecteur reste dans la scène (intensité 0 éteint)
   scene.add(ir.group, ir.lights);
   shooter.beams = ir;
-  shooter.lights = { ambient, sun }; // la nuit ne s'applique qu'aux prises de vue des caméras
+  shooter.lights = { ambient, sun }; // la nuit de la vue est réglée par useDayNight ; la prise de vue la remet comme elle était
   const view: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, pullMark, cutMark, shooter, dragging: false, fan: { pct: 0, angle: 0 }, ir, ghost: { level: 1 } };
 
   const resize = () => { const w = host.clientWidth, h = host.clientHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); };

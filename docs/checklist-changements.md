@@ -18,7 +18,7 @@ Déclencheur : une plaque, un composant, un fil, une nappe, un pavé ou un group
 | Une nouvelle propriété de `Plank` qui change le dessin : l'ajouter à la clé de géométrie (`plankShapeKey`) | `src/birdhouse/three/factories/plank.ts` | `tests/plankKey.test.ts` |
 | Couleur de la pièce | `src/birdhouse/three/registry/palette.ts` | `tests/parts.golden.test.ts` |
 | Pièce de ventilation : ajouter son nom à `VENT_PIECES` (groupe « Ventilateur ») | `src/birdhouse/model/nest/makeNest.ts` | **auto** : `tests/coherence.test.ts` (chaque alternative de `VENT_PIECES` correspond à une pièce générée) |
-| Pièce cachée à la création (isolant, barres, toit en chêne) | `HIDDEN_AT_CREATION` dans `src/features/viewer/constants.ts` | **auto** : `tests/coherence.test.ts` |
+| Pièce cachée à la création (isolant, toit en chêne) | `HIDDEN_AT_CREATION` dans `src/features/viewer/constants.ts` | **auto** : `tests/coherence.test.ts` |
 | Lien du composant (constructeur ou revendeur) | tableau `LINKS` de `makeNest.ts` | **auto** : `tests/coherence.test.ts` (chaque motif correspond à une pièce) |
 | Références golden : régénérer **puis relire le diff** | `UPDATE_GOLDEN=1 npx vitest run`, fichiers de `tests/golden/` | `npm test` (ne jamais régénérer à l'aveugle) |
 | Découpe laser : les plaques de bois sont rangées toutes seules ; MDF = `material: 'mdf'` (planches à part) ; une pièce non découpée est un `special` | `src/birdhouse/model/sheets/index.ts` | `tests/bars.test.ts`, `tests/model.golden.test.ts` |
@@ -165,7 +165,7 @@ Il y a **trois** projets npm indépendants (racine, `pi/site/`, `laser-control/`
 
 | À mettre à jour | Fichier | Vérifie |
 | --- | --- | --- |
-| Jour / nuit : la vue 3D reste de jour, la nuit n'assombrit que les prises de vue des caméras | `src/features/viewer/hooks/useDayNight.ts`, `CameraShooter.lights` dans `src/birdhouse/three/cameraShooter.ts` | `tests/cameraShooter.test.ts`, `tests/cameras.test.ts` |
+| Jour / nuit : la nuit assombrit la vue 3D générale et les prises de vue des caméras | `src/features/viewer/hooks/useDayNight.ts`, `CameraShooter.lights` dans `src/birdhouse/three/cameraShooter.ts` | `tests/cameraShooter.test.ts`, `tests/cameras.test.ts` |
 | Prise de vue de la caméra 1 (nid, IR) ou 2 (entrée) | `src/features/viewer/hooks/usePiCameraShot.ts`, `src/birdhouse/three/cameraShooter.ts` | `tests/cameraShooter.test.ts`, `tests/shotUp.test.ts` |
 | Rotor du ventilateur qui tourne : `fanSpin`, `useFanSpeed`, prop `onFanSpeed` du simulateur | `src/birdhouse/three/fanSpin.ts`, `src/features/viewer/hooks/useFanSpeed.ts` | `tests/fanSpin.test.ts` |
 | Faisceaux infrarouges : `irBeam`, `useIrBeams`, prop `onLeds` du simulateur | `src/birdhouse/three/irBeam.ts`, `src/features/viewer/hooks/useIrBeams.ts` | `tests/irBeam.test.ts` |

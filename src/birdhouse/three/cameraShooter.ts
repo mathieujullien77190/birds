@@ -38,7 +38,7 @@ export class CameraShooter {
   private target: WebGLRenderTarget | null = null;
   /** Faisceaux infrarouges visibles dans la vue : cachés (et projecteurs éteints) le temps d'une prise de vue, la lampe ci-dessus simule déjà cet éclairage. */
   beams?: { suspend(): () => void };
-  /** Lumières de la scène : la NUIT n'existe que pour les caméras (la vue 3D reste de jour) : le temps d'une prise de vue de nuit, on y met l'ambiance nocturne puis on remet la vue comme avant. */
+  /** Lumières de la scène : le temps d'une prise de vue de nuit, on y met l'ambiance nocturne puis on remet la vue comme elle était (jour ou nuit). */
   lights?: { ambient: AmbientLight; sun: DirectionalLight };
 
   /** `overlays` : les repères de la vue (cotes, trou, face, coupe), cachés pendant la prise de vue. */

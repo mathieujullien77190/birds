@@ -7,7 +7,6 @@ export type V3 = [number, number, number];
 /** Une rotation (quaternion unitaire). */
 export interface Rotation { x: number; y: number; z: number; w: number }
 
-export const IDENTITY: Rotation = { x: 0, y: 0, z: 0, w: 1 };
 const DEG2RAD = Math.PI / 180, RAD2DEG = 180 / Math.PI; // mêmes constantes que MathUtils de three
 export const degToRad = (d: number): number => d * DEG2RAD;
 export const radToDeg = (r: number): number => r * RAD2DEG;

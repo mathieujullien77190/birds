@@ -15,7 +15,7 @@ describe('barres du toit en MDF 3 mm, découpées au laser, à fleur du lambris'
       const sc = buildNest(over), t = sc.t, bars = sc.planks.filter((p) => /^Barre /.test(p.name));
       expect(bars.map((b) => b.name).sort()).toEqual(['avant droite', 'avant gauche', 'arrière droite', 'arrière gauche'].map((n) => `Barre ${n} (MDF 3 mm)`).sort());
       const lam = sc.planks.filter((p) => /^Lambris (avant|arrière)/.test(p.name)), faceY = (front: boolean) => { const l = lam.filter((q) => (q.pos[1] > 0) === !front); return l[0].pos[1] + (front ? -1 : 1) * l[0].depth! / 2; }; // face extérieure du lambris
-      for (const b of bars) { expect(b.material).toBe('mdf'); expect(b.special).toBeUndefined(); expect([b.w, b.h]).toEqual([60, 10]); expect(HIDDEN_AT_CREATION.some((re) => re.test(b.name)), b.name).toBe(true); }
+      for (const b of bars) { expect(b.material).toBe('mdf'); expect(b.special).toBeUndefined(); expect([b.w, b.h]).toEqual([60, 10]); expect(HIDDEN_AT_CREATION.some((re) => re.test(b.name)), b.name).toBe(false); }
       const mid = sc.planks.find((p) => p.name === 'Cadre toit milieu')!, walls = sc.planks.filter((p) => /^Face (avant|arrière) ext/.test(p.name));
       expect(mid.notches.filter((n) => n.width === 10)).toHaveLength(4); for (const n of mid.notches.filter((x) => x.width === 10)) expect(n.depth).toBe(47); // l'engagement dans l'encoche reste de 47 mm
       for (const w of walls) expect(w.holes.filter((h) => h.size === 10 && Math.abs((h.sh ?? 0) - t) < 0.5), w.name).toHaveLength(2);

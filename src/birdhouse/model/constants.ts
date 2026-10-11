@@ -1,8 +1,4 @@
-import { type Edge, type PlankScene, type NestParams } from './types';
-
-export const EDGES: { id: Edge; label: string }[] = [
-  { id: 'top', label: 'Haut' }, { id: 'bottom', label: 'Bas' }, { id: 'left', label: 'Gauche' }, { id: 'right', label: 'Droite' },
-];
+import { type PlankScene, type NestParams } from './types';
 
 /** Taille de base d'une dent, en mm (boîtes et « Dents : auto »). */
 export const TOOTH = 16;
@@ -36,8 +32,8 @@ export const PI_CSI2: [number, number] = [-38.5, 0];
 
 /** Raspberry Pi 4 Model B (modèle 3D importé de public/models/pi4.bin) : carte de 85 × 56 mm, posée à plat sur le toit sur 3 mm de cales. */
 export const PI_W = 85, PI_H = 56;
-/** Boîtier étanche du Pi (posé sur le toit, 105 × 75 × 35, paroi 2,5) : transparent dans la vue pour voir la carte. */
-export const CASE_W = 105, CASE_D = 68, CASE_H = 35, CASE_WALL = 2.5, CASE_FLOOR = 2.5;
+/** Boîtier du Pi (hauteur et paroi, mm) : transparent dans la vue pour voir la carte. */
+export const CASE_H = 35, CASE_WALL = 2.5;
 /** Repères de la carte, dans le repère de la plaque (centre de la carte, x vers la droite, y vers l'arrière) : connecteur de la nappe caméra (dessus), broches du GPIO. */
 export const PI_CSI: [number, number, number] = [4, -16.5, 6.1];
 export const PI_PIN_Y = 25.77; // rangée extérieure du GPIO (broches paires : 2, 4, 6…)
