@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal } from '@/ui';
+import { colorArrowheads } from '@/lib';
 import { CodeBrowser } from '../CodeBrowser';
 import { DOCS, DOC_CSS } from './constants';
 import { enhancePrices, renderDoc } from './helpers';
@@ -16,7 +17,7 @@ export function DocModal({ doc: first, onClose }: { doc: DocDef; onClose: () => 
     import('mermaid').then(({ default: mermaid }) => {
       if (off || !ref.current) return;
       mermaid.initialize({ startOnLoad: false, theme: 'neutral', flowchart: { htmlLabels: true, useMaxWidth: true } });
-      mermaid.run({ nodes: Array.from(ref.current.querySelectorAll<HTMLElement>('pre.mermaid')) }).catch(() => {});
+      mermaid.run({ nodes: Array.from(ref.current.querySelectorAll<HTMLElement>('pre.mermaid')) }).then(() => { if (!off && ref.current) colorArrowheads(ref.current); }).catch(() => {});
     });
     if (ref.current) enhancePrices(ref.current);
     return () => { off = true; };

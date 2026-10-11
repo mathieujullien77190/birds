@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { marked } from 'marked';
 import { IconButton, PanelHeader } from '@/ui';
 import { DOC_CSS } from '@/features/docs';
+import { colorArrowheads } from '@/lib';
 import type { Plank } from '@/birdhouse/model';
 import type { Hover } from '@/types';
 import { CSS } from './constants';
@@ -32,6 +33,7 @@ export function SchemaPanel({ hover, planks, onHover }: { hover: Hover | null; p
     }).catch(() => { if (!off) setSvg('<p>schéma indisponible</p>'); });
     return () => { off = true; };
   }, [src]);
+  useEffect(() => { if (ref.current) colorArrowheads(ref.current); }, [svg]); // pointes de flèche de la couleur de leur trait
   // surbrillance d'après la pièce survolée dans la 3D / « Pièces »
   const keys = useMemo(() => {
     if (!hover) { fromSchema.current = false; return null; }
