@@ -6,10 +6,25 @@ Un nichoir à mésanges isolé, dessiné en 3D dans le navigateur et découpé a
 
 ## Ce que fait l'application
 
-- Un seul écran : le nichoir en 3D (Three.js), réglable par quelques curseurs (intérieur carré, hauteur et diamètre du trou), avec les options Solaire, 2ᵉ caméra et Peltier + capteur.
-- Chaque pièce est une plaque de contreplaqué crénelée : cliquer une pièce dans la 3D la choisit et la montre dans le volet « Pièces » ; survoler un fil ou un composant le met en surbrillance dans le schéma électrique (bouton 🔌 Schéma) et inversement.
-- « Découpe laser » : les plaques sont rangées sur des planches de 410 × 400 mm (marge de 8 mm, 5 mm entre pièces) et exportées en SVG, un fichier par planche.
-- Trois documents intégrés (pièce « Schéma électronique » du volet « Pièces ») : voir la section **Documentation** ci-dessous. L'app contient aussi un explorateur du **code du Pi** (arborescence du dossier `pi/`, sources colorées), un **simulateur de la page web du Pi** (bouton « 🐍 Pi » : le vrai programme Python tourne dans le navigateur, avec terminal, flux vidéo pris depuis les caméras de la 3D, essais de pannes, jour / nuit) et le **pilotage de la laser** (section « Découpe laser »).
+**Concevoir le nichoir**
+- Un nichoir complet généré en 3D (Three.js) à partir de quelques curseurs : taille intérieure, hauteur et diamètre du trou d'envol. Options : panneau solaire, 2ᵉ caméra, Peltier + capteur.
+- Chaque pièce est une plaque de contreplaqué de 3 mm à crans qui s'emboîtent, avec isolant, habillage en lambris, toit, évacuation de l'eau et fixation à l'arbre. L'électronique est modélisée aussi (Raspberry Pi, caméras, batterie, régulateur, fils et nappes à leur vraie taille).
+- Vue 3D interactive : survol et sélection des pièces, liste « Pièces » (groupes, œil pour cacher, renommer, dupliquer), plan de coupe, tirer une face, trou par clic droit, historique avec « Retour ».
+- Mode **jour / nuit** de la scène, et **schéma électronique** à côté de la 3D : survoler un fil ou un composant le met en surbrillance des deux côtés, clic sur un module pour sa fiche.
+
+**Fabriquer**
+- **Découpe laser** : toutes les plaques rangées automatiquement sur des planches de 410 × 400 mm, exportées en SVG.
+- **Pilotage de la laser** (Sculpfun S30 Pro) depuis le navigateur : connexion USB, déplacements, cadre à vide, génération du G-code, planche d'essai, envoi avec pause et arrêt, et une machine simulée pour essayer sans rien brancher.
+
+**Surveiller et commander le nichoir** (programme sur le Raspberry Pi, site React + TypeScript)
+- Température et humidité du nid et de l'extérieur (météo en ligne), température du dissipateur.
+- Peltier en froid / chaud / arrêt avec sécurités (coupure à 55 °C, sonde en panne, batterie faible).
+- Niveau de la batterie, consommation estimée selon ce qui est allumé et recharge solaire.
+- Deux caméras en direct avec LED infrarouges, chacune allumable et éteignable.
+- **Simulateur** de ce site dans l'app (bouton « 🐍 Pi ») : le vrai programme Python tourne dans le navigateur, avec un terminal, des flux vidéo pris depuis les caméras de la 3D (noir et blanc infrarouge la nuit) et des essais de pannes.
+
+**Comprendre**
+- Documents intégrés (schéma électronique avec poids et prix par groupe, logiciel, laser) et explorateur du code du Pi : voir **Documentation** ci-dessous.
 
 ## Documentation
 
