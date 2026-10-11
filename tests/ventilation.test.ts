@@ -138,7 +138,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     const exitWin = wins.filter((h) => h !== exit);
     for (const h of exitWin) expect(Math.abs(h.x - exit!.x) - (h.size + exit!.size) / 2).toBeGreaterThanOrEqual(0); // les deux fenêtres ne se recouvrent pas
     const flap = one(sc0, /^Clapet de ventilation/), net = one(sc0, /^Grillage sortie ventilation/);
-    expect(flap.pos[1]).toBeGreaterThan(back.pos[1]); expect(net.pos[1]).toBeGreaterThan(back.pos[1]); // dehors, sous le débord du toit en chêne
+    expect(flap.pos[1]).toBeGreaterThan(back.pos[1]); expect(net.pos[1]).toBeGreaterThan(back.pos[1]); expect(net.pos[1]).toBeGreaterThan(flap.pos[1]); expect(flap.transparent).toBeFalsy(); // le grillage est le plus à l'extérieur, le clapet est opaque // dehors, sous le débord du toit en chêne
     expect(Math.abs(flap.pos[0] - net.pos[0])).toBeLessThan(0.1);
   });
 });
@@ -153,6 +153,36 @@ describe('bloc isolant d\'hiver', () => {
     const names = [...by(sc0, /^Bloc isolant d'hiver/), foam, one(sc0, /^Poignée bloc d'hiver/), one(sc0, /^Bouchon prise d'air/)].map((p) => p.name);
     for (const n of names) expect(HIDDEN_AT_CREATION.some((re) => re.test(n)), n).toBe(true);
     expect(HIDDEN_AT_CREATION.some((re) => re.test('Cassette ventilateur 1'))).toBe(false);
+  });
+});
+
+describe('caisson de sortie du ventilateur', () => {
+  it('le grillage est à 20 mm de la plaque sur quatre joues, sous le débord du toit en chêne, le clapet a la place de s ouvrir', () => {
+    const back = one(sc0, /^Face arrière toit/), outer = back.pos[1] + t / 2, flap = one(sc0, /^Clapet de ventilation/), net = one(sc0, /^Grillage sortie ventilation/);
+    const cheeks = by(sc0, /^Joue grillage sortie/);
+    expect(cheeks).toHaveLength(4); expect(cheeks.every((c) => !c.special)).toBe(true); // contreplaqué découpé au laser
+    const depth = net.pos[1] + net.h / 2 - outer;
+    expect(depth).toBeGreaterThanOrEqual(19); expect(depth).toBeLessThanOrEqual(30 - 5); // débord arrière du toit en chêne : 30 mm
+    const open15 = flap.depth! * Math.sin((15 * Math.PI) / 180); // débattement du bas du clapet ouvert à 15°
+    expect(open15).toBeLessThan(depth - (flap.pos[1] - outer) - 2);
+    // les joues entourent le clapet sans le toucher (largeur et hauteur)
+    const box = aabb(flap, t);
+    for (const c of cheeks) { const b = aabb(c, t); expect(gap(box, b), c.name).toBeGreaterThan(0.5); expect(b.max.y).toBeLessThanOrEqual(net.pos[1] + 0.5); }
+    // le dessous du toit en chêne est plus haut que le haut du caisson d'au moins 5 mm (pente de 8° comprise)
+    const front = one(sc0, /^Face avant toit/), base = front.pos[2] - front.h / 2, top = Math.max(...cheeks.map((c) => aabb(c, t).max.z));
+    const oakUnder = base + front.h + ((net.pos[1] - front.pos[1]) * (back.h - front.h)) / (back.pos[1] - front.pos[1]);
+    expect(oakUnder - top).toBeGreaterThanOrEqual(5);
+  });
+  it('les joues passent par la fenêtre du lambris arrière sans recouper une lame', () => {
+    const lames = by(sc0, /^Lambris arrière/).filter((p) => p.poly);
+    const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
+    const inHole = (pt: [number, number], h: Plank['holes'][number]) => Math.abs(pt[0] - h.x) <= h.size / 2 && Math.abs(pt[1] - h.y) <= (h.sh ?? h.size) / 2;
+    for (const c of by(sc0, /^Joue grillage sortie/)) {
+      const b = aabb(c, t);
+      for (let x = b.min.x + 0.2; x <= b.max.x; x += 1) for (let z = b.min.z + 0.2; z <= b.max.z; z += 1) {
+        for (const l of lames) { const local: [number, number] = [x - l.pos[0], z - l.pos[2]]; expect(inPoly(local, l.poly!) && !l.holes.some((h) => inHole(local, h)), c.name + ' dans ' + l.name).toBe(false); }
+      }
+    }
   });
 });
 
