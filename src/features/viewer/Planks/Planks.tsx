@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Hint } from '@/ui';
-import { usePersistentFlag } from '@/hooks';
+import { useIsMobile, usePersistentFlag } from '@/hooks';
 import { randomId } from '@/lib';
 import { DocModal, DOCS } from '@/features/docs';
 import { LaserMachineModal, LaserPreview, useLaser } from '@/features/laser';
@@ -9,13 +9,19 @@ import { makeNest, moveWithGroup, setAirPlug, setWinterCassette, winterState, ex
 import { PiSimulator } from '@/birdhouse/PiSimulator';
 import { loadPiModel, piModel } from '@/birdhouse/three/piModel';
 import type { View } from '@/birdhouse/three/types';
-import { ContextMenu, CutPanel, HistoryList, LeftPanel, PiecesList, PullBar, RightPanel, SelectionBar, UndoBar, ViewToolbar } from '../components';
+import { ContextMenu, CutPanel, HistoryList, LeftPanel, MobileBar, PartsSheet, PiecesList, PullBar, RightPanel, SelectionBar, UndoBar, ViewToolbar } from '../components';
 import { HIDDEN_AT_CREATION, STORAGE } from '../constants';
 import { useCutPlane, useDrawer, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useThreeView, useFanSpeed, useIrBeams } from '../hooks';
 import type { ContextMenuState, Hover, PullState } from '../types';
 
 /** Écran du nichoir : vue 3D (Three.js), panneaux gauche / droite, schéma, documents, simulateur du Pi. Garde la scène, la sélection et l'historique. */
 export default function Planks() {
+  const mobile = useIsMobile();
+  const firstMobile = useRef(mobile);
+  useEffect(() => { if (mobile !== firstMobile.current) window.location.reload(); }, [mobile]); // la vue 3D est liée à son élément : changer de disposition (rotation du téléphone, fenêtre redimensionnée) recharge la page, tout est enregistré
+  const [mSettings, setMSettings] = useState(false); // téléphone : feuille des réglages
+  const [mParts, setMParts] = useState(false); // téléphone : feuille « Pièces » (afficher / cacher)
+  const [mSchema, setMSchema] = useState(false); // téléphone : schéma en plein écran (fermé au départ)
   const [sc, setSc] = useState<PlankScene>(() => loadScene());
   const scRef = useRef(sc);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -152,6 +158,43 @@ export default function Planks() {
     setExtra(new Set());
   };
 
+  const toggleCut = () => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }));
+  const openPi = () => { setPiMounted(true); setPiOpen(true); };
+  const modals = (<>
+    {machine.open && <LaserMachineModal m={machine} />}
+    {piMounted && <PiSimulator open={piOpen} onClose={() => setPiOpen(false)} shoot={shoot} night={night} onToggleNight={() => setNight((v) => !v)} onFanSpeed={setFanPct} onLeds={(s) => setLeds((o) => (o.nid === s.nid && o.ext === s.ext ? o : s))} />}
+    {docOpen && DOCS.find((d) => d.id === docOpen) && <DocModal doc={DOCS.find((d) => d.id === docOpen)!} onClose={() => setDocOpen(null)} />}
+  </>);
+
+  if (mobile) { // téléphone : barre en haut, la 3D en grand, réglages et pièces (afficher / cacher) en feuilles qui se ferment
+    return (
+      <div className="flex h-full w-full flex-col overflow-hidden bg-stone-100 text-stone-800">
+        <MobileBar settingsOn={mSettings} onSettings={() => { setMSettings((v) => !v); setMParts(false); }} partsOn={mParts} onParts={() => { setMParts((v) => !v); setMSettings(false); }}
+          backLabel={backLabel} onBack={back} winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug}
+          schemaOn={mSchema} onToggleSchema={() => setMSchema((v) => !v)} onOpenPi={openPi} cutOn={cut.on} onToggleCut={toggleCut} />
+        <main className="relative min-h-0 flex-1">
+          <div ref={host} className="h-full w-full touch-none" />
+          {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
+          {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
+          {mSettings && (
+            <div className="absolute inset-0 z-20 flex flex-col bg-stone-50 [&>aside]:!w-full [&>aside]:flex-1">
+              <LeftPanel open setOpen={(o) => setMSettings(o)} sc={sc} commit={commit} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} />
+            </div>
+          )}
+          {mParts && <PartsSheet sc={sc} hidden={hidden} toggleHidden={toggleHidden} setHidden={setHidden} onClose={() => setMParts(false)}
+            onPick={(id, g) => { setSelectedId(id); setExtra(new Set()); setGroupSel(g); }} />}
+        </main>
+        {mSchema && (
+          <div className="fixed inset-0 z-30 flex flex-col bg-white">
+            <div className="flex items-center justify-between border-b border-stone-200 px-3 py-2"><span className="text-sm font-semibold text-emerald-900">Schéma électrique</span><button type="button" onClick={() => setMSchema(false)} className="rounded px-2 py-1 text-lg leading-none text-stone-500">×</button></div>
+            <div className="min-h-0 flex-1 [&>.schema-panel]:!w-full"><SchemaPanel hover={hover} planks={sc.planks} onHover={(id) => setHover(id ? { plank: id } : null)} /></div>
+          </div>
+        )}
+        {modals}
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full w-full overflow-hidden bg-stone-100 text-stone-800">
       <LeftPanel open={leftOpen} setOpen={setLeftOpen} sc={sc} commit={commit} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} />
@@ -168,9 +211,7 @@ export default function Planks() {
         {ctx && <ContextMenu ctx={ctx} sc={sc} hidden={hidden} toggleHidden={toggleHidden} close={() => setCtx(null)} />}
       </main>
 
-      {machine.open && <LaserMachineModal m={machine} />}
-      {piMounted && <PiSimulator open={piOpen} onClose={() => setPiOpen(false)} shoot={shoot} night={night} onToggleNight={() => setNight((v) => !v)} onFanSpeed={setFanPct} onLeds={(s) => setLeds((o) => (o.nid === s.nid && o.ext === s.ext ? o : s))} />}
-      {docOpen && DOCS.find((d) => d.id === docOpen) && <DocModal doc={DOCS.find((d) => d.id === docOpen)!} onClose={() => setDocOpen(null)} />}
+      {modals}
       {schemaOn && <SchemaPanel hover={hover} planks={sc.planks} onHover={(id) => setHover(id ? { plank: id } : null)} />}
       <RightPanel
         open={rightOpen} setOpen={setRightOpen} drawer={drawer} setDrawer={setDrawer}
