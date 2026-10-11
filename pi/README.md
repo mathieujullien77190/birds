@@ -1,6 +1,6 @@
 # Programme de test du nichoir (Raspberry Pi 5)
 
-Version minimale pour vérifier que le matériel marche : lecture des deux capteurs de température, les deux caméras en direct, le Peltier (froid / chaud / arrêt, puissance) et les deux cartes de LED infrarouges, sur une page web.
+Version minimale pour vérifier que le matériel marche : lecture du capteur du nid (BME280), la météo de dehors, les deux caméras en direct, le ventilateur de 60 mm (manuel ou automatique), les deux cartes de LED infrarouges et l'historique des températures sur 24 h, sur une page web. (Le Peltier a été retiré le 2026-10-11 : trop faible.)
 
 | Fichier | Rôle |
 | --- | --- |
@@ -13,7 +13,7 @@ Version minimale pour vérifier que le matériel marche : lecture des deux capte
 ## Installation (une seule fois, sur le Pi)
 
 ```sh
-sudo raspi-config                # Interface Options : activer I2C, 1-Wire et les caméras
+sudo raspi-config                # Interface Options : activer I2C et les caméras
 sudo apt install -y python3-picamera2 git
 mkdir -p /home/pi/nichoir && cd /home/pi/nichoir
 # copier ici nichoir.py, web/, nichoir.service, requirements.txt (scp, clé USB ou git)
@@ -31,35 +31,37 @@ journalctl -u nichoir -f         # voir ce qu'il raconte
 ```
 
 ## Essayer sans matériel (mode simulé)
-Sur un ordinateur, sans rien de branché : capteurs, GPIO et caméras sont remplacés par des valeurs fausses mais plausibles (nid autour de 15 °C, dissipateur qui chauffe avec la puissance du Peltier, deux flux vidéo animés). Un bandeau « MODE SIMULÉ » s'affiche en haut de la page.
+Sur un ordinateur, sans rien de branché : capteurs, GPIO et caméras sont remplacés par des valeurs fausses mais plausibles (le nid suit dehors + 2 à 4 °C, refroidi par le ventilateur, deux flux vidéo animés, tachymètre simulé). Un bandeau « MODE SIMULÉ » s'affiche en haut de la page.
 ```sh
 pip install flask
 NICHOIR_MOCK=1 python nichoir.py          # Windows PowerShell : $env:NICHOIR_MOCK=1; python nichoir.py
 # puis http://localhost:8080
 ```
-Pour essayer la coupure de sécurité : `NICHOIR_MOCK_SURCHAUFFE=60` force le dissipateur à 60 °C dès que le Peltier tourne ; il est coupé à 55 °C et la page affiche « Peltier coupé ».
+Pour voir la ventilation : dans la page, « Ventilation automatique », ou dans l'app 3D le menu « 🧪 Tests ». L'historique se remplit toutes les 5 s (300 s sur le Pi) et s'écrit dans `historique-simule.json`.
 
 Dans l'app 3D, le bouton « 🐍 Pi » fait la même chose **sans installer Python** (exécuté dans le navigateur) et montre la sortie du programme dans un terminal ; les flux vidéo y sont des vues 3D prises depuis les caméras du modèle.
 
 ## Brochage
 
-Voir le document « Schéma électronique » de l'application. En résumé : Peltier PWM GPIO18, INA GPIO13, INB GPIO19 ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; DS18B20 sur 1-Wire (GPIO4, résistance de 4,7 kΩ vers le 3,3 V) ; caméras sur CAM0 et CAM1.
+Voir le document « Schéma électronique » de l'application. En résumé : ventilateur Noctua NF-A6x25 PWM, PWM 25 kHz sur GPIO18 (broche 12), tachymètre GPIO17 (broche 11, pull-up), masse commune broche 14, 12 V du rail ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; INA219 (batterie) I2C 0x41 ; caméras sur CAM0 et CAM1.
+
+**À valider sur le Pi 5** : gpiozero / lgpio limite peut-être le PWM à 10 kHz ; le programme essaie 25 kHz et retombe sur 10 kHz en le signalant. Un ventilateur PWM à 0 % tourne au minimum (il ne s'arrête que si son 12 V est coupé).
 
 ## Ce que fait la page
 
-- Toutes les 5 s : température et humidité du nid, température du dissipateur.
-- Deux flux vidéo MJPEG (640 × 480).
-- Boutons Froid / Chaud / Arrêt et curseur de puissance (plafonné à 60 %).
-- Boutons LED du nid et LED extérieures.
-- Si un capteur, une caméra ou les GPIO manquent, la page l'écrit à côté du bloc concerné et le reste continue de marcher : on peut donc lancer le programme sur un Pi à moitié câblé, ou même sur un ordinateur pour voir la page.
+- Toutes les 5 s : température et humidité du nid (et écart avec dehors), météo extérieure (Open-Meteo), batterie, consommation estimée.
+- Carte Ventilateur : vitesse, tr/min, boutons Arrêt / Marche, curseur de 30 à 100 %, **ventilation automatique** (réglages modifiables, gardés dans `reglages.json`).
+- Graphique des températures sur 24 h (un point toutes les 5 min dans `historique.json`).
+- Deux flux vidéo MJPEG (640 × 480) et boutons caméras / LED infrarouges.
+- Si un capteur, une caméra ou les GPIO manquent, la page l'écrit à côté du bloc concerné et le reste continue de marcher.
 
-## Sécurité intégrée
+## Sécurités intégrées
 
-Si la sonde du dissipateur dépasse 55 °C, le Peltier est coupé et un message s'affiche. Il faut re-cliquer Froid ou Chaud pour le relancer.
+Alerte au-dessus de 35 °C dans le nid (notification ntfy si `NICHOIR_NTFY_TOPIC` est réglé) ; capteur du nid muet = le ventilateur automatique ne démarre pas ; ventilateur commandé mais 0 tr/min pendant plus de 10 s = erreur ; sous 10 % de batterie les caméras et LED sont coupées, **jamais le ventilateur**.
 
 ## Ce que ce programme ne fait pas encore
 
-Pas de régulation automatique (c'est volontaire : on teste), pas d'historique, pas de mot de passe. La version complète est décrite dans le document « Logiciel » de l'application.
+Pas de mot de passe, pas d'horaire automatique des LED. « On mesure d'abord » : une saison d'historique avant de décider d'autre chose. Voir le document « Logiciel » de l'application.
 
 ## Séparation des dossiers
 `pi/` = ce qui tourne sur le Raspberry (Python + site) ; `src/` à la racine = l'app de conception et de simulation. `pi/site` a son propre `package.json` et `node_modules` ; aucun import entre `src/` et `pi/site/` (l'app lit seulement la sortie `pi/web/` pour le simulateur « 🐍 Pi »).

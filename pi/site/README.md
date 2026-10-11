@@ -17,9 +17,9 @@ Raccourci à la racine du dépôt : `npm run build:pi`.
 
 ## Structure (`src/`, alias `@/`)
 - `ui/` : briques génériques répétées (`Banner`, `Card`, `ErrorLine`, `Gauge`, `Stat`, `ToggleButton`).
-- `components/` : composants métier qui assemblent ces briques (`App`, `Header`, `NestCard`, `PeltierCard`, `BatteryCard` (jauge verte > 50 %, orange 20-50 %, rouge < 20 %, tension, Wh restants sur 76,8, solaire), `ConsumptionCard` (total en W, une barre par élément, autonomie estimée), `CameraCard`).
-- `api/` client typé de l'API Flask ; `hooks/` (`useDeviceState` : relecture toutes les 5 s et commandes) ; `types/` (`DeviceState`, miroir de `etat` en Python) ; `constants/` ; `utils/`.
+- `components/` : composants métier qui assemblent ces briques (`App`, `Header`, `NestCard` (avec l'écart avec dehors), `WeatherCard`, `FanCard` (vitesse, tr/min, Arrêt / Marche, curseur 30-100 %) qui contient `AutoFan` (ventilation automatique : bouton, état, avertissements, réglages), `HistoryChart` (graphique SVG des 24 h : nid, dehors, vitesse du ventilateur en fond), `BatteryCard` (jauge verte > 50 %, orange 20-50 %, rouge < 20 %, tension, Wh restants sur 76,8, solaire), `ConsumptionCard` (total en W, une barre par élément, autonomie estimée), `CameraCard`).
+- `api/` client typé de l'API Flask ; `hooks/` (`useDeviceState` : relecture de l'état et de l'historique toutes les 5 s, et commandes) ; `types/` (`DeviceState`, miroir de `etat` en Python ; `HistoryPoint`) ; `constants/` ; `utils/`.
 
 Convention : un dossier par composant (ui ou métier) avec `<Nom>.tsx`, `index.ts`, et seulement au besoin `helpers.ts`, `constants.ts`, `types.ts`, `use<Truc>.ts`, `<Nom>.css`.
 
-Le simulateur de l'app (`src/birdhouse/PiSimulator.tsx`) repère les images par `img.cam` et les boutons par leurs `id` (`c_1`, `c_2`, `l_nid`, `l_ext`) : à conserver.
+Le simulateur de l'app (`src/birdhouse/PiSimulator.tsx`) repère les images par `img.cam` et les boutons par leurs `id` (`c_1`, `c_2`, `l_nid`, `l_ext`) ; les nouveaux boutons ont aussi des `id` stables : `v_arret`, `v_marche`, `v_auto`, `auto_appliquer`, `auto_<réglage>` : à conserver.
