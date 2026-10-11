@@ -174,7 +174,7 @@ export default function Planks() {
       </main>
 
       {machine.open && <LaserMachineModal m={machine} />}
-      {piOpen && <PiSimulator onClose={() => setPiOpen(false)} shoot={shoot} />}
+      {piOpen && <PiSimulator onClose={() => setPiOpen(false)} shoot={shoot} night={night} onToggleNight={() => setNight((v) => !v)} />}
       {docOpen && DOCS.find((d) => d.id === docOpen) && <DocModal doc={DOCS.find((d) => d.id === docOpen)!} onClose={() => setDocOpen(null)} />}
       {schemaOn && <SchemaPanel hover={hover} planks={sc.planks} onHover={(id) => setHover(id ? { plank: id } : null)} />}
       <RightPanel

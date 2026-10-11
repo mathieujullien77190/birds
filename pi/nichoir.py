@@ -37,7 +37,7 @@ HOT_MAX = 55.0      # °C sur le dissipateur : au-dessus, le Peltier est coupé
 PWM_MAX = 0.6       # puissance maximale du Peltier (batterie de 6 Ah)
 PERIODE = 5.0       # secondes entre deux lectures
 BATTERIE_BASSE = 20      # % : en dessous, le Peltier est coupé (et refusé) pour économiser l'énergie
-BATTERIE_CRITIQUE = 10   # % : en dessous, les LED infrarouges sont aussi coupées
+BATTERIE_CRITIQUE = 10   # % : en dessous, les caméras et les LED infrarouges sont coupées aussi (et refusées)
 CAPACITE_WH = 76.8  # batterie LiFePO4 12,8 V × 6 Ah
 # Consommation estimée (W) de chaque élément quand il est allumé : valeurs usuelles, à remplacer par des mesures (INA219) dès que possible.
 CONSO_W = {"pi": 3.5, "camera": 0.7, "led": 1.2, "peltier_max": 72.0}  # Peltier : 72 W à pleine tension, proportionnel au carré du rapport cyclique (TEC1-12706, ~2 Ω)
@@ -268,6 +268,10 @@ def peltier(sens: str, puissance: float):
 
 # FACULTATIF : allume ou éteint une caméra (num 0 ou 1). Éteinte, elle ne filme plus (le Pi consomme moins) et la page n'affiche plus son flux.
 def camera(num: int, on: bool):
+    bas = etat["batterie"]["pourcent"]
+    if on and bas is not None and bas < BATTERIE_CRITIQUE:
+        log(f"Caméra {num + 1} refusée : batterie à {bas} % (< {BATTERIE_CRITIQUE} %)")
+        on = False
     etat[f"cam{num + 1}"] = bool(on)
     if num in capteurs_cam:
         cam, flux = capteurs_cam[num]
@@ -336,9 +340,13 @@ def lecture():
     if pc is not None and pc < BATTERIE_BASSE:
         if etat["peltier"] != "arrêt":
             peltier("arrêt", 0)
-        if pc < BATTERIE_CRITIQUE and (etat["led_nid"] or etat["led_ext"]):
-            leds(False, False)
-        niveau = "Peltier et LED coupés" if pc < BATTERIE_CRITIQUE else "Peltier coupé"
+        if pc < BATTERIE_CRITIQUE:
+            if etat["led_nid"] or etat["led_ext"]:
+                leds(False, False)
+            for n in (0, 1):
+                if etat[f"cam{n + 1}"]:
+                    camera(n, False)
+        niveau = "Peltier, caméras et LED coupés" if pc < BATTERIE_CRITIQUE else "Peltier coupé"
         if etat["erreurs"].get("delestage") is None:
             log(f"DÉLESTAGE : batterie à {pc} % : {niveau}")
         etat["erreurs"]["delestage"] = f"Batterie à {pc} % : {niveau} pour économiser l'énergie"

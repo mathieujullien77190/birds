@@ -110,7 +110,7 @@ const PAGE = indexHtml
   );
 
 /** État renvoyé par `/api/etat` (seulement ce que les essais lisent). */
-interface PiState { peltier: string; puissance: number; t_dissipateur: number | null; t_nid: number | null; led_nid: boolean; led_ext: boolean; erreurs: Record<string, string>; batterie: { pourcent: number | null } }
+interface PiState { peltier: string; puissance: number; t_dissipateur: number | null; t_nid: number | null; led_nid: boolean; led_ext: boolean; cam1: boolean; cam2: boolean; erreurs: Record<string, string>; batterie: { pourcent: number | null } }
 type PyFns = Record<'restaurer' | 'surchauffe' | 'panne' | 'batterie', (...a: unknown[]) => unknown>;
 
 /** Essais automatiques : on provoque un cas limite dans le Python simulé, puis on attend que le programme réagisse comme prévu (sinon l'essai échoue au bout de `timeout` secondes). */
@@ -125,12 +125,12 @@ const PI_TESTS: PiTest[] = [
   { id: 'nid', label: 'Capteur du nid en panne', hint: "Le BME280 ne répond plus : la page doit afficher « — » et l'erreur, sans planter", timeout: 10,
     setup: (f) => { f.restaurer(); f.panne('bme', true); },
     expect: (e) => e.t_nid === null && !!e.erreurs.bme280, ok: (e) => e.erreurs.bme280 },
-  { id: 'batterie', label: 'Batterie presque vide (8 %)', hint: 'Peltier et LED allumés, batterie à 8 % : le délestage doit tout couper', timeout: 10,
+  { id: 'batterie', label: 'Batterie presque vide (8 %)', hint: 'Peltier, LED et caméras allumés, batterie à 8 % : le délestage doit tout couper (Peltier sous 20 %, caméras et LED sous 10 %)', timeout: 10,
     setup: (f, cmd) => { f.restaurer(); cmd('/api/peltier', { sens: 'froid', puissance: 0.5 }); cmd('/api/led', { nid: true }); f.batterie(8); },
-    expect: (e) => e.peltier === 'arrêt' && !e.led_nid && !!e.erreurs.delestage, ok: (e) => e.erreurs.delestage },
+    expect: (e) => e.peltier === 'arrêt' && !e.led_nid && !e.cam1 && !e.cam2 && !!e.erreurs.delestage, ok: (e) => e.erreurs.delestage },
 ];
 
-export function PiSimulator({ onClose, shoot }: { onClose: () => void; shoot?: (num: number, led?: boolean) => string | null }) {
+export function PiSimulator({ onClose, shoot, night = false, onToggleNight }: { onClose: () => void; shoot?: (num: number, led?: boolean) => string | null; night?: boolean; onToggleNight?: () => void }) {
   const [state, setState] = useState<'chargement' | 'prêt' | 'erreur'>('chargement');
   const [err, setErr] = useState('');
   const [log, setLog] = useState<string[]>([]); // lignes du terminal, dans l'ordre d'arrivée
@@ -220,6 +220,9 @@ export function PiSimulator({ onClose, shoot }: { onClose: () => void; shoot?: (
             <div className="text-sm font-semibold text-stone-800">Interface web du Pi — simulateur</div>
             <div className="truncate text-[11px] text-stone-500">Le vrai <code>pi/nichoir.py</code> (mode simulé) tourne dans ton navigateur (Pyodide) ; la page est le vrai <code>pi/web/index.html</code>.</div>
           </div>
+          {onToggleNight && (
+            <button onClick={onToggleNight} aria-pressed={night} title="Jour / nuit de la scène : les caméras voient la même scène que la vue 3D (la nuit elles sont sombres, les LED infrarouges les éclairent)" className={`rounded px-2.5 py-1 text-xs font-semibold ${night ? 'bg-indigo-900 text-indigo-100 hover:bg-indigo-800' : 'bg-amber-100 text-amber-900 hover:bg-amber-200'}`}>{night ? '🌙 Nuit' : '☀ Jour'}</button>
+          )}
           <div className="relative">
             <button onClick={() => setMenu((m) => !m)} disabled={state !== 'prêt' || !!running} aria-expanded={menu} title="Essais automatiques : on provoque une panne ou un cas limite et on vérifie que le programme réagit" className="rounded bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-700 hover:bg-stone-200 disabled:opacity-40">{running ? 'Essai en cours…' : '🧪 Tests'}</button>
             {menu && (
