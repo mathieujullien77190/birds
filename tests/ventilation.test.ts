@@ -192,6 +192,37 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
   });
 });
 
+describe('ventilateur à 1 cm du bloc caméra, ouverture du plafond, conduit de sortie', () => {
+  const comp = () => union(by(sc0, /^(Face|Côté) .* caméra [0-9]$/), t);
+  it('la paroi avant du siège est à 10 mm du mur arrière du compartiment de la caméra', () => {
+    const front = aabb(one(sc0, /^Goulotte ventilateur avant/), t);
+    expect(front.min.y - comp().max.y).toBeCloseTo(10, 1);
+    for (const p of by(sc0, /^(Goulotte ventilateur|Cassette ventilateur|Conduit de sortie)/)) expect(aabb(p, t).min.y - comp().max.y, p.name).toBeGreaterThanOrEqual(9.99);
+  });
+  it('l ouverture du plafond sous le ventilateur fait 56 × au moins 28, sous le ventilateur, à plus de 3 mm de la paroi du siège et du mur du nid', () => {
+    const floor = one(sc0, /^Dessous toit/), fan = one(sc0, /^Ventilateur Noctua/), open = floor.holes.find((h) => h.shape === 'square' && h.size === 56)!;
+    expect(open.sh!).toBeGreaterThanOrEqual(28);
+    const y0 = floor.pos[1] + open.y - open.sh! / 2, y1 = floor.pos[1] + open.y + open.sh! / 2, seatFront = aabb(one(sc0, /^Goulotte ventilateur avant/), t);
+    expect(y0 - seatFront.max.y).toBeGreaterThanOrEqual(3 - 1e-6);
+    expect(y1).toBeLessThanOrEqual(60 + 1e-6); // reste au-dessus du nid (intérieur à ± 60)
+    expect(y0).toBeGreaterThan(fan.pos[1] - 30.5); expect(y1).toBeLessThan(fan.pos[1] + 30); // sous l'empreinte du ventilateur
+    expect(ligament(floor, open).min).toBeGreaterThanOrEqual(3 - 1e-6);
+  });
+  it('conduit de sortie : tube de 4 plaques entre la cassette et la plaque arrière, même section que les deux fenêtres, sans chevaucher le siège ni la cassette', () => {
+    const duct = by(sc0, /^Conduit de sortie/), back = one(sc0, /^Face arrière toit/), cass = one(sc0, /^Cassette ventilateur 2$/), ub = union(duct, t);
+    expect(ub.min.y).toBeCloseTo(cass.pos[1] + t / 2, 1); expect(ub.max.y).toBeCloseTo(back.pos[1] - t / 2, 1); // de la cassette à la face intérieure de la plaque
+    expect(ub.max.y - ub.min.y).toBeLessThanOrEqual(20); // court
+    const exit = back.holes.find((h) => Math.abs(h.x - (cass.pos[0] - back.pos[0])) < 0.1 && h.size > 40)!, cw = cass.holes[0];
+    expect([exit.size, exit.sh]).toEqual([cw.size, cw.sh]);
+    expect(ub.max.x - ub.min.x).toBeCloseTo(exit.size + 2 * t, 1); expect(ub.max.z - ub.min.z).toBeCloseTo(exit.sh! + 2 * t, 1); // l'intérieur du tube = la fenêtre
+    const wz = back.pos[2] + exit.y; expect((ub.max.z + ub.min.z) / 2).toBeCloseTo(wz, 1); expect((ub.max.x + ub.min.x) / 2).toBeCloseTo(cass.pos[0], 1);
+    const solid = [...by(sc0, /^Goulotte ventilateur/), ...by(sc0, /^Cassette ventilateur/), ...by(sc0, /^Poignée cassette/)];
+    for (const d of duct) for (const q of solid) { const a = aabb(d, t), b = aabb(q, t); expect(gap(a, b) >= -0.01 || [a.min.y, a.max.y].some((y) => Math.abs(y - b.min.y) < 0.01 || Math.abs(y - b.max.y) < 0.01), d.name + ' / ' + q.name).toBe(true); }
+    const side = by(sc0, /^Goulotte ventilateur (gauche|droite)/); for (const d of duct) for (const q of side) expect(gap(aabb(d, t), aabb(q, t)), d.name + ' / ' + q.name).toBeGreaterThan(0.5); // le tube est dans le siège (jeu latéral)
+    for (const d of duct) expect(HIDDEN_AT_CREATION.some((re) => re.test(d.name)), d.name).toBe(false);
+  });
+});
+
 describe('habillage arrière plan', () => {
   it("toutes les lames arrière sont dans le même plan, de même épaisseur, avec le même haut ; le grillage de sortie reste dans l'épaisseur de l'habillage", () => {
     const lames = by(sc0, /^Lambris arrière/), face = one(sc0, /^Face arrière toit/);
@@ -303,7 +334,7 @@ describe('cassette ajustée au siège, sans joint', () => {
     const inner = Math.abs(seatW[0].pos[0] - seatW[1].pos[0]) - t; // intérieur du siège en x
     expect(cass.max.x - cass.min.x).toBeCloseTo(inner, 1); // jeu 0
     expect(cass.min.y).toBeCloseTo(front.pos[1] + t / 2, 1); // devant : contre la paroi avant du siège
-    const back = one(sc0, /^Face arrière toit/); expect(cass.max.y).toBeCloseTo(back.pos[1] - t / 2, 1); // derrière : contre la plaque arrière
+    const duct = by(sc0, /^Conduit de sortie/); expect(duct).toHaveLength(4); expect(Math.max(...duct.map((p) => aabb(p, t).min.y))).toBeCloseTo(cass.max.y, 1); // derrière : le conduit de sortie s'appuie sur la cassette
     expect(cass.min.z).toBeCloseTo(one(sc0, /^Dessous toit/).pos[2] + t / 2, 1); // sur le plafond
     expect(by(sc0, /^Plot caoutchouc ventilateur/)).toHaveLength(4); // les vibrations ne passent que par les plots
   });
