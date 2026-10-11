@@ -4,7 +4,7 @@ import type { Plank, PlankScene } from '@/birdhouse/model';
 import { HIDDEN_AT_CREATION } from '@/features/viewer/constants';
 import { VARIANTS, buildNest } from './helpers';
 import { aabb, gap, inside, obb, pathContacts, pathItems, ribbonPoints, thick } from './geomChecks';
-import { outline } from '@/birdhouse/model';
+import { nestSheets, outline, setAirPlug, setWinterCassette, winterState } from '@/birdhouse/model';
 import { ligament } from './geomLigament';
 
 const by = (sc: PlankScene, re: RegExp): Plank[] => sc.planks.filter((p) => re.test(p.name));
@@ -149,14 +149,15 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
 });
 
 describe('bloc isolant d\'hiver', () => {
-  it('même empreinte que la cassette, comble l\'ouverture du plafond, caché par défaut', () => {
-    const cass = union(by(sc0, /^Cassette ventilateur [1-4]$|^Cassette ventilateur cadre/), t), win = union(by(sc0, /^Bloc isolant d'hiver/), t);
+  it('même empreinte que la cassette, comble l\'ouverture du plafond, visible, rangé à côté du nichoir en été', () => {
+    const scW = setWinterCassette(sc0, true); // le bloc est mis dans le siège
+    const cass = union(by(sc0, /^Cassette ventilateur [1-4]$|^Cassette ventilateur cadre/), t), win = union(by(scW, /^Bloc isolant d'hiver/), t);
     for (const k of ['x', 'y'] as const) { expect(win.min[k]).toBeCloseTo(cass.min[k], 1); expect(win.max[k]).toBeCloseTo(cass.max[k], 1); }
-    const foam = one(sc0, /^Isolant bloc d'hiver/), open = one(sc0, /^Dessous toit/).holes.find((h) => h.size === 56)!, ring = one(sc0, /^Bloc isolant d'hiver cadre du bas/);
+    const foam = one(scW, /^Isolant bloc d'hiver/), open = one(scW, /^Dessous toit/).holes.find((h) => h.size === 56)!, ring = one(scW, /^Bloc isolant d'hiver cadre du bas/);
     expect(foam.w).toBeGreaterThanOrEqual(open.size); expect(foam.depth).toBeGreaterThanOrEqual(30); expect(foam.depth).toBeLessThanOrEqual(40);
     expect(foam.pos[2] - foam.depth! / 2).toBeGreaterThanOrEqual(ring.pos[2] - t / 2 - 0.01); // posée sur le cadre
     const names = [...by(sc0, /^Bloc isolant d'hiver/), foam, one(sc0, /^Poignée bloc d'hiver/), one(sc0, /^Bouchon-boîte prise d'air fond/), one(sc0, /^Laine bouchon prise d'air/), ...by(sc0, /^Bouchon-boîte prise d'air [1-4]$/)].map((p) => p.name);
-    for (const n of names) expect(HIDDEN_AT_CREATION.some((re) => re.test(n)), n).toBe(true);
+    for (const n of names) expect(HIDDEN_AT_CREATION.some((re) => re.test(n)), n).toBe(false); // visibles par défaut
     expect(HIDDEN_AT_CREATION.some((re) => re.test('Cassette ventilateur 1'))).toBe(false);
   });
 });
@@ -219,23 +220,24 @@ describe("prise d'air basse", () => {
     expect(one(sc0, /^Plancher int/).holes.some((h) => h.size > 29 && h.sh! > 46)).toBe(true);
   });
   it("la sous-boîte isolante passe pile dans le conduit, dépasse de 10 à 12 mm sous le fond, s'arrête à 10 mm au moins sous la fente, ses dents s'emboîtent", () => {
-    const ws = [1, 2, 3, 4].map((i) => one(sc0, new RegExp(`^Bouchon-boîte prise d'air ${i}$`))), lip = one(sc0, /^Bouchon-boîte prise d'air fond/), wool = one(sc0, /^Laine bouchon prise d'air/), duct = [1, 2, 3, 4].map((i) => one(sc0, new RegExp(`^Conduit d'air ${i}$`)));
+    const scP = setAirPlug(sc0, true); // la sous-boîte est insérée dans le conduit
+    const ws = [1, 2, 3, 4].map((i) => one(scP, new RegExp(`^Bouchon-boîte prise d'air ${i}$`))), lip = one(scP, /^Bouchon-boîte prise d'air fond/), wool = one(scP, /^Laine bouchon prise d'air/), duct = [1, 2, 3, 4].map((i) => one(scP, new RegExp(`^Conduit d'air ${i}$`)));
     const inX = Math.abs(duct[1].pos[0] - duct[0].pos[0]) - t, inY = Math.abs(duct[3].pos[1] - duct[2].pos[1]) - t; // intérieur libre du conduit
     const bx = union(ws, t);
     expect(bx.max.x - bx.min.x).toBeCloseTo(inX, 1); expect(bx.max.y - bx.min.y).toBeCloseTo(inY, 1); // pile, jeu 0
     expect(bx.min.z).toBeLessThanOrEqual(-10); expect(bx.min.z).toBeGreaterThanOrEqual(-12); // la lèvre dépasse de 10 à 12 mm sous le fond
-    const inner = one(sc0, /^Côté gauche int/), slot = inner.holes.find((h) => h.size === 34 && h.sh === 30)!;
+    const inner = one(scP, /^Côté gauche int/), slot = inner.holes.find((h) => h.size === 34 && h.sh === 30)!;
     expect(inner.pos[2] + slot.y - slot.sh! / 2 - bx.max.z).toBeGreaterThanOrEqual(10); // ≥ 10 mm sous le bas de la fente
     expect(bx.max.z).toBeGreaterThan(55); // assez haute pour tenir et isoler
     expect(lip.w).toBeGreaterThan(inX + 10); expect(lip.notches.length).toBe(2); // collerette large, deux encoches pour les doigts
     expect(lip.holes.length).toBeGreaterThanOrEqual(4); // fentes des dents des parois
     for (const p of ws) { expect(p.cast?.bottom?.phase).toBe(0); expect(p.cast?.top).toBeUndefined(); } // dents en bas dans la lèvre, ouverte en haut
     expect(aabb(wool, t).min.z).toBeGreaterThanOrEqual(lip.pos[2] + t / 2 - 0.01);
-    for (const p of [...ws, lip, wool]) expect(HIDDEN_AT_CREATION.some((re) => re.test(p.name)), p.name).toBe(true);
-    expect(by(sc0, /^Grillage inox maille 5 mm — prise/)).toEqual([]); // plus de grillage sous l'ouverture
+    for (const p of [...ws, lip, wool]) expect(HIDDEN_AT_CREATION.some((re) => re.test(p.name)), p.name).toBe(false); // visibles par défaut (rangées à côté du nichoir)
+    expect(by(scP, /^Grillage inox maille 5 mm — prise/)).toEqual([]); // plus de grillage sous l'ouverture
     // aucune pièce visible (hors pièces de rechange cachées) ne gêne la sous-boîte
     const box = { min: bx.min, max: bx.max };
-    for (const p of sc0.planks) { if (p.special === 'doc' || p.path || /^(Bouchon-boîte|Laine bouchon|Conduit d.air|Dessous ext|Plancher int|Isolant|Grillage|Clapet prise)/.test(p.name)) continue; expect(gap(box, aabb(p, t)), p.name).toBeGreaterThan(0.3); }
+    for (const p of scP.planks) { if (p.special === 'doc' || p.path || /^(Bouchon-boîte|Laine bouchon|Conduit d.air|Dessous ext|Plancher int|Isolant|Grillage|Clapet prise)/.test(p.name)) continue; expect(gap(box, aabb(p, t)), p.name).toBeGreaterThan(0.3); }
   });
   it("l'isolant est découpé autour du conduit", () => {
     const x = one(sc0, /^Conduit d'air 5/).pos, w = one(sc0, /^Conduit d'air 5/);
@@ -330,5 +332,47 @@ describe('capteur BME280 dans le compartiment de la caméra', () => {
     const wires = by(sc0, /^Fil (3,3 V|SDA|SCL|masse) \((rouge|jaune|vert|noir)\)$/).filter((w) => w.path && w.path[0][0] > sensor.pos[0] - 6 && w.path[0][0] < x1 && w.path[0][2] < roofFloorTop + 10);
     expect(wires).toHaveLength(4);
     for (const w of wires) for (const pt of pathItems([w])[0].pts) if (pt.z < roofTop) { expect(pt.x, w.name).toBeGreaterThan(x0); expect(pt.x).toBeLessThan(x1); expect(pt.y).toBeGreaterThan(y0); expect(pt.y).toBeLessThan(y1); } // sous le dessus du toit, jamais hors du compartiment
+  });
+});
+
+describe("pièces d'hiver : exposées à côté du nichoir, échange exact par les boutons", () => {
+  const sizes: [string, PlankScene][] = [['défaut', sc0], ['intérieur 200', buildNest({ l: 200, L: 200 })]];
+  it("état d'été par défaut : cassette ventilateur en place, bloc et sous-boîte rangés à côté", () => {
+    expect(winterState(sc0)).toEqual({ cassette: 'summer', plug: 'open' });
+  });
+  for (const [nom, sc] of sizes) {
+    it(`aller-retour exact (${nom}) : appliquer deux fois revient aux positions d'origine`, () => {
+      const w = setWinterCassette(sc, true), back = setWinterCassette(w, false);
+      expect(winterState(w).cassette).toBe('winter'); expect(back.planks).toEqual(sc.planks);
+      for (const p of w.planks.filter((q) => q.path)) expect(p.pos, p.name).toEqual([0, 0, 0]); // les fils gardent pos = 0 (le chemin seul se déplace)
+      const p = setAirPlug(sc, true), open = setAirPlug(p, false);
+      expect(winterState(p).plug).toBe('plugged'); expect(open.planks).toEqual(sc.planks);
+      expect(setWinterCassette(w, true)).toBe(w); expect(setAirPlug(p, true)).toBe(p); // idempotent
+      const both = setAirPlug(setWinterCassette(sc, true), true);
+      expect(setAirPlug(setWinterCassette(both, false), false).planks).toEqual(sc.planks);
+    });
+  }
+  it("sans le ventilateur ou le conduit, les fonctions ne font rien et l'état est null", () => {
+    const sans = { ...sc0, planks: sc0.planks.filter((p) => !/ventilateur|cassette|Conduit d'air|Bouchon-boîte|Laine bouchon|Isolant bloc|Bloc isolant|Goulotte/i.test(p.name)) };
+    expect(winterState(sans)).toEqual({ cassette: null, plug: null });
+    expect(setWinterCassette(sans, true)).toBe(sans); expect(setAirPlug(sans, true)).toBe(sans);
+  });
+  it("les pièces rangées sont hors du nichoir, du lambris, du toit en chêne et du panneau solaire, posées sur le sol, et restent découpées", () => {
+    const spares = by(sc0, /^(Bloc isolant d'hiver|Isolant bloc d'hiver|Poignée bloc d'hiver|Bouchon-boîte prise d'air|Laine bouchon prise d'air)/);
+    expect(spares.length).toBeGreaterThanOrEqual(13);
+    const house = union([...by(sc0, /^(Lambris|Toit en chêne)/), one(sc0, /^Côté gauche ext/)], t), sp = union(spares, t), solar = aabb(one(sc0, /^Panneau solaire/), t);
+    expect(sp.max.x).toBeLessThan(house.min.x - 50); expect(gap(sp, solar)).toBeGreaterThan(300); // à gauche, loin du panneau (à droite)
+    expect(sp.min.z).toBeCloseTo(0, 1); // à plat sur le sol (z = 0)
+    expect(spares.filter((p) => !p.special).length).toBeGreaterThanOrEqual(10); // plaques de contreplaqué : découpées comme les autres
+    for (const p of spares) expect(HIDDEN_AT_CREATION.some((re) => re.test(p.name)), p.name).toBe(false);
+    const cote = nestSheets(sc0, 410, 400).flatMap((sh) => sh.items.map((i) => i.plank.name));
+    expect(cote).toContain("Bloc isolant d'hiver 1"); expect(cote).toContain("Bouchon-boîte prise d'air 1");
+    expect(gap(union(by(sc0, /^(Bloc isolant d'hiver|Isolant bloc d'hiver|Poignée bloc d'hiver)/), t), union(by(sc0, /^(Bouchon-boîte prise d'air|Laine bouchon prise d'air)/), t))).toBeGreaterThan(5); // le bloc et la sous-boîte ne se touchent pas
+  });
+  it("en hiver : le bloc est dans le siège, la cassette ventilateur est rangée au même endroit exposé", () => {
+    const w = setWinterCassette(sc0, true), blockSeat = one(w, /^Isolant bloc d'hiver/), fanSeat = one(sc0, /^Ventilateur Noctua/), foamSpare = one(sc0, /^Isolant bloc d'hiver/), fanSpare = one(w, /^Ventilateur Noctua/);
+    expect(Math.hypot(blockSeat.pos[0] - fanSeat.pos[0], blockSeat.pos[1] - fanSeat.pos[1])).toBeLessThan(0.02); // le bloc prend la place de la cassette
+    expect(Math.hypot(fanSpare.pos[0] - foamSpare.pos[0], fanSpare.pos[1] - foamSpare.pos[1])).toBeLessThan(0.02); // et inversement
+    expect(one(w, /^Fiche 4 broches toit/).pos).toEqual(one(sc0, /^Fiche 4 broches toit/).pos); // la fiche et ses fils restent sur le toit
   });
 });

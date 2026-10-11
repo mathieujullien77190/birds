@@ -8,6 +8,7 @@ import { rotFromBasis, transformPlanks } from '../geometry/transform';
 import { slotsForTeeth } from '../geometry/face';
 import { makeBox } from './box';
 import { CAMERA_NAMES } from './cameras';
+import { summerLayout } from './winter';
 import { fromAxisAngle, invert, multiply, rotate } from '../math/rotation';
 
 /**
@@ -455,7 +456,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     part('Cale interrupteur arrière', 17, 3, t, SWX, SWY + 12.5 + 1.5, topZ + t / 2, 'block', '#a16207'),
   ];
   // fils : côté cassette (quatre fils du ventilateur soudés sur la plaque de connexion, par le trou du couvercle), côté toit (de la fiche au module, au Wago −, et au Pi par-dessus le toit)
-  const cw = (nm: string, color: string, k: number): Plank => wire(nm, color, [[FANX - 20, pinYk(k), FAN_Z + FAN_T / 2], [FANX - 20, pinYk(k), FAN_Z + FAN_T / 2 + 4], [FANX - 20, pinYk(k), DUCT_Z1 - 4], [FANX - 20, pinYk(k), LID + 3], [FANX - 12, pinYk(k), PBZ + 0.8], [FANX - 9, pinYk(k), PBZ + 0.6]] as Vec3[], k === 0 || k === 3 ? 1.6 : 1.2);
+  const cw = (nm: string, color: string, k: number): Plank => wire(nm, color, ([[FANX - 20, pinYk(k), FAN_Z + FAN_T / 2], [FANX - 20, pinYk(k), FAN_Z + FAN_T / 2 + 4], [FANX - 20, pinYk(k), DUCT_Z1 - 4], [FANX - 20, pinYk(k), LID + 3], [FANX - 12, pinYk(k), PBZ + 0.8], [FANX - 9, pinYk(k), PBZ + 0.6]] as Vec3[]).map((q) => q.map(r2) as Vec3), k === 0 || k === 3 ? 1.6 : 1.2); // points au centième : la cassette se range et se remet en place sans écart
   // boucle de câble des fils fixes : de la fiche, par-dessus le couvercle, une boucle en U (aller à l'ouest, retour à l'est) le long du bord nord du couvercle ; ≈ 120 mm de fil au moins avant de quitter la cassette
   const lvl = [bodyH + 102.2, bodyH + 103.4, bodyH + 105.8, bodyH + 108.2];
   const loop = (k: number): Vec3[] => { const yo = r2(FANY + 22.2 + 1.25 * k), yr = r2(FANY + 31.8 - 1.25 * k), xt = r2(FANX - 28 + 1.2 * k), xv = r2(XPLUG + 5 + 1.3 * k), z = lvl[k];
@@ -677,5 +678,5 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const unnumber = (nm: string) => (start === 1 ? nm.replace(/^((?:Face avant|Face arrière|Côté droit|Côté gauche|Dessus|Dessous)(?: (?:ext|int|toit|compartiment))?|Grille anti-insectes) 1$/, "$1") : nm); // un seul nichoir : plus de « 1 » derrière les plaques des boîtes (les numéros des séries — lambris, cales, isolant… — restent)
   const ventGroup = uid(); // groupe « Ventilation » : tout ce qui sert à ventiler (cassette du ventilateur, siège, grilles, clapets, interrupteur 12 V, fils, prise d'air basse) ; le bloc isolant d'hiver garde son groupe
   const finalPlanks = planks.map((p) => { let q = p.group && merged.has(p.group) ? { ...p, group: elecGroup, name: unnumber(p.name) } : { ...p, name: unnumber(p.name) }; if (q.path && q.special !== 'solar' && q.name !== 'Câble 12 V vers le toit') q = { ...q, path: q.path.map(underRoof) }; const l = LINKS.find(([re]) => re.test(q.name)); if (VENT_PIECES.test(q.name)) q = { ...q, group: ventGroup }; return l ? { ...q, url: l[1] } : q; });
-  return { planks: finalPlanks, group, name: 'Corps', groupNames: { [group]: 'Corps', [roofGroup]: 'Toit', [elecGroup]: 'Électronique', [docGroupId]: 'Schéma électronique', [entryGroup]: 'Entrée', [isoGroup]: 'Isolant', [wGroup]: "Bloc d'hiver (pièce de rechange)", [ventGroup]: 'Ventilation', ...(n.lambris ? { [lamGroup]: 'Habillage' } : {}) } }; // un seul nichoir : groupes sans numéro, le corps s'appelle « Corps »
+  return { planks: summerLayout({ t, fit, planks: finalPlanks }).planks, group, name: 'Corps', groupNames: { [group]: 'Corps', [roofGroup]: 'Toit', [elecGroup]: 'Électronique', [docGroupId]: 'Schéma électronique', [entryGroup]: 'Entrée', [isoGroup]: 'Isolant', [wGroup]: "Pièces d'hiver (rechange)", [ventGroup]: 'Ventilation', ...(n.lambris ? { [lamGroup]: 'Habillage' } : {}) } }; // un seul nichoir : groupes sans numéro, le corps s'appelle « Corps »
 }

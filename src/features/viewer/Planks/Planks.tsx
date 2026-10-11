@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Hint } from '@/ui';
 import { usePersistentFlag } from '@/hooks';
 import { randomId } from '@/lib';
 import { DocModal, DOCS } from '@/features/docs';
 import { LaserMachineModal, LaserPreview, useLaser } from '@/features/laser';
 import { SchemaPanel } from '@/features/schema';
-import { makeNest, moveWithGroup, extents, fitHole, newHole, saveHistory, saveScene, loadScene, type Hole, type Plank, type PlankScene, type Vec3 } from '@/birdhouse/model';
+import { makeNest, moveWithGroup, setAirPlug, setWinterCassette, winterState, extents, fitHole, newHole, saveHistory, saveScene, loadScene, type Hole, type Plank, type PlankScene, type Vec3 } from '@/birdhouse/model';
 import { PiSimulator } from '@/birdhouse/PiSimulator';
 import { loadPiModel, piModel } from '@/birdhouse/three/piModel';
 import type { View } from '@/birdhouse/three/types';
@@ -77,6 +77,9 @@ export default function Planks() {
   backRef.current = back;
   const update = (id: string, patch: Partial<Plank>, label = 'Réglage de la plaque') => commit(label, (s) => ({ ...s, planks: s.planks.map((p) => (p.id === id ? { ...p, ...patch } : p)) }));
   const selected = sc.planks.find((p) => p.id === selectedId) ?? null;
+  const wState = useMemo(() => winterState(sc), [sc]); // pièces d'hiver : cassette ventilateur / isolante, prise d'air ouverte / bouchée (état déduit des positions)
+  const toggleCassette = () => { const w = wState.cassette === 'summer'; commit(w ? 'Cassette isolante posée' : 'Cassette ventilateur posée', (s) => setWinterCassette(s, w)); };
+  const togglePlug = () => { const p = wState.plug === 'open'; commit(p ? "Prise d'air bouchée" : "Prise d'air ouverte", (s) => setAirPlug(s, p)); };
   const commitRef = useRef(commit);
   commitRef.current = commit;
   const moveRef = useRef(moveWithGroup);
@@ -164,7 +167,7 @@ export default function Planks() {
         <div ref={host} className="h-full w-full" />
         {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
         <UndoBar backLabel={backLabel} onBack={back} />
-        <ViewToolbar schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={() => setPiOpen(true)} night={night} onToggleNight={() => setNight((v) => !v)} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
+        <ViewToolbar winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={() => setPiOpen(true)} night={night} onToggleNight={() => setNight((v) => !v)} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
         {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
         {pull && <PullBar cutOn={cut.on} onDone={() => setPull(null)} />}
         {extra.size > 0 && <SelectionBar count={extra.size + (selectedId ? 1 : 0)} onLink={linkSelection} onUnlink={unlinkSelection} onCancel={() => setExtra(new Set())} />}
