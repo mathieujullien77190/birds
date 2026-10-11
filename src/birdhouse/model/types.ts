@@ -12,6 +12,8 @@ export interface Hole { id: string; shape: 'round' | 'square'; x: number; y: num
 
 export interface Plank {
   id: string;
+  /** Matériau de la plaque découpée : absent = contreplaqué ; 'mdf' = MDF (découpé sur ses propres planches). */
+  material?: 'mdf';
   /** Élément spécial (pas du bois) : dessiné par son propre modèle 3D, exclu de la découpe laser. « camera » (carte caméra) ou « ir » (carte de LED infrarouges). */
   /** Contour libre (repère de la plaque, sens trigonométrique) : remplace le rectangle (crans et trous restent possibles). */
   poly?: [number, number][];
@@ -50,7 +52,7 @@ export interface HistoryEntry { label: string; scene: PlankScene; at: number }
 export interface Placed { plank: Plank; poly: Pt[]; x: number; y: number }
 
 export interface NestItem { plank: Plank; poly: Pt[]; holes: Pt[][]; w: number; h: number; x: number; y: number; rotated: boolean }
-export interface NestSheet { items: NestItem[]; used: number }
+export interface NestSheet { items: NestItem[]; used: number; /** 'mdf' : feuille de MDF (matériau distinct du contreplaqué) ; absent : contreplaqué. */ material?: 'mdf' }
 
 export type FaceAxis = 'x' | 'y' | 'z';
 

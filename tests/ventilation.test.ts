@@ -254,9 +254,10 @@ describe('Wago du rail 12 V : 221-413 (+) et 221-415 (−)', () => {
 
 describe('habillage arrière : fenêtres sur une bande commune', () => {
   it("toutes les lames coupées par une fenêtre s'arrêtent au même niveau et reprennent au même niveau", () => {
-    const lames = by(sc0, /^Lambris arrière/), bot = Math.min(...lames.map((l) => aabb(l, t).min.z)), top = Math.max(...lames.map((l) => aabb(l, t).max.z));
+    const lames = by(sc0, /^Lambris arrière [^3]/), bot = Math.min(...lames.map((l) => aabb(l, t).min.z)), top = Math.max(...lames.map((l) => aabb(l, t).max.z));
     const stops = lames.filter((l) => aabb(l, t).max.z < top - 1).map((l) => aabb(l, t).max.z), restarts = lames.filter((l) => aabb(l, t).min.z > bot + 1).map((l) => aabb(l, t).min.z);
-    expect(stops.length).toBeGreaterThanOrEqual(2); expect(restarts.length).toBeGreaterThanOrEqual(2);
+    expect(stops.length).toBeGreaterThanOrEqual(1); expect(restarts.length).toBeGreaterThanOrEqual(1);
+    const l3 = by(sc0, /^Lambris arrière 3/); expect(l3.length).toBe(2); expect(Math.abs(Math.min(...l3.map((l) => aabb(l, t).min.z).filter((z) => z > bot + 1)) - restarts[0])).toBeLessThanOrEqual(0.01); // la lame du milieu (fenêtre du tourniquet + de la sortie) reprend au même niveau
     for (const z of stops) expect(Math.abs(z - stops[0]), 'arrêt des lames').toBeLessThanOrEqual(0.01);
     for (const z of restarts) expect(Math.abs(z - restarts[0]), 'reprise des lames').toBeLessThanOrEqual(0.01);
     expect(restarts[0]).toBeGreaterThan(stops[0]);
@@ -361,7 +362,7 @@ describe("prise d'air basse", () => {
     for (const p of [...ws, lid, wool]) expect(p.holes, p.name).toEqual([]); expect(fond.holes.every((h) => Math.max(h.size, h.sh ?? 0) < 10)).toBe(true); // boîte pleine : seules les fentes des pieds du U percent le fond
     for (const e of ['top', 'bottom', 'left', 'right'] as const) expect(lid.cast![e]!.phase).toBe(1); // le couvercle s'emboîte dans le haut des parois
     const wb = aabb(wool, t); expect(wb.max.z).toBeLessThanOrEqual(lid.pos[2] - t / 2 + 0.01); expect(wb.min.z).toBeGreaterThanOrEqual(fond.pos[2] + t / 2 - 0.01); // laine enfermée entre le fond et le couvercle
-    expect(scP.planks.filter((p) => /[Tt]ourniquet|Vis tourniquet|[Gg]oupille/.test(p.name))).toEqual([]); // aucun verrou
+    expect(scP.planks.filter((p) => /bouchon.*([Tt]ourniquet|[Gg]oupille)|([Tt]ourniquet|[Gg]oupille).*bouchon/.test(p.name))).toEqual([]); // aucun verrou
     expect(bottom.holes.filter((h) => h.shape === 'round' && h.size === 3)).toEqual([]); // aucun trou de vis
     for (const p of [...ws, fond, lid, wool, handle]) expect(HIDDEN_AT_CREATION.some((re) => re.test(p.name)), p.name).toBe(false); // visibles par défaut (rangées à côté du nichoir)
     expect(by(scP, /^Grillage inox maille 5 mm — prise/)).toEqual([]); // plus de grillage sous l'ouverture

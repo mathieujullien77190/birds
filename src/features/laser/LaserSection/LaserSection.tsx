@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { Btn, Chip, Section, Slider } from '@/ui';
 import { saveSvg } from '@/lib';
-import { sheetSvg } from '@/birdhouse/model';
+import { sheetLabel, sheetSvg } from '@/birdhouse/model';
 import type { CutCfg, Sheets } from '../types';
 import type { LaserMachine } from '../hooks/useLaserMachine';
 import { MachineSection } from '../components/MachineSection';
@@ -22,8 +22,8 @@ export function LaserSection({ cutCfg, setCutCfg, cutView, setCutView, sheets, m
       </div>
       {sheets.map((sh, i) => (
         <div key={i} className="flex items-center gap-2 text-[11px]">
-          <span className="min-w-0 flex-1 truncate text-stone-700">Planche {i + 1} : {sh.items.length} pièce{sh.items.length > 1 ? 's' : ''}, {Math.round(Math.min(sh.used, 1) * 100)} % de la hauteur{sh.used > 1 ? ' — déborde !' : ''}</span>
-          <Btn block={false} variant="primary" onClick={() => saveSvg(sheetSvg(sh, cutCfg.W, cutCfg.H, i), `planche-${i + 1}-${cutCfg.W}x${cutCfg.H}.svg`)}>SVG</Btn>
+          <span className="min-w-0 flex-1 truncate text-stone-700">{sheetLabel(sheets, i)} : {sh.items.length} pièce{sh.items.length > 1 ? 's' : ''}, {Math.round(Math.min(sh.used, 1) * 100)} % de la hauteur{sh.used > 1 ? ' — déborde !' : ''}</span>
+          <Btn block={false} variant="primary" onClick={() => saveSvg(sheetSvg(sh, cutCfg.W, cutCfg.H, i), `${sh.material === 'mdf' ? 'planche-mdf' : 'planche'}-${i + 1}-${cutCfg.W}x${cutCfg.H}.svg`)}>SVG</Btn>
         </div>
       ))}
       <MachineSection m={machine} />

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Btn, Chip, Notice } from '@/ui';
 import { saveText } from '@/lib';
+import { sheetLabel } from '@/birdhouse/model';
 import { MACHINE_AREA, formatDuration, gcodeText } from '../../grbl';
 import type { LaserMachine } from '../../hooks/useLaserMachine';
 import { segmentsPath } from './helpers';
@@ -24,7 +25,7 @@ export function GcodePreview({ m }: { m: LaserMachine }) {
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-stone-600">
-        {m.target === 'sheet' && sheets.map((_, i) => <Chip key={i} active={i === sheetIndex} onClick={() => m.setSheetIndex(i)}>Planche {i + 1}</Chip>)}
+        {m.target === 'sheet' && sheets.map((_, i) => <Chip key={i} active={i === sheetIndex} onClick={() => m.setSheetIndex(i)}>{sheetLabel(sheets, i)}</Chip>)}
         <Chip active={m.target === 'test'} onClick={() => m.setTarget(m.target === 'test' ? 'sheet' : 'test')}>Planche d'essai</Chip>
         {program && <Btn block={false} variant="ghost" onClick={() => saveText(gcodeText(program), `${m.target === 'test' ? 'essai' : `planche-${sheetIndex + 1}`}.gcode`)}>Télécharger le G-code</Btn>}
       </div>

@@ -46,9 +46,10 @@ Une fabrique peut rendre un `rotor` en plus de `geo` / `edges` (`PartGeometry.ro
 ## Faisceaux infrarouges (LED allumées dans le simulateur du Pi)
 
 `three/irBeam.ts` : `IrBeams` (un par vue, `view.ir`) dessine, pour chacune des deux cartes de LED (« LED infrarouges » dans le nid, « LED infrarouges extérieures »), un cône translucide rose-rouge (demi-angle 35°, 180 mm pour le nid, 250 mm dehors, additif, dégradé vers le bout), une lueur sur la carte et un projecteur (`SpotLight`, même axe) qui éclaire vraiment les surfaces. L'axe est l'axe d'objectif de la carte (−z local tourné par la mesh) ; le fondu dure 150 ms ; de jour l'intensité est × 0,5. Les projecteurs restent dans la scène à intensité 0 quand les LED sont éteintes (retirer une lumière fait recompiler les matériaux). Rien ne se sélectionne ni ne se survole (pas de `raycast`) ; `CameraShooter` appelle `beams.suspend()` pendant une prise de vue (la lampe infrarouge du flux vidéo simule déjà cet éclairage). Le simulateur du Pi donne `etat.led_nid` / `led_ext` par sa prop `onLeds` (chaque seconde, éteintes à la fermeture) ; le hook `useIrBeams(view, sc, leds)` lie les cartes (après `useSceneSync`) et allume les faisceaux ; `useDayNight` règle le jour / la nuit.
-## Cassette fantôme
+## Cassette fantôme (désactivée)
 
-`three/ghost.ts` : quand le ventilateur tourne (`view.fan.pct` > 0), les plaques de la cassette (`PlankMesh.ghost`) passent à 0,28 d'opacité par un fondu de 200 ms (`fadeOpacity`, `stepGhost` dans la boucle de rendu) et reviennent opaques à l'arrêt. C'est une mutation du matériau de la plaque (aucune ressource créée, rien de plus à libérer) ; la clé de géométrie, le modèle et la sélection ne changent pas.
+Effet de cassette translucide désactivé à la demande de l'utilisateur (la cassette garde son opacité quand le ventilateur tourne) ; la machinerie `three/ghost.ts` est gardée, opacité cible 1. Le Jour / Nuit n'est que dans la fenêtre de l'interface web du Pi ; la vue 3D reste de jour ; la nuit ne s'applique qu'aux prises de vue des caméras (`CameraShooter.lights`) ; fermer la fenêtre du simulateur la cache sans l'arrêter.
+
 ## Ce qui refait la géométrie d'une plaque
 
 `plankShapeKey` (dans `factories/plank.ts`) liste tout ce qui change le dessin : dimensions, crans, trous, épaisseur, chemin, profondeur, couleur, contour libre, haut incliné, type spécial. La mesh (`PlankMesh`) ne refait sa géométrie que si cette clé change. **Si une pièce dépend d'une nouvelle propriété de `Plank` pour son dessin, l'ajouter à la clé** (sinon le dessin reste périmé).

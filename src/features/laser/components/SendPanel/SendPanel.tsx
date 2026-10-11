@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Btn, Hint, Notice, ProgressBar } from '@/ui';
+import { sheetLabel } from '@/birdhouse/model';
 import { formatDuration } from '../../grbl';
 import type { LaserMachine } from '../../hooks/useLaserMachine';
 import { SafetyDialog } from '../SafetyDialog';
@@ -53,7 +54,7 @@ export function SendPanel({ m }: { m: LaserMachine }) {
       {ask && program && (
         <SafetyDialog
           program={program} settings={settings} simulated={grbl.kind === 'mock'}
-          label={m.target === 'test' ? "Planche d'essai" : `Planche ${m.sheetIndex + 1}`}
+          label={m.target === 'test' ? "Planche d'essai" : sheetLabel(m.sheets, m.sheetIndex)}
           onCancel={() => setAsk(false)}
           onConfirm={() => { setAsk(false); job.start(kind, program); }}
         />

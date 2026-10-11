@@ -110,7 +110,8 @@ function emptyRects(occ: Uint8Array, nx: number, ny: number, res: number, min: n
  */
 export function nestSheets(s: PlankScene, W: number, H: number, gap = 5, margin = 8): NestSheet[] { // gap = espace entre pièces, margin = marge sur les bords de la planche
   type Free = { x: number; y: number; w: number; h: number };
-  const items = s.planks.filter((p) => !p.special).map((p) => ({ p, area: p.w * p.h })).sort((a, b) => b.area - a.area || Math.max(b.p.w, b.p.h) - Math.max(a.p.w, a.p.h));
+  const mdf = s.planks.filter((p) => !p.special && p.material === 'mdf').map((p) => ({ ...p, material: undefined })); // le MDF a ses propres planches, rangées après celles du contreplaqué
+  const items = s.planks.filter((p) => !p.special && p.material !== 'mdf').map((p) => ({ p, area: p.w * p.h })).sort((a, b) => b.area - a.area || Math.max(b.p.w, b.p.h) - Math.max(a.p.w, a.p.h));
   const sheets: { sheet: NestSheet; free: Free[] }[] = [];
   const g = gap;
   const place = (p: Plank): boolean => {
@@ -220,7 +221,14 @@ export function nestSheets(s: PlankScene, W: number, H: number, gap = 5, margin 
       S.free = [];
     }
   }
-  return sheets.map((S) => S.sheet);
+  const ply = sheets.map((S) => S.sheet);
+  return mdf.length ? [...ply, ...nestSheets({ ...s, planks: mdf }, W, H, gap, margin).map((sh): NestSheet => ({ ...sh, material: 'mdf' }))] : ply;
+}
+
+/** Libellé d'une planche de découpe : « Planche 3 » pour le contreplaqué, « Planche MDF 1 » pour le MDF (numérotée à part). */
+export function sheetLabel(sheets: NestSheet[], i: number): string {
+  if (sheets[i]?.material !== 'mdf') return `Planche ${i + 1}`;
+  return `Planche MDF ${sheets.slice(0, i + 1).filter((x) => x.material === 'mdf').length}`;
 }
 
 /** SVG d'une planche pour la machine : cadre de la planche en gris (repère, à ne pas couper), noir 0,1 mm = coupe, bleu = nom à graver. 1 unité = 1 mm, origine en haut à gauche. */

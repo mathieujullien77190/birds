@@ -3,6 +3,9 @@ export const PALETTE = {
   white: '#ffffff',
   black: '#000000',
   // bois contreplaqué
+  mdfTop: '#a47c55',
+  mdfBottom: '#8f6a46',
+  mdfSide: '#5c3f24',
   plywoodTop: '#e2c79a',
   plywoodBottom: '#c9a874',
   plywoodSide: '#6f4a22',
