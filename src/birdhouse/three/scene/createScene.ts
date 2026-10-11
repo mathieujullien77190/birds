@@ -1,6 +1,7 @@
 import { AmbientLight, Color, DirectionalLight, Group, MOUSE, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { AMBIENCE, SUN_POSITION, VIEW } from '../constants';
+import { CameraShooter } from '../cameraShooter';
 import { clearGroup, disposeObject3D } from '../dispose';
 import { disposeAll } from '../registry/materials';
 import type { View } from '../types';
@@ -43,7 +44,8 @@ export function createScene(host: HTMLElement): SceneHandle {
   scene.add(cutMark);
   const pullMark = new Group(); // la face double-cliquée, en pointillés bleus : on la tire ou on la pousse
   scene.add(holeMark, pullMark);
-  const view: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, holeMark, pullMark, cutMark, dragging: false };
+  const shooter = new CameraShooter(scene, renderer, [labels, holeMark, pullMark, cutMark]);
+  const view: View = { ambient, sun, scene, camera, renderer, orbit, meshes: new Map(), labels, holeMark, pullMark, cutMark, shooter, dragging: false };
 
   const resize = () => { const w = host.clientWidth, h = host.clientHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); };
   const ro = new ResizeObserver(resize);
@@ -57,6 +59,7 @@ export function createScene(host: HTMLElement): SceneHandle {
     cancelAnimationFrame(raf);
     ro.disconnect();
     orbit.dispose();
+    view.shooter.dispose();
     for (const m of view.meshes.values()) { scene.remove(m); disposeObject3D(m); }
     view.meshes.clear();
     for (const g of [labels, holeMark, pullMark, cutMark]) clearGroup(g);
