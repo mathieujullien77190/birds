@@ -15,16 +15,11 @@ const geoOf = (p: Plank) => (p.special === 'camera' ? cameraBoardGeometry(p) : p
 
 interface Item { name: string; el: Plank; host: Plank; out: Vector3; body: (z: number) => boolean }
 const roofOut = new Vector3(0, 0, -1);
-const boxCenter = (() => { const ps = sc.planks.filter((p) => /^Boîte caméra 2/.test(p.name)); return ps.reduce((s, p) => s.add(new Vector3(...p.pos)), new Vector3()).divideScalar(ps.length); })();
-const front = find(/^Boîte caméra 2 : face avant/);
-const frontOut = (() => { const n = obb(front, t).ax[2].clone(); return n.dot(new Vector3(...front.pos).sub(boxCenter)) >= 0 ? n : n.negate(); })();
 const below = (z: number) => z < -0.8 - 1e-6, above = (z: number) => z > 0.8 + 1e-6;
 const items: Item[] = [
   { name: 'caméra 1', el: find(/^Caméra$/), host: find(/^Dessous toit/), out: roofOut, body: below },
   { name: 'LED infrarouges (nid)', el: find(/^LED infrarouges$/), host: find(/^Dessous toit/), out: roofOut, body: below },
   { name: 'capteur BME280', el: find(/^Capteur/), host: find(/^Dessous toit/), out: roofOut, body: above },
-  { name: 'caméra 2', el: find(/^Caméra 2$/), host: front, out: frontOut, body: below },
-  { name: 'LED infrarouges extérieures', el: find(/^LED infrarouges extérieures/), host: front, out: frontOut, body: below },
 ];
 
 function measure(it: Item) {

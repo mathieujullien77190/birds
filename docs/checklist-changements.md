@@ -21,7 +21,7 @@ Déclencheur : une plaque, un composant, un fil, une nappe, un pavé ou un group
 | Pièce cachée à la création (isolant, toit en chêne) | `HIDDEN_AT_CREATION` dans `src/features/viewer/constants.ts` | **auto** : `tests/coherence.test.ts` |
 | Lien du composant (constructeur ou revendeur) | tableau `LINKS` de `makeNest.ts` | **auto** : `tests/coherence.test.ts` (chaque motif correspond à une pièce) |
 | Références golden : régénérer **puis relire le diff** | `UPDATE_GOLDEN=1 npx vitest run`, fichiers de `tests/golden/` | `npm test` (ne jamais régénérer à l'aveugle) |
-| Découpe laser : les plaques de bois sont rangées toutes seules ; MDF = `material: 'mdf'` et okoumé 5 mm de l'habillage / de la boîte caméra 2 = `material: 'okoume'` + `depth` (planches à part) ; une pièce non découpée est un `special` | `src/birdhouse/model/sheets/index.ts` | `tests/bars.test.ts`, `tests/model.golden.test.ts` |
+| Découpe laser : les plaques de bois sont rangées toutes seules ; MDF = `material: 'mdf'` et okoumé 5 mm de l'habillage = `material: 'okoume'` + `depth` (planches à part) ; une pièce non découpée est un `special` | `src/birdhouse/model/sheets/index.ts` | `tests/bars.test.ts`, `tests/model.golden.test.ts` |
 | Un fil ou une nappe : il ne doit rien traverser | `tests/geomChecks.ts`, `tests/wireChecks.ts` | **auto** : `tests/wiresSolid.test.ts`, `tests/ventilation.test.ts` |
 | Schéma électronique (si c'est de l'électronique) : voir la section 2 et la section 7 | `docs/schema-electronique.md` | `tests/coherence.test.ts` |
 | Lien pièce ↔ schéma : tableau `MAP` | `src/features/schema/SchemaPanel/constants.ts` | **auto** : `tests/coherence.test.ts` (chaque nœud de `MAP` existe dans le schéma) |

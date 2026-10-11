@@ -25,12 +25,10 @@ export const CAM_W = 25, CAM_H = 24;
 export const IR_W = 12, IR_H = 24;
 /** Abscisses (centre) de la caméra et de la carte IR dans le compartiment : l'ensemble de 37 mm est centré. */
 export const CAM_X = -6, IR_X = 12.5;
-/** Épaisseur du contreplaqué okoumé extérieur peint en blanc (habillage et boîte de la caméra 2), en mm. */
+/** Épaisseur du contreplaqué okoumé extérieur peint en blanc (habillage), en mm. */
 export const OKOUME_T = 5, OKOUME_COLOR = '#f5f5f4';
-/** Deuxième caméra : BOÎTE CARRÉE crénelée de 56 × 56 × 46 (intérieur 46 × 46 × 36) en okoumé 5 mm, À L'EXTÉRIEUR, sous le débord du toit en chêne, à l'avant gauche, inclinée et tournée pour viser le trou d'entrée ;
- *  elle contient la caméra (centre en x = CAM2_CX) et la carte de LED infrarouges (CAM2_IX) côte à côte ; CAM2_GAP = jeu entre la boîte et l'habillage. Une longue nappe sort du Pi par une fente de la plaque avant du toit.
+/** Deuxième caméra : NUE, À L'EXTÉRIEUR, sous le débord du toit en chêne, à l'avant gauche, inclinée et tournée pour viser le trou d'entrée (boîte en okoumé essayée puis retirée). Une longue nappe sort du Pi par une fente de la plaque avant du toit.
  *  PI_CSI2 = connecteur du 2ᵉ port caméra du Pi dans le repère de la carte (provisoire : emplacement du port DSI du Pi 4 tant que le Pi 5 n'est pas intégré). */
-export const CAM2_X = -72, CAM2_Y = -128, CAM2_L = 56, CAM2_D = 56, CAM2_H = 46, CAM2_CX = -7.5, CAM2_IX = 14, CAM2_GAP = 0.05, CAM2_PITCH_MAX = 35; // GAP ≈ 0 (0,05 pour ne jamais entrer dans le bois) : la boîte est COLLÉE à l'habillage (son coin le plus proche touche la face extérieure du lambris)
 export const PI_CSI2: [number, number] = [-38.5, 0];
 
 /** Raspberry Pi 4 Model B (modèle 3D importé de public/models/pi4.bin) : carte de 85 × 56 mm, posée à plat sur le toit sur 3 mm de cales. */
