@@ -414,16 +414,17 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const HU_W = 30, HU_LEG = t, HU_SLOT = r2(t + fit), HU_LEGX = r2((HU_W - HU_LEG) / 2);
   const slopeAtLid = bodyH + Hf + ((FANY + D / 2) * (Hb - Hf)) / D, HU_H = Math.max(2 * t, Math.min(12, Math.floor(slopeAtLid - (DUCT_Z1 + t) - 2))); // hauteur au-dessus du couvercle (barre comprise)
   const uPoly = (w: number, h: number): Pt[] => [[-w / 2, -h / 2], [-w / 2 + HU_LEG, -h / 2], [-w / 2 + HU_LEG, h / 2 - t], [w / 2 - HU_LEG, h / 2 - t], [w / 2 - HU_LEG, -h / 2], [w / 2, -h / 2], [w / 2, h / 2], [-w / 2, h / 2]]; // U vu de face : le bas des pieds = tenons
-  const uSlots = (): Hole[] => [-1, 1].map((sg) => ({ id: uid(), shape: 'square' as const, x: sg * HU_LEGX, y: 0, size: HU_SLOT, sh: HU_SLOT })); // fentes du couvercle
-  const uHandle = (name: string, group: string): Plank => ({ ...wood(name, HU_W, HU_H + t, [FANX, FANY, DUCT_Z1 + t + (HU_H - t) / 2], faceRot, group), poly: uPoly(HU_W, HU_H + t) }); // z : tenons de t sous la face haute du couvercle
+  const HU_N = 3, HU_SLOT3 = r2(HU_N * t + fit); // trois couches de contreplaqué collées face à face (9 mm) : une seule fente par pied
+  const uSlots = (): Hole[] => [-1, 1].map((sg) => ({ id: uid(), shape: 'square' as const, x: sg * HU_LEGX, y: 0, size: HU_SLOT, sh: HU_SLOT3 })); // fentes du couvercle (t en x, 9 mm en y)
+  const uHandle = (name: string, group: string): Plank[] => [0, 1, 2].map((i) => ({ ...wood(`${name} ${i + 1}`, HU_W, HU_H + t, [FANX, FANY + (i - 1) * t, DUCT_Z1 + t + (HU_H - t) / 2], faceRot, group), poly: uPoly(HU_W, HU_H + t) })); // z : tenons de t sous la face haute du couvercle
   // la cassette est une BOÎTE CRÉNELÉE (`makeBox`, comme les autres boîtes du nichoir) : quatre parois qui s'emboîtent par leurs arêtes verticales, cadre du bas et couvercle emboîtés dans les parois ; même enveloppe que le bloc d'hiver
   const EXZ = bodyH + VENT_Z; // centre de la fenêtre de sortie
   const cbH = r2(DUCT_Z1 + t - ZB), CASS_OPEN = r2(CO - 2 * t - 9); // l'ouverture du cadre laisse 4,5 mm de bois au-delà des crans
   const cassKey: Record<string, string> = { 'Face avant': 'Cassette ventilateur 1', 'Face arrière': 'Cassette ventilateur 2', 'Côté gauche': 'Cassette ventilateur 3', 'Côté droit': 'Cassette ventilateur 4', Dessous: 'Cassette ventilateur cadre du bas', Dessus: 'Cassette ventilateur couvercle' };
-  const cassHoles = (key: string): Hole[] => key === 'Face arrière' ? [{ id: uid(), shape: 'square' as const, x: 0, y: r2(EXZ - (ZB + cbH / 2)), size: EXW, sh: VENT_H }] : key === 'Dessous' ? [{ id: uid(), shape: 'square' as const, x: 0, y: 0, size: CASS_OPEN, sh: CASS_OPEN }] : key === 'Dessus' ? [{ id: uid(), shape: 'square' as const, x: -20, y: 14, size: 6, sh: 12 }, ...uSlots()] : [];
+  const cassHoles = (key: string): Hole[] => key === 'Face arrière' ? [{ id: uid(), shape: 'square' as const, x: 0, y: r2(EXZ - (ZB + cbH / 2)), size: EXW, sh: VENT_H }] : key === 'Dessous' ? [{ id: uid(), shape: 'square' as const, x: 0, y: 0, size: CASS_OPEN, sh: CASS_OPEN }] : key === 'Dessus' ? [{ id: uid(), shape: 'square' as const, x: -20, y: 16, size: 6, sh: 12 }, ...uSlots()] : [];
   const cassette: Plank[] = [
     ...makeBox(CO, CO, cbH, t, fit, start).planks.map((p) => { const key = p.name.replace(/ \d+$/, ''); return { ...p, name: cassKey[key], pos: [r2(p.pos[0] + FANX), r2(p.pos[1] + FANY), r2(p.pos[2] + ZB)] as Vec3, group: elecGroup, holes: cassHoles(key) }; }),
-    uHandle('Poignée cassette', elecGroup),
+    ...uHandle('Poignée cassette', elecGroup),
     blk("Grille de protection ventilateur 60 mm (fil d'acier)", FAN, FAN, GUARD_T, [FANX, FANY, ZB + t + GUARD_T / 2], elecGroup, '#9ca3af', { transparent: true }), // grille à doigts, ≈ 90 % ouverte, sur la face d'aspiration (côté nid) : elle sort avec la cassette ; le plafond du nid reste une ouverture nue
   ];
   const plotsAt: [number, number, number, number][] = [[FANX, FANY - FAN / 2 + 1, 12, 2], [FANX, FANY + FAN / 2 - 1, 12, 2], [FANX - FAN / 2 + 1, FANY, 2, 12], [FANX + FAN / 2 - 1, FANY, 2, 12]]; // sur le bord du cadre, hors de l'ouverture
@@ -437,7 +438,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const winter: Plank[] = [
     ...makeBox(CO, CO, blockH, t, fit, start).planks.map((p) => ({ ...p, name: blockKey[p.name.replace(/ \d+$/, '')], pos: [r2(p.pos[0] + FANX), r2(p.pos[1] + FANY), r2(p.pos[2] + ZB)] as Vec3, group: wGroup, holes: /^Dessus/.test(p.name) ? uSlots() : [] })), // boîte fermée crénelée : quatre parois, fond plein (bouche l'ouverture du plafond), couvercle
     blk("Isolant bloc d'hiver", CO - 2 * t, CO - 2 * t, blockH - 2 * t - 0.4, [FANX, FANY, ZB + blockH / 2], wGroup, '#f59e0b', { transparent: true }), // laine de bois enfermée : remplit l'intérieur
-    uHandle("Poignée bloc d'hiver", wGroup), // comme la poignée de la cassette
+    ...uHandle("Poignée bloc d'hiver", wGroup), // comme la poignée de la cassette
   ];
   // PRISE D'ORIGINE du ventilateur + RALLONGE : le câble d'origine du Noctua (≈ 30 cm, quatre fils) monte dans la cassette, traverse le couvercle par un petit passage et finit par sa prise 4 broches femelle d'origine, posée sur le couvercle ;
   // la rallonge 4 broches (mâle ⇄ femelle, ≈ 30 cm) s'y emboîte : sa prise mâle reste sur le toit (posée sur le couvercle de la cassette, ou du bloc d'hiver quand la cassette est sortie) ; pas de plaque ni de soudure, rien à fabriquer
@@ -497,9 +498,9 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const pbKey: Record<string, string> = { 'Côté gauche': "Bouchon-boîte prise d'air 1", 'Côté droit': "Bouchon-boîte prise d'air 2", 'Face avant': "Bouchon-boîte prise d'air 3", 'Face arrière': "Bouchon-boîte prise d'air 4", Dessus: "Bouchon-boîte prise d'air couvercle", Dessous: "Bouchon-boîte prise d'air fond" };
   const pbWalls: Plank[] = makeBox(PB_W, PB_L, PB_HW, t, fit, start).planks.map((p) => recastAll({ ...p, name: pbKey[p.name.replace(/ \d+$/, '')], pos: [r2(p.pos[0] + AIR_CX), r2(p.pos[1] + AIR_CY), r2(p.pos[2])] as Vec3, group: wGroup }, t, fit));
   const PB_UW = 30, PB_UY = r2((PB_UW - HU_LEG) / 2), pbFond = pbWalls.find((p) => /fond$/.test(p.name))!;
-  pbFond.holes = [...pbFond.holes, ...[-1, 1].map((sg) => ({ id: uid(), shape: 'square' as const, x: 0, y: sg * PB_UY, size: HU_SLOT, sh: HU_SLOT }))]; // fentes du fond : les pieds du U y sont incrustés
+  pbFond.holes = [...pbFond.holes, ...[-1, 1].map((sg) => ({ id: uid(), shape: 'square' as const, x: 0, y: sg * PB_UY, size: HU_SLOT3, sh: HU_SLOT }))]; // fentes du fond : les pieds du U y sont incrustés
   const woolH = r2(PB_TOP - 2 * t - 0.4);
-  const plugBox: Plank[] = [...pbWalls, { ...wood("Poignée bouchon prise d'air", PB_UW, PLUG_HANDLE + t, [AIR_CX, AIR_CY, (t - PLUG_HANDLE) / 2], sideRot, wGroup), poly: uPoly(PB_UW, PLUG_HANDLE + t) }, blk("Laine bouchon prise d'air", PB_W - 2 * t, PB_L - 2 * t, woolH, [AIR_CX, AIR_CY, t + 0.2 + woolH / 2], wGroup, '#f59e0b', { transparent: true })];
+  const plugBox: Plank[] = [...pbWalls, ...[0, 1, 2].map((i) => ({ ...wood(`Poignée bouchon prise d'air ${i + 1}`, PB_UW, PLUG_HANDLE + t, [AIR_CX + (i - 1) * t, AIR_CY, (t - PLUG_HANDLE) / 2], sideRot, wGroup), poly: uPoly(PB_UW, PLUG_HANDLE + t) })), blk("Laine bouchon prise d'air", PB_W - 2 * t, PB_L - 2 * t, woolH, [AIR_CX, AIR_CY, t + 0.2 + woolH / 2], wGroup, '#f59e0b', { transparent: true })];
   // manchon : le conduit est à 4,7 mm de la paroi intérieure (ligaments de bois du fond) ; quatre petites plaques entourent la fente et ferment ce passage
   const AIR_XM = r2((AIR_X1 - (n.l / 2 + t)) / 2), AIR_GW = r2(-(n.l / 2 + t) - AIR_X1);
   const sleeve: Plank[] = [

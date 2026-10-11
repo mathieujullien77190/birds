@@ -100,7 +100,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     }
   });
   it('prise d origine du ventilateur sur le couvercle + prise mâle de la rallonge : alignées, sous la pente, avec 50 mm de mou au moins, sans plaque ni soudure', () => {
-    const head = one(sc0, /^Prise 4 broches du ventilateur/), plug = one(sc0, /^Rallonge ventilateur 4 broches : prise mâle/), lid = one(sc0, /^Cassette ventilateur couvercle/), handle = one(sc0, /^Poignée cassette/);
+    const head = one(sc0, /^Prise 4 broches du ventilateur/), plug = one(sc0, /^Rallonge ventilateur 4 broches : prise mâle/), lid = one(sc0, /^Cassette ventilateur couvercle/), handle = one(sc0, /^Poignée cassette 2$/);
     expect(by(sc0, /^(Plaque de connexion|Barrette|Soudure|Entretoise plaque|Fiche 4 broches)/)).toEqual([]); // plus de plaque de prototypage ni de soudure
     expect(head.special).toBe('block');
     const passage = lid.holes.find((h) => Math.min(h.size, h.sh ?? h.size) <= 6 && Math.max(h.size, h.sh ?? h.size) >= 10)!; expect(passage).toBeTruthy(); // passage du câble d origine dans le couvercle
@@ -128,17 +128,19 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     }
   });
   it("poignée en U de la cassette : centrée, pieds incrustés dans deux fentes du couvercle, ouverture libre, marge de 2 mm sous la pente", () => {
-    const u = one(sc0, /^Poignée cassette/), lid = one(sc0, /^Cassette ventilateur couvercle/), ub = aabb(u, t), lb = aabb(lid, t);
-    expect(Math.abs(u.pos[0] - lid.pos[0])).toBeLessThan(0.5); expect(Math.abs(u.pos[1] - lid.pos[1])).toBeLessThan(0.5); // centrée sur le couvercle
-    const slots = lid.holes.filter((h) => h.size === h.sh && h.size < 4); expect(slots).toHaveLength(2); // deux fentes de t + jeu
-    for (const h of slots) { expect(Math.abs(Math.abs(h.x) - (u.w - t) / 2)).toBeLessThan(0.01); expect(h.size).toBeGreaterThanOrEqual(t); expect(h.size).toBeLessThanOrEqual(t + 0.5); expect(ligament(lid, h).min, 'ligament').toBeGreaterThanOrEqual(4.5 - 1e-6); } // les tenons sont les pieds
+    const layers = by(sc0, /^Poignée cassette \d$/), u = one(sc0, /^Poignée cassette 2$/), lid = one(sc0, /^Cassette ventilateur couvercle/), ub = union(layers, t), lb = aabb(lid, t);
+    expect(layers).toHaveLength(3); for (const l of layers) { expect(l.poly).toEqual(u.poly); expect(l.pos[0]).toBe(u.pos[0]); expect(l.pos[2]).toBe(u.pos[2]); } // trois couches identiques de 3 mm collées face à face
+    expect(ub.max.y - ub.min.y).toBeCloseTo(3 * t, 2); // épaisseur totale 9 mm
+    expect(Math.abs((ub.max.x + ub.min.x) / 2 - lid.pos[0])).toBeLessThanOrEqual(0.1); expect(Math.abs((ub.max.y + ub.min.y) / 2 - lid.pos[1])).toBeLessThanOrEqual(0.1); // centrée sur le couvercle (x et y) à 0,1 mm
+    const slots = lid.holes.filter((h) => h.size < 4 && (h.sh ?? 0) > 8 && (h.sh ?? 0) < 10); expect(slots).toHaveLength(2); // une fente par pied : t en x, 3 couches (9 mm) en y
+    for (const h of slots) { expect(Math.abs(Math.abs(h.x) - (u.w - t) / 2)).toBeLessThan(0.01); expect(h.size).toBeGreaterThanOrEqual(t); expect(h.size).toBeLessThanOrEqual(t + 0.5); expect(h.sh!).toBeGreaterThanOrEqual(3 * t); expect(h.sh!).toBeLessThanOrEqual(3 * t + 0.5); expect(ligament(lid, h).min, 'ligament').toBeGreaterThanOrEqual(4.5 - 1e-6); } // les tenons sont les pieds
     expect(ub.min.z).toBeCloseTo(lb.max.z - t, 2); // les tenons affleurent la face intérieure du couvercle
     const open = ub.max.z - t - lb.max.z; expect(open).toBeGreaterThanOrEqual(5); expect(u.w - 2 * t).toBeGreaterThanOrEqual(24); // ouverture ≥ 5 × 24 (petite poignée : le bout des doigts)
     const front = one(sc0, /^Face avant toit/), back = one(sc0, /^Face arrière toit/), base = front.pos[2] - front.h / 2;
     const plane = (y: number) => base + front.h + ((y - front.pos[1]) * (back.h - front.h)) / (back.pos[1] - front.pos[1]);
     expect(plane(ub.max.y) - ub.max.z).toBeGreaterThanOrEqual(2); expect(plane(ub.min.y) - ub.max.z).toBeGreaterThanOrEqual(2); // marge sous la pente
-    const blk2 = setWinterCassette(sc0, true), ub2 = one(blk2, /^Poignée bloc d'hiver/), bl = one(blk2, /^Bloc isolant d'hiver couvercle/);
-    expect(ub2.pos).toEqual(u.pos); expect(ub2.w).toBe(u.w); expect(ub2.h).toBe(u.h); expect(ub2.poly).toEqual(u.poly); expect(bl.holes.map((h) => ({ ...h, id: 0 }))).toEqual(slots.map((h) => ({ ...h, id: 0 }))); // même U, mêmes fentes sur le bloc
+    const blk2 = setWinterCassette(sc0, true), ub2 = one(blk2, /^Poignée bloc d'hiver 2$/), bl = one(blk2, /^Bloc isolant d'hiver couvercle/);
+    expect(by(blk2, /^Poignée bloc d'hiver \d$/)).toHaveLength(3); expect(ub2.pos).toEqual(u.pos); expect(ub2.w).toBe(u.w); expect(ub2.h).toBe(u.h); expect(ub2.poly).toEqual(u.poly); expect(bl.holes.map((h) => ({ ...h, id: 0 }))).toEqual(slots.map((h) => ({ ...h, id: 0 }))); // même U, mêmes fentes sur le bloc
     expect(u.poly!.length).toBe(8); expect(u.special).toBeUndefined(); // contreplaqué découpé au laser
   });
   it('cassette en boîte crénelée : dents sur chaque arête, phases 0 / 1 alternées, ouvertures à plus de 4,5 mm des crans, même enveloppe que le siège', () => {
@@ -153,6 +155,14 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     for (const h of lid.holes) expect(ligament(lid, h).min, 'trou du couvercle').toBeGreaterThanOrEqual(4.5 - 1e-6);
     const gl = one(sc0, /^Goulotte ventilateur gauche/), gr = one(sc0, /^Goulotte ventilateur droite/); // enveloppe extérieure = intérieur du siège
     const cb = union([...walls, floor, lid], t); expect(cb.max.x - cb.min.x).toBeCloseTo(Math.abs(gr.pos[0] - gl.pos[0]) - t, 2);
+  });
+  it('équilibre : le centre de gravité de la cassette (en x, y) est à moins de 4 mm de la poignée, qui est centrée à 0,1 mm', () => {
+    const lid = one(sc0, /^Cassette ventilateur couvercle/), handle = one(sc0, /^Poignée cassette 2$/);
+    const mass = (p: Plank): number => /^Ventilateur Noctua/.test(p.name) ? 80 : /^Grille de protection/.test(p.name) ? 5 : /^Plot caoutchouc/.test(p.name) ? 0.5 : /^Prise 4 broches/.test(p.name) ? 1 : (p.w * p.h * 1.4e-3 * 0.8); // g : bois 1,4 kg/m² (3 mm), un peu moins avec les crans et ouvertures
+    const parts = sc0.planks.filter((p) => /^(Cassette ventilateur|Poignée cassette|Ventilateur Noctua|Grille de protection ventilateur|Plot caoutchouc ventilateur|Prise 4 broches du ventilateur)/.test(p.name));
+    let m = 0, cx = 0, cy = 0; for (const p of parts) { const w = mass(p); m += w; cx += w * p.pos[0]; cy += w * p.pos[1]; }
+    expect(Math.hypot(cx / m - handle.pos[0], cy / m - handle.pos[1])).toBeLessThanOrEqual(4);
+    expect(Math.abs(handle.pos[0] - lid.pos[0])).toBeLessThanOrEqual(0.1); expect(Math.abs(handle.pos[1] - lid.pos[1])).toBeLessThanOrEqual(0.1);
   });
   it('les broches du Pi : 12 (PWM), 11 (tachymètre), 14 (masse), 13 (commande de l\'interrupteur) sont chacune utilisées une seule fois', () => {
     const names = ['Fil PWM ventilateur (bleu)', 'Fil tachymètre ventilateur (jaune)', 'Fil masse commune ventilateur (noir)', 'Fil commande interrupteur ventilateur (orange)'];
@@ -182,18 +192,29 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
   });
 });
 
+describe('habillage arrière plan', () => {
+  it("toutes les lames arrière sont dans le même plan, de même épaisseur, avec le même haut ; le grillage de sortie reste dans l'épaisseur de l'habillage", () => {
+    const lames = by(sc0, /^Lambris arrière/), face = one(sc0, /^Face arrière toit/);
+    expect(lames.length).toBeGreaterThanOrEqual(5);
+    for (const l of lames) { expect(l.pos[1], l.name).toBeCloseTo(lames[0].pos[1], 2); expect(l.depth, l.name).toBe(lames[0].depth); expect(l.rot, l.name).toEqual(lames[0].rot); } // même plan, même épaisseur
+    const front = face.pos[1] + t / 2, ext = lames[0].pos[1] + lames[0].depth! / 2; expect(lames[0].pos[1] - lames[0].depth! / 2).toBeCloseTo(front, 2); // les lames touchent la plaque arrière du toit
+    const tops = lames.map((l) => aabb(l, t).max.z), faceTop = face.pos[2] + face.h / 2; expect(Math.max(...tops), 'haut de l habillage').toBeCloseTo(faceTop, 2); for (const z of tops) expect(z === faceTop || z < faceTop - 20, 'une lame est entière ou coupée sous une fenêtre').toBe(true); // le haut de l habillage arrière affleure le haut de la plaque
+    const net = one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/); expect(net.pos[1] - 0.4).toBeCloseTo(front, 2); expect(net.pos[1] + 0.4).toBeLessThan(ext - 1); // à plat sur la plaque, en retrait d'au moins 1 mm de la face de l'habillage
+  });
+});
+
 describe('bloc isolant d\'hiver', () => {
   it("cassette isolante = même enveloppe que la cassette ventilateur, boîte fermée crénelée qui enferme la laine, comble l'ouverture, visible", () => {
     const scW = setWinterCassette(sc0, true); // le bloc est mis dans le siège
     const cass = union([...by(sc0, /^Cassette ventilateur [1-4]$/), one(sc0, /^Cassette ventilateur cadre/), one(sc0, /^Cassette ventilateur couvercle/)], t), win = union(by(scW, /^Bloc isolant d'hiver( [1-4]| fond| couvercle)$/), t);
     for (const k of ['x', 'y', 'z'] as const) { expect(win.min[k], 'min ' + k).toBeCloseTo(cass.min[k], 1); expect(win.max[k], 'max ' + k).toBeCloseTo(cass.max[k], 1); } // mêmes dimensions extérieures, même bas, même haut
-    const fond = one(scW, /^Bloc isolant d'hiver fond/), lid = one(scW, /^Bloc isolant d'hiver couvercle/), foam = one(scW, /^Isolant bloc d'hiver/), handle = one(scW, /^Poignée bloc d'hiver/), handleC = one(sc0, /^Poignée cassette/);
-    for (const p of scW.planks.filter((q) => /^(Bloc isolant d.hiver|Isolant bloc d.hiver)/.test(q.name))) expect(p.holes.filter((h) => Math.max(h.size, h.sh ?? 0) >= 4), p.name).toEqual([]); // boîte pleine fermée : aucune ouverture (seules les fentes de 3 mm des pieds du U)
+    const fond = one(scW, /^Bloc isolant d'hiver fond/), lid = one(scW, /^Bloc isolant d'hiver couvercle/), foam = one(scW, /^Isolant bloc d'hiver/), handle = one(scW, /^Poignée bloc d'hiver 2$/), handleC = one(sc0, /^Poignée cassette 2$/);
+    for (const p of scW.planks.filter((q) => /^(Bloc isolant d.hiver|Isolant bloc d.hiver)/.test(q.name))) expect(p.holes.filter((h) => Math.max(h.size, h.sh ?? 0) >= 10), p.name).toEqual([]); // boîte pleine fermée : aucune ouverture (seules les fentes de 3 mm des pieds du U)
     expect(handle.holes).toEqual([]); expect(handleC.holes).toEqual([]); // le U est plein
     expect(by(scW, /^Bloc isolant d'hiver [1-4]$/).every((p) => (p.cast?.top?.n ?? 0) > 0 && (p.cast?.bottom?.n ?? 0) > 0)).toBe(true); // parois crénelées en haut (couvercle) et en bas (fond)
     expect(handle.pos).toEqual(handleC.pos); expect(handle.w).toBe(handleC.w); expect(handle.h).toBe(handleC.h); // même oreille, même place
     const foamB = aabb(foam, t); expect(foamB.max.z).toBeLessThanOrEqual(lid.pos[2] - t / 2 + 0.01); expect(foamB.min.z).toBeGreaterThanOrEqual(fond.pos[2] + t / 2 - 0.01); expect(foam.depth!).toBeGreaterThan(win.max.z - win.min.z - 2 * t - 1); // la laine remplit presque tout l'intérieur
-    const names = [...by(sc0, /^Bloc isolant d'hiver/), one(sc0, /^Isolant bloc d'hiver/), one(sc0, /^Poignée bloc d'hiver/)].map((p) => p.name);
+    const names = [...by(sc0, /^Bloc isolant d'hiver/), one(sc0, /^Isolant bloc d'hiver/), ...by(sc0, /^Poignée bloc d'hiver/)].map((p) => p.name);
     for (const n of names) expect(HIDDEN_AT_CREATION.some((re) => re.test(n)), n).toBe(false); // visibles par défaut (rangés à côté du nichoir)
   });
 });
@@ -257,22 +278,22 @@ describe("prise d'air basse", () => {
   });
   it("la sous-boîte isolante est pleine hauteur, fermée, à fleur du dessous, tient en force : elle passe pile dans le conduit, couvre la fente, aucun verrou, poignée de 5 mm au plus sous le fond", () => {
     const scP = setAirPlug(sc0, true); // la sous-boîte est insérée dans le conduit
-    const ws = [1, 2, 3, 4].map((i) => one(scP, new RegExp(`^Bouchon-boîte prise d'air ${i}$`))), lid = one(scP, /^Bouchon-boîte prise d'air couvercle/), fond = one(scP, /^Bouchon-boîte prise d'air fond/), wool = one(scP, /^Laine bouchon prise d'air/), handle = one(scP, /^Poignée bouchon prise d'air/), duct = [1, 2, 3, 4].map((i) => one(scP, new RegExp(`^Conduit d'air ${i}$`))), ductLid = one(scP, /^Conduit d'air 5/), bottom = one(scP, /^Dessous ext/);
+    const ws = [1, 2, 3, 4].map((i) => one(scP, new RegExp(`^Bouchon-boîte prise d'air ${i}$`))), lid = one(scP, /^Bouchon-boîte prise d'air couvercle/), fond = one(scP, /^Bouchon-boîte prise d'air fond/), wool = one(scP, /^Laine bouchon prise d'air/), handle = one(scP, /^Poignée bouchon prise d'air 2$/), hLayers = by(scP, /^Poignée bouchon prise d'air \d$/), duct = [1, 2, 3, 4].map((i) => one(scP, new RegExp(`^Conduit d'air ${i}$`))), ductLid = one(scP, /^Conduit d'air 5/), bottom = one(scP, /^Dessous ext/);
     const inX = Math.abs(duct[1].pos[0] - duct[0].pos[0]) - t, inY = Math.abs(duct[3].pos[1] - duct[2].pos[1]) - t; // intérieur libre du conduit
     const bx = union([...ws, lid, fond], t);
     expect(bx.max.x - bx.min.x).toBeCloseTo(inX, 1); expect(bx.max.y - bx.min.y).toBeCloseTo(inY, 1); // pile, jeu 0
     expect(bx.min.z).toBeCloseTo(bottom.pos[2] - t / 2, 2); expect(bx.min.z).toBeCloseTo(0, 2); // fond à fleur de la face extérieure du fond du nichoir
     expect(ductLid.pos[2] - t / 2 - bx.max.z).toBeGreaterThanOrEqual(0); expect(ductLid.pos[2] - t / 2 - bx.max.z).toBeLessThanOrEqual(1); // jusqu'en haut : ≤ 1 mm sous le couvercle du conduit
-    const hb = aabb(handle, t); // poignée en U de bois, centrée sous le fond, pieds incrustés dans deux fentes du fond
+    expect(hLayers).toHaveLength(3); const hb = union(hLayers, t); expect(hb.max.x - hb.min.x).toBeCloseTo(3 * t, 2); // trois couches de contreplaqué : 9 mm ; poignée en U de bois, centrée sous le fond, pieds incrustés dans deux fentes du fond
     expect(hb.max.z).toBeCloseTo(fond.pos[2] + t / 2, 2); expect(bx.min.z - hb.min.z).toBeGreaterThanOrEqual(12 + t - 0.01); expect(bx.min.z - hb.min.z).toBeLessThanOrEqual(16); // dégagement ≥ 12 mm sous la barre
-    expect(Math.abs(handle.pos[0] - fond.pos[0])).toBeLessThan(0.5); expect(Math.abs(handle.pos[1] - fond.pos[1])).toBeLessThan(0.5); // centré
-    expect(fond.holes).toHaveLength(2); for (const h of fond.holes) expect(Math.abs(Math.abs(h.y) - (handle.w - t) / 2)).toBeLessThan(0.01); // un tenon par fente, à la place des pieds
+    expect(Math.abs((hb.max.x + hb.min.x) / 2 - fond.pos[0])).toBeLessThanOrEqual(0.1); expect(Math.abs((hb.max.y + hb.min.y) / 2 - fond.pos[1])).toBeLessThanOrEqual(0.1); // centré
+    expect(fond.holes).toHaveLength(2); for (const h of fond.holes) { expect(Math.abs(Math.abs(h.y) - (handle.w - t) / 2)).toBeLessThan(0.01); expect(h.size).toBeGreaterThanOrEqual(3 * t); } // un tenon par fente, à la place des pieds
     for (const h of fond.holes) expect(ligament(fond, h).min, 'ligament des fentes du fond').toBeGreaterThanOrEqual(4.5 - 1e-6);
     const inner = one(scP, /^Côté gauche int/), slot = inner.holes.find((h) => h.size === 34 && h.sh === 30)!, slotZ0 = inner.pos[2] + slot.y - slot.sh! / 2, slotZ1 = slotZ0 + slot.sh!;
     expect(bx.max.z).toBeGreaterThan(slotZ1); expect(bx.min.z).toBeLessThan(slotZ0); // elle recouvre la fente
     const wallSlot = ws[1]; expect(wallSlot.holes).toEqual([]); expect(wallSlot.pos[0]).toBeGreaterThan(ws[0].pos[0]); // la paroi côté nid est pleine
     expect(Math.abs(wallSlot.pos[1] - (inner.pos[1] + slot.x))).toBeLessThan(2); // en face de la fente
-    for (const p of [...ws, lid, wool]) expect(p.holes, p.name).toEqual([]); expect(fond.holes.every((h) => Math.max(h.size, h.sh ?? 0) < 4)).toBe(true); // boîte pleine : seules les fentes des pieds du U percent le fond
+    for (const p of [...ws, lid, wool]) expect(p.holes, p.name).toEqual([]); expect(fond.holes.every((h) => Math.max(h.size, h.sh ?? 0) < 10)).toBe(true); // boîte pleine : seules les fentes des pieds du U percent le fond
     for (const e of ['top', 'bottom', 'left', 'right'] as const) expect(lid.cast![e]!.phase).toBe(1); // le couvercle s'emboîte dans le haut des parois
     const wb = aabb(wool, t); expect(wb.max.z).toBeLessThanOrEqual(lid.pos[2] - t / 2 + 0.01); expect(wb.min.z).toBeGreaterThanOrEqual(fond.pos[2] + t / 2 - 0.01); // laine enfermée entre le fond et le couvercle
     expect(scP.planks.filter((p) => /[Tt]ourniquet|Vis tourniquet|[Gg]oupille/.test(p.name))).toEqual([]); // aucun verrou
