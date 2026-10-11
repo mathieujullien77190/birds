@@ -20,6 +20,8 @@ Plusieurs outils dans la même app, choisis au démarrage (`src/tools.ts`, `src/
 ## Règle : le document suit le modèle
 **À chaque changement du nichoir (électronique, branchements, pièces, poids, prix, stratégie), mettre à jour `docs/schema-electronique.md`** (schéma mermaid, tableau des branchements, explication, paramètres par composant, vérification, poids, prix par groupe, liens) **en même temps que le code et que ce fichier** — demande de l'utilisateur. Le document est affiché dans l'app (pièce « Schéma électronique » du volet « Pièces », `DocModal`).
 
+**Groupe « Ventilation »** (`VENT_PIECES` dans `src/birdhouse/model/nest/makeNest.ts`) : siège (goulotte), cassette amovible, plots, grille, ventilateur, connecteur, interrupteur 12 V et ses cales, clapet et grillage de sortie, fils du ventilateur, et la prise d'air basse (conduit, grillages, clapet, auvent, bouchon) sont regroupés dans un groupe à part, comme le « Bloc d'hiver » qui garde le sien.
+
 ## Dossiers
 | Dossier | Rôle |
 |---|---|
