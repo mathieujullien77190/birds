@@ -34,7 +34,7 @@ export function carveRects(r: [number, number, number, number], holes: [number, 
 }
 
 /** Pièces de la ventilation (noms avant `unnumber`) : regroupées dans le groupe « Ventilation ». */
-const VENT_PIECES = /^(Goulotte ventilateur|Cassette ventilateur|Poignée cassette|Joint cassette|Plot caoutchouc ventilateur|Ventilateur Noctua|Grille de protection ventilateur|Grillage inox maille 5 mm|Plaque de connexion cassette|Entretoise plaque de connexion|Barrette 4 broches plaque de connexion|Fiche 4 broches toit|Soudure plaque de connexion|Module interrupteur 12 V ventilateur|Cale interrupteur|Fil (PWM|tachymètre|commande interrupteur|masse commune|interrupteur →|Wago \+ → interrupteur|masse interrupteur|ventilateur)|Conduit d'air|Bouchon prise d'air|Clapet prise d'air)/;
+const VENT_PIECES = /^(Goulotte ventilateur|Cassette ventilateur|Poignée cassette|Plot caoutchouc ventilateur|Ventilateur Noctua|Grille de protection ventilateur|Grillage inox maille 5 mm|Plaque de connexion cassette|Entretoise plaque de connexion|Barrette 4 broches plaque de connexion|Fiche 4 broches toit|Soudure plaque de connexion|Module interrupteur 12 V ventilateur|Cale interrupteur|Fil (PWM|tachymètre|commande interrupteur|masse commune|interrupteur →|Wago \+ → interrupteur|masse interrupteur|ventilateur)|Conduit d'air|Bouchon prise d'air|Clapet prise d'air)/;
 
 export function makeNest(n0: NestParams, t: number, fit: number, start: number): { planks: Plank[]; group: string; name: string; groupNames: Record<string, string> } {
   const n: NestParams = { ...n0, l: Math.max(120, n0.l), L: Math.max(120, n0.l), hole: Math.min(n0.hole, Math.max(120, n0.l) - 26), cam: 38, ins: 39, pente: true, lambris: true }; // toit TOUJOURS en pente, habillage TOUJOURS présent (puces retirées : le régulateur sous le nichoir est protégé par l'habillage) ; // intérieur TOUJOURS CARRÉ (un seul curseur), 120 mm au minimum (le fond) ; trou plafonné pour que le bloc d'entrée (trou + 16) tienne dans la paroi intérieure ; compartiment caméra fixe à 38 (curseur retiré) ; // isolant TOUJOURS 39 (le curseur a été retiré à la demande de l'utilisateur) ; compartiment caméra plafonné à 38 // le compartiment caméra est limité à 38 : la batterie (et sa cale) est posée juste à côté, sur le dessus du toit
@@ -135,11 +135,11 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // VENTILATEUR d'extraction (Noctua NF-A6x25 PWM, 60 × 60 × 25, 12 V) : une CASSETTE amovible à la main (le ventilateur dans un cadre de contreplaqué, sans outil ni vis) posée dans un SIÈGE fixe (la goulotte,
   // collée sur le plancher du toit) ; il aspire l'air chaud du nid par une ouverture du plafond (grille côté nid) et le pousse, par une fenêtre de la cassette, vers la fenêtre de la plaque arrière (grillage + clapet à gravité).
   // En hiver on remplace la cassette par un bloc isolant de même empreinte. Le siège est à l'ARRIÈRE du toit, contre la gaine, derrière la nappe de la caméra.
-  const FI = FAN + 0.4, CO = FI + 2 * t, SI = CO + 0.8, FO = SI + 2 * t; // cassette : intérieur (0,2 mm de jeu autour du ventilateur), extérieur ; siège : intérieur (0,4 de jeu autour de la cassette), extérieur
+  const FI = FAN + 0.4, CO = FI + 2 * t, SI = CO, FO = SI + 2 * t; // cassette : intérieur (0,2 mm de jeu autour du ventilateur), extérieur ; siège : intérieur = extérieur de la cassette (ajustée pile, jeu 0), extérieur
   const YREAR = D / 2 - t; // face intérieure de la plaque arrière du toit
   const FANX = r2(CND_X - CND_D / 2 - 8 - FO / 2); // contre la gaine (8 mm) ; les cales du Pi restent à ≈ 5 mm à gauche
-  const CASS_Y1 = r2(YREAR - 2.2), CASS_Y0 = r2(CASS_Y1 - CO), FANY = r2((CASS_Y0 + CASS_Y1) / 2), FY0 = r2(CASS_Y0 - 0.4 - t); // cassette contre la plaque arrière (joint de 2,2), devant du siège
-  const ZB = bodyH + t + 1.5; // dessous du cadre de la cassette (joint de mousse de 1,5 sur le plancher du toit)
+  const CASS_Y1 = r2(YREAR), CASS_Y0 = r2(CASS_Y1 - CO), FANY = r2((CASS_Y0 + CASS_Y1) / 2), FY0 = r2(CASS_Y0 - t); // cassette contre la plaque arrière (pas de joint), devant du siège
+  const ZB = bodyH + t; // dessous du cadre de la cassette : posé directement sur le plancher du toit (pas de joint)
   const GUARD_T = 3, FAN_Z = r2(ZB + t + GUARD_T + FAN_PLOT + FAN_T / 2); // centre du ventilateur : sur ses plots, sur la grille de fil (3 mm), sur le cadre de la cassette
   const FOP_Y0 = FANY - FAN_OPEN / 2, FOP_Y1 = Math.min(FANY + FAN_OPEN / 2, n.L / 2 - 3.5); // l'ouverture du plafond reste au-dessus du nid (le mur intérieur est à L/2) : 56 de large, moins de profondeur
   const FOP_YC = r2((FOP_Y0 + FOP_Y1) / 2), FOP_H = r2(FOP_Y1 - FOP_Y0);
@@ -415,8 +415,6 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     wood('Cassette ventilateur couvercle', CO, CO, [FANX, FANY, DUCT_Z1 + t / 2], [0, 0, 0], elecGroup, [{ id: uid(), shape: 'square' as const, x: -20, y: 14, size: 6, sh: 12 }]), // passage des quatre fils vers la plaque de connexion
     blk('Poignée cassette', 36, 8, t, [FANX - 8, FANY, DUCT_Z1 + t + t / 2], elecGroup, '#a16207'), // languette de saisie
     blk("Grille de protection ventilateur 60 mm (fil d'acier)", FAN, FAN, GUARD_T, [FANX, FANY, ZB + t + GUARD_T / 2], elecGroup, '#9ca3af', { transparent: true }), // grille à doigts, ≈ 90 % ouverte, sur la face d'aspiration (côté nid) : elle sort avec la cassette ; le plafond du nid reste une ouverture nue
-    blk('Joint cassette bas', CO, CO, 1.5, [FANX, FANY, bodyH + t + 0.75], elecGroup, '#374151', { holes: [{ id: uid(), shape: 'square' as const, x: 0, y: 0, size: FAN_OPEN, sh: FAN_OPEN }] }),
-    blk('Joint cassette arrière', EXW + 8, VENT_H + 8, 2.2, [FANX, CASS_Y1 + 1.1, EXZ], roofGroup, '#374151', { rot: faceRot, holes: [{ id: uid(), shape: 'square' as const, x: 0, y: 0, size: EXW, sh: VENT_H }] }), // mousse entre la fenêtre de la cassette et celle de la plaque arrière
   ];
   const plotsAt: [number, number, number, number][] = [[FANX, FANY - FAN / 2 + 1, 12, 2], [FANX, FANY + FAN / 2 - 1, 12, 2], [FANX - FAN / 2 + 1, FANY, 2, 12], [FANX + FAN / 2 - 1, FANY, 2, 12]]; // sur le bord du cadre, hors de l'ouverture
   const plots: Plank[] = plotsAt.map(([x, y, w, h], k) => blk(`Plot caoutchouc ventilateur ${k + 1}`, w, h, FAN_PLOT, [x, y, ZB + t + GUARD_T + FAN_PLOT / 2], elecGroup, '#6b7280'));

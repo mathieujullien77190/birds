@@ -141,8 +141,8 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(Math.abs(cassWin!.size - exit!.size)).toBeLessThan(1);
     const exitWin = wins.filter((h) => h !== exit);
     for (const h of exitWin) expect(Math.abs(h.x - exit!.x) - (h.size + exit!.size) / 2).toBeGreaterThanOrEqual(0); // les deux fenêtres ne se recouvrent pas
-    const net = one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/), joint = one(sc0, /^Joint cassette arrière/);
-    expect(net.pos[1]).toBeGreaterThan(back.pos[1]); expect(net.pos[1]).toBeGreaterThan(joint.pos[1]); // dehors, sous le débord du toit en chêne ; plus extérieur que le joint de mousse
+    const net = one(sc0, /^Grillage inox maille 5 mm — sortie ventilation/), cassB = one(sc0, /^Cassette ventilateur 2$/);
+    expect(net.pos[1]).toBeGreaterThan(back.pos[1]); expect(net.pos[1]).toBeGreaterThan(cassB.pos[1]); // dehors, sous le débord du toit en chêne ; plus extérieur que la cassette
     expect(Math.abs(cass.pos[0] - net.pos[0])).toBeLessThan(0.1);
   });
 });
@@ -157,6 +157,19 @@ describe('bloc isolant d\'hiver', () => {
     const names = [...by(sc0, /^Bloc isolant d'hiver/), foam, one(sc0, /^Poignée bloc d'hiver/), one(sc0, /^Bouchon prise d'air/)].map((p) => p.name);
     for (const n of names) expect(HIDDEN_AT_CREATION.some((re) => re.test(n)), n).toBe(true);
     expect(HIDDEN_AT_CREATION.some((re) => re.test('Cassette ventilateur 1'))).toBe(false);
+  });
+});
+
+describe('cassette ajustée au siège, sans joint', () => {
+  it('aucune pièce Joint ; cassette = intérieur du siège, posée sur le plafond et contre la plaque arrière', () => {
+    expect(by(sc0, /^Joint/)).toEqual([]);
+    const seatW = by(sc0, /^Goulotte ventilateur (gauche|droite)/), cass = union(by(sc0, /^Cassette ventilateur [1-4]$|^Cassette ventilateur cadre/), t), front = one(sc0, /^Goulotte ventilateur avant/);
+    const inner = Math.abs(seatW[0].pos[0] - seatW[1].pos[0]) - t; // intérieur du siège en x
+    expect(cass.max.x - cass.min.x).toBeCloseTo(inner, 1); // jeu 0
+    expect(cass.min.y).toBeCloseTo(front.pos[1] + t / 2, 1); // devant : contre la paroi avant du siège
+    const back = one(sc0, /^Face arrière toit/); expect(cass.max.y).toBeCloseTo(back.pos[1] - t / 2, 1); // derrière : contre la plaque arrière
+    expect(cass.min.z).toBeCloseTo(one(sc0, /^Dessous toit/).pos[2] + t / 2, 1); // sur le plafond
+    expect(by(sc0, /^Plot caoutchouc ventilateur/)).toHaveLength(4); // les vibrations ne passent que par les plots
   });
 });
 
