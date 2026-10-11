@@ -3,7 +3,7 @@
 Version volontairement minimale pour vérifier le matériel :
 - lit le capteur du nid (BME280, I2C), la batterie (INA219, facultatif) et la météo extérieure (en ligne) ;
 - montre les deux caméras en direct (flux MJPEG) ;
-- pilote le ventilateur de 60 mm (PWM 25 kHz + tachymètre) et les deux cartes de LED infrarouges ;
+- pilote le ventilateur de 60 mm (PWM gpiozero / lgpio : 25 kHz visé, repli à 10 kHz ; tachymètre) et les deux cartes de LED infrarouges ;
 - ventilation automatique : le ventilateur n'aspire l'air chaud du nid que quand il fait trop chaud (désactivée au départ) ;
 - garde l'historique des températures sur 24 h (pour décider, après une saison de mesures, s'il faut autre chose) ;
 - sert une page web sur le port 8080.

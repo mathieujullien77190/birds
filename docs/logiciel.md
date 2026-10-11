@@ -30,7 +30,7 @@ flowchart LR
 
 - **Python 3**, déjà installé sur Raspberry Pi OS. C'est le langage le mieux outillé pour le Pi : chaque capteur a sa bibliothèque.
 - Bibliothèques :
-  - `gpiozero` + `lgpio` : PWM du ventilateur (GPIO18, 25 kHz), tachymètre (GPIO17), MOSFET des LED (GPIO23, GPIO24).
+  - `gpiozero` + `lgpio` : PWM du ventilateur (GPIO18, 25 kHz visé, repli à 10 kHz), tachymètre (GPIO17), MOSFET des LED (GPIO23, GPIO24).
   - `smbus2` + `bme280` : capteur de température et d'humidité du nid (I2C) ; `pi-ina219` : batterie (facultatif).
   - `picamera2` : les deux caméras, flux MJPEG.
   - `flask` : la page web et son API.
@@ -63,7 +63,7 @@ journalctl -u nichoir -f  # voir ce qu'il raconte
 Les LED infrarouges et les caméras se commandent à la main depuis la page (pas d'horaire automatique pour l'instant).
 
 ## Le ventilateur
-Un **Noctua NF-A6x25 PWM** (60 mm, 12 V, 4 fils) : Le **12 V positif passe par un interrupteur (MOSFET) commandé par GPIO27** (broche 13) ; **PWM 25 kHz sur GPIO18** (broche 12) ; **tachymètre sur GPIO17** (broche 11, résistance de rappel interne, 2 impulsions par tour) ; masse commune broche 14. Débit visé ≈ 4 à 5 m³/h à bas régime. Il ne tourne que quand il fait chaud.
+Un **Noctua NF-A6x25 PWM** (60 mm, 12 V, 4 fils) : Le **12 V positif passe par un interrupteur (MOSFET) commandé par GPIO27** (broche 13) ; **PWM sur GPIO18** (gpiozero / lgpio, 25 kHz visé, repli à 10 kHz) (broche 12) ; **tachymètre sur GPIO17** (broche 11, résistance de rappel interne, 2 impulsions par tour) ; masse commune broche 14. Débit visé ≈ 4 à 5 m³/h à bas régime. Il ne tourne que quand il fait chaud.
 
 - **Arrêt = 12 V coupé.** Un Noctua PWM tourne encore à ~20 % à 0 % de rapport cyclique, donc « Arrêt » met le PWM à 0 puis coupe GPIO27. Pour démarrer : GPIO27 à haut d'abord, ~0,5 s d'attente (démarrage), puis le PWM. Le 12 V n'est jamais coupé quand une vitesse est demandée. GPIO27 est bas au démarrage et à l'arrêt du programme ; PWM à 0 quand le 12 V est coupé (le fil de commande n'alimente pas le ventilateur). `etat.ventilo.alimente` dit si le 12 V est présent ; la carte affiche « coupé (12 V) » sinon.
 - **Vitesse minimale réelle : 30 %.** En dessous le ventilateur tourne mal : toute commande sous 30 % est un arrêt.

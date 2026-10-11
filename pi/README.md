@@ -43,7 +43,7 @@ Dans l'app 3D, le bouton « 🐍 Pi » fait la même chose **sans installer Pyth
 
 ## Brochage
 
-Voir le document « Schéma électronique » de l'application. En résumé : ventilateur Noctua NF-A6x25 PWM : **GPIO27 (broche 13) = interrupteur 12 V (MOSFET côté +)**, **GPIO18 (broche 12) = PWM 25 kHz**, **GPIO17 (broche 11) = tachymètre** (pull-up), masse commune broche 14, 12 V du rail ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; INA219 (batterie) I2C 0x41 ; caméras sur CAM0 et CAM1.
+Voir le document « Schéma électronique » de l'application. En résumé : ventilateur Noctua NF-A6x25 PWM : **GPIO27 (broche 13) = interrupteur 12 V (MOSFET côté +)**, **GPIO18 (broche 12) = PWM** (gpiozero / lgpio : 25 kHz visé, repli à 10 kHz), **GPIO17 (broche 11) = tachymètre** (pull-up), masse commune broche 14, 12 V du rail ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; INA219 (batterie) I2C 0x41 ; caméras sur CAM0 et CAM1.
 
 **À valider sur le Pi 5** : gpiozero / lgpio limite peut-être le PWM à 10 kHz ; le programme essaie 25 kHz et retombe sur 10 kHz en le signalant. « Arrêt » coupe vraiment le 12 V (GPIO27 bas, PWM à 0), car un Noctua tourne encore à ~20 % à 0 % de PWM ; à la mise en marche : 12 V, 0,5 s, puis PWM.
 
