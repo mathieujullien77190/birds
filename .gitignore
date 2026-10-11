@@ -6,3 +6,5 @@ __pycache__/
 pi/site/node_modules/
 pi/reglages.json
 pi/historique*.json
+laser-control/node_modules/
+laser-control/dist/
