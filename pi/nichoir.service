@@ -1,6 +1,6 @@
 # FACULTATIF : sert seulement à lancer le programme tout seul au démarrage du Pi. Sans lui : `venv/bin/python nichoir.py` à la main.
 [Unit]
-Description=Nichoir mésange (capteurs, Peltier, LED, page web de test)
+Description=Nichoir mésange (capteurs, ventilateur, LED, page web de test)
 After=network-online.target
 
 [Service]

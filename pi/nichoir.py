@@ -1,20 +1,21 @@
 """Nichoir mésange — programme de test sur le Raspberry Pi 5.
 
 Version volontairement minimale pour vérifier le matériel :
-- lit le capteur du nid (BME280, I2C) et la sonde du dissipateur (DS18B20, 1-Wire) ;
+- lit le capteur du nid (BME280, I2C), la batterie (INA219, facultatif) et la météo extérieure (en ligne) ;
 - montre les deux caméras en direct (flux MJPEG) ;
-- pilote le Peltier (froid / chaud / arrêt + puissance) et les deux cartes de LED infrarouges ;
+- pilote le ventilateur de 60 mm (PWM 25 kHz + tachymètre) et les deux cartes de LED infrarouges ;
+- ventilation automatique : le ventilateur n'aspire l'air chaud du nid que quand il fait trop chaud (désactivée au départ) ;
+- garde l'historique des températures sur 24 h (pour décider, après une saison de mesures, s'il faut autre chose) ;
 - sert une page web sur le port 8080.
 
 Chaque partie du matériel est optionnelle : si un capteur ou une caméra manque, la page le dit et le reste marche.
 Mode simulé : `NICHOIR_MOCK=1 python nichoir.py` (ou `--mock`) remplace capteurs, GPIO et caméras par des valeurs fausses mais plausibles,
 pour essayer la page sur un ordinateur sans rien de branché (voir README).
-Sécurité : le Peltier est coupé si le dissipateur dépasse HOT_MAX °C.
 
 Brochage (voir docs/schema-electronique.md) :
-  Peltier (pont en H VNH5019) : PWM GPIO18, INA GPIO13, INB GPIO19
+  Ventilateur (Noctua NF-A6x25 PWM, 12 V) : PWM GPIO18 (broche 12), tachymètre GPIO17 (broche 11, pull-up), masse commune broche 14
   LED du nid : GPIO23 (module MOSFET IN1)   LED extérieures : GPIO24 (IN2)
-  BME280 : I2C adresse 0x76 (ou 0x77)        DS18B20 : 1-Wire sur GPIO4
+  BME280 : I2C adresse 0x76 (ou 0x77)        INA219 (batterie) : I2C adresse 0x41
 """
 import math
 import os
@@ -29,77 +30,109 @@ import zlib
 
 from flask import Flask, Response, jsonify, request, send_from_directory
 
-# REQUIS : les trois réglages ci-dessous. Ne pas augmenter HOT_MAX ni PWM_MAX sans raison : ce sont les sécurités du Peltier et de la batterie.
+
 def log(msg):
     """Écrit une ligne datée sur la sortie standard (visible avec `journalctl -u nichoir -f` sur le Pi, ou dans le terminal du simulateur)."""
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
-# Peltier AUTOMATIQUE (désactivé au départ ; tous les réglages sont modifiables depuis la page et gardés dans reglages.json).
-# Les seuils portent sur la température INTÉRIEURE du nid :
-#   gel     : le nid passe sous `min_gel` → on le réchauffe (Peltier « chaud ») jusqu'à min(`plafond_chauffe`, extérieur + `ecart_ext`) ;
-#   chaleur : le nid dépasse `max_chaleur` → on le refroidit (Peltier « froid ») jusqu'à `max_chaleur` − `hysteresis` ;
-#   entre les deux le Peltier reste éteint. Sécurités prioritaires : voir regler_auto().
-AUTO_DEFAUT = {"actif": False, "min_gel": -5.0, "plafond_chauffe": 0.0, "ecart_ext": 5.0, "max_chaleur": 30.0, "hysteresis": 2.0,
-               "puissance_max": 60.0, "pause_inversion": 60.0, "batterie_min_v": 12.0, "alerte_chaleur": 35.0}
-AUTO_LIMITES = {"min_gel": (-40.0, 10.0), "plafond_chauffe": (-40.0, 20.0), "ecart_ext": (0.0, 30.0), "max_chaleur": (10.0, 50.0), "hysteresis": (0.2, 5.0),
-                "puissance_max": (10.0, 60.0), "pause_inversion": (0.0, 600.0), "batterie_min_v": (10.0, 13.0), "alerte_chaleur": (31.0, 50.0)}
-VALEURS_PLAUSIBLES = {"t_nid": (-40.0, 60.0), "t_dissipateur": (-40.0, 120.0)}   # hors de ces bornes une mesure est jugée aberrante (capteur défaillant)
+# Ventilation AUTOMATIQUE (désactivée au départ ; tous les réglages sont modifiables depuis la page et gardés dans reglages.json).
+# Les seuils portent sur la température INTÉRIEURE du nid (BME280) :
+#   démarre  : le nid dépasse `seuil_marche` ET (dehors inconnu OU le nid dépasse dehors d'au moins `ecart_ext`) ;
+#   vitesse  : de `vitesse_min` à `vitesse_max`, proportionnelle sur `plage` °C au-dessus du seuil ;
+#   s'arrête : le nid repasse sous `seuil_marche` − `hysteresis`, OU le nid n'est plus plus chaud que dehors (aspirer l'air de dehors ne refroidirait plus) ;
+#   `alerte_chaleur` : au-dessus, une alerte (et une notification) même si l'automatique est éteint.
+# Sécurités prioritaires : voir regler_auto().
+AUTO_DEFAUT = {"actif": False, "seuil_marche": 28.0, "ecart_ext": 2.0, "hysteresis": 2.0, "vitesse_min": 30.0, "vitesse_max": 100.0, "plage": 5.0, "alerte_chaleur": 35.0}
+AUTO_LIMITES = {"seuil_marche": (15.0, 45.0), "ecart_ext": (0.0, 15.0), "hysteresis": (0.2, 10.0), "vitesse_min": (30.0, 100.0), "vitesse_max": (30.0, 100.0),
+                "plage": (1.0, 20.0), "alerte_chaleur": (31.0, 50.0)}
+NID_PLAUSIBLE = (-40.0, 60.0)   # hors de ces bornes une mesure du nid est jugée aberrante (capteur défaillant)
 NTFY_TOPIC = os.environ.get("NICHOIR_NTFY_TOPIC", "")   # FACULTATIF : sujet ntfy.sh pour recevoir les alertes sur le téléphone (https://ntfy.sh)
-FICHIER_REGLAGES = os.path.join(os.path.dirname(os.path.abspath(globals().get("__file__", "."))), "reglages.json")
+_DOSSIER = os.path.dirname(os.path.abspath(globals().get("__file__", ".")))
+FICHIER_REGLAGES = os.path.join(_DOSSIER, "reglages.json")
 
-HOT_MAX = 55.0      # °C sur le dissipateur : au-dessus, le Peltier est coupé
-PWM_MAX = 0.6       # puissance maximale du Peltier (batterie de 6 Ah)
+VENTILO_MIN = 30    # % : vitesse minimale réelle quand le ventilateur tourne (en dessous : arrêt)
+VENTILO_PANNE_S = 10   # s : commandé mais 0 tr/min depuis plus longtemps que ça = panne
 PERIODE = 5.0       # secondes entre deux lectures
 # FACULTATIF : météo extérieure (API gratuite Open-Meteo, sans clé). Sans connexion internet la page affiche « — » et le reste marche.
 # À RÉGLER : les coordonnées du nichoir (variables d'environnement NICHOIR_LAT / NICHOIR_LON, ou ici). Par défaut : Dammarie-les-Lys.
 LATITUDE = float(os.environ.get("NICHOIR_LAT", "48.51"))
 LONGITUDE = float(os.environ.get("NICHOIR_LON", "2.64"))
 METEO_PERIODE = 600   # secondes entre deux demandes (l'API met à jour toutes les 15 min : inutile d'insister)
-BATTERIE_BASSE = 20      # % : en dessous, le Peltier est coupé (et refusé) pour économiser l'énergie
-BATTERIE_CRITIQUE = 10   # % : en dessous, les caméras et les LED infrarouges sont coupées aussi (et refusées)
+BATTERIE_BASSE = 20      # % : en dessous, message d'économie d'énergie (plus rien de gourmand à couper : le ventilateur reste actif, c'est la sécurité du nid)
+BATTERIE_CRITIQUE = 10   # % : en dessous, les caméras et les LED infrarouges sont coupées (et refusées)
 CAPACITE_WH = 76.8  # batterie LiFePO4 12,8 V × 6 Ah
 # Consommation estimée (W) de chaque élément quand il est allumé : valeurs usuelles, à remplacer par des mesures (INA219) dès que possible.
-CONSO_W = {"pi": 3.5, "camera": 0.7, "led": 1.2, "peltier_max": 72.0}  # Peltier : 72 W à pleine tension, proportionnel au carré du rapport cyclique (TEC1-12706, ~2 Ω)
+CONSO_W = {"pi": 3.5, "camera": 0.7, "led": 1.2, "ventilo_max": 0.6}  # ventilateur : 0,6 W à 100 %, proportionnel au cube de la vitesse (loi des ventilateurs)
 # Tension au repos d'une batterie LiFePO4 12,8 V (4 cellules) selon sa charge : (pourcentage, volts). Sous charge la tension chute : l'estimation est grossière.
 COURBE_LIFEPO4 = [(0, 10.0), (10, 12.0), (20, 12.8), (30, 12.9), (40, 13.0), (70, 13.1), (90, 13.2), (100, 13.4)]
 
+# Historique des températures : « on mesure d'abord » — une saison de mesures avant de décider d'autre chose.
+HISTO_MAX = 288                       # points gardés : 24 h à un point toutes les 5 min
+FICHIER_HISTO = os.path.join(_DOSSIER, "historique-simule.json" if (os.environ.get("NICHOIR_MOCK") == "1" or "--mock" in sys.argv) else "historique.json")
+
 # FACULTATIF : mode simulé, pour tester la page sans matériel (ordinateur). Jamais actif par défaut.
 MOCK = os.environ.get("NICHOIR_MOCK") == "1" or "--mock" in sys.argv
+HISTO_PERIODE = 5 if MOCK else 300    # secondes entre deux points (5 s en mode simulé pour que le graphique se remplisse)
 SIM_ACCEL = float(os.environ.get("NICHOIR_MOCK_ACCEL", "1"))  # 1 = temps réel ; 10 ou 60 = le temps passe plus vite sur la batterie simulée (pour voir le niveau bouger)
 MOCK_FORCE = {"nid": None, "ext": None}  # températures imposées pour les essais (nid de base, extérieur)
 MOCK_NUIT = None   # None : jour / nuit d'après l'horloge ; True / False : imposé (le simulateur de l'app suit son bouton Jour / Nuit)
-MOCK_PANNES = {"bme": False, "sonde": False}  # pannes simulées (essais depuis le simulateur de l'app)
-MOCK_SURCHAUFFE = float(os.environ.get("NICHOIR_MOCK_SURCHAUFFE", "0"))  # °C : force le dissipateur à cette température quand le Peltier tourne (essai de la coupure)
+MOCK_PANNES = {"bme": False, "ventilo": False}  # pannes simulées (essais depuis le simulateur de l'app) ; « ventilo » : le tachymètre ne compte plus rien
 
 # ---------------------------------------------------------------- matériel (chaque bloc est optionnel)
 etat = {
-    "t_nid": None, "hum_nid": None, "t_dissipateur": None,
-    "peltier": "arrêt", "puissance": 0.0,
+    "t_nid": None, "hum_nid": None,
+    "ventilo": {"pourcent": 0, "rpm": None, "mode": "arret", "raison": "arrêté"},   # mode : arret / manuel / auto ; rpm : null sans tachymètre
     "led_nid": False, "led_ext": False,
     "batterie": {"pourcent": None, "tension": None, "source": None},   # niveau de charge (mesuré par l'INA219 si présent, sinon simulé)
     "conso": {"total_w": None, "detail": {}},                          # consommation estimée selon ce qui est allumé
     "meteo": {"t_ext": None, "hum_ext": None, "nuages": None, "vent_kmh": None, "jour": None, "rayonnement": None, "source": None, "maj": None},   # météo extérieure
-    "auto": {**AUTO_DEFAUT, "etat": "inactif", "raison": "mode désactivé", "cible": None, "avertissements": []},   # Peltier automatique : réglages, état (inactif / veille / chauffe / refroidit / securite), raison et température visée
+    "auto": {**AUTO_DEFAUT, "etat": "inactif", "raison": "mode désactivé", "avertissements": []},   # ventilation automatique : réglages, état (inactif / veille / ventile / securite) et raison
     "cam1": True, "cam2": True,   # caméras allumées (flux en direct) ou éteintes (économie d'énergie)
     "erreurs": {},        # nom du matériel → message, quand quelque chose manque
     "derniere_lecture": None,
 }
+_vent = {"depuis": 0.0, "tacho_vu": False, "n": 0, "echantillons": []}   # suivi du ventilateur : instant de mise en marche, tachymètre déjà vu, impulsions comptées
+LED_OK = VENT_OK = TACHO_OK = False
+
+
+def _impulsion():
+    _vent["n"] += 1
+
 
 # FACULTATIF : sans les GPIO (ordinateur, Pi non câblé) le programme tourne quand même, la page signale seulement « GPIO indisponible ».
-# REQUIS pour piloter le Peltier et les LED : le pont en H sur GPIO18 / 13 / 19 et le module MOSFET sur GPIO23 / 24.
+# REQUIS pour piloter les LED : le module MOSFET sur GPIO23 / 24.
 try:
-    from gpiozero import DigitalOutputDevice, PWMOutputDevice
-    pwm = PWMOutputDevice(18, frequency=20000)
-    ina, inb = DigitalOutputDevice(13), DigitalOutputDevice(19)
+    from gpiozero import DigitalInputDevice, DigitalOutputDevice, PWMOutputDevice
     led_nid, led_ext = DigitalOutputDevice(23), DigitalOutputDevice(24)
-    GPIO_OK = True
+    LED_OK = True
 except Exception as e:  # pas sur un Pi, ou gpiozero absent
-    GPIO_OK = False
     etat["erreurs"]["gpio"] = f"GPIO indisponible : {e}"
 
-# FACULTATIF : capteur BME280 du nid (température, humidité). Sans lui, la page affiche « — » et le reste marche.
-# Il n'est PAS nécessaire à la sécurité : la coupure du Peltier ne dépend que de la sonde du dissipateur.
+# REQUIS pour piloter le ventilateur : PWM sur GPIO18. Les ventilateurs 4 fils veulent un PWM de 25 kHz (21 à 28 kHz selon la norme Intel).
+# ATTENTION : sur Pi 5 gpiozero passe par lgpio, dont le PWM matériel est limité à 10 kHz selon sa documentation : si 25 kHz est refusé,
+# on retombe sur 10 kHz (le ventilateur marche, parfois avec un léger sifflement ou une vitesse moins linéaire) et on le dit sur la page.
+# À valider sur le vrai matériel ; piste de repli : le PWM matériel du noyau (dtoverlay=pwm-2chan, bibliothèque rpi-hardware-pwm) qui sait faire 25 kHz.
+try:
+    try:
+        ventilo_pwm = PWMOutputDevice(18, frequency=25000)
+    except Exception as e25:
+        ventilo_pwm = PWMOutputDevice(18, frequency=10000)
+        etat["erreurs"]["ventilo_pwm"] = f"PWM 25 kHz refusé ({e25}) : repli sur 10 kHz"
+    ventilo_pwm.value = 0
+    VENT_OK = True
+except Exception as e:
+    etat["erreurs"]["ventilo_gpio"] = f"ventilateur indisponible (GPIO18) : {e}"
+
+# FACULTATIF : tachymètre du ventilateur (fil jaune, GPIO17, pull-up, 2 impulsions par tour). Sans lui `rpm` reste null et la panne du ventilateur n'est pas détectée.
+try:
+    tacho = DigitalInputDevice(17, pull_up=True)
+    tacho.when_activated = _impulsion
+    TACHO_OK = True
+except Exception as e:
+    etat["erreurs"]["tachymetre"] = f"tachymètre indisponible : {e}"
+
+# FACULTATIF : capteur BME280 du nid (température, humidité). Sans lui, la page affiche « — », le ventilateur ne démarre pas tout seul (on ne sait pas s'il fait chaud) et le reste marche.
 try:
     import bme280
     import smbus2
@@ -110,16 +143,6 @@ try:
 except Exception as e:
     BME_OK = False
     etat["erreurs"]["bme280"] = f"capteur du nid indisponible : {e}"
-
-# FACULTATIF mais FORTEMENT CONSEILLÉ : sonde DS18B20 du dissipateur. C'est elle qui coupe le Peltier au-dessus de HOT_MAX.
-# Sans sonde, n'allume le Peltier que sous surveillance (jamais la nuit, jamais sans dissipateur monté).
-try:
-    from w1thermsensor import W1ThermSensor
-    sonde = W1ThermSensor()
-    SONDE_OK = True
-except Exception as e:
-    SONDE_OK = False
-    etat["erreurs"]["ds18b20"] = f"sonde du dissipateur indisponible : {e}"
 
 # FACULTATIF : mesure de la batterie par un module INA219 (I2C 0x41, shunt de 10 mΩ). Sans lui, la page affiche « — » pour le niveau mais la consommation estimée reste visible.
 try:
@@ -180,12 +203,12 @@ def tension_depuis_pourcent(p):
 
 
 def consommation():
-    """Consommation estimée (W) de ce qui est allumé : Pi, caméras, LED infrarouges, Peltier."""
+    """Consommation estimée (W) de ce qui est allumé : Pi, caméras, LED infrarouges, ventilateur."""
     d = {"pi": CONSO_W["pi"]}
     d["cameras"] = CONSO_W["camera"] * (bool(etat["cam1"]) + bool(etat["cam2"]))
     d["led"] = CONSO_W["led"] * (bool(etat["led_nid"]) + bool(etat["led_ext"]))
-    d["peltier"] = round(CONSO_W["peltier_max"] * etat["puissance"] ** 2, 1)
-    d = {k: round(v, 1) for k, v in d.items()}
+    d["ventilo"] = CONSO_W["ventilo_max"] * (etat["ventilo"]["pourcent"] / 100) ** 3
+    d = {k: round(v, 2) for k, v in d.items()}
     return {"total_w": round(sum(d.values()), 1), "detail": d}
 
 
@@ -195,8 +218,9 @@ if MOCK:
         """Sortie GPIO factice : accepte .value = … sans rien piloter."""
         value = 0
 
-    pwm, ina, inb, led_nid, led_ext = Faux(), Faux(), Faux(), Faux(), Faux()
-    GPIO_OK = BME_OK = SONDE_OK = BAT_OK = True
+    ventilo_pwm, led_nid, led_ext = Faux(), Faux(), Faux()
+    LED_OK = VENT_OK = TACHO_OK = BME_OK = BAT_OK = True
+    _vent["tacho_vu"] = True   # le tachymètre simulé « est branché » : une panne simulée est donc détectée
     etat["erreurs"].clear()
     etat["erreurs"]["mock"] = "MODE SIMULÉ : valeurs fausses, rien n'est branché"
     PERIODE = 1.0
@@ -243,29 +267,29 @@ if MOCK:
     for num, teinte in ((0, (80, 255, 120)), (1, (90, 150, 255))):
         cameras[num] = FluxFaux(teinte)
 
-    sim = {"diss": 20.0, "decalage": 0.0, "wh": 0.8 * CAPACITE_WH, "nuage": 0.9, "nuage_cible": 0.9}  # la batterie simulée part à 80 %
+    # exces : de combien le nid dépasse dehors (soleil + couvée) ; effet : refroidissement apporté par le ventilateur (≤ 0) ; les deux avec de l'inertie
+    sim = {"exces": 3.0, "effet": 0.0, "wh": 0.8 * CAPACITE_WH, "nuage": 0.9, "nuage_cible": 0.9}  # la batterie simulée part à 80 %
 
     def simuler():
-        """Un pas de simulation : le nid suit un cycle de 10 min, le Peltier le refroidit / le chauffe, le dissipateur chauffe avec la puissance."""
-        p = etat["puissance"]
-        signe = -1 if etat["peltier"] == "froid" else 1 if etat["peltier"] == "chaud" else 0
-        sim["decalage"] += (signe * 8 * p / PWM_MAX - sim["decalage"]) * 0.05
-        cible = 20 + 40 * p
-        if p > 0 and MOCK_SURCHAUFFE:
-            cible = max(cible, MOCK_SURCHAUFFE)
-        sim["diss"] += (cible - sim["diss"]) * 0.3
+        """Un pas de simulation : le nid suit dehors + un excès (≈ 4 °C le jour, 2 °C la nuit) réduit par le ventilateur (jusqu'à −3 °C à 100 %), avec de l'inertie."""
+        h = time.localtime().tm_hour
+        nuit = MOCK_NUIT if MOCK_NUIT is not None else not 6 <= h < 18
+        t_ext = (16 if not nuit else 9) + 3 * math.sin(time.time() / 900) + random.uniform(-0.1, 0.1)
+        if os.environ.get("NICHOIR_MOCK_METEO_REEL") and etat["meteo"]["t_ext"] is not None:
+            t_ext = etat["meteo"]["t_ext"]
+        if MOCK_FORCE["ext"] is not None:
+            t_ext = MOCK_FORCE["ext"]
+        sim["exces"] += ((2.0 if nuit else 4.0) - sim["exces"]) * 0.05
+        sim["effet"] += (-3.0 * etat["ventilo"]["pourcent"] / 100 - sim["effet"]) * 0.05
         if MOCK_PANNES["bme"]:
             etat["t_nid"] = etat["hum_nid"] = None
             etat["erreurs"]["bme280"] = "lecture du capteur du nid : pas de réponse (panne simulée)"
         else:
             etat["erreurs"].pop("bme280", None)
-            base = MOCK_FORCE["nid"] if MOCK_FORCE["nid"] is not None else 15 + 3 * math.sin(time.time() / 600 * 2 * math.pi)
-            etat["t_nid"] = round(base + sim["decalage"] + random.uniform(-0.2, 0.2), 1)
+            base = MOCK_FORCE["nid"] if MOCK_FORCE["nid"] is not None else t_ext + sim["exces"]
+            etat["t_nid"] = round(base + sim["effet"] + random.uniform(-0.2, 0.2), 1)
             etat["hum_nid"] = round(70 + 10 * math.sin(time.time() / 900 * 2 * math.pi) + random.uniform(-1, 1), 0)
-        etat["t_dissipateur"] = round(sim["diss"] + random.uniform(-0.2, 0.2), 1)
         # batterie simulée : décharge de la consommation, recharge par le panneau solaire le jour (≈ 55 W), rien la nuit
-        h = time.localtime().tm_hour
-        nuit = MOCK_NUIT if MOCK_NUIT is not None else not 6 <= h < 18
         if random.random() < 0.02:
             sim["nuage_cible"] = random.uniform(0.2, 1.0)  # un nuage passe (0,2 = très couvert) ou le ciel se dégage
         sim["nuage"] += (sim["nuage_cible"] - sim["nuage"]) * 0.1
@@ -278,9 +302,6 @@ if MOCK:
         sim["wh"] = min(CAPACITE_WH, max(0.0, sim["wh"] + apport * PERIODE / 3600 * SIM_ACCEL))
         pc = 100 * sim["wh"] / CAPACITE_WH
         if not os.environ.get("NICHOIR_MOCK_METEO_REEL"):  # météo inventée, cohérente avec le jour / la nuit et les nuages de la simulation
-            t_ext = (16 if not nuit else 9) + 3 * math.sin(time.time() / 900) + random.uniform(-0.1, 0.1)
-            if MOCK_FORCE["ext"] is not None:
-                t_ext = MOCK_FORCE["ext"]
             etat["meteo"] = {"t_ext": round(t_ext, 1), "hum_ext": round(70 - 20 * sim["nuage"] + random.uniform(-1, 1)), "nuages": round(100 * (1 - sim["nuage"])),
                              "vent_kmh": round(8 + 4 * math.sin(time.time() / 300), 1), "jour": not nuit, "rayonnement": 0 if nuit else round(800 * sim["nuage"]),
                              "source": "simulée", "maj": time.strftime("%H:%M:%S")}
@@ -288,26 +309,28 @@ if MOCK:
 
 
 # ---------------------------------------------------------------- commandes
-# REQUIS si le Peltier est monté : c'est la seule fonction qui commande le pont en H (sens + puissance plafonnée à PWM_MAX).
-def peltier(sens: str, puissance: float, silencieux: bool = False):
-    """sens : 'froid' (refroidit le nid), 'chaud' (le réchauffe) ou 'arrêt' ; puissance 0..1 (plafonnée à PWM_MAX)."""
-    puissance = max(0.0, min(PWM_MAX, puissance))
-    bas = etat["batterie"]["pourcent"]
-    if sens != "arrêt" and bas is not None and bas < BATTERIE_BASSE:
-        log(f"Peltier refusé : batterie à {bas} % (< {BATTERIE_BASSE} %)")
-        sens = "arrêt"
-    if sens not in ("froid", "chaud", "arrêt"):
-        sens = "arrêt"
-    if sens == "arrêt":
-        puissance = 0.0
-    if sens == "arrêt" and etat["peltier"] != "arrêt":
-        _auto["dernier_sens"], _auto["arret"] = etat["peltier"], time.time()   # pour la pause avant d'inverser le sens
-    etat["peltier"], etat["puissance"] = sens, puissance
-    if not silencieux:
-        log(f"Peltier : {sens}, puissance {round(puissance * 100)} %")
-    if GPIO_OK:
-        ina.value, inb.value = (1, 0) if sens == "froid" else (0, 1) if sens == "chaud" else (0, 0)
-        pwm.value = puissance
+# REQUIS si le ventilateur est monté : c'est la seule fonction qui commande le PWM.
+def ventilo(pourcent, mode="manuel", raison="", silencieux=False):
+    """Vitesse du ventilateur en % (0 = arrêt). Un Noctua tourne mal en dessous de VENTILO_MIN : sous ce seuil on l'arrête.
+    NB : un ventilateur PWM à 0 % de rapport cyclique tourne au minimum (il ne s'arrête vraiment que si son 12 V est coupé)."""
+    try:
+        p = int(round(max(0.0, min(100.0, float(pourcent)))))
+    except (TypeError, ValueError):
+        p = 0
+    if p < VENTILO_MIN:
+        p = 0
+    v = etat["ventilo"]
+    if p > 0 and v["pourcent"] == 0:
+        _vent["depuis"] = time.time()   # pour détecter un ventilateur qui ne tourne pas
+    if p == 0:
+        _vent["depuis"] = 0.0
+        mode, raison = "arret", raison or "arrêté"
+    changement = (p, mode) != (v["pourcent"], v["mode"])
+    v["pourcent"], v["mode"], v["raison"] = p, mode, raison or "commande manuelle"
+    if VENT_OK:
+        ventilo_pwm.value = p / 100
+    if changement and not silencieux:
+        log(f"Ventilateur : {p} % ({mode}) — {v['raison']}" if p else f"Ventilateur : arrêt — {v['raison']}")
 
 
 # FACULTATIF : allume ou éteint une caméra (num 0 ou 1). Éteinte, elle ne filme plus (le Pi consomme moins) et la page n'affiche plus son flux.
@@ -334,29 +357,30 @@ def leds(nid=None, ext=None):
     if nid is not None:
         etat["led_nid"] = bool(nid)
         log(f"LED du nid : {'allumées' if nid else 'éteintes'}")
-        if GPIO_OK:
+        if LED_OK:
             led_nid.value = int(nid)
     if ext is not None:
         etat["led_ext"] = bool(ext)
         log(f"LED extérieures : {'allumées' if ext else 'éteintes'}")
-        if GPIO_OK:
+        if LED_OK:
             led_ext.value = int(ext)
 
 
 # ---------------------------------------------------------------- lecture des capteurs, toutes les PERIODE secondes
-# REQUIS : c'est la boucle qui lit les capteurs et applique la coupure de sécurité. Elle tourne en tâche de fond.
+# REQUIS : c'est la boucle qui lit les capteurs et applique la ventilation et les sécurités. Elle tourne en tâche de fond.
 _lectures = [0]
-_auto = {"mode": None, "dernier_sens": None, "arret": 0.0, "alerte": 0.0}   # mode : ce que l'automatique fait ("chaud", "froid" ou None) ; le reste sert à la pause avant inversion et à l'alerte
+_auto = {"alerte": 0.0, "alerte_vent": 0.0}   # instants de la dernière notification (une par heure au plus)
 
 
 def charger_reglages():
-    """Relit les réglages du Peltier automatique gardés par un démarrage précédent (aucun fichier : valeurs par défaut)."""
+    """Relit les réglages de la ventilation automatique gardés par un démarrage précédent (aucun fichier : valeurs par défaut)."""
     try:
         with open(FICHIER_REGLAGES, encoding="utf-8") as f:
             d = json.load(f)
         for k, (lo, hi) in AUTO_LIMITES.items():
             if k in d:
                 etat["auto"][k] = max(lo, min(hi, float(d[k])))
+        etat["auto"]["vitesse_max"] = max(etat["auto"]["vitesse_max"], etat["auto"]["vitesse_min"])
         etat["auto"]["actif"] = bool(d.get("actif", False))
     except Exception:
         pass  # pas de fichier, ou environnement sans disque (simulateur du navigateur)
@@ -370,10 +394,40 @@ def sauver_reglages():
         pass
 
 
-def cible_chauffe():
-    """Température à ne pas dépasser en réchauffant : `plafond_chauffe`, et au plus `ecart_ext` au-dessus de l'extérieur (si on le connaît)."""
-    a, t_ext = etat["auto"], etat["meteo"]["t_ext"]
-    return a["plafond_chauffe"] if t_ext is None else min(a["plafond_chauffe"], t_ext + a["ecart_ext"])
+# ---------------------------------------------------------------- historique des températures
+historique = []   # points {t: "HH:MM", nid, ext, hum, ventilo}, du plus ancien au plus récent
+_histo = {"dernier": 0.0, "sauve": 0.0}
+
+
+def charger_historique():
+    """Relit historique.json (un redémarrage ne perd pas la courbe) ; aucun fichier ou disque absent : on repart de zéro."""
+    try:
+        with open(FICHIER_HISTO, encoding="utf-8") as f:
+            pts = json.load(f)
+        historique[:] = [p for p in pts if isinstance(p, dict) and "t" in p][-HISTO_MAX:]
+    except Exception:
+        pass
+
+
+def sauver_historique():
+    try:
+        with open(FICHIER_HISTO, "w", encoding="utf-8") as f:
+            json.dump(historique, f)
+    except Exception:
+        pass  # échec silencieux : pas de disque (simulateur du navigateur), carte pleine…
+
+
+def enregistrer_historique():
+    """Ajoute un point toutes les HISTO_PERIODE secondes (288 au plus = 24 h) ; sauvegarde sur disque au plus une fois par minute."""
+    now = time.time()
+    if now - _histo["dernier"] < HISTO_PERIODE:
+        return
+    _histo["dernier"] = now
+    historique.append({"t": time.strftime("%H:%M"), "nid": etat["t_nid"], "ext": etat["meteo"]["t_ext"], "hum": etat["hum_nid"], "ventilo": etat["ventilo"]["pourcent"]})
+    del historique[:-HISTO_MAX]
+    if now - _histo["sauve"] >= 60:
+        _histo["sauve"] = now
+        sauver_historique()
 
 
 def notifier(titre, message):
@@ -389,7 +443,7 @@ def notifier(titre, message):
 
 
 def verifier_alerte():
-    """Alerte si le nid dépasse `alerte_chaleur` (même sans le Peltier automatique) ; une notification par heure au plus."""
+    """Alerte si le nid dépasse `alerte_chaleur` (même sans la ventilation automatique) ; une notification par heure au plus."""
     a, t = etat["auto"], etat["t_nid"]
     if t is not None and t > a["alerte_chaleur"]:
         etat["erreurs"]["alerte_chaleur"] = f"ALERTE : le nid est à {t} °C (> {a['alerte_chaleur']} °C)"
@@ -400,85 +454,93 @@ def verifier_alerte():
         etat["erreurs"].pop("alerte_chaleur", None)
 
 
-def raison_blocage():
-    """Pourquoi l'automatique n'a pas le droit de faire tourner le Peltier (None : il peut). Ces sécurités passent avant tout."""
-    a, e = etat["auto"], etat["erreurs"]
-    if "securite" in e:
-        return "sécurité : " + e["securite"]
-    if "delestage" in e:
-        return "batterie faible : " + e["delestage"]
-    v = etat["batterie"]["tension"]
-    if v is not None and v < a["batterie_min_v"]:
-        return f"batterie sous {a['batterie_min_v']} V ({v} V)"
-    for cle, nom in (("t_nid", "capteur du nid"), ("t_dissipateur", "sonde du dissipateur")):
-        x = etat[cle]
-        lo, hi = VALEURS_PLAUSIBLES[cle]
-        if cle == "t_nid" and (x is None or "bme280" in e):
-            return "capteur du nid absent ou muet"
-        if cle == "t_dissipateur" and ("ds18b20" in e or (SONDE_OK and x is None)):
-            return "sonde du dissipateur absente ou muette"
-        if x is not None and not lo <= x <= hi:
-            return f"{nom} : valeur aberrante ({x} °C)"
-    return None
+def mesurer_ventilo():
+    """Vitesse réelle (tr/min) d'après les impulsions du tachymètre, sur une fenêtre de ~15 s (2 impulsions par tour). Sans tachymètre : rpm = None."""
+    v = etat["ventilo"]
+    if MOCK:
+        v["rpm"] = 0 if (v["pourcent"] == 0 or MOCK_PANNES["ventilo"]) else round(300 + 27 * v["pourcent"])
+        return
+    if not TACHO_OK:
+        v["rpm"] = None
+        return
+    now = time.time()
+    ech = _vent["echantillons"]
+    ech.append((now, _vent["n"]))
+    while len(ech) > 1 and now - ech[0][0] > 15:
+        ech.pop(0)
+    t0, n0 = ech[0]
+    if now - t0 >= 3:
+        v["rpm"] = round((_vent["n"] - n0) / 2 / (now - t0) * 60)
+    if _vent["n"] > 0:
+        _vent["tacho_vu"] = True
+
+
+def verifier_ventilo():
+    """Panne : commandé à 30 % ou plus depuis plus de VENTILO_PANNE_S secondes mais 0 tr/min (seulement si le tachymètre a déjà donné des impulsions : il est branché)."""
+    v, e = etat["ventilo"], etat["erreurs"]
+    if v["pourcent"] >= VENTILO_MIN and _vent["depuis"] and time.time() - _vent["depuis"] > VENTILO_PANNE_S and v["rpm"] == 0 and _vent["tacho_vu"]:
+        e["ventilo"] = f"Le ventilateur est commandé à {v['pourcent']} % mais ne tourne pas (0 tr/min) : câblage, alimentation 12 V ou hélice bloquée ?"
+        if time.time() - _auto["alerte_vent"] > 3600:
+            _auto["alerte_vent"] = time.time()
+            notifier("panne ventilateur", e["ventilo"])
+    else:
+        e.pop("ventilo", None)
 
 
 def avertissements():
-    """Limites de notre montage à signaler à l'utilisateur (le mode reste utilisable) : pas de sonde dehors, batterie non mesurée."""
+    """Limites de notre montage à signaler à l'utilisateur (le mode reste utilisable) : pas de sonde dehors, pas de tachymètre."""
     w = []
     if etat["meteo"]["t_ext"] is None:
-        w.append("température extérieure inconnue (pas d'internet) : le réchauffage vise seulement le plafond, sans l'écart avec dehors")
-    if etat["batterie"]["tension"] is None:
-        w.append("batterie non mesurée (pas d'INA219) : la coupure sous la tension minimale ne peut pas agir")
+        w.append("température extérieure inconnue (pas d'internet) : le ventilateur ne compare pas le nid avec dehors")
+    if not TACHO_OK:
+        w.append("tachymètre absent : une panne du ventilateur ne peut pas être détectée")
     return w
 
 
 def regler_auto():
-    """Peltier automatique : appelé à chaque lecture. Quand il est désactivé, le Peltier est éteint (il l'a été en le désactivant)."""
-    a = etat["auto"]
+    """Ventilation automatique : appelée à chaque lecture. Désactivée, elle ne touche pas au ventilateur (commande manuelle)."""
+    a, v = etat["auto"], etat["ventilo"]
     a["avertissements"] = avertissements()
     if not a["actif"]:
-        a["etat"], a["raison"], a["cible"], _auto["mode"] = "inactif", "mode désactivé", None, None
+        a["etat"], a["raison"] = "inactif", "mode désactivé"
         return
-    blocage = raison_blocage()
+    t, t_ext, e = etat["t_nid"], etat["meteo"]["t_ext"], etat["erreurs"]
+    marche = v["mode"] == "auto" and v["pourcent"] > 0
+    blocage = None
+    if "bme280" in e or t is None:
+        blocage = "capteur du nid absent ou muet : on ne sait pas s'il fait chaud"
+    elif not NID_PLAUSIBLE[0] <= t <= NID_PLAUSIBLE[1]:
+        blocage = f"capteur du nid : valeur aberrante ({t} °C)"
     if blocage:
-        if _auto["mode"] is not None or etat["peltier"] != "arrêt":
-            peltier("arrêt", 0)
-            log(f"Automatique : Peltier coupé ({blocage})")
-        a["etat"], a["raison"], a["cible"], _auto["mode"] = "securite", blocage, None, None
+        if marche:
+            ventilo(0, "arret", "sécurité : " + blocage)
+        a["etat"], a["raison"] = "securite", blocage
         return
-    t = etat["t_nid"]
-    mode, cible_c = _auto["mode"], cible_chauffe()
-    if mode == "chaud" and t >= cible_c:
-        mode = None
-    elif mode == "froid" and t <= a["max_chaleur"] - a["hysteresis"]:
-        mode = None
-    if mode is None:
-        if t < a["min_gel"] and t < cible_c:
-            mode = "chaud"
-        elif t > a["max_chaleur"]:
-            mode = "froid"
-        if mode is not None:  # pause à puissance nulle avant d'inverser le sens (ménage le Peltier et le pont en H)
-            reste = a["pause_inversion"] - (time.time() - _auto["arret"])
-            if _auto["dernier_sens"] not in (None, mode) and reste > 0:
-                a["etat"], a["raison"], a["cible"] = "veille", f"pause de {a['pause_inversion']:.0f} s avant d'inverser le sens (encore {reste:.0f} s)", None
-                return
-    if mode != _auto["mode"]:
-        log({"chaud": f"Automatique : nid à {t} °C (< {a['min_gel']} °C), on réchauffe jusqu'à {round(cible_c, 1)} °C",
-             "froid": f"Automatique : nid à {t} °C (> {a['max_chaleur']} °C), on refroidit vers {a['max_chaleur'] - a['hysteresis']} °C",
-             None: f"Automatique : nid à {t} °C, retour en veille"}[mode])
-        _auto["mode"] = mode
-    if mode is None:
-        if etat["peltier"] != "arrêt":
-            peltier("arrêt", 0, silencieux=True)
-        a["etat"], a["raison"], a["cible"] = "veille", f"nid à {t} °C, entre {a['min_gel']} et {a['max_chaleur']} °C", None
-        return
-    cible = cible_c if mode == "chaud" else a["max_chaleur"] - a["hysteresis"]
-    plafond = min(PWM_MAX, a["puissance_max"] / 100)
-    p = round(min(plafond, 0.15 + 0.1 * abs(cible - t)), 2)  # plus on est loin de la cible, plus on pousse (de 15 % au plafond de puissance)
-    if etat["peltier"] != mode or abs(etat["puissance"] - p) >= 0.05:
-        peltier(mode, p, silencieux=etat["peltier"] == mode)
-    a["etat"], a["cible"] = ("chauffe" if mode == "chaud" else "refroidit"), round(cible, 1)
-    a["raison"] = f"nid à {t} °C, vise {round(cible, 1)} °C"
+    seuil, hyst = a["seuil_marche"], a["hysteresis"]
+    plus_chaud_dehors = t_ext is not None and t <= t_ext + 0.5
+    if marche:
+        if t <= seuil - hyst:
+            ventilo(0, "arret", f"nid redescendu à {t} °C, sous {round(seuil - hyst, 1)} °C")
+        elif plus_chaud_dehors:
+            ventilo(0, "arret", f"le nid ({t} °C) n'est plus plus chaud que dehors ({t_ext} °C)")
+    if not (v["mode"] == "auto" and v["pourcent"] > 0):   # à l'arrêt : doit-il démarrer ?
+        if not (t > seuil and (t_ext is None or t > t_ext + a["ecart_ext"])):
+            if t <= seuil:
+                a["raison"] = f"nid à {t} °C, sous le seuil de {seuil} °C"
+            elif plus_chaud_dehors:
+                a["raison"] = f"nid à {t} °C mais dehors est plus chaud ({t_ext} °C) : l'air aspiré ne rafraîchirait pas"
+            else:
+                a["raison"] = f"nid à {t} °C, seulement {round(t - t_ext, 1)} °C de plus que dehors (écart minimal {a['ecart_ext']} °C)"
+            a["etat"] = "veille"
+            return
+    # il tourne (ou démarre) : vitesse proportionnelle à l'excès de chaleur
+    vmax = max(a["vitesse_max"], a["vitesse_min"])
+    p = round(a["vitesse_min"] + (vmax - a["vitesse_min"]) * max(0.0, min(1.0, (t - seuil) / a["plage"])))
+    if v["pourcent"] == 0 or abs(v["pourcent"] - p) >= 5:   # on ne retouche pas la vitesse pour un petit écart (le journal reste calme)
+        ventilo(p, "auto", f"nid au-dessus du seuil de {seuil} °C", silencieux=v["pourcent"] > 0)
+    a["etat"], a["raison"] = "ventile", f"nid à {t} °C, ventilateur à {v['pourcent']} %"
+
+
 
 
 _meteo = {"dernier": 0.0}
@@ -508,7 +570,7 @@ LOG_TOUS_LES = 10   # une ligne de situation toutes les 10 lectures (50 s sur le
 
 
 def lecture():
-    """Une lecture des capteurs + la coupure de sécurité (appelée toutes les PERIODE secondes par boucle())."""
+    """Une lecture des capteurs + la ventilation et les sécurités (appelée toutes les PERIODE secondes par boucle())."""
     if MOCK:
         simuler()
     elif BME_OK:
@@ -518,23 +580,7 @@ def lecture():
             etat["erreurs"].pop("bme280", None)
         except Exception as e:
             etat["erreurs"]["bme280"] = f"lecture du capteur du nid : {e}"
-    if SONDE_OK:
-        try:
-            if MOCK and MOCK_PANNES["sonde"]:
-                raise OSError("la sonde ne répond pas (panne simulée)")
-            if not MOCK:
-                etat["t_dissipateur"] = round(sonde.get_temperature(), 1)
-            etat["erreurs"].pop("ds18b20", None)
-            if etat["t_dissipateur"] > HOT_MAX and etat["peltier"] != "arrêt":
-                peltier("arrêt", 0)
-                etat["erreurs"]["securite"] = f"Peltier coupé : dissipateur à {etat['t_dissipateur']} °C (> {HOT_MAX})"
-                log("SÉCURITÉ : " + etat["erreurs"]["securite"])
-        except Exception as e:
-            etat["erreurs"]["ds18b20"] = f"lecture de la sonde : {e}"
-            if etat["peltier"] != "arrêt":  # sans mesure de température le Peltier ne doit pas continuer : on le coupe
-                peltier("arrêt", 0)
-                etat["erreurs"]["securite"] = "Peltier coupé : la sonde du dissipateur ne répond plus"
-                log("SÉCURITÉ : " + etat["erreurs"]["securite"])
+    mesurer_ventilo()
     if BAT_OK and not MOCK:
         try:
             v = ina_bat.voltage()
@@ -542,32 +588,33 @@ def lecture():
             etat["erreurs"].pop("batterie", None)
         except Exception as e:
             etat["erreurs"]["batterie"] = f"lecture de la batterie : {e}"
-    pc = etat["batterie"]["pourcent"]  # délestage : on coupe d'abord le Peltier (le plus gourmand), puis les LED
+    pc = etat["batterie"]["pourcent"]  # délestage : sous 10 % on coupe les caméras et les LED ; le ventilateur n'est JAMAIS coupé (sécurité du nid)
     if pc is not None and pc < BATTERIE_BASSE:
-        if etat["peltier"] != "arrêt":
-            peltier("arrêt", 0)
         if pc < BATTERIE_CRITIQUE:
             if etat["led_nid"] or etat["led_ext"]:
                 leds(False, False)
             for n in (0, 1):
                 if etat[f"cam{n + 1}"]:
                     camera(n, False)
-        niveau = "Peltier, caméras et LED coupés" if pc < BATTERIE_CRITIQUE else "Peltier coupé"
+        niveau = "caméras et LED coupées (le ventilateur reste actif)" if pc < BATTERIE_CRITIQUE else "économie d'énergie (sous 10 % : caméras et LED coupées)"
         if etat["erreurs"].get("delestage") is None:
             log(f"DÉLESTAGE : batterie à {pc} % : {niveau}")
-        etat["erreurs"]["delestage"] = f"Batterie à {pc} % : {niveau} pour économiser l'énergie"
+        etat["erreurs"]["delestage"] = f"Batterie à {pc} % : {niveau}"
     else:
         etat["erreurs"].pop("delestage", None)
     maj_meteo()
     verifier_alerte()
+    verifier_ventilo()
     regler_auto()
     etat["conso"] = consommation()
+    enregistrer_historique()
     etat["derniere_lecture"] = time.strftime("%H:%M:%S")
     _lectures[0] += 1
     if _lectures[0] % LOG_TOUS_LES == 1:  # un point de situation de temps en temps, pas à chaque lecture (le journal restait noyé)
-        parts = [f"nid {etat['t_nid']} °C, {etat['hum_nid']} %", f"dissipateur {etat['t_dissipateur']} °C"]
-        if etat["peltier"] != "arrêt":
-            parts.append(f"Peltier {etat['peltier']} {round(etat['puissance'] * 100)} %")  # le Peltier n'est cité que quand il tourne
+        parts = [f"nid {etat['t_nid']} °C, {etat['hum_nid']} %", f"dehors {etat['meteo']['t_ext']} °C"]
+        if etat["ventilo"]["pourcent"]:  # le ventilateur n'est cité que quand il tourne
+            rpm = etat["ventilo"]["rpm"]
+            parts.append(f"ventilateur {etat['ventilo']['pourcent']} %" + (f" ({rpm} tr/min)" if rpm is not None else ""))
         parts.append(f"conso {etat['conso']['total_w']} W")
         if etat["batterie"]["pourcent"] is not None:
             parts.append(f"batterie {etat['batterie']['pourcent']} %")
@@ -595,22 +642,35 @@ def api_etat():
     return jsonify(etat)
 
 
-@app.post("/api/peltier")
-def api_peltier():
-    d = request.get_json(force=True) or {}
-    if etat["auto"]["actif"]:  # une commande à la main reprend la main sur l'automatique
+@app.get("/api/historique")
+def api_historique():
+    """Les points de température des dernières 24 h : [{t, nid, ext, hum, ventilo}, …]."""
+    return jsonify(historique)
+
+
+def _desactiver_auto(pourquoi):
+    """Une commande à la main reprend la main sur l'automatique."""
+    if etat["auto"]["actif"]:
         etat["auto"]["actif"] = False
-        _auto["mode"] = None
         sauver_reglages()
-        log("Peltier automatique désactivé : commande manuelle")
-    peltier(d.get("sens", "arrêt"), float(d.get("puissance", 0.3)))
-    etat["erreurs"].pop("securite", None)
+        log(f"Ventilation automatique désactivée : {pourquoi}")
+
+
+@app.post("/api/ventilo")
+def api_ventilo():
+    """Commande manuelle : {pourcent: 30..100} pour tourner, {mode: 'arret'} ou {pourcent: 0} pour arrêter."""
+    d = request.get_json(force=True) or {}
+    _desactiver_auto("commande manuelle")
+    if d.get("mode") == "arret":
+        ventilo(0, "arret", "arrêté à la main")
+    else:
+        ventilo(d.get("pourcent", 0), "manuel", "commande manuelle")
     return jsonify(etat)
 
 
 @app.post("/api/auto")
 def api_auto():
-    """Active ou règle le Peltier automatique : {actif, min_gel, plafond_chauffe, ecart_ext, max_chaleur, hysteresis} (tout est facultatif)."""
+    """Active ou règle la ventilation automatique : {actif, seuil_marche, ecart_ext, hysteresis, vitesse_min, vitesse_max, plage, alerte_chaleur} (tout est facultatif)."""
     d = request.get_json(force=True) or {}
     a = etat["auto"]
     for k, (lo, hi) in AUTO_LIMITES.items():
@@ -619,15 +679,16 @@ def api_auto():
                 a[k] = max(lo, min(hi, float(d[k])))
             except (TypeError, ValueError):
                 pass
+    a["vitesse_max"] = max(a["vitesse_max"], a["vitesse_min"])
     if "actif" in d:
         voulu = bool(d["actif"])
         if voulu and not a["actif"]:
-            etat["erreurs"].pop("securite", None)  # on le réactive volontairement : la sécurité recoupera si le problème persiste
-            log("Peltier automatique : activé")
+            ventilo(0, "arret", "arrêté (l'automatique prend la main)", silencieux=True)   # l'automatique repart d'un ventilateur arrêté
+            log("Ventilation automatique : activée")
         elif not voulu and a["actif"]:
-            _auto["mode"] = None
-            peltier("arrêt", 0)
-            log("Peltier automatique : désactivé")
+            if etat["ventilo"]["mode"] == "auto":
+                ventilo(0, "arret", "ventilation automatique désactivée")
+            log("Ventilation automatique : désactivée")
         a["actif"] = voulu
     sauver_reglages()
     regler_auto()
@@ -680,6 +741,7 @@ def video2():
 
 if __name__ == "__main__":
     charger_reglages()
+    charger_historique()
     log("Nichoir mésange : page sur http://0.0.0.0:8080" + (" (mode simulé)" if MOCK else ""))
     for msg in etat["erreurs"].values():
         log("! " + msg)

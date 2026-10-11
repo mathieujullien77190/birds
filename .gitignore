@@ -4,3 +4,5 @@ dist
 __pycache__/
 *.pyc
 pi/site/node_modules/
+pi/reglages.json
+pi/historique*.json
