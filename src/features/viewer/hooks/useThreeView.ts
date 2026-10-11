@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { pullFace, moveWithGroup, r2, type FaceAxis, type PlankScene, type Vec3 } from '@/birdhouse/model';
 import { disposeAll } from '@/birdhouse/three/registry/materials';
 import { AMBIENCE, SUN_POSITION, VIEW } from '@/birdhouse/three/constants';
+import { isPlankMesh } from '@/birdhouse/three/factories/plank';
 import { AXIS_N, SNAP, type Cut, type View } from '@/birdhouse/three/types';
 
 /** Ce que la vue 3D lit ou écrit dans le composant : uniquement des refs et des setters stables (l'effet de création ne tourne qu'une fois). */
@@ -70,7 +71,7 @@ export function useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickR
       if (e.button !== 0 || !pl) return;
       rayAt(e);
       const hit = ray.intersectObjects([...v.meshes.values()], false)[0];
-      if (!hit || (hit.object.userData.id as string) !== pl.plankId) return;
+      if (!hit || !isPlankMesh(hit.object) || hit.object.plankId !== pl.plankId) return;
       const m = v.meshes.get(pl.plankId)!;
       const p = scRef.current.planks.find((x) => x.id === pl.plankId)!;
       const N = new Vector3(pl.axis === 'x' ? 1 : 0, pl.axis === 'y' ? 1 : 0, pl.axis === 'z' ? 1 : 0).multiplyScalar(pl.sign).applyQuaternion(m.quaternion).normalize();
@@ -188,7 +189,7 @@ export function useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickR
       const r = renderer.domElement.getBoundingClientRect();
       ray.setFromCamera(new Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
       const hit = ray.intersectObjects([...v.meshes.values()], false)[0];
-      const id = hit ? (hit.object.userData.id as string) : null;
+      const id = hit && isPlankMesh(hit.object) ? hit.object.plankId : null;
       if (e.button === 2) { // clic droit sur une plaque : menu, avec le point touché en coordonnées de la plaque
         if (hit && id) { const local = hit.object.worldToLocal(hit.point.clone()); setSelectedId(id); setCtx({ x: e.clientX - r.left, y: e.clientY - r.top, plankId: id, local: [local.x, local.y] }); }
         else setCtx(null);
@@ -205,7 +206,7 @@ export function useThreeView({ host, view, scRef, selRef, cutRef, pullRef, pickR
         const r = renderer.domElement.getBoundingClientRect();
         ray.setFromCamera(new Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
         const h = ray.intersectObjects([...v.meshes.values()].filter((m) => m.visible), false)[0];
-        const hid = h ? (h.object.userData.id as string) : null;
+        const hid = h && isPlankMesh(h.object) ? h.object.plankId : null;
         const pl = hid ? scRef.current.planks.find((p) => p.id === hid) : undefined;
         if (pl) id = pl.id; // toute pièce survolée passe en surbrillance
       }

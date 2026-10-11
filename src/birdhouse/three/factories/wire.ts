@@ -1,10 +1,11 @@
 import { BufferGeometry, CatmullRomCurve3, Color, Float32BufferAttribute, Quaternion, TubeGeometry, Vector3 } from 'three';
-import type { Plank } from '../model';
-import { PALETTE } from './registry/palette';
+import type { Plank } from '../../model';
+import { PALETTE } from '../registry/palette';
+import { emptyEdges, paintUniform, type PartGeometry } from './geometry';
 
 /** Fil électrique : tube lissé le long de p.path, diamètre p.w, couleur p.color. */
 /** Gaine annelée (ICTA) : un tube dont le rayon ondule le long de la courbe (anneaux tous les 3 mm, ± 8 %), noir. */
-export function conduitGeometry(p: Plank): { geo: BufferGeometry; edges: BufferGeometry } {
+export function conduitGeometry(p: Plank): PartGeometry {
   const curve = new CatmullRomCurve3((p.path ?? []).map((q) => new Vector3(...q)), false, 'catmullrom', 0.5);
   const len = curve.getLength(), pitch = 3, tub = Math.max(8, Math.round((len / pitch) * 6)), rad = 14;
   const geo = new TubeGeometry(curve, tub, p.w / 2, rad, false);
@@ -15,10 +16,8 @@ export function conduitGeometry(p: Plank): { geo: BufferGeometry; edges: BufferG
     pos.setXYZ(i, pos.getX(i) + nrm.getX(i) * r * (k - 1), pos.getY(i) + nrm.getY(i) * r * (k - 1), pos.getZ(i) + nrm.getZ(i) * r * (k - 1));
   }
   geo.computeVertexNormals();
-  const c = new Color(p.color ?? PALETTE.conduit), n = pos.count, col = new Float32Array(n * 3);
-  for (let i = 0; i < n; i++) { col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b; }
-  geo.setAttribute('color', new Float32BufferAttribute(col, 3));
-  return { geo, edges: new BufferGeometry().setAttribute('position', new Float32BufferAttribute([], 3)) };
+  paintUniform(geo, new Color(p.color ?? PALETTE.conduit));
+  return { geo, edges: emptyEdges() };
 }
 
 /** Arrondit les angles d'un chemin : à chaque sommet intermédiaire, le coude est remplacé par un arc (Bézier quadratique) de rayon r — un vrai fil ne fait pas d'angle vif,
@@ -37,18 +36,16 @@ function roundPath(pts: Vector3[], r: number): Vector3[] {
   out.push(pts[pts.length - 1]);
   return out;
 }
-export function wireGeometry(p: Plank): { geo: BufferGeometry; edges: BufferGeometry } {
+export function wireGeometry(p: Plank): PartGeometry {
   const raw = (p.path ?? []).map((q) => new Vector3(...q));
   const curve = new CatmullRomCurve3(roundPath(raw, Math.max(10, 4 * p.w)), false, 'centripetal'); // coudes arrondis (rayon 10 mm, plus pour les gros fils), puis lissage sans dépassement
   const geo = new TubeGeometry(curve, Math.max(64, raw.length * 24), p.w / 2, 8, false);
-  const c = new Color(p.color ?? PALETTE.slate), n = geo.attributes.position.count, col = new Float32Array(n * 3);
-  for (let i = 0; i < n; i++) { col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b; }
-  geo.setAttribute('color', new Float32BufferAttribute(col, 3));
-  return { geo, edges: new BufferGeometry().setAttribute('position', new Float32BufferAttribute([], 3)) };
+  paintUniform(geo, new Color(p.color ?? PALETTE.slate));
+  return { geo, edges: emptyEdges() };
 }
 
 /** Nappe plate (câble CSI) : ruban lissé le long de p.path, largeur p.w, repère transporté sans torsion. */
-export function ribbonGeometry(p: Plank): { geo: BufferGeometry; edges: BufferGeometry } {
+export function ribbonGeometry(p: Plank): PartGeometry {
   const curve = new CatmullRomCurve3((p.path ?? []).map((q) => new Vector3(...q)), false, 'centripetal'); // centripète : pas de boucle ni de dépassement entre les points
   const N = 120, pts = curve.getPoints(N), pos: number[] = [], idx: number[] = [], col: number[] = [];
   const c = new Color(PALETTE.ribbon), tip = new Color(PALETTE.ribbonTip); // ruban orange, embouts bleus (renforts des connecteurs)
@@ -79,5 +76,5 @@ export function ribbonGeometry(p: Plank): { geo: BufferGeometry; edges: BufferGe
   geo.setAttribute('color', new Float32BufferAttribute(col, 3));
   geo.setIndex(idx);
   geo.computeVertexNormals();
-  return { geo, edges: new BufferGeometry().setAttribute('position', new Float32BufferAttribute([], 3)) };
+  return { geo, edges: emptyEdges() };
 }

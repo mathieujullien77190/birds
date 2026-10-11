@@ -3,7 +3,7 @@ import { CAMERA_SHOT } from './constants';
 import type { View } from './types';
 
 /** Vue « au niveau de la caméra » : on rend la scène 3D depuis l'objectif d'une carte caméra (`special = 'camera'`), pour servir d'image au flux vidéo simulé du Pi.
- *  Dans le repère de la carte l'objectif est à −z (voir `cameraGeometry`) et le haut de l'image est +y : on lit donc direction et haut dans l'orientation de sa mesh. */
+ *  Dans le repère de la carte l'objectif est à −z (voir `factories/part/camera.ts`) et le haut de l'image est +y : on lit donc direction et haut dans l'orientation de sa mesh. */
 const LENS_TIP = CAMERA_SHOT.lensTip;
 const cam = new PerspectiveCamera(CAMERA_SHOT.defaultFov, 4 / 3, CAMERA_SHOT.near, CAMERA_SHOT.far);
 let target: WebGLRenderTarget | null = null;

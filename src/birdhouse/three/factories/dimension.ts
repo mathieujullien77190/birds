@@ -1,7 +1,7 @@
-import { MARK } from './constants';
+import { MARK } from '../constants';
 import { BufferGeometry, CanvasTexture, Float32BufferAttribute, Group, LineSegments, Sprite, SpriteMaterial, Vector3 } from 'three';
-import { PALETTE } from './registry/palette';
-import { materials } from './registry/materials';
+import { PALETTE } from '../registry/palette';
+import { materials } from '../registry/materials';
 
 /** Étiquette de mesure flottante : texte dessiné sur un canvas, toujours face à la caméra, au-dessus de tout. */
 function measureSprite(text: string): Sprite {

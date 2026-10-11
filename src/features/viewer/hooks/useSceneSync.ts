@@ -1,13 +1,12 @@
 import { useEffect, type MutableRefObject } from 'react';
-import { BufferGeometry, DoubleSide, Float32BufferAttribute, Line, LineBasicMaterial, LineLoop, LineSegments, MathUtils, Mesh, MeshStandardMaterial, Plane, PlaneGeometry, Sprite, Vector3 } from 'three';
+import { BufferGeometry, Float32BufferAttribute, Line, LineLoop, MathUtils, Mesh, Plane, PlaneGeometry, Sprite, Vector3 } from 'three';
 import { bounds, extents, holeOutline, outline, type PlankScene, type Vec3 } from '@/birdhouse/model';
 import { EMISSIVE, MARK } from '@/birdhouse/three/constants';
 import { materials } from '@/birdhouse/three/registry/materials';
 import { PALETTE } from '@/birdhouse/three/registry/palette';
-import { dimension } from '@/birdhouse/three/dimensions';
+import { dimension } from '@/birdhouse/three/factories/dimension';
 import { oakTexture } from '@/birdhouse/three/oakTexture';
-import { piModel } from '@/birdhouse/three/piModel';
-import { plankGeometry } from '@/birdhouse/three/plankGeometry';
+import { createPlankMesh } from '@/birdhouse/three/factories/plank';
 import { AXIS_I, AXIS_N, type Cut, type View } from '@/birdhouse/three/types';
 import type { FaceAxis } from '@/birdhouse/model';
 
@@ -37,26 +36,14 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       if (p.special === 'doc') continue; // document : rien à dessiner dans la 3D
       seen.add(p.id);
       let m = v.meshes.get(p.id);
-      const key = JSON.stringify([p.w, p.h, p.notches, p.holes, sc.t, p.path, p.depth, p.special === 'pi' && !!piModel]); // tout ce qui change la forme : dimensions, crans, trous, épaisseur
       if (!m) {
-        m = new Mesh(new BufferGeometry(), new MeshStandardMaterial({ color: PALETTE.white, vertexColors: true, roughness: 0.85, side: DoubleSide }));
-        m.userData.id = p.id;
-        m.add(new LineSegments(new BufferGeometry(), materials.edge()));
+        m = createPlankMesh(p, sc.t);
         v.scene.add(m);
         v.meshes.set(p.id, m);
-      }
-      if (m.userData.key !== key) {
-        const { geo, edges } = plankGeometry(p, sc.t);
-        m.geometry.dispose();
-        m.geometry = geo;
-        const lines = m.children[0] as LineSegments;
-        lines.geometry.dispose();
-        lines.geometry = edges;
-        m.userData.key = key;
-      }
+      } else m.updateShape(p, sc.t); // la géométrie n'est refaite que si la forme a changé
       m.position.set(...p.pos);
       m.rotation.set(...(p.rot.map(MathUtils.degToRad) as Vec3));
-      const mat = m.material as MeshStandardMaterial;
+      const mat = m.material;
       const hovered = !!hover && (hover.plank === p.id || (!!hover.group && hover.group === p.group));
       const chosen = groupSel ? p.group === groupSel : p.id === selectedId; // boîte choisie : toutes ses plaques
       mat.emissive.set(hovered ? EMISSIVE.hover : chosen ? EMISSIVE.chosen : extra.has(p.id) ? EMISSIVE.extra : EMISSIVE.none); // survolé dans la liste : ambre
@@ -70,7 +57,7 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       const isHidden = hidden.has(p.id);
       m.visible = !isHidden;
       m.layers.set(isHidden ? 1 : 0); // hors de la couche 0 : ni dessinée ni touchée par les clics
-      ((m.children[0] as LineSegments).material as LineBasicMaterial).clippingPlanes = clipPlanes;
+      m.edges.material.clippingPlanes = clipPlanes;
     }
     for (const [id, m] of v.meshes) if (!seen.has(id)) { v.scene.remove(m); m.geometry.dispose(); v.meshes.delete(id); }
     // ronds de coin : sur l'élément choisi (vert, à tirer) et sur toutes les autres pièces (bleu à 50 %, cibles d'aimantation, visibles pendant le glissé)

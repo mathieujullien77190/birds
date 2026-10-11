@@ -1,0 +1,242 @@
+{
+ "plaque": {
+  "geo": {
+   "n": 36,
+   "pos": "f609fe6f8a119b95",
+   "col": "81ee9ae44ff8baa2"
+  },
+  "edges": {
+   "n": 24,
+   "pos": "39cb10ecb9d42c58",
+   "col": null
+  }
+ },
+ "plaque percée": {
+  "geo": {
+   "n": 432,
+   "pos": "aaf5baa4aff824aa",
+   "col": "e2ef2aeb3305870d"
+  },
+  "edges": {
+   "n": 152,
+   "pos": "c67a59f96ba1b0fe",
+   "col": null
+  }
+ },
+ "alu": {
+  "geo": {
+   "n": 36,
+   "pos": "f609fe6f8a119b95",
+   "col": "d31739913d3d3363"
+  },
+  "edges": {
+   "n": 24,
+   "pos": "39cb10ecb9d42c58",
+   "col": null
+  }
+ },
+ "case": {
+  "geo": {
+   "n": 216,
+   "pos": "b096d80eac7c3937",
+   "col": "3bb443bff5332afd"
+  },
+  "edges": {
+   "n": 144,
+   "pos": "4cf7c48b5b8725a6",
+   "col": null
+  }
+ },
+ "solar": {
+  "geo": {
+   "n": 8928,
+   "pos": "12dfc417a24e13e1",
+   "col": "1be57b8e67bf9bf0"
+  },
+  "edges": {
+   "n": 0,
+   "pos": "da39a3ee5e6b4b0d",
+   "col": null
+  }
+ },
+ "fan": {
+  "geo": {
+   "n": 864,
+   "pos": "2563160cd25e266a",
+   "col": "344c9fda3d99f019"
+  },
+  "edges": {
+   "n": 384,
+   "pos": "ac44eb6a7bd00f98",
+   "col": null
+  }
+ },
+ "peltier": {
+  "geo": {
+   "n": 108,
+   "pos": "a23cf5dd85ea6d89",
+   "col": "429cf1af2c2235b3"
+  },
+  "edges": {
+   "n": 72,
+   "pos": "71fea6ba492cffa6",
+   "col": null
+  }
+ },
+ "driver": {
+  "geo": {
+   "n": 288,
+   "pos": "e71419e2219c9c48",
+   "col": "a2fcdb9eeec6be5f"
+  },
+  "edges": {
+   "n": 192,
+   "pos": "5c906d1061dbe350",
+   "col": null
+  }
+ },
+ "heatsink": {
+  "geo": {
+   "n": 432,
+   "pos": "c7a4897b5d15b3ef",
+   "col": "0dd35fd5d4c3e0fe"
+  },
+  "edges": {
+   "n": 288,
+   "pos": "1088cac5ecdbaa8c",
+   "col": null
+  }
+ },
+ "sensor": {
+  "geo": {
+   "n": 252,
+   "pos": "485929b3a32228ea",
+   "col": "56984f29790a67ba"
+  },
+  "edges": {
+   "n": 168,
+   "pos": "f50fb67c2d2e6e0e",
+   "col": null
+  }
+ },
+ "block": {
+  "geo": {
+   "n": 24,
+   "pos": "5d2d266ec62c57bd",
+   "col": "952b3713c1187e61"
+  },
+  "edges": {
+   "n": 24,
+   "pos": "b4f106b338b2b84d",
+   "col": null
+  }
+ },
+ "block percé": {
+  "geo": {
+   "n": 432,
+   "pos": "02374f645759eeff",
+   "col": "1968ff04fa0433c8"
+  },
+  "edges": {
+   "n": 152,
+   "pos": "1fff5f8a028cdd52",
+   "col": null
+  }
+ },
+ "block poly": {
+  "geo": {
+   "n": 24,
+   "pos": "d230c16ac843ac42",
+   "col": "eaefc8338462cacf"
+  },
+  "edges": {
+   "n": 18,
+   "pos": "4255f701b90173c9",
+   "col": null
+  }
+ },
+ "cable": {
+  "geo": {
+   "n": 242,
+   "pos": "e39968db143d0b9d",
+   "col": "a39afae55a0bdf16"
+  },
+  "edges": {
+   "n": 0,
+   "pos": "da39a3ee5e6b4b0d",
+   "col": null
+  }
+ },
+ "conduit": {
+  "geo": {
+   "n": 2550,
+   "pos": "26d10a59ed163bcc",
+   "col": "addd4856801ab2a5"
+  },
+  "edges": {
+   "n": 0,
+   "pos": "da39a3ee5e6b4b0d",
+   "col": null
+  }
+ },
+ "wire": {
+  "geo": {
+   "n": 873,
+   "pos": "4e2631725a4a4d80",
+   "col": "6997476aa1e84cf1"
+  },
+  "edges": {
+   "n": 0,
+   "pos": "da39a3ee5e6b4b0d",
+   "col": null
+  }
+ },
+ "pi": {
+  "geo": {
+   "n": 4104,
+   "pos": "2b7f18629d9e04eb",
+   "col": "ae2eb9baa5ab82da"
+  },
+  "edges": {
+   "n": 1912,
+   "pos": "b76a568935c255a1",
+   "col": null
+  }
+ },
+ "bar": {
+  "geo": {
+   "n": 36,
+   "pos": "bab8fa971fcb6bfa",
+   "col": "e3f73caf627d913f"
+  },
+  "edges": {
+   "n": 24,
+   "pos": "86836a758628b30d",
+   "col": null
+  }
+ },
+ "ir": {
+  "geo": {
+   "n": 180,
+   "pos": "6d9f9d26cefece60",
+   "col": "b4d7a7cd4ae45ad9"
+  },
+  "edges": {
+   "n": 120,
+   "pos": "d637e1a5fe9173d9",
+   "col": null
+  }
+ },
+ "camera": {
+  "geo": {
+   "n": 396,
+   "pos": "2f26543b4de06d83",
+   "col": "b05f6a4520bef5ec"
+  },
+  "edges": {
+   "n": 168,
+   "pos": "bd88df8394e8ccbc",
+   "col": null
+  }
+ }
+}

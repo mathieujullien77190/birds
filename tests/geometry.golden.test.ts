@@ -1,6 +1,6 @@
 import { describe, it } from 'vitest';
 import type { BufferGeometry } from 'three';
-import { plankGeometry } from '@/birdhouse/three/plankGeometry';
+import { plankGeometry } from '@/birdhouse/three/factories/plank';
 import { VARIANTS, buildNest, expectGolden, hashNumbers } from './helpers';
 
 /** Empreinte d'une géométrie : nombre de sommets, hash des positions et des couleurs (arrondies à 1e-4). */
