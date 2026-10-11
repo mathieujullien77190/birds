@@ -1,6 +1,12 @@
 import { type Pt, type Plank, type PlankScene, type Placed, type NestItem, type NestSheet } from '../types';
 import { holeOutline } from '../geometry/holes';
 import { outline } from '../geometry/outline';
+import { plankCodes } from './partCodes';
+import { codeOutlines, codeSpot } from './codeSpot';
+
+export * from './partCodes';
+export * from './codeText';
+export * from './codeSpot';
 
 /** Rangement de toutes les plaques à plat sur une planche de largeur `sheet` (étagères). */
 export function layout(s: PlankScene, sheet: number, gap = 6): { placed: Placed[]; height: number } {
@@ -108,7 +114,7 @@ function emptyRects(occ: Uint8Array, nx: number, ny: number, res: number, min: n
  * libre où elle laisse le moins de place perdue ; les rectangles libres sont redécoupés autour d'elle. Planche pleine → la suivante.
  * Une pièce plus grande que la planche est posée seule en (gap, gap) et signalée (`used` > 1).
  */
-export function nestSheets(s: PlankScene, W: number, H: number, gap = 5, margin = 8): NestSheet[] { // gap = espace entre pièces, margin = marge sur les bords de la planche
+function nestRaw(s: PlankScene, W: number, H: number, gap = 5, margin = 8): NestSheet[] { // gap = espace entre pièces, margin = marge sur les bords de la planche
   type Free = { x: number; y: number; w: number; h: number };
   const other = (m: 'mdf' | 'okoume') => s.planks.filter((p) => !p.special && p.material === m).map((p) => ({ ...p, material: undefined })); // MDF et okoumé ont leurs propres planches, rangées après celles du contreplaqué
   const mdf = other('mdf'), okoume = other('okoume');
@@ -127,7 +133,7 @@ export function nestSheets(s: PlankScene, W: number, H: number, gap = 5, margin 
       if (!best) continue;
       const { f, rotated } = best;
       const w = (rotated ? p.h : p.w) + g, h = (rotated ? p.w : p.h) + g;
-      const it: NestItem = { plank: p, rotated, ...flat(p, rotated), x: f.x, y: f.y };
+      const it: NestItem = { plank: p, rotated, turns: rotated ? 1 : 0, ...flat(p, rotated), x: f.x, y: f.y };
       S.sheet.items.push(it);
       S.sheet.used = Math.max(S.sheet.used, (f.y + h) / H);
       // redécoupe : chaque rectangle libre qui touche la pièce est remplacé par ses restes (haut, bas, gauche, droite)
@@ -199,7 +205,7 @@ export function nestSheets(s: PlankScene, W: number, H: number, gap = 5, margin 
     if (!best) continue; // ne rentre pas : traitée comme une pièce simple
     const b = best as { R: { occ: Uint8Array }; S: NestSheet; k: number; cx: number; cy: number; pc: ReturnType<typeof occOf>; f: ReturnType<typeof flatK> };
     const x = (b.cx + 1) * RES, y = (b.cy + 1) * RES; // la grille de la pièce a 1 cellule de marge
-    b.S.items.push({ plank: p, rotated: b.k % 2 === 1, poly: b.f.poly, holes: b.f.holes, w: b.f.w, h: b.f.h, x, y });
+    b.S.items.push({ plank: p, rotated: b.k % 2 === 1, turns: b.k as 0 | 1 | 2 | 3, poly: b.f.poly, holes: b.f.holes, w: b.f.w, h: b.f.h, x, y });
     b.S.used = Math.max(b.S.used, (y + b.f.h) / H);
     for (let ix = 0; ix < b.pc.nx; ix++) for (let iy = 0; iy < b.pc.ny; iy++) if (b.pc.cells[ix * b.pc.ny + iy]) b.R.occ[(b.cx + ix) * NYS + b.cy + iy] = 1;
     doneSet.add(p);
@@ -216,15 +222,33 @@ export function nestSheets(s: PlankScene, W: number, H: number, gap = 5, margin 
     sheets.push({ sheet: { items: [], used: 0 }, free: [{ x: margin, y: margin, w: W - 2 * margin + g, h: H - 2 * margin + g }] }); // la place libre commence à la marge ; une pièce occupe (taille + g), d'où le + g
     if (!place(p)) { // plus grande que la planche : posée seule, signalée
       const S = sheets[sheets.length - 1];
-      const it: NestItem = { plank: p, rotated: false, ...flat(p, false), x: margin, y: margin };
+      const it: NestItem = { plank: p, rotated: false, turns: 0, ...flat(p, false), x: margin, y: margin };
       S.sheet.items.push(it);
       S.sheet.used = Math.max(1.01, (g + p.h + g) / H);
       S.free = [];
     }
   }
   const ply = sheets.map((S) => S.sheet);
-  const extra = (planks: Plank[], material: 'mdf' | 'okoume'): NestSheet[] => planks.length ? nestSheets({ ...s, planks }, W, H, gap, margin).map((sh): NestSheet => ({ ...sh, material })) : [];
+  const extra = (planks: Plank[], material: 'mdf' | 'okoume'): NestSheet[] => planks.length ? nestRaw({ ...s, planks }, W, H, gap, margin).map((sh): NestSheet => ({ ...sh, material })) : [];
   return [...ply, ...extra(mdf, 'mdf'), ...extra(okoume, 'okoume')];
+}
+
+/**
+ * Range toutes les plaques sur des planches (voir `nestRaw`) et grave le code de chacune (`partCodes.ts`) : `item.code` et `item.engrave` (contours fermés fins du texte, dans le repère de la pièce posée,
+ * à l'emplacement libre choisi par `codeSpot`, tourné comme la pièce). Les codes sont ceux de la scène ENTIÈRE (jamais ceux d'un sous-ensemble par matériau).
+ * Une plaque trop petite pour un texte de 3 mm avec sa marge n'a pas de gravure (`code` seul).
+ */
+export function nestSheets(s: PlankScene, W: number, H: number, gap = 5, margin = 8): NestSheet[] {
+  const sheets = nestRaw(s, W, H, gap, margin), codes = plankCodes(s);
+  for (const sh of sheets) for (const it of sh.items) {
+    const code = codes.get(it.plank.id)!; // toute plaque posée sur une planche est une plaque découpée de la scène
+    it.code = code;
+    const spot = codeSpot(it.plank, code.length);
+    if (!spot) continue;
+    const turn = (q: Pt): Pt => { let [x, y] = q; for (let i = 0; i < it.turns; i++) [x, y] = [-y, x]; return [x + it.w / 2, y + it.h / 2]; };
+    it.engrave = codeOutlines(spot, code).map((c) => c.map(turn));
+  }
+  return sheets;
 }
 
 /** Libellé d'une planche de découpe : « Planche 3 » pour le contreplaqué, « Planche MDF 1 » pour le MDF, « Planche okoumé 5 mm 1 » pour l'habillage (numérotées à part). */
@@ -234,13 +258,14 @@ export function sheetLabel(sheets: NestSheet[], i: number): string {
   return `Planche ${m === 'mdf' ? 'MDF' : 'okoumé 5 mm'} ${sheets.slice(0, i + 1).filter((x) => x.material === m).length}`;
 }
 
-/** SVG d'une planche pour la machine : cadre de la planche en gris (repère, à ne pas couper), noir 0,1 mm = coupe, bleu = nom à graver. 1 unité = 1 mm, origine en haut à gauche. */
+/** SVG d'une planche pour la machine : cadre de la planche en gris (repère, à ne pas couper), noir 0,1 mm = coupe, bleu = code de chaque plaque à graver (contours fermés fins, avant la coupe ; `class="e"`) et son nom (texte, non gravé). 1 unité = 1 mm, origine en haut à gauche. */
 export function sheetSvg(sheet: NestSheet, W: number, H: number, index: number): string {
   const f = (n: number) => +n.toFixed(2);
-  const parts = sheet.items.map(({ plank, poly, holes, x, y, h }) => {
+  const parts = sheet.items.map(({ plank, poly, holes, x, y, h, code, engrave }) => {
     const px = (a: number) => f(x + a), py = (b: number) => f(y + h - b); // y vers le bas
     const pg = (pts: Pt[]) => `<polygon points="${pts.map(([a, b]) => `${px(a)},${py(b)}`).join(' ')}" fill="none" stroke="#000" stroke-width="0.1"/>`;
-    return pg(poly) + holes.map(pg).join('') + `<text x="${f(x + 4)}" y="${f(y + 6)}" font-size="4" fill="#00f" font-family="sans-serif">${plank.name}</text>`;
+    const eg = (engrave ?? []).map((c) => `<polygon class="e" points="${c.map(([a, b]) => `${px(a)},${py(b)}`).join(' ')}" fill="none" stroke="#00f" stroke-width="0.1"/>`).join('');
+    return pg(poly) + holes.map(pg).join('') + eg + `<text x="${f(x + 4)}" y="${f(y + 6)}" font-size="4" fill="#00f" font-family="sans-serif">${code ? `${code} ` : ''}${plank.name}</text>`;
   });
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}mm" height="${H}mm" viewBox="0 0 ${W} ${H}"><rect x="0.05" y="0.05" width="${W - 0.1}" height="${H - 0.1}" fill="none" stroke="#bbb" stroke-width="0.1" stroke-dasharray="2 2"/><text x="${W - 3}" y="${H - 3}" font-size="4" text-anchor="end" fill="#999" font-family="sans-serif">planche ${index + 1}</text>${parts.join('')}</svg>`;
 }
@@ -249,5 +274,5 @@ export function sheetSvg(sheet: NestSheet, W: number, H: number, index: number):
 export function sheetsPreviewSvg(sheets: NestSheet[], W: number, H: number, gap = 12): string {
   const total = sheets.length * (H + gap) - gap;
   const inner = sheets.map((sh, i) => `<g transform="translate(0 ${i * (H + gap)})"><rect width="${W}" height="${H}" fill="#fffdf7" stroke="#d6d3d1" stroke-width="0.3"/>${sheetSvg(sh, W, H, i).replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '')}</g>`).join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}mm" height="${total}mm" viewBox="0 0 ${W} ${total}"><style>polygon{stroke-width:0.6}text{font-size:6px}</style>${inner}</svg>`; // traits épaissis pour l'écran seulement
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}mm" height="${total}mm" viewBox="0 0 ${W} ${total}"><style>polygon{stroke-width:0.6}polygon.e{stroke-width:0.1}text{font-size:6px}</style>${inner}</svg>`; // traits épaissis pour l'écran seulement
 }

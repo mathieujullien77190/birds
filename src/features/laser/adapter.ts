@@ -2,7 +2,7 @@ import { sheetLabel, type NestSheet } from '@/birdhouse/model';
 import type { LaserItem, LaserJob, Polyline } from '@laser';
 
 /** Remarque affichée sous l'aperçu du trajet : ce que la machine reçoit (et ce qu'elle ne reçoit pas). */
-const NOTICE = 'Les noms des pièces (en bleu dans les SVG) ne sont pas gravés : seules les coupes (contours des pièces et de leurs trous) sont envoyées.';
+const NOTICE = 'Le code de chaque plaque (T01…, en bleu) est gravé à bas régime avant la coupe ; les noms des pièces ne sont pas gravés. Les coupes (contours des pièces et de leurs trous) suivent.';
 
 /**
  * Une planche de `nestSheets` → un `LaserJob` de laser-control. Le repère de la planche a l'origine EN HAUT à gauche (y vers le bas, comme le SVG) ;
@@ -15,9 +15,10 @@ export function sheetToJob(sheet: NestSheet, W: number, H: number): LaserJob {
   });
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   for (const it of sheet.items) { minX = Math.min(minX, it.x); maxX = Math.max(maxX, it.x + it.w); minY = Math.min(minY, H - (it.y + it.h)); maxY = Math.max(maxY, H - it.y); }
+  const engrave = sheet.items.flatMap((it) => (it.engrave ?? []).map((c): Polyline => c.map(([a, b]): [number, number] => [it.x + a, H - (it.y + it.h - b)]))); // le code de chaque plaque, gravé avant la coupe
   return {
     widthMm: W, heightMm: H, title: 'Nichoir high tech — découpe laser',
-    layers: { cut: pieces.flatMap((p) => p.contours) },
+    layers: { cut: pieces.flatMap((p) => p.contours), ...(engrave.length ? { engrave } : {}) },
     pieces,
     frame: sheet.items.length ? { minX, minY, maxX, maxY } : undefined, // le cadre « autour des pièces » suit les plaques entières
   };

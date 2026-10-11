@@ -1,6 +1,6 @@
 import { useEffect, type MutableRefObject } from 'react';
 import { MathUtils, Plane } from 'three';
-import type { FaceAxis, PlankScene } from '@/birdhouse/model';
+import { plankCodes, type FaceAxis, type PlankScene } from '@/birdhouse/model';
 import { EMISSIVE } from '@/birdhouse/three/constants';
 import { clearGroup, disposeObject3D } from '@/birdhouse/three/dispose';
 import { cutMarkObject, habillageDimensions, pullMarkObject } from '@/birdhouse/three/factories/marks';
@@ -18,14 +18,16 @@ export interface SceneSyncState {
   cut: Cut;
   hidden: Set<string>;
   piReady: boolean;
+  /** Écrire le code de chaque plaque découpée sur sa face (bouton « N° »). */
+  showCodes: boolean;
 }
 
 /**
  * L'état → la scène, en effets séparés (chacun ne se refait que si SES entrées changent, dans cet ordre) :
  * 1. les meshes (une par plaque : forme, position, rotation, transparence ; les plaques supprimées sont libérées) ;
- * 2. la surbrillance (sélection, survol) ; 3. la coupe et la visibilité ; 4–7. les repères (trou, face tirée, plan de coupe) et les cotes de l'habillage.
+ * 2. la surbrillance (sélection, survol) ; 3. la coupe et la visibilité ; 4–6. les repères (face tirée, plan de coupe) et les cotes de l'habillage ; 7. les codes écrits sur les plaques.
  */
-export function useSceneSync(view: MutableRefObject<View | null>, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady }: SceneSyncState) {
+export function useSceneSync(view: MutableRefObject<View | null>, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady, showCodes }: SceneSyncState) {
   // 1. une mesh par plaque, géométrie refaite si la forme change, position / rotation recopiées
   useEffect(() => {
     const v = view.current;
@@ -43,7 +45,6 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       m.position.set(...p.pos);
       m.rotation.set(MathUtils.degToRad(p.rot[0]), MathUtils.degToRad(p.rot[1]), MathUtils.degToRad(p.rot[2]));
       const mat = m.material;
-      m.setOak(p.name === 'Toit en chêne'); // le pan de toit en chêne porte une texture de bois (le reste garde ses couleurs par sommets)
       m.ghost = isGhostPart(p.name); m.baseTransparent = !!p.transparent; // la cassette du ventilateur devient translucide quand il tourne
       mat.transparent = !!p.transparent;
       mat.opacity = p.transparent ? 0.3 : 1;
@@ -82,8 +83,9 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       m.visible = !isHidden;
       m.layers.set(isHidden ? 1 : 0);
       m.edges.material.clippingPlanes = clipPlanes;
+      if (m.label) { m.label.material.clippingPlanes = clipPlanes; m.label.material.needsUpdate = true; } // l'étiquette est coupée avec sa plaque
     }
-  }, [view, sc, cut, hidden]);
+  }, [view, sc, cut, hidden, showCodes]);
 
   // 4. face à tirer : son contour en pointillés bleus
   useEffect(() => {
@@ -114,4 +116,11 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
     clearGroup(v.labels);
     v.labels.add(...habillageDimensions(sc, hidden));
   }, [view, sc, hidden]);
+  // 7. codes des plaques (T01…) : une étiquette par plaque découpée, partagée entre pièces identiques ; retirées quand le bouton « N° » est coupé
+  useEffect(() => {
+    const v = view.current;
+    if (!v) return;
+    const codes = showCodes ? plankCodes(sc) : null;
+    for (const p of sc.planks) v.meshes.get(p.id)?.setCode(codes?.get(p.id) ?? null, p, sc.t);
+  }, [view, sc, showCodes, piReady]);
 }

@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { Btn, Hint } from '@/ui';
-import type { Plank } from '@/birdhouse/model';
+import { plankCodes, type Plank } from '@/birdhouse/model';
 import { GroupRow } from './GroupRow';
 import { PlankCard } from './PlankCard';
 import { cardScale, groupName } from './helpers';
@@ -9,10 +9,11 @@ import type { PiecesListProps } from './types';
 /** Contenu du volet « Pièces » : chaque plaque à plat (ou ligne de groupe repliable), glisser-déposer, œil, renommer, dupliquer, supprimer. */
 export function PiecesList(props: PiecesListProps) {
   const { sc, selected, groupSel, openGroups, dropOn, docOpen, confirmAll, removeAll } = props;
+  const codes = useMemo(() => plankCodes(sc), [sc]); // code de chaque plaque découpée (T01…)
   if (!sc.planks.length) return <Hint>Aucune plaque.</Hint>;
   const scale = cardScale(sc.planks);
   const card = (p: Plank) => (
-    <PlankCard key={p.id} p={p} planks={props.sc.planks} scale={scale} selectedId={props.selectedId} groupSel={groupSel} extra={props.extra} hidden={props.hidden} dropOn={dropOn} setDropOn={props.setDropOn} setHover={props.setHover}
+    <PlankCard key={p.id} p={p} code={codes.get(p.id)} planks={props.sc.planks} scale={scale} selectedId={props.selectedId} groupSel={groupSel} extra={props.extra} hidden={props.hidden} dropOn={dropOn} setDropOn={props.setDropOn} setHover={props.setHover}
       setDocOpen={props.setDocOpen} setGroupSel={props.setGroupSel} pick={props.pick} update={props.update} toggleHidden={props.toggleHidden} duplicate={props.duplicate} remove={props.remove} dropPlank={props.dropPlank} />
   );
   // les plaques liées sont rangées sous une seule ligne (boîte, groupe) qui se déplie

@@ -35,6 +35,7 @@ export default function Planks() {
   const [piOpen, setPiOpen] = useState(false); // simulateur de la page web du Pi (Python exécuté dans le navigateur) : fenêtre affichée
   const [piMounted, setPiMounted] = useState(false); // le simulateur reste monté une fois ouvert : fermer la fenêtre ne fait que la cacher, le Python continue (ventilateur, LED, batterie)
   const [night, setNight] = usePersistentFlag(STORAGE.night, false); // vue 3D de nuit (la clé n'est pas ouverte par défaut)
+  const [showCodes, setShowCodes] = usePersistentFlag(STORAGE.codes); // codes des plaques (T01…) écrits dans la 3D, affichés par défaut
   const [schemaOn, setSchemaOn] = usePersistentFlag(STORAGE.schema); // ouvert par défaut ; schéma électrique à côté de la 3D
   const { cut, setCut, cutRef, midOf } = useCutPlane(scRef);
   const { hidden, setHidden, toggleHidden } = useHiddenPlanks(); // pièces cachées dans la 3D (œil du volet « Pièces »)
@@ -101,7 +102,7 @@ export default function Planks() {
   const [fanPct, setFanPct] = useState(0); // vitesse du ventilateur lue dans le simulateur du Pi (le rotor de la 3D tourne)
   useFanSpeed(view, fanPct);
   const [leds, setLeds] = useState({ nid: false, ext: false }); // LED infrarouges allumées dans le simulateur du Pi (faisceaux visibles dans la 3D)
-  useSceneSync(view, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady });
+  useSceneSync(view, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady, showCodes });
   useIrBeams(view, sc, leds); // après useSceneSync : les meshes des cartes de LED existent
 
   // ----- actions -----
@@ -174,7 +175,7 @@ export default function Planks() {
       <div className="flex h-full w-full flex-col overflow-hidden bg-stone-100 text-stone-800">
         <MobileBar settingsOn={mSettings} onSettings={() => { setMSettings((v) => !v); setMParts(false); }} partsOn={mParts} onParts={() => { setMParts((v) => !v); setMSettings(false); }}
           backLabel={backLabel} onBack={back} winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug}
-          cutOn={cut.on} onToggleCut={toggleCut} />
+          cutOn={cut.on} onToggleCut={toggleCut} codesOn={showCodes} onToggleCodes={() => setShowCodes((v) => !v)} />
         <main className="relative min-h-0 flex-1">
           <div ref={host} className="h-full w-full touch-none" />
           {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
@@ -201,7 +202,7 @@ export default function Planks() {
         <div ref={host} className="h-full w-full" />
         {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
         <UndoBar backLabel={backLabel} onBack={back} />
-        <ViewToolbar winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={openPi} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
+        <ViewToolbar codesOn={showCodes} onToggleCodes={() => setShowCodes((v) => !v)} winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={openPi} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
         {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
         {wireSheetEl}
         {pull && <PullBar cutOn={cut.on} onDone={() => setPull(null)} />}

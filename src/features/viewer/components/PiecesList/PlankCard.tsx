@@ -6,8 +6,8 @@ import { wireSummary } from '../WireSheet';
 import type { DropTarget } from './types';
 
 /** Carte d'une plaque dans « Pièces » : nom (renommable), œil, dupliquer, supprimer, dessin à plat (ou bouton du document), glisser-déposer. */
-export function PlankCard({ p, planks, scale, selectedId, groupSel, extra, hidden, dropOn, setDropOn, setHover, setDocOpen, setGroupSel, pick, update, toggleHidden, duplicate, remove, dropPlank }: {
-  p: Plank; planks: Plank[]; scale: number; selectedId: string | null; groupSel: string | null; extra: Set<string>; hidden: Set<string>;
+export function PlankCard({ p, code, planks, scale, selectedId, groupSel, extra, hidden, dropOn, setDropOn, setHover, setDocOpen, setGroupSel, pick, update, toggleHidden, duplicate, remove, dropPlank }: {
+  p: Plank; /** Code de la plaque découpée (T01…), absent pour un composant. */ code?: string; planks: Plank[]; scale: number; selectedId: string | null; groupSel: string | null; extra: Set<string>; hidden: Set<string>;
   dropOn: string | null; setDropOn: Dispatch<SetStateAction<string | null>>; setHover: (h: Hover | null) => void;
   setDocOpen: (d: string | null) => void; setGroupSel: (g: string | null) => void;
   pick: (id: string | null, ctrl: boolean) => void;
@@ -31,6 +31,7 @@ export function PlankCard({ p, planks, scale, selectedId, groupSel, extra, hidde
       title={p.group ? undefined : 'Glisse cette plaque sur une boîte (ou une autre plaque) pour les grouper'}
     >
       <div className="mb-1 flex items-center gap-1 text-[11px]">
+        {code && <span className="shrink-0 rounded bg-sky-50 px-1 font-mono text-[10px] font-semibold text-sky-800" title="Code de la plaque : gravé sur la planche de découpe, écrit dans la 3D (bouton N°) ; le même pour les pièces identiques">{code}</span>}
         <NameEdit value={p.name} active={p.id === selectedId && !groupSel} onSelect={pickPlank} onRename={(v) => update(p.id, { name: v }, 'Nom')} />
         <IconButton dim={isHidden} onClick={() => toggleHidden([p.id])} title={isHidden ? 'Afficher' : 'Cacher'}><Eye off={isHidden} /></IconButton>
         <IconButton onClick={() => duplicate(p)} title="Dupliquer">⧉</IconButton>

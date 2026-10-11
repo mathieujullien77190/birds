@@ -2,9 +2,9 @@ import { ToolbarButton } from '@/ui';
 import type { WinterState } from '@/birdhouse/model';
 
 /** Barre du haut du téléphone : réglages, retour, pièces (afficher / cacher), puis les outils de la vue (cassette, prise d'air, coupe) sur une ligne qui défile. */
-export function MobileBar({ settingsOn, onSettings, partsOn, onParts, backLabel, onBack, winter, onToggleCassette, onTogglePlug, cutOn, onToggleCut }: {
+export function MobileBar({ settingsOn, onSettings, partsOn, onParts, backLabel, onBack, codesOn, onToggleCodes, winter, onToggleCassette, onTogglePlug, cutOn, onToggleCut }: {
   settingsOn: boolean; onSettings: () => void; partsOn: boolean; onParts: () => void; backLabel: string | null; onBack: () => void;
-  winter: WinterState; onToggleCassette: () => void; onTogglePlug: () => void; cutOn: boolean; onToggleCut: () => void;
+  codesOn: boolean; onToggleCodes: () => void; winter: WinterState; onToggleCassette: () => void; onTogglePlug: () => void; cutOn: boolean; onToggleCut: () => void;
 }) {
   return (
     <header className="z-10 shrink-0 border-b border-stone-200 bg-white">
@@ -17,6 +17,7 @@ export function MobileBar({ settingsOn, onSettings, partsOn, onParts, backLabel,
       <div className="flex items-center gap-1 overflow-x-auto px-2 pb-1">
         <ToolbarButton dense muted icon={winter.cassette === 'winter' ? '❄' : '🌀'} active={winter.cassette === 'winter'} aria-pressed={winter.cassette === 'winter'} disabled={winter.cassette === null} onClick={onToggleCassette} className="shrink-0 disabled:opacity-40">Cassette</ToolbarButton>
         <ToolbarButton dense muted icon={winter.plug === 'plugged' ? '🧱' : '💨'} active={winter.plug === 'plugged'} aria-pressed={winter.plug === 'plugged'} disabled={winter.plug === null} onClick={onTogglePlug} className="shrink-0 disabled:opacity-40">Prise d&apos;air</ToolbarButton>
+        <ToolbarButton dense muted icon="№" active={codesOn} aria-pressed={codesOn} onClick={onToggleCodes} className="shrink-0">N°</ToolbarButton>
         <ToolbarButton dense icon="✂" active={cutOn} aria-pressed={cutOn} onClick={onToggleCut} className="shrink-0">Coupe</ToolbarButton>
       </div>
     </header>
