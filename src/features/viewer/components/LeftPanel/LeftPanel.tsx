@@ -22,13 +22,13 @@ export interface LeftPanelProps {
   machine: LaserMachine;
 }
 
-/** Panneau de gauche : « Bois », « Nichoir mésange », « Découpe laser » ; replié, il ne reste qu'une languette ▸ sur la tranche. */
+/** Panneau de gauche : « Bois », « Nichoir high tech », « Découpe laser » ; replié, il ne reste qu'une languette ▸ sur la tranche. */
 export function LeftPanel({ open, setOpen, sc, commit, nest, setNest, addNest, cutCfg, setCutCfg, cutView, setCutView, sheets, machine }: LeftPanelProps) {
   return (
     <SidePanel side="left" open={open} onOpen={() => setOpen(true)} openTitle="Ouvrir le menu" width="w-[22rem]" className="gap-3 overflow-y-auto p-3">
       <header className="flex items-start justify-between gap-2">
         <div>
-          <h1 className="text-base font-semibold text-emerald-900">Nichoir mésange</h1>
+          <h1 className="text-base font-semibold text-emerald-900">Nichoir high tech</h1>
         </div>
         <div className="flex items-center gap-1">
           <CollapseButton roomy onClick={() => setOpen(false)} title="Replier le menu">◂</CollapseButton>

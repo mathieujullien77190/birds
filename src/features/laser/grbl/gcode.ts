@@ -216,7 +216,7 @@ export function buildGcode(sheet: NestSheet, opt: CutOptions): GcodeJob {
   return {
     lines: w.lines, lineTimes: w.lineTimes, segments: w.segments, stats,
     header: [
-      'Nichoir mésange — découpe laser (Sculpfun S30 Pro, GRBL 1.1)',
+      'Nichoir high tech — découpe laser (Sculpfun S30 Pro, GRBL 1.1)',
       `Planche ${opt.W} x ${opt.H} mm ; origine de travail = coin bas-gauche, X à droite, Y vers l'arrière`,
       `${contours.length} contours, ${Math.max(1, Math.round(opt.passes))} passe(s) (${opt.passMode === 'all' ? 'tout le jeu' : 'contour par contour'}), F${num(feed)} mm/min, S${s}/${opt.sMax}`,
       'Les noms des pièces ne sont pas gravés.',

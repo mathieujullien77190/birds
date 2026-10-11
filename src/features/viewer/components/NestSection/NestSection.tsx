@@ -2,11 +2,11 @@ import { Btn, Chip, Section, Slider } from '@/ui';
 import type { NestParams, PlankScene } from '@/birdhouse/model';
 import { nestOuterSize } from './helpers';
 
-/** Section « Nichoir mésange » : dimensions, options (Solaire, 2ᵉ caméra) et création du nichoir. */
+/** Section « Nichoir high tech » : dimensions, options (Solaire, 2ᵉ caméra) et création du nichoir. */
 export function NestSection({ sc, nest, setNest, addNest }: { sc: PlankScene; nest: NestParams; setNest: (n: NestParams) => void; addNest: () => void }) {
   const [W, D, H] = nestOuterSize(nest, sc.t);
   return (
-    <Section title="Nichoir mésange" defaultOpen note={`${nest.l} × ${nest.L}`}>
+    <Section title="Nichoir high tech" defaultOpen note={`${nest.l} × ${nest.L}`}>
       <Slider label="Intérieur (carré, fond)" value={nest.l} min={120} max={300} step={1} unit=" mm" onChange={(l) => setNest({ ...nest, l, L: l })} />
       <Slider label="Du sol au bas du trou" value={nest.floorToHole} min={60} max={600} step={1} unit=" mm" onChange={(floorToHole) => setNest({ ...nest, floorToHole })} />
       <Slider label="Diamètre du trou" value={nest.hole} min={20} max={120} step={1} unit=" mm" onChange={(hole) => setNest({ ...nest, hole })} />

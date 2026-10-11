@@ -1,4 +1,4 @@
-# Nichoir mésange
+# Nichoir high tech
 
 Un nichoir à mésanges isolé, dessiné en 3D dans le navigateur et découpé au laser dans du contreplaqué de 3 mm, avec son électronique : deux caméras, LED infrarouges, ventilateur silencieux sur cassette amovible (été / hiver), prise d'air basse, capteurs, batterie LiFePO4 et panneau solaire, le tout piloté par un Raspberry Pi 5 et visible sur une page web.
 

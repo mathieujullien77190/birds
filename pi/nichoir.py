@@ -1,4 +1,4 @@
-"""Nichoir mésange — programme de test sur le Raspberry Pi 5.
+"""Nichoir high tech — programme de test sur le Raspberry Pi 5.
 
 Version volontairement minimale pour vérifier le matériel :
 - lit le capteur du nid (BME280, I2C), la batterie (INA219, facultatif) et la météo extérieure (en ligne) ;
@@ -770,7 +770,7 @@ if __name__ == "__main__":
     ventilo(0, "arret", "démarrage du programme", silencieux=True)   # 12 V coupé au démarrage
     charger_reglages()
     charger_historique()
-    log("Nichoir mésange : page sur http://0.0.0.0:8080" + (" (mode simulé)" if MOCK else ""))
+    log("Nichoir high tech : page sur http://0.0.0.0:8080" + (" (mode simulé)" if MOCK else ""))
     for msg in etat["erreurs"].values():
         log("! " + msg)
     threading.Thread(target=boucle, daemon=True).start()
