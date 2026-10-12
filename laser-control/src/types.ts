@@ -16,6 +16,8 @@ export interface MachineSettings {
   power: number;
   passes: number;
   passMode: PassMode;
+  /** Assistance d'air (pompe de la carte) : `M8` / `M9` autour de la coupe. */
+  air: boolean;
   /** Plafond de puissance (%). */
   capPct: number;
   /** Vitesse des déplacements manuels (mm/min). */

@@ -27,6 +27,8 @@ export interface CutOptions {
   capPct: number;
   /** Vitesse des déplacements rapides, pour l'estimation du temps (mm/min). */
   rapidFeed?: number;
+  /** Assistance d'air : `M8` avant la coupe, `M9` après (machines à pompe commandée par la carte, comme la S30 Ultra). Éteinte par défaut : le G-code reste identique. */
+  air?: boolean;
   /** Gravure (couche `engrave` du travail) : vitesse (mm/min), puissance (%, soumise au même plafond) et passes. Une passe légère par défaut. */
   engraveFeed?: number;
   engravePowerPct?: number;
@@ -130,18 +132,20 @@ export class Writer {
 }
 
 /** Début commun : unités mm, absolu, système G54, mode laser dynamique à puissance 0 (rien ne brûle avant le premier G1). */
-export function prologue(w: Writer) {
+export function prologue(w: Writer, air = false) {
   w.raw('G21');
   w.raw('G90');
   w.raw('G54');
   w.raw('G94');
   w.raw('M5');
+  if (air) w.raw('M8');
   w.raw('M4 S0');
 }
 
 /** Fin commune : laser éteint, retour à l'origine de travail, `M5` en dernière ligne. */
-export function epilogue(w: Writer) {
+export function epilogue(w: Writer, air = false) {
   w.raw('M5');
+  if (air) w.raw('M9');
   w.rapid(0, 0, true);
   w.raw('M5');
 }
@@ -186,6 +190,8 @@ export interface TestCardOptions {
   sMax: number;
   capPct: number;
   rapidFeed?: number;
+  /** Assistance d'air (`M8` / `M9`). */
+  air?: boolean;
 }
 
 export interface TestCell { speed: number; power: number; s: number; x: number; y: number; clamped: boolean }
@@ -203,7 +209,7 @@ export function buildTestCard(o: TestCardOptions): TestCardResult {
   const w = new Writer(o.rapidFeed ?? DEFAULT_RAPID, o.W, o.H);
   const cells: TestCell[] = [];
   let clamped = false;
-  prologue(w);
+  prologue(w, o.air);
   o.powers.forEach((power, r) => o.speeds.forEach((speed, c) => {
     const x = TEST_MARGIN + c * (o.size + o.gap), y = TEST_MARGIN + r * (o.size + o.gap);
     const s = powerToS(power, o.sMax, o.capPct);
@@ -213,7 +219,7 @@ export function buildTestCard(o: TestCardOptions): TestCardResult {
     const sq: [number, number][] = [[x, y], [x + o.size, y], [x + o.size, y + o.size], [x, y + o.size]];
     for (let p = 0; p < Math.max(1, Math.round(o.passes)); p++) w.cut(sq, Math.max(1, speed), s, p === 0);
   }));
-  epilogue(w);
+  epilogue(w, o.air);
   const stats = w.stats(cells.length, clamped);
   const job: GcodeJob = {
     lines: w.lines, lineTimes: w.lineTimes, segments: w.segments, stats,

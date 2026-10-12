@@ -99,7 +99,7 @@ describe('buildGcode : en-tête, valeurs par défaut, plafonnement', () => {
   it('en-tête sans gravure : titre par défaut, planche, passes, avertissement sur les noms', () => {
     const g = buildGcode(job, OPT);
     expect(g.header).toEqual([
-      'Découpe laser (Sculpfun S30 Pro, GRBL 1.1)',
+      'Découpe laser (Sculpfun S30 Pro / S30 Ultra, GRBL 1.1)',
       "Planche 100 x 100 mm ; origine de travail = coin bas-gauche, X à droite, Y vers l'arrière",
       '1 contours, 1 passe(s) (tout le jeu), F600 mm/min, S500/1000',
       'Les noms des pièces ne sont pas gravés.',
@@ -109,7 +109,7 @@ describe('buildGcode : en-tête, valeurs par défaut, plafonnement', () => {
   });
   it('en-tête avec gravure aux valeurs par défaut (1500 mm/min, 15 %, 1 passe), titre, mode contour', () => {
     const g = buildGcode({ ...job, title: 'Boîte', layers: { cut: job.layers.cut, engrave: [box(40, 40, 10, 10), [[0, 0], [1, 1]]] } }, { ...OPT, passMode: 'contour', passes: 2.4 });
-    expect(g.header[0]).toBe('Boîte (Sculpfun S30 Pro, GRBL 1.1)');
+    expect(g.header[0]).toBe('Boîte (Sculpfun S30 Pro / S30 Ultra, GRBL 1.1)');
     expect(g.header[2]).toBe('1 contours, 2 passe(s) (contour par contour), F600 mm/min, S500/1000');
     expect(g.header[3]).toBe('1 contours gravés avant la coupe : F1500 mm/min, S150/1000, 1 passe(s)');
     expect(g.stats.contours).toBe(2); // le contour gravé dégénéré (2 points) est écarté

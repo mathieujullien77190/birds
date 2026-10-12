@@ -37,6 +37,11 @@ describe('parseMachineSettings', () => {
     const custom = { ...D, feed: 450, power: 75, passes: 5, passMode: 'contour' as const, capPct: 90, jogFeed: 1000, jogStep: 1, engraveFeed: 2000, engravePower: 20, frameMode: 'sheet' as const, test: { ...D.test, size: 12 } };
     expect(parseMachineSettings(JSON.stringify(custom))).toEqual(custom);
   });
+  it('assistance d air : éteinte par défaut, vraie seulement si le texte stocké dit exactement true', () => {
+    expect(D.air).toBe(false);
+    expect(parseMachineSettings('{"air":true}').air).toBe(true);
+    for (const v of ['1', '"true"', 'null', '0', 'false']) expect(parseMachineSettings(`{"air":${v}}`).air, v).toBe(false);
+  });
   it('chaque champ numérique est ramené dans ses bornes', () => {
     const hi = parseMachineSettings(JSON.stringify({ feed: 99999, power: 500, passes: 99, capPct: 500, jogFeed: 99999, engraveFeed: 99999, engravePower: 500 }));
     expect([hi.feed, hi.power, hi.passes, hi.capPct, hi.jogFeed, hi.engraveFeed, hi.engravePower]).toEqual([6000, 100, 20, 100, 6000, 6000, 100]);

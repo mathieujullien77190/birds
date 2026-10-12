@@ -20,6 +20,10 @@ export function CutSettings({ m }: { m: LaserMachine }) {
         <Chip active={s.passMode === 'all'} onClick={() => set({ passMode: 'all' })} title="Tout le jeu de contours, puis on recommence">Toute la planche</Chip>
         <Chip active={s.passMode === 'contour'} onClick={() => set({ passMode: 'contour' })} title="Chaque contour est repassé avant le suivant">Contour par contour</Chip>
       </div>
+      <label className="flex cursor-pointer items-center gap-2 text-[11px] text-stone-700" title="Pour les machines dont la pompe est commandée par la carte (Sculpfun S30 Ultra) : le programme envoie M8 avant la coupe et M9 après. Laisser éteint si la machine n'a pas de pompe commandée.">
+        <input type="checkbox" checked={s.air} onChange={(e) => set({ air: e.target.checked })} />
+        Assistance d'air (M8 / M9)
+      </label>
       {!!m.item?.job?.layers.engrave?.length && (
         <>
           <Slider label="Vitesse de gravure" value={s.engraveFeed} min={FEED_RANGE.min} max={FEED_RANGE.max} step={10} unit=" mm/min" onChange={(engraveFeed) => set({ engraveFeed })} />

@@ -39,13 +39,13 @@ export function useLaserMachine(items: LaserItem[], area: Area = { W: MACHINE_AR
   const cut = useMemo<GcodeJob | null>(() => {
     if (imported) return imported.job;
     if (!item?.job) return null;
-    return buildGcode(item.job, { feed: settings.feed, powerPct: settings.power, passes: settings.passes, passMode: settings.passMode, sMax, capPct: settings.capPct, engraveFeed: settings.engraveFeed, engravePowerPct: settings.engravePower });
-  }, [imported, item?.job, settings.feed, settings.power, settings.passes, settings.passMode, settings.capPct, settings.engraveFeed, settings.engravePower, sMax]);
+    return buildGcode(item.job, { feed: settings.feed, powerPct: settings.power, passes: settings.passes, passMode: settings.passMode, air: settings.air, sMax, capPct: settings.capPct, engraveFeed: settings.engraveFeed, engravePowerPct: settings.engravePower });
+  }, [imported, item?.job, settings.feed, settings.power, settings.passes, settings.passMode, settings.air, settings.capPct, settings.engraveFeed, settings.engravePower, sMax]);
 
   const test = useMemo<TestCardResult>(() => {
     const t = settings.test;
-    return buildTestCard({ W, H, speeds: spread(t.speedMin, t.speedMax, t.speedCount), powers: spread(t.powerMin, t.powerMax, t.powerCount), size: t.size, gap: 5, passes: t.passes, sMax, capPct: settings.capPct });
-  }, [settings.test, settings.capPct, W, H, sMax]);
+    return buildTestCard({ W, H, speeds: spread(t.speedMin, t.speedMax, t.speedCount), powers: spread(t.powerMin, t.powerMax, t.powerCount), size: t.size, gap: 5, passes: t.passes, sMax, capPct: settings.capPct, air: settings.air });
+  }, [settings.test, settings.capPct, settings.air, W, H, sMax]);
 
   const program: GcodeJob | null = target === 'test' ? test.job : cut;
 

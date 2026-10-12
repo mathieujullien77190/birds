@@ -3,6 +3,7 @@ import { Btn, Chip, Slider } from '@/ui';
 import { saveZip } from '@/lib';
 import { sheetSvg } from '@/birdhouse/model';
 import { LaserSection as LaserShell, type LaserMachine } from '@laser';
+import { LASER_MACHINES } from '../constants';
 import { sheetFiles } from '../helpers';
 import type { CutCfg, Sheets } from '../types';
 
@@ -15,6 +16,10 @@ export function LaserSection({ cutCfg, setCutCfg, cutView, setCutView, sheets, m
 }) {
   return (
     <LaserShell machine={machine} hideMachine note={`${sheets.length} planche${sheets.length > 1 ? 's' : ''} de ${cutCfg.W} × ${cutCfg.H}`}>
+      <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-stone-600">
+        Machine
+        {LASER_MACHINES.map((mc) => <Chip key={mc.id} active={cutCfg.W === mc.W && cutCfg.H === mc.H} onClick={() => setCutCfg({ ...cutCfg, W: mc.W, H: mc.H })} title={`Planche de ${mc.W} × ${mc.H} mm (zone de gravure de la machine)`}>{mc.label}</Chip>)}
+      </div>
       <Slider label="Largeur de la planche" value={cutCfg.W} min={100} max={1500} step={5} unit=" mm" onChange={(W) => setCutCfg({ ...cutCfg, W })} />
       <Slider label="Hauteur de la planche" value={cutCfg.H} min={100} max={1500} step={5} unit=" mm" onChange={(H) => setCutCfg({ ...cutCfg, H })} />
       <Slider label="Espace entre les pièces" value={cutCfg.gap} min={0} max={20} step={0.5} unit=" mm" onChange={(gap) => setCutCfg({ ...cutCfg, gap })} />

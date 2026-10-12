@@ -30,17 +30,18 @@ export function buildGcode(job: LaserJob, opt: CutOptions): GcodeJob {
   const eS = powerToS(ePower, opt.sMax, opt.capPct);
   const ePasses = Math.max(1, Math.round(opt.engravePasses ?? 1));
   const clamped = opt.powerPct > opt.capPct || opt.powerPct > 100 || (engrave.length > 0 && ePower > opt.capPct);
-  prologue(w);
+  prologue(w, opt.air);
   for (let p = 0; p < ePasses; p++) for (const c of engrave) w.cut(c, eFeed, eS, p === 0, true);
   emitContours(w, contours, { feed, s, passes: opt.passes, passMode: opt.passMode });
-  epilogue(w);
+  epilogue(w, opt.air);
   const stats = w.stats(contours.length + engrave.length, clamped);
   return {
     lines: w.lines, lineTimes: w.lineTimes, segments: w.segments, stats,
     header: [
-      `${job.title ?? 'Découpe laser'} (Sculpfun S30 Pro, GRBL 1.1)`,
+      `${job.title ?? 'Découpe laser'} (Sculpfun S30 Pro / S30 Ultra, GRBL 1.1)`,
       `Planche ${num(job.widthMm)} x ${num(job.heightMm)} mm ; origine de travail = coin bas-gauche, X à droite, Y vers l'arrière`,
       `${contours.length} contours, ${Math.max(1, Math.round(opt.passes))} passe(s) (${opt.passMode === 'all' ? 'tout le jeu' : 'contour par contour'}), F${num(feed)} mm/min, S${s}/${opt.sMax}`,
+      ...(opt.air ? ["Assistance d'air : M8 avant la coupe, M9 après"] : []),
       ...(engrave.length ? [`${engrave.length} contours gravés avant la coupe : F${num(eFeed)} mm/min, S${eS}/${opt.sMax}, ${ePasses} passe(s)`] : ['Les noms des pièces ne sont pas gravés.']),
     ],
   };

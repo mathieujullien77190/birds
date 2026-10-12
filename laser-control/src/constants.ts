@@ -12,6 +12,7 @@ export const DEFAULT_MACHINE_SETTINGS: MachineSettings = {
   power: 60,
   passes: 3,
   passMode: 'all',
+  air: false,
   capPct: 80,
   jogFeed: 3000,
   jogStep: 10,

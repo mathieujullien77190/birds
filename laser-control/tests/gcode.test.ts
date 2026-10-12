@@ -37,6 +37,15 @@ describe('buildGcode', () => {
     expect(g.lines[g.lines.length - 2]).toBe('G0 X0 Y0');
   });
 
+  it('assistance d air : M8 après M5 et avant M4 S0, M9 avant le retour à l origine, M5 toujours en dernier ; éteinte par défaut (G-code inchangé)', () => {
+    const off = buildGcode(job(), OPT), on = buildGcode(job(), { ...OPT, air: true });
+    expect(off.lines).not.toContain('M8'); expect(off.lines).not.toContain('M9');
+    expect(on.lines.slice(0, 7)).toEqual(['G21', 'G90', 'G54', 'G94', 'M5', 'M8', 'M4 S0']);
+    expect(on.lines.slice(-4)).toEqual(['M5', 'M9', 'G0 X0 Y0', 'M5']);
+    expect(on.lines.filter((l) => l !== 'M8' && l !== 'M9')).toEqual(off.lines); // rien d'autre ne change
+    expect(on.header.join(' ')).toContain('M8');
+  });
+
   it('coupe la petite pièce avant la grande, et le trou avant le contour extérieur', () => {
     const g = buildGcode(job(), { ...OPT, passes: 1 });
     const cutStarts = g.lines.map((l, i) => ({ l, i })).filter(({ l }) => l.startsWith('G1') && l.includes('F'));
