@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { Btn, Chip, Slider } from '@/ui';
 import { saveZip } from '@/lib';
-import { sheetLabel, sheetSvg } from '@/birdhouse/model';
+import { sheetSvg } from '@/birdhouse/model';
 import { LaserSection as LaserShell, type LaserMachine } from '@laser';
 import { sheetFiles } from '../helpers';
 import type { CutCfg, Sheets } from '../types';
@@ -23,10 +23,7 @@ export function LaserSection({ cutCfg, setCutCfg, cutView, setCutView, sheets, m
         <Chip active={!cutView} onClick={() => setCutView(false)}>3D</Chip>
         <Chip active={cutView} onClick={() => setCutView(true)}>Planches à découper</Chip>
       </div>
-      {sheets.map((sh, i) => (
-        <div key={i} className="text-[11px] text-stone-700">{sheetLabel(sheets, i)} : {sh.items.length} pièce{sh.items.length > 1 ? 's' : ''}, {Math.round(Math.min(sh.used, 1) * 100)} % de la hauteur{sh.used > 1 ? ' — déborde !' : ''}</div>
-      ))}
-      <Btn variant="primary" disabled={!sheets.length} onClick={() => saveZip(sheetFiles(sheets, cutCfg, sheetSvg), `planches-nichoir-${cutCfg.W}x${cutCfg.H}.zip`)}>Télécharger tout (ZIP de {sheets.length} SVG)</Btn>
+      <Btn variant="primary" disabled={!sheets.length} onClick={() => saveZip(sheetFiles(sheets, cutCfg, sheetSvg), `planches-nichoir-${cutCfg.W}x${cutCfg.H}.zip`)}>Télécharger les planches (ZIP)</Btn>
     </LaserShell>
   );
 }
