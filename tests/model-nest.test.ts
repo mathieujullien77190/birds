@@ -46,11 +46,11 @@ describe('makeNest : dimensions déduites des réglages', () => {
     // le toit se pose sur le corps
     expect(byName(planks, /^Dessous toit$/).pos[2]).toBe(bodyH + t / 2);
   });
-  it('encoche du trou d\'envol : largeur trou + 15 + 1 de jeu, ouverte jusqu\'au haut du mur, dans les deux façades avant', () => {
+  it('encoche du trou d\'envol : largeur trou + 15 pile (sans jeu), ouverte jusqu\'au haut du mur, dans les deux façades avant', () => {
     const { planks } = build({ hole: 30 });
     for (const re of [/^Face avant ext$/, /^Face avant int$/]) {
       const p = byName(planks, re);
-      const n = p.notches.filter((x) => x.edge === 'top' && x.width === 46);
+      const n = p.notches.filter((x) => x.edge === 'top' && x.width === 45);
       expect(n).toHaveLength(1);
       expect(n[0].pos).toBe(p.w / 2);
       expect(n[0].depth).toBeGreaterThan(0);

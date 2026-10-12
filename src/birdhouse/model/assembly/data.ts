@@ -83,10 +83,10 @@ export const SEQ: Rule[] = [
     "Pièce en C crénelée de 3 mm : ses dents reçoivent les parois du nid (et celles des quatre parois extérieures, plus tard) ; elle enferme l'isolant sous le cadre du toit. Elle revient vers l'entrée des deux côtés et ne laisse que l'ouverture du bloc d'entrée, qui reste enlevable par le haut. La gaine la traverse par un trou de Ø 18 mm.",
     "Le nid terminé (pièce en C + 4 parois) se pose ensuite d'un bloc dans le corps (étape « Poser le nid dans le corps »).",
   ].join('\n') }),
-  P('nid-avant', 'nid', 'emboiter', /^Face avant int$/, { text: (r) => `Première paroi : ses dents du haut entrent dans les fentes de ${r(/^Pièce en C sous le cadre/)}. Ses dents du bas serviront plus tard à s'enfoncer dans ${r(/^Plancher int$/)}.` }),
-  P('nid-droit', 'nid', 'emboiter', /^Côté droit int$/, { text: 'Emboîter les dents des angles avec la paroi avant, dents du haut dans la pièce en C.' }),
-  P('nid-arriere', 'nid', 'emboiter', /^Face arrière int$/, { text: 'Emboîter les dents des angles avec le côté droit, dents du haut dans la pièce en C.' }),
-  P('nid-gauche', 'nid', 'emboiter', /^Côté gauche int$/, { text: (r) => `Dernière paroi : elle ferme la boîte. La grille de ${r(/^Côté gauche int$/)} (six fentes de 4 mm) est tournée vers le nid ; le module d'aération se colle contre sa face extérieure.` }),
+  P('nid-droit', 'nid', 'emboiter', /^Côté droit int$/, { text: (r) => `Première paroi : ses dents du haut entrent dans les fentes de ${r(/^Pièce en C sous le cadre/)}. Ses dents du bas serviront plus tard à s'enfoncer dans ${r(/^Plancher int$/)}.` }),
+  P('nid-gauche', 'nid', 'emboiter', /^Côté gauche int$/, { text: (r) => `Deuxième paroi, en face de la première : dents du haut dans la pièce en C. La grille de ${r(/^Côté gauche int$/)} (six fentes de 4 mm) est tournée vers le nid ; le module d'aération se colle contre sa face extérieure.` }),
+  P('nid-arriere', 'nid', 'emboiter', /^Face arrière int$/, { text: 'Emboîter les dents des angles avec les deux côtés, dents du haut dans la pièce en C.' }),
+  P('nid-avant', 'nid', 'emboiter', /^Face avant int$/, { text: 'Dernière paroi : elle ferme la boîte. Emboîter les dents des angles avec les deux côtés, dents du haut dans la pièce en C ; son encoche reste ouverte vers le haut pour le bloc d\'entrée.' }),
 
   // ---- c. Corps ----
   P('corps-dessous', 'corps', 'placer', /^Dessous ext$/, { text: "À plat. Son ouverture rectangulaire laisse passer plus tard le module d'aération." }),
@@ -94,6 +94,8 @@ export const SEQ: Rule[] = [
   N('corps-module-air', 'corps', 'installer', "Poser le module d'aération (déjà monté)", "Le module est monté à part (bloc « Aération du corps ») : on le pose d'un bloc, déjà assemblé, après l'isolant du plancher.", [/^Conduit d'air/]),
   P('corps-plancher', 'corps', 'emboiter', /^Plancher int$/, { text: "Ses dents traversent les fentes des murs extérieurs. Il n'a que le passage du conduit d'air." }),
   N('corps-nid-pose', 'corps', 'installer', 'Poser le nid dans le corps (déjà monté)', "Le nid se monte à part (bloc « Nid ») : on le pose d'un bloc (pièce en C et quatre parois, déjà assemblées), sur le plancher intérieur ; les dents du bas des quatre parois entrent dans les fentes du plancher.", [/^(Face avant|Face arrière|Côté droit|Côté gauche) int$|^Pièce en C sous le cadre/]),
+  P('corps-liner', 'corps', 'emboiter', /^Plaque isolant entrée (gauche|droite)$/, { all: true, title: "Plaques qui cachent l'isolant, de chaque côté du bloc d'entrée", text: (r) => `Les deux plaques debout bordent le puits du bloc d'entrée : plaques crénelées aux deux bouts : leurs dents du côté du nid entrent dans les fentes de ${r(/^Face avant int$/)} (déjà en place avec le nid), le plat des bouts se colle contre elle, et le haut contre la pièce en C sans y entrer. Leurs dents côté extérieur recevront ${r(/^Face avant ext$/)} à l'étape suivante.` }),
+  P('corps-liner-dessous', 'corps', 'emboiter', /^Plaque isolant entrée dessous$/, { text: (r) => `À plat entre les deux plaques, sous le bloc d'entrée, crénelée aux deux bouts : ses dents entrent dans ${r(/^Face avant int$/)} et le plat se colle contre elle ; ${r(/^Face avant ext$/)} se pose ensuite sur ses dents extérieures.` }),
   P('corps-avant-ext', 'corps', 'emboiter', /^Face avant ext$/, { text: (r) => `Ne pas monter ${r(/^Côté gauche ext$/)} maintenant : c'est la dernière paroi du corps, après le module d'aération et l'isolation.` }),
   P('corps-arriere-ext', 'corps', 'emboiter', /^Face arrière ext$/),
   P('corps-droit-ext', 'corps', 'emboiter', /^Côté droit ext$/),

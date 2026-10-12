@@ -92,7 +92,7 @@ describe('assemblySteps : les ordres imposés', () => {
     expect(plankCodes(sc0).get(byName(sc0, /^Dessous ext$/).id)).toBe('COR-08');
     expect(plankCodes(sc0).get(byName(sc0, /^Plancher int$/).id)).toBe('COR-09');
     expect(plankCodes(sc0).get(byName(sc0, /^Face avant ext$/).id)).toBe('COR-04');
-    const nid = ['Pièce en C sous le cadre', 'Face avant int', 'Côté droit int', 'Face arrière int', 'Côté gauche int'].map((n) => idx(new RegExp(`^${n}`)));
+    const nid = ['Pièce en C sous le cadre', 'Côté droit int', 'Côté gauche int', 'Face arrière int', 'Face avant int'].map((n) => idx(new RegExp(`^${n}`)));
     expect(new Set(nid).size).toBe(5); expect(nid).toEqual([...nid].sort((x, y) => x - y)); // la pièce en C (COR-15) d'abord, puis les 4 parois intérieures une à une, toutes dans le bloc Nid (avant le Corps)
     for (const k of nid) { expect(steps0[k].pieceIds).toHaveLength(1); expect(steps0[k].block).toBe('nid'); }
     expect(blockFirst('nid')).toBeLessThan(blockFirst('corps')); expect(steps0.filter((s) => s.block === 'nid')).toHaveLength(5); expect(steps0[blockFirst('nid')].pieceIds).toEqual([byName(sc0, /^Pièce en C sous le cadre/).id]);
