@@ -1,5 +1,5 @@
 import type { AssemblyBlock, AssemblyKind } from './types';
-import { BENCH_CAMERAS, BENCH_FAN, BENCH_PAGE, BENCH_SENSORS, DRY_TEXT, OIL_FULL, OIL_SHORT, PAINT_DRY, PAINT_TEXT, PI_PROGRAM, PI_SD, SAT_DRY, SAT_TEXT, TEST_BATTERY, TEST_MULTIMETER } from './texts';
+import { BENCH_CAMERAS, BENCH_FAN, BENCH_PAGE, BENCH_SENSORS, DRY_SHORT, DRY_TEXT, OIL_FULL, PAINT_DRY, PAINT_TEXT, PI_PROGRAM, PI_SD, SAT_DRY, SAT_TEXT, TEST_BATTERY, TEST_MULTIMETER } from './texts';
 
 /** Blocs du montage, dans l'ordre. */
 export const ASSEMBLY_BLOCKS: AssemblyBlock[] = [
@@ -53,7 +53,7 @@ export const SUBASSEMBLIES: { re: RegExp; block: string; put: string }[] = [
   { re: /^(Face avant|Face arrière|Côté droit|Côté gauche) int$/, block: 'nid', put: 'corps-nid-pose' },
   { re: /^(Face (avant|arrière)|Côté (droit|gauche)) caméra 1$/, block: 'zonecam', put: 'toit-zone-camera' },
   { re: /^Goulotte ventilateur (gauche|droite|avant)$/, block: 'goulotte', put: 'toit-goulotte' },
-  { re: /^(Cassette ventilateur|Grille de protection ventilateur|Plot caoutchouc ventilateur|Ventilateur Noctua|Poignée cassette|Prise 4 broches du ventilateur|Fil cassette|Conduit de sortie)/, block: 'cassette', put: 'toit-cassette' },
+  { re: /^(Cassette ventilateur|Grille de protection ventilateur|Plot caoutchouc ventilateur|Ventilateur Noctua|Poignée cassette|Prise 4 broches du ventilateur|Câble d'origine du ventilateur|Conduit de sortie)/, block: 'cassette', put: 'toit-cassette' },
 ];
 
 export const SEQ: Rule[] = [
@@ -76,8 +76,8 @@ export const SEQ: Rule[] = [
   ].join('\n') }),
 
   // ---- b. Pièces d'hiver (rechange) ----
-  N('hiv-huile', 'hiver', 'huiler', "Huiler les pièces d'hiver", `${OIL_SHORT}\nLes parois de la sous-boîte passent pile (jeu 0) dans le conduit d'air : couche très fine, bien essuyée.`, [/^(Bloc isolant d'hiver|Poignée bloc d'hiver|Bouchon-boîte|Poignée bouchon)/]),
-  N('hiv-sechage', 'hiver', 'attendre', "Séchage des pièces d'hiver", DRY_TEXT, [/^(Bloc isolant d'hiver|Poignée bloc d'hiver|Bouchon-boîte|Poignée bouchon)/]),
+  N('hiv-huile', 'hiver', 'huiler', "Huiler les pièces d'hiver", `Les parois de la sous-boîte passent pile (jeu 0) dans le conduit d'air : couche très fine, bien essuyée.`, [/^(Bloc isolant d'hiver|Poignée bloc d'hiver|Bouchon-boîte|Poignée bouchon)/]),
+  N('hiv-sechage', 'hiver', 'attendre', "Séchage des pièces d'hiver", DRY_SHORT, [/^(Bloc isolant d'hiver|Poignée bloc d'hiver|Bouchon-boîte|Poignée bouchon)/]),
   P('hiv-fond', 'hiver', 'placer', /^Bloc isolant d'hiver fond/, { text: "Bloc d'hiver : même empreinte que la cassette du ventilateur, boîte pleine fermée, sans aucune ouverture." }),
   P('hiv-12', 'hiver', 'emboiter', /^Bloc isolant d'hiver [12]$/),
   P('hiv-34', 'hiver', 'emboiter', /^Bloc isolant d'hiver [34]$/),
@@ -93,11 +93,10 @@ export const SEQ: Rule[] = [
 
   // ---- c. Corps ----
   N('corps-huile', 'corps', 'huiler', 'Huiler les pièces du corps', (r) => [
-    OIL_SHORT,
-    `Huiler les parois extérieures, le dessous, les étriers (régulateur et batterie), les nervures et les clavettes. L'intérieur du nid reste brut : ne pas huiler les parois, le plancher (${r(/^Plancher int$/)}) ni l'entrée côté nid (poncé, sans suie de découpe).`,
-    `Le dessous du nichoir (${r(/^Dessous ext$/)}) reçoit seulement l'huile de lin, comme les autres pièces : 2 couches, chants en deux couches.`,
-  ].join('\n'), [/^(Dessous ext|Face (avant|arrière) ext|Côté (droit|gauche) ext|Plaque de verrouillage|Cadre toit|Étrier (régulateur|batterie)|Fixation arbre|Clavette fixation)/]),
-  N('corps-sechage', 'corps', 'attendre', 'Séchage des pièces du corps', DRY_TEXT, [/^(Dessous ext|Face (avant|arrière) ext|Côté (droit|gauche) ext|Plaque de verrouillage|Cadre toit|Étrier (régulateur|batterie)|Fixation arbre|Clavette fixation)/]),
+    'Huiler les parois extérieures, le dessous, la pièce en C, les étriers (régulateur et batterie), les nervures et les clavettes.',
+    `NE PAS HUILER l'intérieur du nid : ni les parois intérieures, ni la face supérieure de « Plancher int » (${r(/^Plancher int$/)}), ni l'intérieur du trou d'envol (bloc d'entrée, côté nid compris).`,
+  ].join('\n'), [/^(Dessous ext|Face (avant|arrière) ext|Côté (droit|gauche) ext|Pièce en C|Étrier (régulateur|batterie)|Fixation arbre|Clavette fixation)/]),
+  N('corps-sechage', 'corps', 'attendre', 'Séchage des pièces du corps', DRY_SHORT, [/^(Dessous ext|Face (avant|arrière) ext|Côté (droit|gauche) ext|Pièce en C|Étrier (régulateur|batterie)|Fixation arbre|Clavette fixation)/]),
   P('corps-dessous', 'corps', 'placer', /^Dessous ext$/, { text: "À plat. Son ouverture rectangulaire laisse passer plus tard le module d'aération." }),
   P('corps-iso-bas', 'corps', 'isoler', /^Isolant sous le plancher/, { all: true, text: "L'isolation du bas se met AVANT le module d'aération, qui la traverse : les quatre pièces se posent ensemble sous le fond." }),
   N('corps-module-air', 'corps', 'installer', "Poser le module d'aération (déjà monté)", "Le module est monté à part (bloc « Aération du corps ») : on le pose d'un bloc, déjà assemblé, après l'isolant du plancher.", [/^Conduit d'air/]),
@@ -112,19 +111,15 @@ export const SEQ: Rule[] = [
     "À passer maintenant, pendant que tout est accessible. Elle monte dans le coin arrière droit, à 1 cm du mur arrière, et traverse des trous de Ø 16 mm, serrés, dans le fond et le plancher intérieur, puis plus tard des trous de Ø 18 mm dans les trois planches du cadre du toit, le dessous et le dessus du toit.",
     "L'isolant n'est pas découpé autour : on pousse la gaine dans la laine.",
   ].join('\n') }),
-  P('corps-iso-nid', 'corps', 'isoler', /^Isolant (gauche|droite$|arrière$)/, { all: true, title: 'Isolant autour du nid', text: "Tous les isolants qui entourent le nid se posent d'un coup, APRÈS le module d'aération et la gaine des fils (ils passent déjà dans ces isolants) et AVANT la paroi extérieure gauche." }),
+  P('corps-iso-nid', 'corps', 'isoler', /^Isolant (gauche|droite$|arrière$|avant gauche$|avant droite$|sous le bloc d'entrée$)/, { all: true, title: "Isolant autour du nid et du bloc d'entrée", text: "Tous les isolants du corps se posent d'un coup : ceux qui entourent le nid et ceux qui entourent le bloc d'entrée (sous le bloc, avant gauche et avant droite). APRÈS le module d'aération et la gaine des fils (ils passent déjà dans ces isolants) et AVANT la paroi extérieure gauche. Le bloc d'entrée lui-même se pose plus tard." }),
   P('corps-gauche-ext', 'corps', 'emboiter', /^Côté gauche ext$/, { text: "Dernière paroi du corps : le module d'aération et l'isolation sont en place." }),
-  P('corps-cadre', 'corps', 'coller', /^Cadre toit/, { all: true, title: 'Cadre : les trois planches sous la plaque de verrouillage', text: "Coller les trois planches l'une sur l'autre : on les enfile sur la gaine (trou de Ø 18 mm) et on les pose dans l'isolant, à fleur du haut des parois. L'ouverture à l'avant laisse passer le bloc d'entrée." }),
-  P('corps-plaque-c', 'corps', 'isoler', /^Plaque de verrouillage de l'isolant/, { text: "La plaque en C se pose à plat sur le haut des huit parois, sur l'isolant et sur le cadre, et se colle : la laine ne peut plus sortir. Son trou est l'intérieur du nid, ouvert vers le haut ; l'ouverture à l'avant laisse passer le bloc d'entrée, qui reste enlevable par le haut. Ne pas huiler la face côté nid." }),
+  P('corps-piece-c', 'corps', 'emboiter', /^Pièce en C sous le cadre/, { text: "Pièce en C crénelée de 3 mm, posée à plat dans la couronne d'isolant, sous le cadre du toit : ses dents entrent dans les fentes des huit parois (les quatre extérieures et les quatre du nid) ; elle enferme l'isolant. Elle revient vers l'entrée des deux côtés et ne laisse que l'ouverture du bloc d'entrée, qui reste enlevable par le haut. La gaine la traverse par un trou de Ø 18 mm. À coller." }),
   P('corps-etriers', 'corps', 'coller', /^Étrier régulateur/, { text: 'Les tenons des bras traversent le fond par des fentes de 8 × 3 mm et affleurent son dessus : ils tiendront le régulateur sous le nichoir. Le régulateur se fixe dessous après le montage du corps.' }),
   P('corps-etriers-bat', 'corps', 'coller', /^Étrier batterie/, { text: 'Quatre étriers identiques, à gauche de ceux du régulateur : leurs tenons traversent le fond par des fentes de 8 × 3 mm et affleurent son dessus ; ils tiendront la batterie sous le nichoir, à plat. Dernières pièces du corps.' }),
 
   // ---- d. Entrée et isolant restant ----
-  N('ent-huile', 'entree', 'huiler', "Huiler le bloc d'entrée", `${OIL_SHORT}\nHuiler le dehors du bloc seulement.`, [/^Entrée \d+$/]),
-  N('ent-sechage', 'entree', 'attendre', "Séchage du bloc d'entrée", DRY_TEXT, [/^Entrée \d+$/]),
-  P('ent-iso-sous', 'entree', 'isoler', /^Isolant sous le bloc d'entrée/),
-  P('ent-iso-avant-g', 'entree', 'isoler', /^Isolant avant gauche/),
-  P('ent-iso-avant-d', 'entree', 'isoler', /^Isolant avant droite/),
+  N('ent-huile', 'entree', 'huiler', "Huiler le bloc d'entrée", "Huiler le dehors du bloc seulement. NE PAS HUILER l'intérieur du trou d'envol (les trous des carrés) ni la face intérieure du bloc.", [/^Entrée \d+$/]),
+  N('ent-sechage', 'entree', 'attendre', "Séchage du bloc d'entrée", DRY_SHORT, [/^Entrée \d+$/]),
   P('ent-bloc', 'entree', 'placer', /^Entrée \d+$/, { all: true, title: "Empiler le bloc d'entrée", text: (r) => [
     'Ne pas huiler : face intérieure côté nid brute.',
     `Empiler les carrés percés dans l'ordre, du dehors vers le nid (${r(/^Entrée 1$/)} affleure le mur extérieur, le dernier affleure la face intérieure) : rien ne dépasse.`,
@@ -132,20 +127,20 @@ export const SEQ: Rule[] = [
   ].join('\n') }),
 
   // ---- d'. Zone caméra : les 4 murs du compartiment, assemblés à part puis posés d'un bloc dans le toit ----
-  N('zc-huile', 'zonecam', 'huiler', 'Huiler les murs de la zone caméra', `${OIL_SHORT}\nLes quatre murs du compartiment de la caméra.`, [/^(Face (avant|arrière)|Côté (droit|gauche)) caméra 1$/]),
-  N('zc-sechage', 'zonecam', 'attendre', 'Séchage des murs de la zone caméra', DRY_TEXT, [/^(Face (avant|arrière)|Côté (droit|gauche)) caméra 1$/]),
+  N('zc-huile', 'zonecam', 'huiler', 'Huiler les murs de la zone caméra', `Les quatre murs du compartiment de la caméra.`, [/^(Face (avant|arrière)|Côté (droit|gauche)) caméra 1$/]),
+  N('zc-sechage', 'zonecam', 'attendre', 'Séchage des murs de la zone caméra', DRY_SHORT, [/^(Face (avant|arrière)|Côté (droit|gauche)) caméra 1$/]),
   P('zc-av-ar', 'zonecam', 'placer', /^Face (avant|arrière) caméra 1$/, { text: 'Compartiment de la caméra : les quatre murs s\'emboîtent entre eux sur l\'établi ; leurs dents du bas traverseront ensuite les fentes du plancher du toit.' }),
   P('zc-cotes', 'zonecam', 'emboiter', /^Côté (droit|gauche) caméra 1$/),
 
   // ---- d''. Goulotte du ventilateur : le siège fixe, assemblé à part ----
-  N('gl-huile', 'goulotte', 'huiler', 'Huiler la goulotte du ventilateur', `${OIL_SHORT}\nLes trois parois du siège du ventilateur.`, [/^Goulotte ventilateur (gauche|droite|avant)$/]),
-  N('gl-sechage', 'goulotte', 'attendre', 'Séchage de la goulotte du ventilateur', DRY_TEXT, [/^Goulotte ventilateur (gauche|droite|avant)$/]),
+  N('gl-huile', 'goulotte', 'huiler', 'Huiler la goulotte du ventilateur', `Les trois parois du siège du ventilateur.`, [/^Goulotte ventilateur (gauche|droite|avant)$/]),
+  N('gl-sechage', 'goulotte', 'attendre', 'Séchage de la goulotte du ventilateur', DRY_SHORT, [/^Goulotte ventilateur (gauche|droite|avant)$/]),
   P('gl-avant', 'goulotte', 'placer', /^Goulotte ventilateur avant$/, { text: "Siège du ventilateur : la paroi avant et les deux côtés s'emboîtent par leurs arêtes verticales crénelées pour former un U, d'un seul bloc ; il n'y a aucune dent à l'arrière, où la plaque arrière du toit fait la quatrième paroi." }),
   P('gl-cotes', 'goulotte', 'emboiter', /^Goulotte ventilateur (gauche|droite)$/),
 
   // ---- d'''. Cassette du ventilateur : montée à part (ventilateur, grille, plots, câble, conduit de sortie), glissée ensuite dans la goulotte ----
-  N('cass-huile', 'cassette', 'huiler', 'Huiler la cassette du ventilateur', `${OIL_SHORT}\nParois, cadre du bas, couvercle, poignée et conduit de sortie de la cassette.`, [/^(Cassette ventilateur|Grille de protection ventilateur|Plot caoutchouc ventilateur|Ventilateur Noctua|Poignée cassette|Prise 4 broches du ventilateur|Fil cassette|Conduit de sortie)/]),
-  N('cass-sechage', 'cassette', 'attendre', 'Séchage de la cassette du ventilateur', DRY_TEXT, [/^(Cassette ventilateur|Grille de protection ventilateur|Plot caoutchouc ventilateur|Ventilateur Noctua|Poignée cassette|Prise 4 broches du ventilateur|Fil cassette|Conduit de sortie)/]),
+  N('cass-huile', 'cassette', 'huiler', 'Huiler la cassette du ventilateur', `Parois, cadre du bas, couvercle, poignée et conduit de sortie de la cassette.`, [/^(Cassette ventilateur|Grille de protection ventilateur|Plot caoutchouc ventilateur|Ventilateur Noctua|Poignée cassette|Prise 4 broches du ventilateur|Câble d'origine du ventilateur|Conduit de sortie)/]),
+  N('cass-sechage', 'cassette', 'attendre', 'Séchage de la cassette du ventilateur', DRY_SHORT, [/^(Cassette ventilateur|Grille de protection ventilateur|Plot caoutchouc ventilateur|Ventilateur Noctua|Poignée cassette|Prise 4 broches du ventilateur|Câble d'origine du ventilateur|Conduit de sortie)/]),
   P('cass-cadre', 'cassette', 'placer', /^Cassette ventilateur cadre du bas/, { text: 'Cassette du ventilateur : amovible à la main, sans outil ni vis. Quatre parois emboîtées par leurs arêtes verticales ; le cadre du bas et le couvercle s\'emboîtent dans les parois.' }),
   P('cass-parois-1', 'cassette', 'emboiter', /^Cassette ventilateur 1$/),
   P('cass-parois-2', 'cassette', 'emboiter', /^Cassette ventilateur 2$/),
@@ -153,17 +148,18 @@ export const SEQ: Rule[] = [
   P('cass-grille', 'cassette', 'placer', /^Grille de protection ventilateur/, { text: 'Sur le cadre du bas, entre le cadre et le ventilateur : elle sort avec la cassette.' }),
   P('cass-plots', 'cassette', 'placer', /^Plot caoutchouc ventilateur/, { all: true, text: 'Quatre plots en caoutchouc de 12 × 2 × 3 mm posés sur le cadre : les vibrations ne passent que par eux.' }),
   P('cass-ventilateur', 'cassette', 'placer', /^Ventilateur Noctua/),
+  P('cass-fils', 'cassette', 'cabler', /^Câble d'origine du ventilateur/, { text: "Le câble noir vendu avec le ventilateur (quatre fils dans une gaine, déjà fixé au ventilateur) se pose d'abord, AVANT le couvercle et la poignée : il sort vers le haut et traversera le passage de 12 × 6 mm du couvercle. Il finit par une prise 4 broches femelle (broche 1 masse, broche 2 +12 V, broche 3 tachymètre, broche 4 PWM), collée sur la tranche avant du couvercle." }),
   P('cass-couvercle', 'cassette', 'emboiter', /^Cassette ventilateur couvercle/),
   P('cass-poignee', 'cassette', 'coller', /^Poignée cassette/, { text: 'U de contreplaqué : trois couches de 3 mm collées face à face (9 mm), pieds dans deux fentes du couvercle.' }),
   P('cass-prise', 'cassette', 'placer', /^Prise 4 broches du ventilateur/, { text: "Le câble d'origine du ventilateur monte dans la cassette, traverse le couvercle par un passage de 12 × 6 mm et finit par cette prise femelle, collée sur la tranche avant du couvercle." }),
-  P('cass-fils', 'cassette', 'cabler', /^Fil cassette/),
   P('cass-sortie-12', 'cassette', 'emboiter', /^Conduit de sortie [12]$/, { text: 'Conduit de sortie : ses dents entrent dans les fentes de la paroi arrière de la cassette, contre la fenêtre. Il sort et rentre avec elle.' }),
   P('cass-sortie-34', 'cassette', 'emboiter', /^Conduit de sortie [34]$/),
 
   // ---- e. Toit ----
-  N('toit-huile', 'toit', 'huiler', 'Huiler les pièces du toit', `${OIL_SHORT}\nPlaques et baguettes du toit.`, [/^(Dessous toit|Dessus toit|(Face|Côté) \S+ toit|Baguette dessus toit)/]),
-  N('toit-sechage', 'toit', 'attendre', 'Séchage des pièces du toit', DRY_TEXT, [/^(Dessous toit|Dessus toit|(Face|Côté) \S+ toit|Baguette dessus toit)/]),
+  N('toit-huile', 'toit', 'huiler', 'Huiler les pièces du toit', `Cadres, plaques et baguettes du toit.`, [/^(Cadre toit|Fourreau gaine toit|Dessous toit|Dessus toit|(Face|Côté) \S+ toit|Baguette dessus toit)/]),
+  N('toit-sechage', 'toit', 'attendre', 'Séchage des pièces du toit', DRY_SHORT, [/^(Cadre toit|Fourreau gaine toit|Dessous toit|Dessus toit|(Face|Côté) \S+ toit|Baguette dessus toit)/]),
   P('toit-dessous', 'toit', 'placer', /^Dessous toit$/),
+  P('toit-fourreau', 'toit', 'coller', /^Fourreau gaine toit/, { all: true, title: 'Fourreau de la gaine dans le toit', text: "Treize petits carrés percés de Ø 18 mm, empilés et collés sur le dessous du toit autour du trou de la gaine : ils tiennent la gaine à travers l'isolant jusqu'au dessus du toit." }),
   P('toit-avant', 'toit', 'emboiter', /^Face avant toit$/),
   P('toit-arriere', 'toit', 'emboiter', /^Face arrière toit$/),
   P('toit-cotes', 'toit', 'emboiter', /^Côté (droit|gauche) toit$/),
@@ -176,13 +172,17 @@ export const SEQ: Rule[] = [
   P('toit-bag-arriere-2', 'toit', 'coller', /^Baguette dessus toit arrière 2$/),
   P('toit-iso', 'toit', 'isoler', /^Isolant toit/, { all: true, title: 'Isolation du toit', text: 'Isolant du toit, autour du compartiment de la caméra et du siège du ventilateur.' }),
   P('toit-dessus', 'toit', 'placer', /^Dessus toit$/, { text: 'À plat sur les baguettes, sans crénelage. Son ouverture carrée est au-dessus du compartiment de la caméra ; son encoche à l\'arrière laisse passer le siège du ventilateur.' }),
+  P('toit-cadre', 'toit', 'coller', /^Cadre toit/, { text: "Coller les trois planches l'une sur l'autre. Elles descendent dans l'isolant entre les murs extérieur et intérieur et calent le toit. Dernière étape du toit : on les enfile sur la gaine (trou de Ø 18 mm) et on les colle sous le toit assemblé." }),
 
   // ---- f. Le reste : habillage, couvercle, baguettes de cale ----
-  N('hab-peinture', 'habillage', 'peindre', "Peindre l'habillage en blanc", PAINT_TEXT, [/^Lambris/]),
-  N('hab-sechage', 'habillage', 'attendre', "Séchage de la peinture de l'habillage", PAINT_DRY, [/^Lambris/]),
+  N('hab-peinture', 'habillage', 'peindre', "Peindre l'habillage en blanc", PAINT_TEXT, [/^(Lambris|Plaque de ventilation)/]),
+  N('hab-sechage', 'habillage', 'attendre', "Séchage de la peinture de l'habillage", PAINT_DRY, [/^(Lambris|Plaque de ventilation)/]),
   P('hab-cotes', 'habillage', 'coller', /^Lambris (droite|gauche)/, { text: "Les lames des côtés se collent d'abord : la façade et l'arrière recouvrent leurs bouts." }),
-  P('hab-avant', 'habillage', 'coller', /^Lambris avant/),
+  P('hab-avant', 'habillage', 'coller', /^Lambris avant \d+$/),
+  P('hab-avant-perce', 'habillage', 'placer', /^Lambris avant \d+ \(percé\)$/, { text: "La lame du trou d'envol NE SE COLLE PAS : elle se retire pour accéder à l'entrée. Elle se pose sur la façade et tient par quatre cure-dents, un à chaque coin." }),
+  P('hab-curedents', 'habillage', 'placer', /^Cure-dent lame d'entrée/, { all: true, text: "Quatre cure-dents enfoncés dans les quatre trous de Ø 2,2 mm de la lame, à travers la paroi derrière (un peu de colle sur les cure-dents du bas si besoin, jamais sur la lame), coupés à ras de la lame. Pour retirer la lame : les tirer ou les couper." }),
   P('hab-arriere', 'habillage', 'coller', /^Lambris arrière/),
+  P('hab-ventilation', 'habillage', 'coller', /^Plaque de ventilation arrière/, { text: "S'emboîte dans l'ouverture de l'habillage arrière, jeu 0 : à gauche (vue de derrière) la grille de la sortie du ventilateur, à droite celle du Raspberry Pi. Elle tient par quatre cure-dents, un à chaque coin : percer ou repasser les quatre trous de Ø 2,2 mm à travers la plaque, puis la plaque arrière du toit (3 mm), enfoncer les cure-dents avec un peu de colle et les couper à ras." }),
   P('couv-crenelee', 'couvercle', 'placer', /^Toit en okoumé \(plaque crénelée\)/, { text: 'Toit en okoumé : deux plaques de 5 mm collées (10 mm), non peintes. Un grand trou oblong de 28 mm, le canal de la caméra 2, traverse cette plaque.' }),
   P('couv-bag-avant', 'couvercle', 'coller', /^Baguette couvercle avant$/, { text: 'Les dents de 5 mm entrent dans les fentes de la plaque crénelée et affleurent son dessus. Pas de dents devant le canal de la caméra 2.' }),
   P('couv-bag-arriere', 'couvercle', 'coller', /^Baguette couvercle arrière$/),

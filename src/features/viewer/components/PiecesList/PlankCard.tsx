@@ -6,10 +6,10 @@ import { wireSummary } from '../WireSheet';
 import type { DropTarget } from './types';
 
 /** Carte d'une plaque dans « Pièces » : nom (renommable), œil, dupliquer, supprimer, dessin à plat (ou bouton du document), glisser-déposer. */
-export function PlankCard({ p, code, planks, scale, selectedId, groupSel, extra, hidden, dropOn, setDropOn, setHover, setDocOpen, setGroupSel, pick, update, toggleHidden, duplicate, remove, dropPlank }: {
+export function PlankCard({ p, code, planks, scale, selectedId, groupSel, extra, hidden, dropOn, setDropOn, setHover, setGroupSel, pick, update, toggleHidden, duplicate, remove, dropPlank }: {
   p: Plank; /** Code de la plaque découpée (T01…), absent pour un composant. */ code?: string; planks: Plank[]; scale: number; selectedId: string | null; groupSel: string | null; extra: Set<string>; hidden: Set<string>;
   dropOn: string | null; setDropOn: Dispatch<SetStateAction<string | null>>; setHover: (h: Hover | null) => void;
-  setDocOpen: (d: string | null) => void; setGroupSel: (g: string | null) => void;
+  setGroupSel: (g: string | null) => void;
   pick: (id: string | null, ctrl: boolean) => void;
   update: (id: string, patch: Partial<Plank>, label?: string) => void;
   toggleHidden: (ids: string[]) => void; duplicate: (p: Plank) => void; remove: (id: string) => void;
@@ -38,11 +38,9 @@ export function PlankCard({ p, code, planks, scale, selectedId, groupSel, extra,
         <IconButton size="sm" onClick={() => remove(p.id)} title="Supprimer">×</IconButton>
       </div>
       {p.url && <a href={p.url} target="_blank" rel="noreferrer" className="mb-1 block truncate text-[11px] text-sky-700 underline" title={p.url}>🔗 Fiche du composant</a>}
-      {p.special === 'doc'
-        ? <button onClick={() => setDocOpen('schema')} className="flex w-full items-center gap-2 rounded border border-sky-200 bg-sky-50 px-2 py-1.5 text-left text-[11px] font-semibold text-sky-900 hover:bg-sky-100">📄 Ouvrir le document <span className="ml-auto rounded bg-white px-1.5 py-0.5 text-[10px] font-normal text-sky-700">Document</span></button>
-        : p.special
-          ? <div className="py-2 text-center text-[11px] text-stone-500">{wireSummary(p, planks) ?? 'Élément spécial : pas découpé (modèle 3D)'}</div>
-          : <button onClick={pickPlank} className="flex w-full justify-center" dangerouslySetInnerHTML={{ __html: plankSvg(p, scale) }} />}
+      {p.special
+        ? <div className="py-2 text-center text-[11px] text-stone-500">{wireSummary(p, planks) ?? 'Élément spécial : pas découpé (modèle 3D)'}</div>
+        : <button onClick={pickPlank} className="flex w-full justify-center" dangerouslySetInnerHTML={{ __html: plankSvg(p, scale) }} />}
     </div>
   );
 }

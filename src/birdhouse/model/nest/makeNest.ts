@@ -39,7 +39,7 @@ export function carveRects(r: [number, number, number, number], holes: [number, 
 /** Baguettes qui portent le dessus du toit : largeur du corps (appui) en mm ; la plaque a en plus les dents de t. */
 const BAG_BODY = 5;
 
-const VENT_PIECES = /^(Goulotte ventilateur|Conduit de sortie|Cassette ventilateur|Poignée cassette|Plot caoutchouc ventilateur|Ventilateur Noctua|Grille de protection ventilateur|Prise 4 broches du ventilateur|Rallonge ventilateur 4 broches|Module interrupteur 12 V ventilateur|Fil (PWM|tachymètre|commande interrupteur|masse commune|interrupteur →|Wago \+ → interrupteur|masse interrupteur|ventilateur))/;
+const VENT_PIECES = /^(Conduit de sortie|Cassette ventilateur|Poignée cassette|Plot caoutchouc ventilateur|Ventilateur Noctua|Grille de protection ventilateur|Prise 4 broches du ventilateur|Câble d'origine du ventilateur)/; // groupe « Ventilation » : le ventilateur, son câble d'origine, sa prise et la cassette ; toute son électronique (interrupteur 12 V, rallonge, fils) est dans « Électronique »
 
 /** Pièces de la prise d'air basse du corps (conduit crénelé, noms avant `unnumber`) : groupe « Aération du corps » (codes A-xx : un nom qui commence comme « Ventilation » donnerait des préfixes illisibles). */
 const AIR_PIECES = /^Conduit d'air/;
@@ -48,7 +48,6 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const n: NestParams = { ...n0, l: Math.max(120, n0.l), L: Math.max(120, n0.l), hole: Math.min(n0.hole, Math.max(120, n0.l) - 26), cam: 38, ins: 39, pente: true, lambris: true, solar: true }; // toit TOUJOURS en pente, habillage TOUJOURS présent, système solaire TOUJOURS présent (puce retirée : réglage ancien ignoré en silence) (puces retirées : le régulateur sous le nichoir est protégé par l'habillage) ; // intérieur TOUJOURS CARRÉ (un seul curseur), 120 mm au minimum (le fond) ; trou plafonné pour que le bloc d'entrée (trou + 16) tienne dans la paroi intérieure ; compartiment caméra fixe à 38 (curseur retiré) ; // isolant TOUJOURS 39 (le curseur a été retiré à la demande de l'utilisateur) ; compartiment caméra plafonné à 38 // le compartiment caméra est limité à 38 : la batterie (et sa cale) est posée juste à côté, sur le dessus du toit
   const isoGroup = uid(); // cinquième groupe : l'isolant (pavés orange)
   const solGroupId = uid(); // groupe « Solaire » : le panneau déporté, ses poteaux et son câble
-  const docGroupId = uid(); // groupe « Schéma électronique » : le document, avec son œil
   const lamGroup = uid(); // groupe « Lambris »
   const coverGroup = uid(); // groupe « Couvercle » : le pan en okoumé 5 mm et les quatre baguettes crénelées de contreplaqué 3 mm collées dessous
   const entryGroup = uid(); // quatrième groupe : le bloc d'entrée (empilement de carrés percés) qui traverse la double paroi
@@ -58,26 +57,26 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const roofH = 2 * t + n.ins;
   const bodyH = n.floorToHole + n.hole + n.above + 2 * t + 2 * e - roofH; // les murs s'arrêtent là ; le toit se pose dessus
   const holeZ = e + t + n.floorToHole + n.hole / 2; // centre du trou d'envol, en z monde depuis le dessous du corps
-  const WALL_DROP = t; // les huit parois du corps s'arrêtent 3 mm sous bodyH : la plaque de verrouillage de l'isolant (en C) occupe ces 3 mm et se pose sur leur chant
-  const outerBox = makeBox(W, D, bodyH - WALL_DROP, t, fit, start);
-  const innerBox = makeBox(n.l + 2 * t, n.L + 2 * t, bodyH - WALL_DROP - e, t, fit, start);
+  const outerBox = makeBox(W, D, bodyH, t, fit, start);
+  const innerBox = makeBox(n.l + 2 * t, n.L + 2 * t, bodyH - e, t, fit, start);
   const roofBox = makeBox(W, D, roofH, t, fit, start);
   const group = outerBox.group, roofGroup = roofBox.group;
   const noTop = (p: Plank): Plank => { const cast = { ...(p.cast ?? {}) }; delete cast.top; return recastAll({ ...p, cast, notches: p.notches.filter((x) => x.edge !== 'top') }, t, fit); }; // mur sans crans en haut (le toit se pose dessus)
   const isWall = (p: Plank) => /^(Face|Côté)/.test(p.name);
   const OPEN = n.hole + 15; // ouverture carrée dans les deux murs avant : 1,5 cm de plus que le trou d'envol
   // l'ouverture des murs avant est une encoche ouverte vers le HAUT (largeur OPEN + 1 mm de jeu, du bas du carré jusqu'au haut du mur) : toit retiré, on pose le bloc d'entrée par le dessus
-  const hole = (p: Plank): Plank => ({ ...p, notches: [...p.notches, { id: uid(), edge: 'top', pos: r2(p.w / 2), width: OPEN + 1, depth: r2(bodyH - WALL_DROP - (holeZ - OPEN / 2)) }] }); // 0,5 mm de jeu de chaque côté : le bloc coulisse à la verticale dans l'encoche, il s'arrête sur le fond
+  const hole = (p: Plank): Plank => ({ ...p, notches: [...p.notches, { id: uid(), edge: 'top', pos: r2(p.w / 2), width: OPEN + 1, depth: r2(bodyH - (holeZ - OPEN / 2)) }] }); // 0,5 mm de jeu de chaque côté : le bloc coulisse à la verticale dans l'encoche, il s'arrête sur le fond
   const floorEdge = (len: number) => ({ n: teethFor(len), phase: 0 as const }); // phase 0 : coins creux, dents au milieu
   const floor: Plank = recastAll({ id: uid(), name: 'Plancher int', w: W, h: D, pos: [0, 0, e + t / 2], rot: [0, 0, 0], notches: [], holes: [], group, cast: { top: floorEdge(W), bottom: floorEdge(W), left: floorEdge(D), right: floorEdge(D) } }, t, fit);
   // FIXATION À L'ARBRE : deux nervures verticales en x = ± W/4, chacune = 3 PLAQUES COLLÉES (9 mm), 30 mm de profondeur, du bas du corps jusqu'au bas du toit ;
   // 3 POINTS D'ACCROCHE par nervure, deux fois plus longs qu'une dent classique (RIB_TOOTH = 32) : deux en bas dans le mur arrière du corps (fentes 9,5 × 32), un au niveau du toit
   // (encoche ouverte dans le bas de la plaque arrière du toit : le toit se pose par-dessus et se retire toujours)
   const RIB_N = 3, RIB_T = RIB_N * t, RIB_D = 15, RIB_TOOTH = 32, RIB_Z0 = 10, RIB_XS = [-W / 4, W / 4].map(r2);
-  const RIB_TEETH_Z: [number, number][] = [[RIB_Z0 + 45, RIB_Z0 + 45 + RIB_TOOTH], [bodyH - 10 - RIB_TOOTH, bodyH - 10]]; // z des deux dents : une en bas (au-dessus du plancher intérieur), une en haut du corps ; plus de dent dans le toit (retirée à la demande de l'utilisateur)
+  const RIB_TEETH_Z: [number, number][] = [[RIB_Z0 + 45, RIB_Z0 + 45 + RIB_TOOTH], [bodyH - 20 - RIB_TOOTH, bodyH - 20]]; // z des deux dents : une en bas (au-dessus du plancher intérieur), une en haut du corps, descendue de 1 cm (demande de l'utilisateur) ; plus de dent dans le toit (retirée à la demande de l'utilisateur)
   const RIB_OUT = 6, RIB_KEY = 3; // les dents ressortent de 6 mm dans l'isolant et sont percées d'un trou rectangulaire de 3 × 20 : une clavette (cale) les verrouille
   const RIB_Z1 = bodyH + 36; // haut de la nervure : elle monte le long du toit (jusqu'à 1 mm sous le tasseau arrière) pour mieux tenir, mais sans dent dans le toit : elle touche juste la face extérieure de sa plaque arrière = haut de la dent du toit (1 cm plus bas qu'avant, demande de l'utilisateur)
-  const RGX = W / 2 - 45, RGY = -D / 2 + 75, RGZ = -16.5, CND_X = n.l / 2 + t, CND_D = 16, CND_HOLE_ROOF = 18, CND_Y = D / 2 - t - 10 - CND_D / 2; // régulateur sous le plancher, côté droit ; gaine à 1 cm du mur arrière
+  const RGX = W / 2 - 45, RGY = -D / 2 + 75, RGZ = -16.5, CND_D = 16, CND_HOLE_ROOF = 18, CND_X = r2(W / 2 - t - 5 - CND_D / 2), CND_Y = D / 2 - t - 5 - CND_D / 2; // régulateur sous le plancher, côté droit ; gaine à 1 cm du mur arrière
+  const SLEEVE = 26; // côté des carrés du fourreau de la gaine dans le toit (trou de Ø 18 + 4 mm de bois de chaque côté)
   const cam2X = -W / 2 + 33, cam2Y = -D / 2 - 23; // caméra 2 : toujours DEHORS, 23 mm devant la façade, à 33 mm du bord gauche, quelle que soit la taille du nichoir
   // quatre ÉTRIERS en U de contreplaqué qui tiennent le régulateur sous le plancher : plaque de 78 × 51 debout en travers, encoche de 62 × 42 ouverte vers le haut (le régulateur 61 × 33 + 1 de jeu),
   // bras de 8 dont les 3 mm du haut (= t) sont des tenons qui traversent le fond par des fentes 8 × 3 et AFFLEURENT son dessus : rien ne dépasse dans l'isolant
@@ -167,9 +166,14 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // UNE grande aération qui occupe presque toute la plaque arrière du toit au-dessus du dessus du toit, avec 2 cm de bois de marge sur les côtés et en haut (et 4 mm au-dessus du dessus du toit)
   // renfoncement des prises du Pi : les ports (USB, Ethernet, HDMI) regardent la plaque arrière, qui est percée en face d'eux ; un petit tunnel de contreplaqué (haut + deux côtés, le dessus du toit fait le fond)
   // relie les ports à cette fenêtre, pour brancher sans ouvrir le nichoir et sans ouvrir le grenier ; l'aération démarre juste à sa droite
-  const PORT_X0 = piX - 30, PORT_X1 = piX + 30, PORT_Z0 = roofH + 3, PORT_Z1 = roofH + 27, VENT_L = r2(CND_X - CND_D / 2 - 4), VENT_R = W / 2 - 20; // l'aération démarre 26 mm à droite de la fenêtre des prises du Pi (20 de bois entre les deux : la lame d'habillage y est plus large)
+  const PORT_X0 = piX - 30, PORT_X1 = piX + 30, VENT_L = r2(n.l / 2 + t - CND_D / 2 - 4), VENT_R = W / 2 - 20; // l'aération démarre 26 mm à droite de la fenêtre des prises du Pi (20 de bois entre les deux : la lame d'habillage y est plus large)
   const VENT_GAP = t + 4.5; // 7,5 : entre le haut de la fenêtre et le haut de la paroi de la cassette (le conduit a des dents sur ses quatre plaques : fente de t au-dessus de la fenêtre + 4,5 mm de bois avant les crans du couvercle (t))
   const VENT_XS: number[] = [], VENT_W = VENT_R - VENT_L, VENT_Z0 = roofH + 4, VENT_H = Hb - 22 - VENT_Z0 - VENT_GAP, VENT_Z = VENT_Z0 + VENT_H / 2; // la fenêtre de sortie s'arrête VENT_GAP sous le haut de la cassette (les dents du couvercle ne doivent pas être coupées)
+  const PORT_Z0 = VENT_Z0, PORT_Z1 = VENT_Z0 + VENT_H; // fenêtre des prises du Pi : MÊME hauteur que la fenêtre de sortie du ventilateur (demande de l'utilisateur)
+  const PV_M = 7, PIN_D = 2.2, PIN_IN = 4, PIN_INZ = 3.5; // plaque de ventilation : marge au-dessus et au-dessous des grilles, trous de cure-dent (Ø, retrait des bords en x et en z)
+  let pinHoles: { x: number; z: number }[] = []; // centres (monde : x, z) des quatre trous de cure-dent, remplis par l'habillage et repris dans la plaque arrière du toit
+  let frontPins: { x: number; z: number }[] = []; // centres (monde : x, z) des quatre trous de cure-dent de la lame d'entrée (non collée), repris dans la paroi qui est derrière
+  const PIN_LEN = 10; // cure-dent coupé : 5 mm de lame + 3 mm de paroi + 2 mm derrière
   const GL_Y = 84; // le câble du panneau entre dans le toit par le côté droit, à cette ordonnée, 14 mm au-dessus du dessus du toit
   const tallRoof = (p: Plank): Plank => {
     if (!n.pente) return p;
@@ -195,7 +199,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const FI = FAN + 0.4, CO = FI + 2 * t, SI = CO, FO = SI + 2 * t; const EXW = r2(CO - 4 * t - 9); // fenêtre de sortie : la largeur de la cassette moins, de chaque côté, les crans verticaux (t), la fente des dents du conduit (t) et 4,5 mm de bois // cassette : intérieur (0,2 mm de jeu autour du ventilateur), extérieur ; siège : intérieur = extérieur de la cassette (ajustée pile, jeu 0), extérieur
   const GR_SLOT = 4, GR_BAR = 2, GR_N = Math.floor((EXW + GR_BAR) / (GR_SLOT + GR_BAR)), GR_SPAN = GR_N * GR_SLOT + (GR_N - 1) * GR_BAR; // grilles percées dans la plaque (sortie du ventilateur, paroi intérieure du corps) : fentes de 4 mm (aucune > 5 mm), barreaux de 2 mm
   const YREAR = D / 2 - t; // face intérieure de la plaque arrière du toit
-  const FANX = r2(CND_X - CND_D / 2 - 8 - FO / 2); // contre la gaine (8 mm) ; les cales du Pi restent à ≈ 5 mm à gauche
+  const FANX = r2(n.l / 2 + t - CND_D / 2 - 8 - FO / 2); // contre la gaine (8 mm) ; les cales du Pi restent à ≈ 5 mm à gauche
   const CAMY1 = r2(CAM_Y + n.cam / 2 + t); // face extérieure (côté arrière) du mur arrière du compartiment de la caméra
   const FAN_GAP = 10; // le siège du ventilateur est à 1 cm du bloc caméra (demande de l'utilisateur : plus près du centre, l'ouverture du plafond est plus grande)
   const FY0 = r2(CAMY1 + FAN_GAP), CASS_Y0 = r2(FY0 + t), CASS_Y1 = r2(CASS_Y0 + CO), FANY = r2((CASS_Y0 + CASS_Y1) / 2); // devant du siège, cassette (pas de joint) ; derrière la cassette, un petit conduit de sortie la relie à la plaque arrière
@@ -205,7 +209,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const FOP_Y0 = r2(FY0 + t + 3), FOP_Y1 = r2(Math.min(FANY + FAN_OPEN / 2, n.L / 2 - 2)); // l'ouverture du plafond commence 3 mm après la paroi avant du siège (ligament) et reste au-dessus du nid (le mur intérieur est à L/2) : 56 de large
   const FOP_YC = r2((FOP_Y0 + FOP_Y1) / 2), FOP_H = r2(FOP_Y1 - FOP_Y0);
   const DUCT_Z1 = bodyH + VENT_Z0 + VENT_H + VENT_GAP; // haut de la fenêtre de sortie = haut des parois de la cassette et du siège
-  const CONX = r2(FANX + FO / 2 + 4), SWX = r2(W / 2 - t - 13.5), SWY = r2(D / 2 - t - 18); // connecteur de la cassette, module interrupteur
+  const CONX = r2(FANX + FO / 2 + 4), SWX = r2(CND_X - CND_D / 2 - 3.5 - 8.5), SWY = r2(D / 2 - t - 18); // connecteur de la cassette, module interrupteur
   // PRISE D'AIR BASSE : un conduit de contreplaqué (4 parois + couvercle) dans l'isolant du mur GAUCHE, à l'AVANT, du dessous de la boîte à mi-hauteur du nid, puis une fente dans la paroi intérieure
   const AIR_X0 = r2(-(W / 2 - t) + 4.7), AIR_X1 = r2(-(n.l / 2 + t)), AIR_CX = r2((AIR_X0 + AIR_X1) / 2), AIR_LX = r2(AIR_X1 - AIR_X0), AIR_LY = 52; // ≥ 4,5 mm de bois entre le conduit et les fentes de dents voisines (mur extérieur à l'ouest, mur intérieur à l'est) ; plus long vers l'AVANT // empreinte extérieure du conduit
   const AIR_ZT = AIR_ZS + AIR_SH / 2, AIR_ZTOP = AIR_ZT + 8; // haut de la fente ; haut du conduit (≥ 4,5 mm de bois entre la fente et les crans du haut)
@@ -237,9 +241,9 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       return [recastAll({ id: uid(), name, w: len, h: BAG_BODY + t, pos: [r2(spec.pos[0]), r2(spec.pos[1]), r2(zt - t / 2)] as Vec3, rot: [0, 0, spec.rot] as Vec3, notches: [], holes: [], group: roofGroup, cast: { top: { n: teethFor(len), phase: 0 } } }, t, fit)];
     };
     const tasseaux: Plank[] = [
-      ...bag('Baguette dessus toit gauche', 'left', -yr, yr), ...bag('Baguette dessus toit droite', 'right', -yr, yr), // sur toute la profondeur
+      ...bag('Baguette dessus toit gauche', 'left', -yr, yr), ...bag('Baguette dessus toit droite', 'right', -yr, n.solar ? r2(CND_Y - SLEEVE / 2 - 1) : yr), // sur toute la profondeur
       ...bag('Baguette dessus toit avant', 'front', -xr + BAG_BODY, xr - BAG_BODY), // entre les deux
-      ...carveRects([-xr + BAG_BODY, yr - BAG_BODY, xr - BAG_BODY, yr], [[FANX - FO / 2 - 0.5, 0, FANX + FO / 2 + 0.5, yr]]).flatMap(([x0, , x1], k) => bag(`Baguette dessus toit arrière ${k + 1}`, 'back', x0, x1)), // l'arrière contourne le siège du ventilateur, dont les parois le remplacent
+      ...carveRects([-xr + BAG_BODY, yr - BAG_BODY, xr - BAG_BODY, yr], [[FANX - FO / 2 - 0.5, 0, FANX + FO / 2 + 0.5, yr], ...(n.solar ? [[CND_X - SLEEVE / 2 - 1, 0, xr, yr] as [number, number, number, number]] : [])]).flatMap(([x0, , x1], k) => bag(`Baguette dessus toit arrière ${k + 1}`, 'back', x0, x1)), // l'arrière contourne le siège du ventilateur, dont les parois le remplacent
     ];
     const carriers: [RegExp, string][] = [[/^Côté gauche toit/, 'gauche'], [/^Côté droit toit/, 'droite'], [/^Face avant toit/, 'avant'], [/^Face arrière toit/, 'arrière']];
     for (const [re, side] of carriers) { // fentes des dents dans la plaque du toit qui porte chaque baguette (scène réduite : seulement la plaque et ses baguettes)
@@ -290,7 +294,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   ] : [];
   // cadre sous le toit, en trois planches collées (le toit n'est plus verrouillé par des barres : il tient avec l'habillage collé au corps) ;
   // en descendant dans l'isolant entre murs extérieur et intérieur, le cadre cale en plus le toit sur le corps
-  const ring = (name: string, k: number, holes: Hole[]): Plank => ({ id: uid(), name, w: W - 2 * t, h: D - 2 * t, pos: [0, 0, bodyH - WALL_DROP - (2 * k + 1) * t / 2], rot: [0, 0, 0], notches: [], holes, group });
+  const ring = (name: string, k: number, holes: Hole[]): Plank => ({ id: uid(), name, w: W - 2 * t, h: D - 2 * t, pos: [0, 0, bodyH - (2 * k + 1) * t / 2], rot: [0, 0, 0], notches: [], holes, group: roofGroup });
   // le cadre est en U : son ouverture centrale (l'extérieur de la boîte intérieure) est ouverte vers l'avant par une encoche qui va jusqu'au bord avant, de sorte
   // que le bloc d'entrée (plaques de 55 dans l'isolant) peut monter à fleur du haut du mur, toit retiré ou posé
   const uNotch = (): Notch => ({ id: uid(), edge: 'bottom', pos: r2((W - 2 * t) / 2), width: n.l + 2 * t, depth: r2((D / 2 - t) + (n.L / 2 + t)) });
@@ -299,13 +303,30 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     { ...ring('Cadre toit milieu', 1, []), notches: [uNotch()] },
     { ...ring('Cadre toit bas', 2, []), notches: [uNotch()] },
   ];
+  // PIÈCE EN C CRÉNELÉE (demande de l'utilisateur : « pas de tasseau sous la plaque en C, on la crénelle et on l'intègre directement ») : plaque de t posée dans la couronne d'isolant, juste sous le cadre du toit
+  // (de bodyH − 4t à bodyH − 3t), dont les bords portent des dents de t qui entrent dans des fentes des parois : les quatre parois extérieures (bords extérieurs) et les quatre parois intérieures (bords du nid) ;
+  // elle est ouverte devant seulement sur la largeur du bloc d'entrée (elle « revient vers l'entrée » des deux côtés) ; l'isolant s'arrête sous elle (z1 = bodyH − 4t).
+  const cxo = W / 2 - t, cyo = D / 2 - t, cxi = n.l / 2 + t, cyi = n.L / 2 + t;
+  const entryG = r2((OPEN + 12) / 2 + 1.5); // demi-largeur de l'ouverture du bloc d'entrée dans la pièce en C : les plaques du bloc (OPEN + 12) + 1 mm de jeu de chaque côté + 0,5
+  // FOURREAU de la gaine dans le toit : de petits carrés de contreplaqué empilés (un par t d'isolant), percés du trou de la gaine, entre le plancher et le dessus du toit : ils tiennent la gaine et la séparent de l'isolant
+  const sleeve: Plank[] = n.solar ? Array.from({ length: Math.round((roofH - 2 * t) / t) }, (_, k): Plank => ({ id: uid(), name: `Fourreau gaine toit ${k + 1}`, w: SLEEVE, h: SLEEVE, pos: [CND_X, r2(CND_Y), r2(bodyH + t + (k + 0.5) * t)] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [{ id: uid(), shape: 'round' as const, x: 0, y: 0, size: CND_HOLE_ROOF }], group: roofGroup })) : [];
+  const cPiece: Plank = (() => { // contour en C : la couronne d'isolant sans le nid, ouverte devant sur la largeur du bloc d'entrée ; dents (impaires ≈ 16 mm, bouts pleins) sur tous les bords qui touchent une paroi
+    const g = entryG, a = cxo, b = cyo, hx = cxi, hy = cyi;
+    const V: [number, number][] = [[-a, -b], [-g, -b], [-g, -hy], [-hx, -hy], [-hx, hy], [hx, hy], [hx, -hy], [g, -hy], [g, -b], [a, -b], [a, b], [-a, b]]; // matière à gauche du sens de parcours
+    const teethOn = [true, false, true, true, true, true, true, false, true, true, true, true]; // les flancs de l'ouverture du bloc d'entrée n'ont pas de dents
+    const poly: [number, number][] = [];
+    V.forEach((P, i) => {
+      const Q = V[(i + 1) % V.length]; poly.push(P);
+      const dx = Q[0] - P[0], dy = Q[1] - P[1], len = Math.hypot(dx, dy);
+      if (!teethOn[i] || len < 12) return; // un bord trop court (ouverture du bloc d'entrée presque aussi large que le nid) n'a pas de dent
+      const ux = dx / len, uy = dy / len, nx = uy, ny = -ux, nSeg = teethFor(len), seg = len / nSeg; // (nx, ny) : vers l'extérieur de la matière
+      for (let k = 1; k < nSeg; k += 2) { const s0 = k * seg, s1 = (k + 1) * seg; poly.push([P[0] + ux * s0, P[1] + uy * s0], [P[0] + ux * s0 + nx * t, P[1] + uy * s0 + ny * t], [P[0] + ux * s1 + nx * t, P[1] + uy * s1 + ny * t], [P[0] + ux * s1, P[1] + uy * s1]); }
+    });
+    return { ...ring('Pièce en C sous le cadre', 3, []), w: W, h: D, poly: poly.map(([x, y]) => [r2(x), r2(y)] as [number, number]), group };
+  })();
+
   // le Raspberry Pi sur le toit, à l'arrière (pas au-dessus de l'ouverture), calé par six petits bouts de bois collés sur le toit
   const roofTop = bodyH + roofH;
-  // PLAQUE DE VERROUILLAGE DE L'ISOLANT : plaque de contreplaqué de t en forme de C, posée à plat sur le chant des huit parois (murs extérieurs, murs intérieurs) et sur les trois planches du cadre, de bodyH − t à bodyH ;
-  // elle recouvre toute la couronne d'isolant ; son trou = l'intérieur du nid (ouvert vers le haut) ; elle est ouverte à l'avant sur la largeur du plus large carré du bloc d'entrée (+ 1 mm) : le bloc se retire par le haut
-  const lockA = W / 2, lockB = D / 2, lockHx = n.l / 2, lockHy = n.L / 2, lockG = r2((OPEN + 12) / 2 + 0.5);
-  const lockPlate: Plank = { id: uid(), name: "Plaque de verrouillage de l'isolant", w: W, h: D, pos: [0, 0, r2(bodyH - t / 2)] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group,
-    poly: [[-lockA, -lockB], [-lockG, -lockB], [-lockG, -lockHy], [-lockHx, -lockHy], [-lockHx, lockHy], [lockHx, lockHy], [lockHx, -lockHy], [lockG, -lockHy], [lockG, -lockB], [lockA, -lockB], [lockA, lockB], [-lockA, lockB]] as Pt[] };
   const OAK = n.chene ? 18 : 0, topZ = roofTop + OAK; // dessus de la planche de chêne : tout ce qui est « sur le toit » (Pi, boîtier, toit en pente) se pose dessus
   const piZ = topZ + 7; // centre de la carte : sur des entretoises de 6 mm au-dessus du dessus du toit (les composants du dessous dépassent de 2,9)
   const wedgeNeed: number[] = []; // longueurs (mm) des cales de bois d'autrefois, une par côté de composant : le besoin que les baguettes de cale (3 × ce besoin) doivent couvrir
@@ -368,7 +389,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const outFace = -D / 2, inFace = -n.L / 2; // faces extérieure du mur extérieur et intérieure du mur intérieur
   const K = Math.ceil((inFace - outFace) / t); // plaques dans l'épaisseur des murs (16 : le dernier carré affleure la face intérieure)
   // les plaques sont des RECTANGLES : elles montent toutes jusqu'en haut du mur (à fleur, elles comblent l'encoche), dans l'isolant aussi (le cadre du toit est en U, ouvert vers l'avant)
-  const wallTop = bodyH - WALL_DROP;
+  const wallTop = bodyH;
   const plate = (name: string, w: number, bottom: number, top: number, y: number): Plank => {
     const h = r2(top - bottom), zc = r2((top + bottom) / 2);
     return { id: uid(), name, w, h, pos: [0, y, zc] as Vec3, rot: frontRot, notches: [], holes: [fitHole({ w, h } as Plank, { id: uid(), shape: 'round', x: 0, y: r2(holeZ - zc), size: n.hole })], group: entryGroup };
@@ -384,7 +405,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // l'isolant : uniquement des pavés (boîtes pleines), en orange, dans un groupe à part ; pas de découpe, pas de bois
   const xo = W / 2 - t, yo = D / 2 - t, xi = n.l / 2 + t, yi = n.L / 2 + t; // faces intérieures du mur extérieur, faces extérieures du mur intérieur
   const wide = (OPEN + 12) / 2; // demi-largeur des plaques du bloc d'entrée dans l'isolant
-  const z0 = e + t, z1 = bodyH - WALL_DROP - 3 * t; // au-dessus du plancher intérieur, jusque sous le cadre (les trois planches, sous la plaque de verrouillage)
+  const z0 = e + t, z1 = bodyH - 4 * t; // au-dessus du plancher intérieur, jusque sous la pièce en C (elle-même sous le cadre)
   const block = (name: string, x0: number, x1: number, y0: number, y1: number, za: number, zb: number): Plank[] => (x1 - x0 > 0.01 && y1 - y0 > 0.01 && zb - za > 0.01
     ? [{ id: uid(), name, w: r2(x1 - x0), h: r2(y1 - y0), depth: r2(zb - za), pos: [r2((x0 + x1) / 2), r2((y0 + y1) / 2), r2((za + zb) / 2)] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: isoGroup, special: 'block' as const, color: '#f59e0b', transparent: true }]
     : []);
@@ -399,7 +420,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     ...block('Isolant avant droite', wide, xi, -yo, -yi, z0, z1),
     ...block("Isolant sous le bloc d'entrée", -wide, wide, -yo, -yi, z0, holeZ - OPEN / 2 - 6),
     // le toit : des pavés autour du compartiment caméra et du siège du ventilateur
-    ...carveRects([-xo, -yo, xo, yo], [...(n.cam > 0 ? [[CAMX0 - t, CAM_Y - cc, CAMX1 + t, CAM_Y + cc] as [number, number, number, number]] : []), [FANX - FO / 2, FY0, FANX + FO / 2, yo] as [number, number, number, number]])
+    ...carveRects([-xo, -yo, xo, yo], [...(n.cam > 0 ? [[CAMX0 - t, CAM_Y - cc, CAMX1 + t, CAM_Y + cc] as [number, number, number, number]] : []), [FANX - FO / 2, FY0, FANX + FO / 2, yo] as [number, number, number, number], ...(n.solar ? [[CND_X - SLEEVE / 2, CND_Y - SLEEVE / 2, CND_X + SLEEVE / 2, CND_Y + SLEEVE / 2] as [number, number, number, number]] : [])]) // le fourreau de la gaine tient la place de la laine
       .flatMap(([x0, y0, x1, y1], k) => block(`Isolant toit ${k + 1}`, x0, x1, y0, y1, bodyH + t, bodyH + roofH - t)),
   ];
   // outils pour les pièces de l'électronique (groupe Électronique) : pavé et fil
@@ -542,7 +563,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     part('Module interrupteur 12 V ventilateur (côté +, commande 3,3 V)', 17, 25, 8, SWX, SWY, topZ + 3 + 4, 'block', '#7e22ce'),
   ];
   // fils : côté cassette (câble d'origine du ventilateur : quatre fils du ventilateur par le trou du couvercle jusqu'à la prise femelle), côté toit (de la prise mâle au module, au Wago − et au Pi, en contournant le siège)
-  const cw = (nm: string, color: string, k: number): Plank => wire(nm, color, ([[PX(k), FANY + HOLE_Y, FAN_Z + FAN_T / 2], [PX(k), FANY + HOLE_Y, FAN_Z + FAN_T / 2 + 4], [PX(k), FANY + HOLE_Y, DUCT_Z1 - 4], [PX(k), FANY + HOLE_Y, LID + 1.2], [PX(k), CASS_Y0 + 3, LID + 1.2], [PX(k), CASS_Y0 - 1.5, LID + 1.2]] as Vec3[]).map((q) => q.map(r2) as Vec3), k === 0 || k === 3 ? 1.6 : 1.2); // points au centième : la cassette se range et se remet en place sans écart
+  const cableFan = (): Plank => { const x = r2((PX(0) + PX(3)) / 2); return wire("Câble d'origine du ventilateur (gaine noire, 4 fils)", '#111827', ([[x, FANY + HOLE_Y, FAN_Z + FAN_T / 2], [x, FANY + HOLE_Y, FAN_Z + FAN_T / 2 + 4], [x, FANY + HOLE_Y, DUCT_Z1 - 4], [x, FANY + HOLE_Y, LID + 1.2], [x, CASS_Y0 + 3, LID + 1.2], [x, CASS_Y0 - 1.5, LID + 1.2]] as Vec3[]).map((q) => q.map(r2) as Vec3), 4); }; // UN seul câble noir gainé, celui vendu avec le Noctua (4 fils dedans : pas de couleur à suivre dans la 3D) ; points au centième : la cassette se range et se remet en place sans écart
   const plugExit = (k: number, j: number): Vec3[] => [[PX(k), r2(PLUG_FY - 4), ZL(j)], [PX(k), yG, ZL(j)]]; // de la prise mâle, par sa face avant, dans l'espace devant le siège
   // les fils vers le Pi quittent la prise mâle vers l'OUEST dans l'espace devant le siège (à un niveau chacun, sous la pente), puis descendent à l'ouest du siège et longent le Pi jusqu'à leur broche ;
   // les broches 12 et 14 (rangée extérieure) sont abordées par l'ouest, la 11 et la 13 par l'est
@@ -552,8 +573,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     return wire(nm, color, pts, d);
   };
   const fanWires: Plank[] = [
-    cw('Fil cassette + (rouge)', '#dc2626', 0), cw('Fil cassette PWM (bleu)', '#2563eb', 1), cw('Fil cassette tachymètre (jaune)', '#eab308', 2), cw('Fil cassette − (noir)', '#111827', 3),
-    wire('Fil Wago + → interrupteur ventilateur (rouge)', '#dc2626', [...wgEnd(wgPort(WGP_Y, 3, 0), [[r2(WGF - 29), r2(WGP_Y + 17.5), topZ + 14], [r2(WGF - 29), wgPort(WGP_Y, 3, 0), WG_Z]]).reverse(), [SWX + 4, SWY - 17, topZ + 15], [SWX + 4, SWY - 12.5, topZ + 11.5]] as Vec3[], 1.6),
+    cableFan(),
+    wire('Fil Wago + → interrupteur ventilateur (rouge)', '#dc2626', [...wgEnd(wgPort(WGP_Y, 3, 0), [[r2(WGF - 29), r2(WGP_Y + 17.5), topZ + 12], [r2(WGF - 29), wgPort(WGP_Y, 3, 0), WG_Z]]).reverse(), [SWX + 4, SWY - 17, topZ + 12], [SWX + 4, SWY - 12.5, topZ + 11.5]] as Vec3[], 1.6),
     // 12 V commuté : de l'interrupteur, par le couloir à l'est du siège (x = CONX, entre le siège et la gaine), jusqu'à l'espace devant le siège puis la prise mâle
     wire('Fil interrupteur → ventilateur + (rouge)', '#dc2626', [[SWX - 3, SWY + 10, topZ + 11.5], [SWX - 6, YREAR - 1.5, topZ + 14], [SWX - 6, YREAR - 1.5, ZL(0)], [CONX, YREAR - 3, ZL(0)], [CONX, yG, ZL(0)], ...plugExit(0, 0).reverse()] as Vec3[], 1.6),
     wire('Fil ventilateur − (noir)', '#111827', [...plugExit(3, 3), [CONX - 2, yG, ZL(3)], [CONX - 2, r2(WGP_Y - 8.5), ZL(3)], [CONX - 2, r2(WGP_Y - 8.5), topZ + 9], [CONX, r2(WGP_Y - 8.5), topZ + 9], ...wgEnd(wgPort(WGM_Y, 5, 1), [[r2(WGF - 25.2), r2(WGP_Y - 11), topZ + 9], [r2(WGF - 25.2), wgPort(WGM_Y, 5, 1), WG_Z]])] as Vec3[], 1.6),
@@ -648,8 +669,9 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       out.push(sidePlate(`Lambris gauche ${i + 1}`, r2(-xe - LAM_T / 2), ly0i, ly1i, -LAM_DOWN, sideA + slope * ly0i, sideA + slope * ly1i));
     }
     // BANDE COMMUNE des fenêtres de l'habillage arrière : la fenêtre de sortie du ventilateur et celle des prises du Pi s'arrêtent et reprennent aux MÊMES hauteurs, pour que toutes les lames s'interrompent au même niveau
-    const BAND_Z0 = bodyH + Math.min(VENT_Z0 - 4, PORT_Z0 - 4), BAND_Z1 = bodyH + Math.max(VENT_Z0 + VENT_H + 4, PORT_Z1 + 4);
-    const windows: [number, number, number, number][] = n.pente ? [...VENT_XS.map((vx): [number, number, number, number] => [vx - (VENT_W + 8) / 2, BAND_Z0, vx + (VENT_W + 8) / 2, BAND_Z1]), [FANX - EXW / 2 - 4, BAND_Z0, FANX + EXW / 2 + 4, BAND_Z1] as [number, number, number, number], ...(n.cam > 0 ? [[PORT_X0 - 4, BAND_Z0, PORT_X1 + 4, BAND_Z1] as [number, number, number, number]] : [])] : []; // fenêtres de l'habillage arrière : toutes sur la même bande en hauteur
+    const BAND_Z0 = bodyH + VENT_Z0 - PV_M, BAND_Z1 = bodyH + VENT_Z0 + VENT_H + PV_M; // un seul trou dans l'habillage pour la plaque de ventilation : même hauteur pour la sortie du ventilateur et les prises du Pi
+    const ventWin: [number, number, number, number] = [(n.cam > 0 ? PORT_X0 : FANX - EXW / 2) - 8, BAND_Z0, FANX + EXW / 2 + 8, BAND_Z1];
+    const windows: [number, number, number, number][] = n.pente ? [...VENT_XS.map((vx): [number, number, number, number] => [vx - (VENT_W + 8) / 2, BAND_Z0, vx + (VENT_W + 8) / 2, BAND_Z1]), ventWin] : []; // fenêtres de l'habillage arrière : la plaque de ventilation (sortie du ventilateur à gauche vue de derrière, prises du Pi à droite) les remplit
     // les fenêtres sont AIMANTÉES aux joints entre lames et entre elles (à moins de 6 mm) : sinon il restait des lamelles de 2 ou 3 mm entre une fenêtre et un joint, ou entre deux fenêtres
     const jointsB = Array.from({ length: k - 1 }, (_, i) => bx0l + (i + 1) * sx);
     const snapWins = (ws: [number, number, number, number][], joints: number[]) => {
@@ -692,6 +714,25 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       const bx0i = bx0l + i * sx, bx1i = bx0l + (i + 1) * sx; // arrière : décalé d'une épaisseur (recouvre le coin droit)
       lame(`Lambris avant ${i + 1}${centre ? ' (percé)' : ''}`, x0, x1, -ye - LAM_T / 2, -LAM_DOWN, frontTop, [], centre ? { x: 0, z: holeZ, d: n.hole } : null);
       lame(`Lambris arrière ${i + 1}`, bx0i, bx1i, ye + LAM_T / 2, -LAM_DOWN, backTop, windows, null);
+    }
+    { // LAME D'ENTRÉE NON COLLÉE (demande de l'utilisateur) : quatre trous de cure-dent aux coins, quatre cure-dents ; les deux trous du bas vont dans la paroi du corps, les deux du haut dans la plaque avant du toit
+      const l = out.find((p) => /^Lambris avant \d+ \(percé\)$/.test(p.name));
+      if (l) {
+        const zTopPin = r2(frontTop - 6), zLowPin = 6, dx = r2(l.w / 2 - 6), cxl = l.pos[0], czl = l.pos[2];
+        frontPins = [[-dx, zLowPin], [dx, zLowPin], [-dx, zTopPin], [dx, zTopPin]].map(([x, z]) => ({ x: r2(cxl + x), z }));
+        l.holes = [...l.holes, ...frontPins.map((q): Hole => ({ id: uid(), shape: 'round' as const, x: r2(q.x - cxl), y: r2(q.z - czl), size: PIN_D }))];
+        frontPins.forEach((q, k) => out.push({ id: uid(), name: `Cure-dent lame d'entrée ${k + 1}`, w: 2, h: 2, depth: PIN_LEN, pos: [q.x, r2(-ye - LAM_T + PIN_LEN / 2), q.z] as Vec3, rot: rotFromBasis([1, 0, 0], [0, 0, 1]), notches: [], holes: [], group: lamGroup, special: 'block' as const, color: '#d9b779' }));
+      }
+    }
+    if (n.pente) { // PLAQUE DE VENTILATION : okoumé 5 mm dans l'ouverture de l'habillage arrière ; à gauche (vue de derrière) la grille de la sortie du ventilateur, à droite celle du Raspberry Pi ; 4 trous de cure-dent aux coins
+      const [vx0, vz0, vx1, vz1] = ventWin, cx = (vx0 + vx1) / 2, cz = (vz0 + vz1) / 2;
+      const slot = (x: number): Hole => ({ id: uid(), shape: 'square' as const, x: r2(x - cx), y: r2(bodyH + VENT_Z - cz), size: GR_SLOT, sh: VENT_H });
+      const fanSlots = Array.from({ length: GR_N }, (_, j) => slot(FANX - GR_SPAN / 2 + GR_SLOT / 2 + j * (GR_SLOT + GR_BAR)));
+      const nPi = Math.floor((PORT_X1 - PORT_X0 + GR_BAR) / (GR_SLOT + GR_BAR)), spanPi = nPi * GR_SLOT + (nPi - 1) * GR_BAR;
+      const piSlots = n.cam > 0 ? Array.from({ length: nPi }, (_, j) => slot(piX - spanPi / 2 + GR_SLOT / 2 + j * (GR_SLOT + GR_BAR))) : [];
+      pinHoles = [[vx0 + PIN_IN, vz0 + PIN_INZ], [vx1 - PIN_IN, vz0 + PIN_INZ], [vx0 + PIN_IN, vz1 - PIN_INZ], [vx1 - PIN_IN, vz1 - PIN_INZ]].map(([x, z]) => ({ x: r2(x), z: r2(z) }));
+      const pins = pinHoles.map((q): Hole => ({ id: uid(), shape: 'round' as const, x: r2(q.x - cx), y: r2(q.z - cz), size: PIN_D }));
+      out.push({ id: uid(), name: 'Plaque de ventilation arrière', w: r2(vx1 - vx0), h: r2(vz1 - vz0), depth: LAM_T, pos: [r2(cx), ye + LAM_T / 2, r2(cz)] as Vec3, rot: rotFromBasis([1, 0, 0], [0, 0, 1]), notches: [], holes: [...fanSlots, ...piSlots, ...pins], group: lamGroup, material: 'okoume' as const, color: LAM_COLOR });
     }
     // TOIT EN OKOUMÉ : DEUX plaques de contreplaqué okoumé de 5 mm collées l'une sur l'autre (10 mm ; NON peintes : l'utilisateur les huile ou les sature pour l'extérieur), posées sur la diagonale des côtés du toit ;
     // elles débordent de 60 mm devant (abri de l'entrée) et de 30 mm seulement sur les côtés et derrière ; découpées au laser sur « Planche okoumé 5 mm » avec les lames de l'habillage.
@@ -772,12 +813,22 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     ...slotted.map((p) => ({ ...p, group, name: p.name.replace(/ (\d+)$/, ' ext $1') })),
     { ...floorSlotted, group },
     ...innerParts.map((p) => ({ ...p, name: p.name.replace(/ (\d+)$/, ' int $1') })),
-    ...batBrackets, lockPlate,
+    ...batBrackets, cPiece, ...sleeve,
     ...roofParts, ...frames, ...camParts, ...camera, ...pi, ...cable, ...wires,
-    { id: uid(), name: 'Schéma électronique', w: 1, h: 1, pos: [0, 0, -30] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: docGroupId, special: 'doc' as const }, // document (pas une pièce physique) : un clic dans « Pièces » l'ouvre
   ];
+  for (const p of planks) { // trous de cure-dent de la lame d'entrée dans la paroi derrière elle : « Face avant ext » (deux du bas), « Face avant toit » (deux du haut)
+    const low = /^Face avant ext/.test(p.name), up = /^Face avant toit/.test(p.name);
+    if (low || up) p.holes = [...p.holes, ...frontPins.filter((q) => (low ? q.z < bodyH : q.z > bodyH)).map((q) => ({ id: uid(), shape: 'round' as const, x: r2(q.x - p.pos[0]), y: r2(q.z - p.pos[2]), size: PIN_D }))];
+  }
+  for (const p of planks) if (/^Face arrière toit/.test(p.name)) p.holes = [...p.holes, ...pinHoles.map((q) => ({ id: uid(), shape: 'round' as const, x: r2(q.x - p.pos[0]), y: r2(q.z - p.pos[2]), size: PIN_D }))]; // trous de cure-dent de la plaque de ventilation : 3 mm de bois derrière elle
   if (n.solar) { // la gaine traverse le fond, le plancher intérieur, le cadre du toit et le plancher / dessus du toit, dans l'isolant du côté droit
-    for (const p of planks) if (/^(Dessous ext|Plancher int|Cadre toit (bas|milieu|haut)|Plaque de verrouillage|Dessous toit|Dessus toit)/.test(p.name)) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: r2(CND_X - p.pos[0]), y: r2(CND_Y - p.pos[1]), size: /^(Dessous ext|Plancher int)/.test(p.name) ? CND_D : CND_HOLE_ROOF })]; // fond et plancher du corps : pile le diamètre de la gaine (serrée) ; zone du toit (trois planches du cadre, dessous et dessus du toit) : Ø 18, la gaine passe sans effort
+    for (const p of planks) if (/^(Dessous ext|Plancher int|Cadre toit (bas|milieu|haut)|Pièce en C|Dessous toit|Dessus toit)/.test(p.name)) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: r2(CND_X - p.pos[0]), y: r2(CND_Y - p.pos[1]), size: /^(Dessous ext|Plancher int)/.test(p.name) ? CND_D : CND_HOLE_ROOF })]; // fond et plancher du corps : pile le diamètre de la gaine (serrée) ; zone du toit (trois planches du cadre, dessous et dessus du toit) : Ø 18, la gaine passe sans effort
+  }
+  for (const w of planks) { // fentes des dents de la pièce en C dans chacune des huit parois (scène réduite : la paroi et la pièce en C)
+    if (!/^(Face|Côté) (avant|arrière|gauche|droit) (ext|int)/.test(w.name)) continue;
+    const tmp: PlankScene = { t, fit, planks: [{ ...w, group: undefined }, { ...cPiece, group: '__piece-c' }] };
+    const sl = slotsForTeeth(tmp, w.id).scene.planks[0];
+    w.holes = [...w.holes, ...sl.holes.filter((h) => !w.holes.some((o) => o.id === h.id))];
   }
   for (const p of planks) { // prise d'air basse : l'ouverture du dessous, le passage du conduit dans le fond intérieur et la fente de la paroi intérieure gauche
     if (/^Dessous ext/.test(p.name)) p.holes = [...p.holes, { id: uid(), shape: 'square' as const, x: AIR_CX, y: AIR_CY, size: r2(AIR_LX - 2 * t), sh: r2(AIR_LY - 2 * t) }]; // ouverture du conduit : son intérieur, rectangle simple (les parois reposent sur le fond autour)
@@ -802,6 +853,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const merged = new Set([solGroupId]);
   const LINKS: [RegExp, string][] = [ // fiches de référence (constructeur ou revendeur)
     [/^Raspberry Pi/, 'https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html#/ram-2_gb'],
+    [/^Nappe caméra 2/, 'https://www.kubii.com/fr/nappes-cables-adaptateurs/4116-1861-nappe-csi-mipi-camera-pour-raspberry-pi-5-3272496316669.html#/dimensions-500mm_x_16mm_8_x_06'],
+    [/^Nappe caméra$/, 'https://www.kubii.com/fr/nappes-cables-adaptateurs/4116-1859-nappe-csi-mipi-camera-pour-raspberry-pi-5-3272496316669.html#/dimensions-200mm_x_16mm_8_x_06'],
     [/^Caméra( 2)?$/, 'https://www.amazon.fr/dp/B0BRY3L9H7'],
     [/^(Ventilateur Noctua|Prise 4 broches du ventilateur|Rallonge ventilateur)/, 'https://www.amazon.fr/dp/B00VXTANZ4'],
     [/^Grille de protection ventilateur/, 'https://www.amazon.fr/dp/B0B1QRWHW3'],
@@ -814,10 +867,10 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   ];
   const underRoof = (pt: Vec3): Vec3 => (Math.abs(pt[0]) < W / 2 - t && Math.abs(pt[1]) < D / 2 - t ? [pt[0], pt[1], r2(Math.min(pt[2], bodyH + Hf + ((pt[1] + D / 2) * (Hb - Hf)) / D - 2))] : pt); // fils et nappes restent sous la pente du toit
   const unnumber = (nm: string) => (start === 1 ? nm.replace(/^((?:Face avant|Face arrière|Côté droit|Côté gauche|Dessus|Dessous)(?: (?:ext|int|toit|compartiment))?|Grille anti-insectes) 1$/, "$1") : nm); // un seul nichoir : plus de « 1 » derrière les plaques des boîtes (les numéros des séries — lambris, cales, isolant… — restent)
-  const ventGroup = uid(); // groupe « Ventilation » : tout ce qui sert à ventiler (cassette du ventilateur, siège, grilles, clapets, interrupteur 12 V, fils, prise d'air basse) ; le bloc isolant d'hiver garde son groupe
+  const ventGroup = uid(); // groupe « Ventilation » : tout ce qui sert à ventiler (cassette du ventilateur, grilles, clapets, interrupteur 12 V, fils, prise d'air basse) ; le bloc isolant d'hiver garde son groupe
   const airGroup = uid(); // groupe « Aération du corps » : le conduit de la prise d'air basse (5 plaques), monté dans le corps ; la sous-boîte isolante qui le bouche garde le groupe « Pièces d'hiver »
   const finalPlanks = planks.map((p) => { let q = p.group && merged.has(p.group) ? { ...p, group: elecGroup, name: unnumber(p.name) } : { ...p, name: unnumber(p.name) }; if (q.path && q.special !== 'solar' && q.name !== 'Câble 12 V vers le toit') if (!/LED extérieures|^Nappe caméra 2/.test(q.name)) q = { ...q, path: q.path.map(underRoof) }; /* la nappe et les fils de la caméra 2 passent DANS le toit (canal du pan) : pas ramenés sous la pente */ const l = LINKS.find(([re]) => re.test(q.name)); if (VENT_PIECES.test(q.name)) q = { ...q, group: ventGroup }; else if (AIR_PIECES.test(q.name)) q = { ...q, group: airGroup }; return l ? { ...q, url: l[1] } : q; });
   const spareGroup = uid(); // « Pièces fines de rechange » : THIN.copies exemplaires de chaque plaque fine, à plat derrière les pièces d'hiver et les baguettes de cale (à gauche du nichoir, à l'arrière : jamais sur eux)
   const spares = thinSpares(finalPlanks, t, spareGroup, r2(-W / 2 - SPARE_GAP), r2(D / 2 + SPARE_GAP + 100));
-  return { planks: [...summerLayout({ t, fit, planks: finalPlanks }).planks, ...spares], group, name: 'Corps', groupNames: { [group]: 'Corps', [roofGroup]: 'Toit', [elecGroup]: 'Électronique', [docGroupId]: 'Schéma électronique', ...(n.lambris && n.pente ? { [coverGroup]: 'Couvercle' } : {}), [entryGroup]: 'Entrée', [isoGroup]: 'Isolant', [wGroup]: "Pièces d'hiver (rechange)", [stripGroup]: 'Baguettes de cale (à couper)', ...(spares.length ? { [spareGroup]: 'Pièces fines de rechange' } : {}), [ventGroup]: 'Ventilation', [airGroup]: 'Aération du corps', [lamGroup]: 'Habillage' } }; // un seul nichoir : groupes sans numéro, le corps s'appelle « Corps »
+  return { planks: [...summerLayout({ t, fit, planks: finalPlanks }).planks, ...spares], group, name: 'Corps', groupNames: { [group]: 'Corps', [roofGroup]: 'Toit', [elecGroup]: 'Électronique', ...(n.lambris && n.pente ? { [coverGroup]: 'Couvercle' } : {}), [entryGroup]: 'Entrée', [isoGroup]: 'Isolant', [wGroup]: "Pièces d'hiver (rechange)", [stripGroup]: 'Baguettes de cale (à couper)', ...(spares.length ? { [spareGroup]: 'Pièces fines de rechange' } : {}), [ventGroup]: 'Ventilation', [airGroup]: 'Aération du corps', [lamGroup]: 'Habillage' } }; // un seul nichoir : groupes sans numéro, le corps s'appelle « Corps »
 }

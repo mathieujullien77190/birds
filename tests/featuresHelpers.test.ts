@@ -6,7 +6,7 @@ import { MERMAID_SRC } from '@/features/schema/SchemaPanel/constants';
 import { buildTree } from '@/features/docs/CodeBrowser/helpers';
 import { renderDoc } from '@/features/docs/DocModal/helpers';
 import { nestOuterSize } from '@/features/viewer/components/NestSection/helpers';
-import { cardScale, groupName } from '@/features/viewer/components/PiecesList/helpers';
+import { cardScale, groupName, groupRank } from '@/features/viewer/components/PiecesList/helpers';
 import { parseCutCfg } from '@/features/laser/helpers';
 import { CUT_CFG_KEY, DEFAULT_CUT_CFG, SHEET_GAP_PREVIEW } from '@/features/laser/constants';
 import { NEST_DEFAULT } from '@/birdhouse/model';
@@ -128,5 +128,11 @@ describe('petits calculs de l\'interface', () => {
     expect(DEFAULT_CUT_CFG).toEqual({ W: 410, H: 400, gap: 5 });
     expect(CUT_CFG_KEY).toBe('plaques-decoupe');
     expect(SHEET_GAP_PREVIEW).toBeGreaterThan(0);
+  });
+
+  it('groupRank : Couvercle, Habillage, Toit, Électronique, puis les autres, les baguettes, les pièces de rechange, le schéma en dernier', () => {
+    const names = ['Dossier du nichoir', 'Pièces fines de rechange', 'Baguettes de cale (à couper)', 'Corps', 'Électronique', 'Toit', 'Habillage', 'Couvercle', "Pièces d'hiver", 'Entrée'];
+    expect([...names].sort((a, b) => groupRank(a.replace(/ \(.*\)$/, '')) - groupRank(b.replace(/ \(.*\)$/, ''))).map((n) => n.replace(/ \(.*\)$/, ''))).toEqual(
+      ['Couvercle', 'Habillage', 'Toit', 'Électronique', 'Corps', 'Entrée', 'Baguettes de cale', 'Pièces fines de rechange', "Pièces d'hiver", 'Dossier du nichoir']);
   });
 });

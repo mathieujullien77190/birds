@@ -1,5 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { CollapseButton, SidePanel } from '@/ui';
+import { MachineSection } from '@laser';
 import { LaserSection, type CutCfg, type LaserMachine, type Sheets } from '@/features/laser';
 import type { NestParams, PlankScene } from '@/birdhouse/model';
 import { NestSection } from '../NestSection';
@@ -34,7 +35,8 @@ export function LeftPanel({ open, setOpen, sc, nest, setNest, addNest, cutCfg, s
         </div>
       </header>
       <NestSection sc={sc} nest={nest} setNest={setNest} addNest={addNest} />
-      <LaserSection cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} hideMachine={hideMachine} />
+      <LaserSection cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} />
+      {!hideMachine && <MachineSection m={machine} title="Pilotage laser (Sculpfun)" defaultOpen />}
     </SidePanel>
   );
 }

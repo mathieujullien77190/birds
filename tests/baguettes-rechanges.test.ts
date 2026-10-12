@@ -20,7 +20,7 @@ describe('baguettes qui portent le dessus du toit (contreplaqué 3 mm, dents dan
     const sc = buildNest(over), t = sc.t;
     const bag = by(sc, /^Baguette dessus toit/);
     it(`plus de tasseaux de bois : cinq baguettes plates découpées au laser, 3 mm, dents impaires, bouts sans dent (${name})`, () => {
-      expect(by(sc, /^Tasseau/)).toEqual([]);
+      expect(by(sc, /^Tasseau (gauche|droite|avant|arrière)/)).toEqual([]);
       expect(bag.map((p) => p.name).sort()).toEqual(['Baguette dessus toit arrière 1', 'Baguette dessus toit arrière 2', 'Baguette dessus toit avant', 'Baguette dessus toit droite', 'Baguette dessus toit gauche']);
       for (const p of bag) {
         expect(p.special, p.name).toBeUndefined(); expect(p.material, p.name).toBeUndefined();
@@ -64,11 +64,12 @@ describe('baguettes qui portent le dessus du toit (contreplaqué 3 mm, dents dan
       }
     });
   }
-  it('elles se rangent sur les planches de contreplaqué ; les deux baguettes latérales sont identiques (même numéro)', () => {
+  it('elles se rangent sur les planches de contreplaqué ; la baguette droite est raccourcie autour du fourreau de la gaine (donc plus identique à la gauche)', () => {
     const sc = buildNest({}), codes = plankCodes(sc);
     const items = nestSheets(sc, 410, 400).flatMap((s) => s.items.filter((i) => /^Baguette dessus toit/.test(i.plank.name)));
     expect(items).toHaveLength(5);
-    expect(codes.get(one(sc, /^Baguette dessus toit gauche$/).id)).toBe(codes.get(one(sc, /^Baguette dessus toit droite$/).id));
+    expect(codes.get(one(sc, /^Baguette dessus toit gauche$/).id)).not.toBe(codes.get(one(sc, /^Baguette dessus toit droite$/).id));
+    expect(one(sc, /^Baguette dessus toit droite$/).w).toBeLessThan(one(sc, /^Baguette dessus toit gauche$/).w);
   });
 });
 

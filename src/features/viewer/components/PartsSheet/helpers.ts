@@ -2,7 +2,7 @@ import type { Plank, PlankScene } from '@/birdhouse/model';
 
 export interface PartsRow { key: string; name: string; group: string | null; ids: string[]; members: Plank[] }
 
-/** Lignes du volet mobile « afficher / cacher » : un groupe = une ligne (dans l'ordre d'apparition), une plaque seule = une ligne ; le document « Schéma électronique » (jamais dessiné) est omis. */
+/** Lignes du volet mobile « afficher / cacher » : un groupe = une ligne (dans l'ordre d'apparition), une plaque seule = une ligne ; le document « Dossier du nichoir » (jamais dessiné) est omis. */
 export function partsRows(sc: PlankScene): PartsRow[] {
   const rows: PartsRow[] = [];
   const byGroup = new Map<string, PartsRow>();

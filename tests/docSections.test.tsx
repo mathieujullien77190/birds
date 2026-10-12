@@ -166,7 +166,7 @@ describe('fenêtre des documents', () => {
     for (const b of [...screen.getByRole('navigation', { name: 'Sommaire' }).querySelectorAll('button'), screen.getByText('suivante ▶')]) expect(b.className).toContain('min-h-11');
     expect(screen.getByRole('navigation', { name: 'Sommaire' }).className).toContain('overflow-x-auto');
   });
-  it('document réel « Schéma électronique » : sommaire, schéma dans « Schéma général », prix interactifs dans « Prix »', async () => {
+  it('document réel « Dossier du nichoir » : sommaire, schéma dans « Schéma général », prix interactifs dans « Prix »', async () => {
     const md = readFileSync(join(__dirname, '..', 'docs', 'schema-electronique.md'), 'utf8');
     const secs = splitSections(md);
     expect(secs.filter((s) => !s.intro).length).toBeGreaterThanOrEqual(10);

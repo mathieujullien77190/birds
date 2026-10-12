@@ -78,7 +78,7 @@ describe('wireInfo sur des fils connus', () => {
       const i = wireInfo(find(re), nest)!;
       expect(i.kind).toBe('ribbon');
       expect(i.diameter).toBe(16);
-      expect(i.cordNote).toContain('nappe CSI');
+      expect(i.cordNote).toContain('câble caméra Raspberry Pi 5');
       expect(i.colorName).toContain('orange');
     }
     expect(wireInfo({ ...find(/^Nappe caméra$/), path: [[0, 0, 0], [0, 0, 1500]] })!.cordCm).toBe(160); // plus longue que toutes les nappes courantes
@@ -90,7 +90,7 @@ describe('wireInfo sur des fils connus', () => {
     expect(i.section).toContain('pas de cuivre');
   });
   it('câble d\'origine du ventilateur : rien à acheter', () => {
-    const i = wireInfo(find(/^Fil cassette PWM/), nest)!;
+    const i = wireInfo(find(/^Câble d'origine du ventilateur/), nest)!;
     expect(i.cordCm).toBeNull();
     expect(i.cordNote).toContain('rien à acheter');
   });

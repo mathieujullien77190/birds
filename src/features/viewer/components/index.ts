@@ -7,6 +7,7 @@ export * from './RightPanel';
 export * from './SelectionBar';
 export * from './WireSheet';
 export * from './ViewToolbar';
+export * from './ViewModeToggle';
 export * from './MobileBar';
 export * from './PartsSheet';
 export * from './AssemblyPanel';

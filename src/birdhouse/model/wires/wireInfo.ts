@@ -31,7 +31,7 @@ export interface WireInfo {
   notes: string;
 }
 
-interface Desc { from: string; to: string; role: string; voltage: string; current: string; connector: string; pins?: number[]; notes: string; fixedCord?: string; dupont?: boolean }
+interface Desc { ribbonCm?: number; from: string; to: string; role: string; voltage: string; current: string; connector: string; pins?: number[]; notes: string; fixedCord?: string; dupont?: boolean }
 
 const DUPONT = 'cordon Dupont femelle-femelle (côté Pi : picot du GPIO, aucune soudure)';
 const SCREW = 'borne à vis du module (fil dénudé de 6 mm)';
@@ -43,7 +43,7 @@ const SIG = 'quelques mA';
 /** Table des descriptions : première expression qui reconnaît le nom. Ajouter ici toute nouvelle liaison (le test « fiche complète » échoue sinon). */
 const TABLE: [RegExp, Desc][] = [
   [/^Câble 12 V/, { from: 'Panneau solaire (boîte de jonction au dos)', to: 'Régulateur de charge (bornier panneau, sous le nichoir)', role: '12 V solaire, + et − dans un seul câble à deux conducteurs', voltage: '≈ 17 à 18 V à puissance max, 21 à 22 V à vide', current: '≈ 5,8 A au plus (panneau 100 W)', connector: 'MC4 côté panneau, borne à vis du régulateur côté charge', notes: 'Longe le sol et arrive sous le nichoir, à l\'abri du lambris ; câble de Ø 7 mm, 2 × 4 mm² environ.' }],
-  [/^Nappe caméra 2/, { from: 'Raspberry Pi (2ᵉ port CSI)', to: 'Caméra 2 (dehors, sous le débord)', role: 'données de l\'image, bus CSI (MIPI)', voltage: '3,3 V logique, alimentation de la caméra comprise', current: SIG, connector: 'connecteur CSI à levier des deux côtés, sans outil', notes: 'Longue nappe plate de 16 mm : elle monte dans le canal du toit en okoumé (entre les deux plaques collées) : de l\'à-plomb de la caméra jusque dans le caisson, où elle rejoint le Pi. Ne jamais la plier à angle vif ni la croiser avec un fil.' }],
+  [/^Nappe caméra 2/, { ribbonCm: 50, from: 'Raspberry Pi (2ᵉ port CSI)', to: 'Caméra 2 (dehors, sous le débord)', role: 'données de l\'image, bus CSI (MIPI)', voltage: '3,3 V logique, alimentation de la caméra comprise', current: SIG, connector: 'connecteur CSI à levier des deux côtés, sans outil', notes: 'Longue nappe plate de 16 mm : elle monte dans le canal du toit en okoumé (entre les deux plaques collées) : de l\'à-plomb de la caméra jusque dans le caisson, où elle rejoint le Pi. Ne jamais la plier à angle vif ni la croiser avec un fil.' }],
   [/^Nappe caméra$/, { from: 'Raspberry Pi (port CSI CAM0)', to: 'Caméra 1 (dans le nid)', role: 'données de l\'image, bus CSI (MIPI)', voltage: '3,3 V logique, alimentation de la caméra comprise', current: SIG, connector: 'connecteur CSI à levier des deux côtés, sans outil', notes: 'Courte nappe plate de 16 mm : elle passe par l\'ouverture du toit et arrive à l\'horizontale dans le connecteur du Pi.' }],
   [/^Gaine des fils/, { from: 'Dessous du nichoir (régulateur)', to: 'Dessus du toit (fusible)', role: 'protège les deux fils de charge dans l\'isolant', voltage: '—', current: '—', connector: 'aucun : on enfile les fils dans la gaine avant de les brancher', notes: 'Gaine annelée noire de Ø 16 dans le coin arrière droit, traverse le fond, les planchers et le cadre du toit par des trous de 16 mm (serrés).' }],
   [/^Fil 5 V LED extérieures/, { from: 'Raspberry Pi, broche 2 (5 V)', to: 'Carte de 4 LED infrarouges extérieures (+)', role: 'alimentation 5 V des LED, toujours présente', voltage: '5 V', current: IR_I, connector: DUPONT, pins: [2], dupont: true, notes: 'Longe la nappe de la caméra 2 sans jamais la croiser. Le 5 V reste direct ; c\'est la masse qui est commutée.' }],
@@ -63,10 +63,7 @@ const TABLE: [RegExp, Desc][] = [
   [/^Fil SCL/, { from: 'Raspberry Pi, GPIO3 SCL (broche 5)', to: 'Capteur BME280 (SCL)', role: 'horloge I2C du capteur', voltage: '3,3 V logique', current: SIG, connector: DUPONT, pins: [5], dupont: true, notes: 'Adresse I2C 0x76 ou 0x77.' }],
   [/^Fil masse \(noir\)/, { from: 'Raspberry Pi, broche 9 (masse)', to: 'Capteur BME280 (GND)', role: 'masse du capteur', voltage: '0 V', current: '< 1 mA', connector: DUPONT, pins: [9], dupont: true, notes: 'Quatrième fil du capteur.' }],
   [/^Fil 5 V \(rouge\)/, { from: 'Raspberry Pi, broche 4 (5 V)', to: 'Carte de 4 LED infrarouges du nid (+)', role: 'alimentation 5 V des LED du nid, toujours présente', voltage: '5 V', current: IR_I, connector: DUPONT, pins: [4], dupont: true, notes: 'Le 5 V reste direct ; c\'est la masse (module MOSFET, OUT1) qui est commutée.' }],
-  [/^Fil cassette \+/, { from: 'Ventilateur Noctua (dans la cassette)', to: 'Prise 4 broches d\'origine (+12 V)', role: '12 V commuté du ventilateur', voltage: '12 V', current: '≈ 0,05 A', connector: 'câble d\'origine du ventilateur', notes: 'Câble d\'origine du Noctua (≈ 30 cm) : il monte du ventilateur et traverse le couvercle par un passage de 6 × 12 mm.', fixedCord: 'câble d\'origine du ventilateur : rien à acheter ni à couper' }],
-  [/^Fil cassette PWM/, { from: 'Ventilateur Noctua (dans la cassette)', to: 'Prise 4 broches d\'origine (PWM)', role: 'commande de vitesse PWM', voltage: '3,3 V logique, 25 kHz', current: SIG, connector: 'câble d\'origine du ventilateur', notes: 'Fil bleu du Noctua.', fixedCord: 'câble d\'origine du ventilateur : rien à acheter ni à couper' }],
-  [/^Fil cassette tachymètre/, { from: 'Ventilateur Noctua (dans la cassette)', to: 'Prise 4 broches d\'origine (tachymètre)', role: 'retour de vitesse (2 impulsions par tour)', voltage: '3,3 V logique (collecteur ouvert)', current: SIG, connector: 'câble d\'origine du ventilateur', notes: 'Fil jaune du Noctua.', fixedCord: 'câble d\'origine du ventilateur : rien à acheter ni à couper' }],
-  [/^Fil cassette −/, { from: 'Ventilateur Noctua (dans la cassette)', to: 'Prise 4 broches d\'origine (masse)', role: 'masse du ventilateur', voltage: '0 V', current: '≈ 0,05 A', connector: 'câble d\'origine du ventilateur', notes: 'Fil noir du Noctua.', fixedCord: 'câble d\'origine du ventilateur : rien à acheter ni à couper' }],
+  [/^Câble d'origine du ventilateur/, { from: 'Ventilateur Noctua (dans la cassette)', to: "Prise 4 broches d'origine (femelle, sur le couvercle de la cassette)", role: 'les 4 fils du ventilateur dans une seule gaine noire : broche 1 masse, broche 2 +12 V, broche 3 tachymètre, broche 4 PWM (brochage standard des ventilateurs 4 broches)', voltage: '12 V sur la broche 2 ; 3,3 V logique sur le PWM et le tachymètre', current: '≈ 0,05 A', connector: "prise 4 broches d'origine, détrompée, aucune soudure", notes: "Câble vendu avec le Noctua (≈ 30 cm) : il monte du ventilateur et traverse le couvercle par un passage de 6 × 12 mm. Le câble est noir : les couleurs de ses fils ne sont pas à suivre, on branche par le numéro de broche de la prise.", fixedCord: "câble d'origine du ventilateur : rien à acheter ni à couper" }],
   [/^Fil Wago \+ → interrupteur/, { from: 'Wago 221-413 du + (1ʳᵉ entrée)', to: 'Module interrupteur 12 V (entrée)', role: '12 V + du ventilateur, avant l\'interrupteur', voltage: '12,8 V nominal', current: '≈ 0,05 A', connector: WAGO + ' côté rail, ' + SCREW, notes: 'L\'interrupteur est côté + (high-side) : une masse coupée ferait remonter 12 V vers les GPIO.' }],
   [/^Fil interrupteur → ventilateur/, { from: 'Module interrupteur 12 V (sortie)', to: 'Rallonge du ventilateur (prise mâle, +12 V)', role: '12 V commuté vers le ventilateur', voltage: '12 V (coupé à l\'arrêt)', current: '≈ 0,05 A', connector: FAN_PLUG, notes: 'Passe sur le dessus du toit ; la prise se débranche à la main pour sortir la cassette.' }],
   [/^Fil ventilateur −/, { from: 'Rallonge du ventilateur (prise mâle, masse)', to: 'Wago 221-415 du − (2ᵉ entrée)', role: 'masse du ventilateur', voltage: '0 V (référence)', current: '≈ 0,05 A', connector: FAN_PLUG + ' ; ' + WAGO, notes: 'Retour du ventilateur vers le rail.' }],
@@ -107,7 +104,8 @@ export function pathLength(p: Plank): number {
 const cordFor = (cm: number, dupont: boolean): number => (dupont ? Math.max(40, Math.ceil(cm / 10) * 10) : Math.ceil((cm + 6) / 5) * 5);
 
 /** Nappe CSI : longueurs courantes du commerce (cm). */
-const RIBBON_LENGTHS = [5, 10, 15, 20, 30, 50, 100];
+const RIBBON_LENGTHS = [20, 30, 50]; // longueurs du câble caméra Raspberry Pi 5 chez Kubii : 200, 300 et 500 mm (200 mm = 1,32 €, 500 mm = 3,72 €)
+const RIBBON_PRICE: Record<number, string> = { 20: '1,32 €', 50: '3,72 €' };
 
 /** Pour deux fils nommés « Fil masse (noir) » : celui du capteur suit « Fil SCL (vert) », celui des LED du nid suit « Fil 5 V (rouge) » (ordre de `makeNest`) ; sans contexte, le capteur. */
 function descFor(p: Plank, planks: Plank[]): Desc | undefined {
@@ -134,7 +132,7 @@ export function wireInfo(p: Plank, planks: Plank[] = []): WireInfo | null {
   const dupont = !!d?.dupont;
   let cordCm: number | null, cordNote: string;
   if (d?.fixedCord) { cordCm = null; cordNote = d.fixedCord; }
-  else if (kind === 'ribbon') { cordCm = RIBBON_LENGTHS.find((l) => l >= lengthCm + 2) ?? Math.ceil(lengthCm / 10) * 10 + 10; cordNote = `nappe CSI plate de ${cordCm} cm (la plus courte du commerce qui convient)`; }
+  else if (kind === 'ribbon') { cordCm = d?.ribbonCm ?? RIBBON_LENGTHS.find((l) => l >= lengthCm + 2) ?? Math.ceil(lengthCm / 10) * 10 + 10; cordNote = `câble caméra Raspberry Pi 5 de ${cordCm} cm, 22 → 15 broches, 16 mm de large (Kubii${RIBBON_PRICE[cordCm] ? `, ${RIBBON_PRICE[cordCm]}` : ''}) : le trajet fait ${lengthCm} cm`; }
   else if (kind === 'conduit') { cordCm = Math.ceil((lengthCm + 2) / 5) * 5; cordNote = `gaine annelée Ø 16 de ${cordCm} cm`; }
   else { cordCm = cordFor(lengthCm, dupont); cordNote = dupont ? `${cordCm} cm (cordons Dupont F/F de 40 cm : on plie le surplus en S)` : `${cordCm} cm de fil (trajet ${lengthCm} cm + marge pour dénuder)`; }
   return {

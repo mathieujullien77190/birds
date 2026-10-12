@@ -24,13 +24,13 @@ export function AssemblyPanel({ steps, index, setIndex, onClose, mobile }: { ste
     const d = swipeDirection(t.clientX - s.x, t.clientY - s.y);
     if (d) go(d);
   };
-  const pos = mobile ? 'inset-x-0 bottom-0 max-h-[40%] rounded-t-xl' : 'bottom-3 right-3 w-[26rem] max-h-[60%] rounded-lg';
+  const pos = mobile ? 'inset-x-0 bottom-0 max-h-[40%] rounded-t-xl' : 'bottom-14 right-3 w-[26rem] max-h-[calc(60%-2.5rem)] rounded-lg';
   const body = mobile ? 'text-base' : 'text-sm';
   const btn = 'flex h-12 flex-1 items-center justify-center rounded-lg text-base font-medium disabled:opacity-40';
   if (folded) {
     return (
       <button type="button" aria-label="Rouvrir le montage" onClick={() => setFolded(false)}
-        className={`absolute z-20 flex items-center gap-2 border border-stone-200 bg-white/95 px-3 py-2 text-left shadow-md ${mobile ? 'inset-x-0 bottom-0 rounded-t-xl' : 'bottom-3 right-3 w-[26rem] rounded-lg'}`}>
+        className={`absolute z-20 flex items-center gap-2 border border-stone-200 bg-white/95 px-3 py-2 text-left shadow-md ${mobile ? 'inset-x-0 bottom-0 rounded-t-xl' : 'bottom-14 right-3 w-[26rem] rounded-lg'}`}>
         <span className="min-w-0 flex-1 truncate text-sm font-semibold text-stone-900">{step.title}</span>
         <span className="shrink-0 text-sm text-stone-500">{label}</span>
       </button>

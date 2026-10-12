@@ -9,7 +9,7 @@ import { makeNest, moveWithGroup, setAirPlug, setCassetteMode, nextCassette, win
 import { PiSimulator } from '@/birdhouse/PiSimulator';
 import { loadPiModel, piModel } from '@/birdhouse/three/piModel';
 import type { View } from '@/birdhouse/three/types';
-import { AssemblyPanel, hiddenFor, ContextMenu, CutPanel, LeftPanel, MobileBar, PartsSheet, PiecesList, PullBar, RightPanel, SelectionBar, ViewToolbar, WireSheet, wireSheetFor } from '../components';
+import { AssemblyPanel, hiddenFor, ContextMenu, CutPanel, LeftPanel, MobileBar, PartsSheet, PiecesList, PullBar, RightPanel, SelectionBar, ViewModeToggle, ViewToolbar, WireSheet, wireSheetFor } from '../components';
 import { HIDDEN_AT_CREATION, STORAGE } from '../constants';
 import { useCutPlane, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useAssembly, useThreeView, useFanSpeed, useIrBeams } from '../hooks';
 import type { ContextMenuState, Hover, PullState } from '../types';
@@ -144,10 +144,6 @@ export default function Planks() {
     setConfirmAll(false); commit('Tout supprimé', (s) => ({ ...s, planks: [], groupNames: {} })); setSelectedId(null); setGroupSel(null); setExtra(new Set()); setPull(null); };
   const removeGroup = (g: string) => { commit('Groupe supprimé', (s) => ({ ...s, planks: s.planks.filter((p) => p.group !== g) })); if (selected?.group === g) setSelectedId(null); };
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set()); // groupes dépliés dans le volet « Pièces »
-  useEffect(() => { // le groupe « Schéma électronique » est déplié d'office : on voit tout de suite le bouton qui ouvre le document
-    const docs = Object.entries(sc.groupNames ?? {}).filter(([, nm]) => nm === 'Schéma électronique').map(([g]) => g);
-    if (docs.some((g) => !openGroups.has(g))) setOpenGroups((s) => new Set([...s, ...docs]));
-  }, [sc.groupNames]); // eslint-disable-line react-hooks/exhaustive-deps -- ne se relance que si les noms de groupes changent ; `openGroups` n'est lu que pour savoir s'il manque un groupe à déplier
   /** Lie toutes les plaques sélectionnées (principale + Ctrl + clic) dans un seul groupe (les groupes existants fusionnent). */
   const linkSelection = () => {
     const ids = new Set([selectedId, ...extra].filter(Boolean) as string[]);
@@ -181,6 +177,7 @@ export default function Planks() {
         <main className="relative min-h-0 flex-1">
           <div ref={host} className="h-full w-full touch-none" />
           {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
+          {!asm.on && <ViewModeToggle sheets={cutView} onChange={setCutView} />}
           {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
           {!mSettings && !mParts && !asm.on && wireSheetEl}
           {asm.on && <AssemblyPanel steps={asm.steps} index={asm.index} setIndex={asm.setIndex} onClose={() => asm.setOn(false)} mobile />}
@@ -204,7 +201,8 @@ export default function Planks() {
       <main className="relative min-w-0 flex-1" onClick={() => setCtx(null)}>
         <div ref={host} className="h-full w-full" />
         {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
-        <ViewToolbar assemblyOn={asm.on} onToggleAssembly={() => asm.setOn(!asm.on)} winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={openPi} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
+        <ViewModeToggle sheets={cutView} onChange={setCutView} />
+        <ViewToolbar assemblyOn={asm.on} onToggleAssembly={() => asm.setOn(!asm.on)} winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={openPi} onOpenDoc={() => setDocOpen('schema')} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
         {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
         {wireSheetEl}
         {asm.on && <AssemblyPanel steps={asm.steps} index={asm.index} setIndex={asm.setIndex} onClose={() => asm.setOn(false)} mobile={false} />}
@@ -218,7 +216,7 @@ export default function Planks() {
       {schemaOn && <SchemaPanel hover={hover} selectedId={selectedId} planks={sc.planks} onHover={(id) => setHover(id ? { plank: id } : null)} />}
       <RightPanel
         open={rightOpen} setOpen={setRightOpen} piecesCount={sc.planks.length}
-        pieces={sc.planks.length ? <PiecesList sc={sc} selectedId={selectedId} selected={selected} groupSel={groupSel} extra={extra} hidden={hidden} openGroups={openGroups} setOpenGroups={setOpenGroups} dropOn={dropOn} setDropOn={setDropOn} setHover={setHover} confirmAll={confirmAll} docOpen={docOpen} setDocOpen={setDocOpen} setSelectedId={setSelectedId} setGroupSel={setGroupSel} setExtra={setExtra} pick={pick} update={update} commit={commit} toggleHidden={toggleHidden} duplicate={duplicate} remove={remove} duplicateGroup={duplicateGroup} removeGroup={removeGroup} removeAll={removeAll} dropPlank={dropPlank} /> : <Hint>Aucune plaque.</Hint>}
+        pieces={sc.planks.length ? <PiecesList sc={sc} selectedId={selectedId} selected={selected} groupSel={groupSel} extra={extra} hidden={hidden} openGroups={openGroups} setOpenGroups={setOpenGroups} dropOn={dropOn} setDropOn={setDropOn} setHover={setHover} confirmAll={confirmAll} setSelectedId={setSelectedId} setGroupSel={setGroupSel} setExtra={setExtra} pick={pick} update={update} commit={commit} toggleHidden={toggleHidden} duplicate={duplicate} remove={remove} duplicateGroup={duplicateGroup} removeGroup={removeGroup} removeAll={removeAll} dropPlank={dropPlank} /> : <Hint>Aucune plaque.</Hint>}
       />
     </div>
   );

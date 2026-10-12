@@ -124,7 +124,7 @@ describe('habillageDimensions : cotes de l\'habillage seulement', () => {
     const seg = (i: number) => { const p = ((out[i].children[0]) as LineSegments).geometry.attributes.position; return [new Vector3(p.getX(0), p.getY(0), p.getZ(0)), new Vector3(p.getX(1), p.getY(1), p.getZ(1))]; };
     expect(seg(0).map((x) => x.toArray())).toEqual([[min[0], min[1] - O, min[2]], [max[0], min[1] - O, min[2]]]); // largeur devant, au sol
     expect(seg(1).map((x) => x.toArray())).toEqual([[max[0] + O, min[1], min[2]], [max[0] + O, max[1], min[2]]]); // profondeur à droite, au sol
-    expect(seg(2).map((x) => x.toArray())).toEqual([[max[0] + O, min[1] - O, min[2]], [max[0] + O, min[1] - O, max[2]]]); // hauteur sur l'arête avant droite
+    expect(seg(2).map((x) => x.toArray())).toEqual([[max[0] + O, max[1] + O, min[2]], [max[0] + O, max[1] + O, max[2]]]); // hauteur sur l'arête arrière droite, derrière
   });
   it("ignore les plaques sans groupe, les groupes d'un autre nom, les groupes sans nom et les groupes entièrement cachés", () => {
     const planks = [P({ id: 'solo' }), lame('x', 0, 'autre'), lame('y', 0, 'sansnom'), lame('h', 0, 'cache')];

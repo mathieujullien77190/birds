@@ -2,7 +2,7 @@
 
 > Le logiciel de pilotage est un **projet autonome** : le dossier `laser-control/` (son `README.md` décrit l'installation, l'export et le format `LaserJob`). Il tourne seul (`npm install && npm run dev`, SVG ou G-code déposé sur la page) et l'app du nichoir l'utilise via l'alias `@laser` ; le mode d'emploi ci-dessous est le même dans les deux.
 
-L'app pilote la découpeuse directement depuis le navigateur (API **Web Serial**) : connexion USB, déplacements, cadre à vide, envoi du G-code planche par planche. Section « Découpe laser » du panneau de gauche, bloc « Machine » → « Ouvrir le pilotage de la laser ».
+L'app pilote la découpeuse directement depuis le navigateur (API **Web Serial**) : connexion USB, déplacements, cadre à vide, envoi du G-code planche par planche. Panneau de gauche, bloc « Pilotage laser (Sculpfun) » (sous « Découpe laser ») → « Ouvrir l'application ». Au-dessus de la vue, en bas à droite, une bascule « 3D / Planches » affiche les planches à découper à la place de la 3D.
 
 ## Matériel et branchement
 | Élément | Valeur |
@@ -57,6 +57,7 @@ Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la sc
 | H-11 | Lambris arrière 3.1 | Habillage | okoumé | 1 |
 | H-12 | Lambris arrière 4 | Habillage | okoumé | 1 |
 | H-13 | Lambris arrière 5 | Habillage | okoumé | 1 |
+| H-14 | Plaque de ventilation arrière | Habillage | okoumé | 1 |
 | COU-01 | Baguette couvercle avant | Couvercle | contreplaqué | 4 |
 | COU-02 | Baguette couvercle arrière | Couvercle | contreplaqué | 4 |
 | COU-03 | Baguette couvercle gauche | Couvercle | contreplaqué | 4 |
@@ -77,10 +78,10 @@ Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la sc
 | P-03 | Bloc isolant d'hiver couvercle | Pièces d'hiver (rechange) | contreplaqué | 1 |
 | P-04 | Bloc isolant d'hiver fond | Pièces d'hiver (rechange) | contreplaqué | 1 |
 | P-05 | Poignée bloc d'hiver 1, Poignée bloc d'hiver 2, Poignée bloc d'hiver 3 | Pièces d'hiver (rechange) | contreplaqué | 12 |
-| V-07 | Goulotte ventilateur gauche, Goulotte ventilateur droite | Ventilation | contreplaqué | 2 |
-| V-08 | Goulotte ventilateur avant | Ventilation | contreplaqué | 1 |
-| V-09 | Conduit de sortie 1, Conduit de sortie 2 | Ventilation | contreplaqué | 8 |
-| V-10 | Conduit de sortie 3, Conduit de sortie 4 | Ventilation | contreplaqué | 8 |
+| T-01 | Goulotte ventilateur gauche, Goulotte ventilateur droite | Toit | contreplaqué | 2 |
+| T-02 | Goulotte ventilateur avant | Toit | contreplaqué | 1 |
+| V-07 | Conduit de sortie 1, Conduit de sortie 2 | Ventilation | contreplaqué | 8 |
+| V-08 | Conduit de sortie 3, Conduit de sortie 4 | Ventilation | contreplaqué | 8 |
 | A-01 | Conduit d'air 3, Conduit d'air 4 | Aération du corps | contreplaqué | 2 |
 | A-02 | Conduit d'air 2 | Aération du corps | contreplaqué | 1 |
 | A-03 | Conduit d'air 1 | Aération du corps | contreplaqué | 1 |
@@ -104,21 +105,24 @@ Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la sc
 | COR-12 | Côté droit int | Corps | contreplaqué | 1 |
 | COR-13 | Côté gauche int | Corps | contreplaqué | 1 |
 | COR-14 | Étrier batterie 1, Étrier batterie 2… (4 noms) | Corps | contreplaqué | 16 |
-| COR-15 | Plaque de verrouillage de l'isolant | Corps | contreplaqué | 1 |
-| T-01 | Face avant toit | Toit | contreplaqué | 1 |
-| T-02 | Face arrière toit | Toit | contreplaqué | 1 |
-| T-03 | Côté droit toit, Côté gauche toit | Toit | contreplaqué | 2 |
-| T-04 | Dessus toit | Toit | contreplaqué | 1 |
-| T-05 | Dessous toit | Toit | contreplaqué | 1 |
-| T-06 | Baguette dessus toit gauche, Baguette dessus toit droite | Toit | contreplaqué | 8 |
-| T-07 | Baguette dessus toit avant | Toit | contreplaqué | 4 |
-| T-08 | Baguette dessus toit arrière 1 | Toit | contreplaqué | 4 |
-| T-09 | Baguette dessus toit arrière 2 | Toit | contreplaqué | 4 |
-| COR-16 | Cadre toit haut, Cadre toit milieu, Cadre toit bas | Corps | contreplaqué | 3 |
-| T-10 | Face avant caméra 1, Face arrière caméra 1 | Toit | contreplaqué | 2 |
-| T-11 | Côté droit caméra 1, Côté gauche caméra 1 | Toit | contreplaqué | 2 |
+| COR-15 | Pièce en C sous le cadre | Corps | contreplaqué | 1 |
+| T-03 | Fourreau gaine toit 1, Fourreau gaine toit 2… (13 noms) | Toit | contreplaqué | 13 |
+| T-04 | Face avant toit | Toit | contreplaqué | 1 |
+| T-05 | Face arrière toit | Toit | contreplaqué | 1 |
+| T-06 | Côté droit toit | Toit | contreplaqué | 1 |
+| T-07 | Côté gauche toit | Toit | contreplaqué | 1 |
+| T-08 | Dessus toit | Toit | contreplaqué | 1 |
+| T-09 | Dessous toit | Toit | contreplaqué | 1 |
+| T-10 | Baguette dessus toit gauche | Toit | contreplaqué | 4 |
+| T-11 | Baguette dessus toit droite | Toit | contreplaqué | 4 |
+| T-12 | Baguette dessus toit avant | Toit | contreplaqué | 4 |
+| T-13 | Baguette dessus toit arrière 1 | Toit | contreplaqué | 4 |
+| T-14 | Baguette dessus toit arrière 2 | Toit | contreplaqué | 4 |
+| T-15 | Cadre toit haut, Cadre toit milieu, Cadre toit bas | Toit | contreplaqué | 3 |
+| T-16 | Face avant caméra 1, Face arrière caméra 1 | Toit | contreplaqué | 2 |
+| T-17 | Côté droit caméra 1, Côté gauche caméra 1 | Toit | contreplaqué | 2 |
 
-Total : 235 plaques, 73 codes.
+Total : 249 plaques, 77 codes.
 
 ## Réglages à calibrer
 Valeurs de départ prudentes : 300 mm/min, 60 %, 3 passes, plafond de puissance 80 %. Elles dépendent du contreplaqué, de la focale et de l'air assist : la **planche d'essai** découpe une grille de petits carrés (colonnes = vitesses, lignes = puissances) ; le tableau à l'écran donne la position de chaque carré. Retenir le couple qui détache le carré proprement avec le moins de brûlure.

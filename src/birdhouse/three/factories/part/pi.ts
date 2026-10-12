@@ -4,7 +4,7 @@ import { PALETTE } from '../../registry/palette';
 import { piModel } from '../../piModel';
 import { coloredPart, emptyEdges, type Part, type PartGeometry } from '../geometry';
 
-/** Raspberry Pi 5 d'après le plan mécanique officiel (85 × 56, coins de 3, 4 trous Ø 2,7 à 3,5 mm des bords, entraxe 58 × 49) ; composants à leur place, formes simplifiées (cotes lues sur le dessin à l'échelle 1:1, approximatives). Dessin de repli tant que le modèle 3D (forme du Pi 4, mêmes cotes) n'est pas chargé. */
+/** Raspberry Pi 5 d'après le plan mécanique officiel (85 × 56, coins de 3, 4 trous Ø 2,7 à 3,5 mm des bords, entraxe 58 × 49) ; composants à leur place, formes simplifiées (cotes lues sur le dessin à l'échelle 1:1, approximatives). Dessin de repli tant que le modèle 3D (STEP du Pi 5) n'est pas chargé. */
 export function simplePiGeometry(p: Plank): PartGeometry {
   const parts: Part[] = [];
   const px = (x: number) => x - p.w / 2, py = (y: number) => y - p.h / 2; // repère du plan (coin bas gauche) → repère centré
@@ -35,7 +35,7 @@ export function simplePiGeometry(p: Plank): PartGeometry {
   return coloredPart(parts);
 }
 
-/** Raspberry Pi : le modèle 3D (STEP converti : forme du Pi 4, mêmes cotes que le Pi 5 ; à remplacer par un STEP du Pi 5 si fourni) une fois chargé, sinon le dessin simplifié du Pi 5. */
+/** Raspberry Pi : le modèle 3D (STEP du Pi 5 converti) une fois chargé, sinon le dessin simplifié du Pi 5. */
 export function piGeometry(p: Plank): PartGeometry {
   return piModel ? { geo: piModel.clone(), edges: emptyEdges() } : simplePiGeometry(p);
 }

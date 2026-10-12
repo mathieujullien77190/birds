@@ -1,10 +1,10 @@
 import { BufferAttribute, BufferGeometry, Float32BufferAttribute } from 'three';
 
-/** Modèle 3D du Raspberry Pi (STEP converti en binaire compact, voir public/models/pi4.bin) : forme du Pi 4, mêmes cotes que le Pi 5 (85 × 56 mm) ; à remplacer par un STEP du Pi 5 si fourni (le nom de fichier reste pi4.bin). Chargé une fois, partagé. */
+/** Modèle 3D du Raspberry Pi 5 (STEP converti en binaire compact, voir public/models/pi5.bin ; le STEP n'a pas de couleurs, elles viennent de la forme de chaque pièce : carte verte, prises métal, boîtiers sombres, contacts or). Chargé une fois, partagé. */
 export let piModel: BufferGeometry | null = null;
 let piLoading: Promise<void> | null = null;
 export function loadPiModel(): Promise<void> {
-  piLoading ??= fetch(`${import.meta.env.BASE_URL}models/pi4.bin`).then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error('pi4.bin')))).then((buf) => {
+  piLoading ??= fetch(`${import.meta.env.BASE_URL}models/pi5.bin`).then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error('pi5.bin')))).then((buf) => {
     const head = new Uint32Array(buf, 0, 2), nV = head[0], nI = head[1];
     const pos = new Float32Array(buf, 8, nV * 3), col = new Uint8Array(buf, 8 + nV * 12, nV * 3), idx = new Uint32Array(buf.slice(8 + nV * 15, 8 + nV * 15 + nI * 4));
     const g = new BufferGeometry();

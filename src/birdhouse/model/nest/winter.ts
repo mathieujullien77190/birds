@@ -8,7 +8,7 @@ import { SPARE_RE } from './spares';
  * Les déplacements sont des translations au centième : l'aller-retour est exact.
  */
 
-const CASSETTE = [/^Cassette ventilateur/, /^Poignée cassette/, /^Plot caoutchouc ventilateur/, /^Grille de protection ventilateur/, /^Ventilateur Noctua/, /^Prise 4 broches du ventilateur/, /^Fil cassette/, /^Conduit de sortie/]; // le conduit de sortie est fixé à la cassette (dents dans sa paroi arrière) : il sort et rentre avec elle
+const CASSETTE = [/^Cassette ventilateur/, /^Poignée cassette/, /^Plot caoutchouc ventilateur/, /^Grille de protection ventilateur/, /^Ventilateur Noctua/, /^Prise 4 broches du ventilateur/, /^Câble d'origine du ventilateur/, /^Conduit de sortie/]; // le conduit de sortie est fixé à la cassette (dents dans sa paroi arrière) : il sort et rentre avec elle
 const BLOCK = [/^Bloc isolant d'hiver/, /^Isolant bloc d'hiver/, /^Poignée bloc d'hiver/];
 const PLUG = [/^Bouchon-boîte prise d'air/, /^Laine bouchon prise d'air/, /^Poignée bouchon prise d'air/];
 /** Distance entre le nichoir et les pièces rangées ; dépassement du U de la sous-boîte sous son fond. */

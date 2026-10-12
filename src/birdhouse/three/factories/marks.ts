@@ -37,7 +37,7 @@ export function cutMarkObject(planks: Plank[], t: number, cut: Cut): Mesh | null
 
 /**
  * Cotes de l'HABILLAGE seulement (demande de l'utilisateur : plus de cotes sur les autres pièces) : l × L × H de l'encombrement de ses plaques visibles,
- * posées en coordonnées du monde (largeur devant au sol, profondeur à droite au sol, hauteur sur l'arête avant droite).
+ * posées en coordonnées du monde (largeur devant au sol, profondeur à droite au sol, hauteur sur l'arête ARRIÈRE droite, derrière le nichoir : demande de l'utilisateur).
  */
 export function habillageDimensions(sc: PlankScene, hidden: ReadonlySet<string>): Object3D[] {
   const out: Object3D[] = [];
@@ -55,7 +55,7 @@ export function habillageDimensions(sc: PlankScene, hidden: ReadonlySet<string>)
     out.push(
       dimension(new Vector3(min[0], min[1] - O, min[2]), new Vector3(max[0], min[1] - O, min[2]), Yn, Yn.clone().multiplyScalar(O), `${l}`),
       dimension(new Vector3(max[0] + O, min[1], min[2]), new Vector3(max[0] + O, max[1], min[2]), X, X.clone().multiplyScalar(O), `${L}`),
-      dimension(new Vector3(max[0] + O, min[1] - O, min[2]), new Vector3(max[0] + O, min[1] - O, max[2]), X, new Vector3(O, -O, 0), `${H}`),
+      dimension(new Vector3(max[0] + O, max[1] + O, min[2]), new Vector3(max[0] + O, max[1] + O, max[2]), X, new Vector3(O, O, 0), `${H}`),
     );
   }
   return out;

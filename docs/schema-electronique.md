@@ -1,4 +1,4 @@
-# Schéma électronique du nichoir isolé
+# Dossier du nichoir isolé
 
 Un panneau solaire de 100 W charge une batterie LiFePO4 12,8 V ; la batterie alimente un Raspberry Pi 5 (via un convertisseur 12 V → 5 V) et un ventilateur silencieux de 60 mm qui aspire l'air chaud du nid à travers le toit (l'entrée d'air est le trou d'envol et une prise d'air basse dans l'isolant). Le ventilateur ne tourne que quand il fait chaud : le Pi le pilote en PWM et peut couper son 12 V par un petit interrupteur. Une sonde de température étanche, sous le débord du toit, donne la température de dehors. Ce document décrit le montage tel qu'il est modélisé dans l'outil « Plaques » (groupe « Électronique »), puis donne, composant par composant, les paramètres à respecter.
 
@@ -18,12 +18,16 @@ flowchart TB
     BAT["Batterie LiFePO4 12,8 V 6 Ah<br/>4 cellules 32700 en série + BMS"]
   end
   subgraph TOIT["Électronique dans le grenier"]
-    RAIL(("Rail 12 V<br/>Wago 221-413 (+) et 221-415 (−)"))
-    BUCK["Convertisseur 12 V → 5 V 5 A<br/>sortie USB-C"]
-    PI["Raspberry Pi 5"]
-    SW["Module 2 MOSFET<br/>LED on / off"]
-    SWF["Interrupteur 12 V du ventilateur<br/>MOSFET côté +"]
-    FAN["Ventilateur Noctua NF-A6x25 PWM<br/>60 mm, 12 V, cassette amovible"]
+    subgraph V12["Côté 12 V"]
+      RAIL(("Rail 12 V<br/>Wago 221-413 (+) et 221-415 (−)"))
+      BUCK["Convertisseur 12 V → 5 V 5 A<br/>sortie USB-C"]
+      SWF["Interrupteur 12 V du ventilateur<br/>MOSFET côté +"]
+      FAN["Ventilateur Noctua NF-A6x25 PWM<br/>60 mm, 12 V, cassette amovible"]
+    end
+    subgraph V33["Côté 5 V et 3,3 V (logique)"]
+      PI["Raspberry Pi 5"]
+      SW["Module 2 MOSFET<br/>LED on / off"]
+    end
   end
   subgraph NID["Dans le nid (sous le plafond)"]
     CAM1["Caméra 1 (NoIR)"]
@@ -70,6 +74,8 @@ flowchart TB
   linkStyle 17 stroke:#111827,stroke-width:2.5px
   linkStyle 18 stroke:#eab308,stroke-width:2.5px
   linkStyle 19 stroke:#eab308,stroke-width:2.5px
+  style V12 fill:#fef2f2,stroke:#dc2626,stroke-width:2px
+  style V33 fill:#eff6ff,stroke:#2563eb,stroke-width:2px
   classDef pv fill:#1e3a8a,stroke:#1c1917,color:#fff
   classDef mppt fill:#1d4ed8,stroke:#1c1917,color:#fff
   classDef fuse fill:#dc2626,stroke:#1c1917,color:#fff
@@ -106,7 +112,7 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 | --- | --- | --- | --- |
 | Câble 12 V | Panneau solaire | Régulateur de charge, sous le nichoir | Longe le sol et arrive sous le nichoir, à l'abri du lambris |
 | Charge | Régulateur | Batterie, via le fusible | Tout se passe sous le nichoir, dans la jupe de l'habillage : le régulateur (à droite), la batterie (à gauche, à plat, tenue par quatre étriers) et le fusible (collé sous le fond, derrière le régulateur). Deux fils courts de 2,5 mm² (≈ 4 cm pour le + et ≈ 10 cm pour le −) relient les sorties du régulateur, côté arrière, au fusible (lame A, avec le + de la batterie) et à la borne − de la batterie. La charge ne passe pas par la lame B du fusible |
-| Montée vers le toit | Fusible (lame B) et borne − de la batterie | Wago + et Wago −, sur le dessus du toit | Deux fils de 2,5 mm² montent dans une gaine de Ø 16 mm, dans l'isolant du coin arrière droit (à 1 cm du mur arrière, pile sur le joint entre la plaque d'isolant du mur droit et celle du mur arrière) : ils traversent le fond et le plancher intérieur par des trous de 16 mm, pile le diamètre de la gaine, puis les trois planches du cadre, la plaque de verrouillage de l'isolant, le dessous et le dessus du toit par des trous de Ø 18 mm (la gaine y passe tranquillement), et arrivent sur le dessus du toit (≈ 37 cm de fil pour le + et ≈ 49 cm pour le −). Le fusible protège la batterie et le câblage du rail |
+| Montée vers le toit | Fusible (lame B) et borne − de la batterie | Wago + et Wago −, sur le dessus du toit | Deux fils de 2,5 mm² montent dans une gaine de Ø 16 mm, dans l'isolant du coin arrière droit (à 5 mm du mur arrière et à 5 mm du mur de droite) : ils traversent le fond et le plancher intérieur par des trous de 16 mm, pile le diamètre de la gaine, puis la pièce en C, les trois planches du cadre, le dessous du toit, le fourreau de petits carrés empilés dans le toit et son dessus par des trous de Ø 18 mm (la gaine y passe tranquillement), et arrivent sur le dessus du toit (≈ 37 cm de fil pour le + et ≈ 49 cm pour le −). Le fusible protège la batterie et le câblage du rail |
 | Rail 12 V | Fusible / batterie (par la gaine) | Convertisseur 12 → 5 V et ventilateur (par son interrupteur) | Fils rouge (+) et noir (−), répartis par un **Wago 221-413 à 3 entrées pour le +** (fusible, interrupteur du ventilateur, convertisseur) et un **Wago 221-415 à 5 entrées pour le −** (batterie, convertisseur, ventilateur, masse de l'interrupteur, une entrée de réserve), posés à droite de la sortie de la gaine : chaque fil a sa propre entrée |
 | Alimentation du Pi | Convertisseur 12 → 5 V | Prise USB-C du Pi 5 | 5 V, 5 A recommandés pour le Pi 5 |
 | Interrupteur du ventilateur | Wago + (12 V) ; Pi GPIO27 (broche 13) ; masse sur le Wago − | Entrée, commande 3,3 V et masse du module interrupteur 12 V (côté +) | Le Noctua ne s'arrête pas à 0 % de PWM (il tourne à environ 20 %) : on coupe son 12 V. Côté **+**, pas côté masse : une masse coupée ferait remonter jusqu'à 12 V dans les fils PWM et tachymètre vers les GPIO |
@@ -147,7 +153,7 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 
 - Il est posé sur des entretoises de 6 mm dans le coin arrière gauche du toit, calé au montage par des morceaux de baguette de contreplaqué collés sur tous les côtés (voir « Cales »).
 - Il pilote le ventilateur (PWM, tachymètre, interrupteur 12 V), lit le capteur du nid et la sonde de dehors, commande les deux caméras et allume les LED infrarouges.
-- Ses prises USB (2 × USB 3 et 2 × USB 2) et sa prise Ethernet regardent la plaque arrière, percée d'une fenêtre de 60 × 24 mm en face d'elles : on branche sans ouvrir le nichoir. Son USB-C d'alimentation et ses deux micro-HDMI sont sur l'autre grand bord, tourné vers le centre du toit, hors de cette fenêtre. Le Pi 5 n'a pas de prise jack audio.
+- Ses prises USB (2 × USB 3 et 2 × USB 2) et sa prise Ethernet regardent la plaque arrière, percée d'une fenêtre de 60 × 35,5 mm en face d'elles (la même hauteur que la sortie du ventilateur) : on branche sans ouvrir le nichoir, en retirant au besoin la plaque de ventilation arrière de l'habillage. Son USB-C d'alimentation et ses deux micro-HDMI sont sur l'autre grand bord, tourné vers le centre du toit, hors de cette fenêtre. Le Pi 5 n'a pas de prise jack audio.
 - Il lui faut un convertisseur 12 V → 5 V capable de fournir 5 A (le Pi 5 demande 5 V / 5 A en USB-C ; avec 3 A seulement, il limite le courant de ses ports USB).
 - Ses deux ports caméra sont des connecteurs de 22 broches côte à côte sur le bord tourné vers le centre du toit ; les caméras (nappes de 15 broches) s'y branchent par des nappes adaptatrices 22 → 15 broches.
 - Il possède un connecteur de pile RTC : une pile rechargeable dédiée garde l'heure sans réseau (option, voir « Points à vérifier »).
@@ -177,13 +183,14 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 - Le dessus des baguettes affleure le dessous du dessus du toit ; chaque baguette fait 3 mm de haut (l'épaisseur du contreplaqué) sur 5 mm de large.
 - Ligaments de bois autour des fentes : 4,5 mm ou plus.
 
-**Corps, isolant et plaque de verrouillage.** Le corps est fait de huit parois de contreplaqué 3 mm : quatre extérieures (« Face avant ext », « Face arrière ext », « Côté gauche ext », « Côté droit ext ») hautes de 224 mm et quatre intérieures (« … int ») hautes de 182 mm, dont le haut est à 3 mm sous le dessous du toit (227 mm).
+**Corps, isolant et cadre.** Le corps est fait de huit parois de contreplaqué 3 mm : quatre extérieures (« Face avant ext », « Face arrière ext », « Côté gauche ext », « Côté droit ext ») hautes de 227 mm et quatre intérieures (« … int ») hautes de 185 mm, dont le haut est au niveau du dessous du toit.
 
-- **Isolant** : de la fibre de bois de 39 mm remplit la couronne entre les murs extérieurs et intérieurs ; elle s'arrête 9 mm sous le haut des parois, sous le cadre.
-- **Cadre** : trois planches de contreplaqué collées (« Cadre toit haut / milieu / bas », 9 mm, groupe « Corps ») ferment la couronne par le haut, à fleur du chant des parois ; leur ouverture, en U, est ouverte vers l'avant sur toute la largeur du nid.
-- **Plaque de verrouillage de l'isolant** : plaque de contreplaqué 3 mm de 210 × 210 mm en forme de C, collée à plat sur le chant des huit parois, sur l'isolant et sur le cadre ; elle occupe les 3 mm entre le haut des parois et le dessous du toit, donc la hauteur du corps est de 227 mm. Son trou est l'intérieur du nid (120 × 120 mm, ouvert vers le haut). À l'avant elle est ouverte sur 60 mm de large, le plus large carré du bloc d'entrée (59 mm) plus 1 mm : le bloc d'entrée se retire par le haut, aucune de ses pièces n'est recouverte. La gaine la traverse par un trou de Ø 18 mm.
-- **Recouvrement** : la plaque recouvre toute l'épaisseur de chaque paroi (3 mm) et l'isolant ; elle est collée à plat, sans dents.
-- **Toit** : il repose sur cette plaque ; le haut du bloc d'entrée et des plaques d'isolant du bloc affleure le dessous de la plaque (224 mm).
+- **Isolant** : de la fibre de bois de 39 mm remplit la couronne entre les murs extérieurs et intérieurs ; elle s'arrête 12 mm sous le haut des parois, sous la pièce en C.
+- **Pièce en C crénelée** : plaque de contreplaqué 3 mm (« Pièce en C sous le cadre », groupe « Corps ») posée à plat dans la couronne d'isolant, sous le cadre ; elle n'a pas de tasseau : ses dents (≈ 16 mm, une sur deux, bouts pleins) s'encastrent directement dans des fentes des huit parois, les quatre extérieures par ses bords extérieurs et les quatre du nid par les bords de son trou. Elle revient vers l'entrée des deux côtés : devant, elle ne laisse que l'ouverture du bloc d'entrée (60 mm + 1 mm de jeu de chaque côté), qui reste enlevable par le haut. Elle enferme l'isolant ; la gaine la traverse (trou de Ø 18 mm).
+- **Cadre** : trois planches de contreplaqué collées (« Cadre toit haut / milieu / bas », 9 mm, groupe « Toit »), posées pile sur la pièce en C, ferment la couronne par le haut, à fleur du chant des parois ; leur ouverture, en U, est ouverte vers l'avant sur toute la largeur du nid.
+- **Plaque de ventilation arrière** : plaque d'okoumé de 5 mm (groupe « Habillage », peinte avec lui) qui remplit l'ouverture de l'habillage arrière, jeu 0 ; vue de derrière, à gauche la grille de la sortie du ventilateur (7 fentes de 4 mm, la même que celle de la plaque arrière du toit), à droite celle du Raspberry Pi (10 fentes de 4 mm devant sa fenêtre). Quatre trous de Ø 2,2 mm, un à chaque coin, la traversent et traversent la plaque arrière du toit : on y enfonce quatre cure-dents, avec un peu de colle, coupés à ras.
+- **Lame d'entrée non collée** : la lame de l'habillage avant qui porte le trou d'envol (« Lambris avant 3 (percé) ») ne se colle pas : quatre trous de Ø 2,2 mm à ses coins, repris dans la paroi derrière elle (deux dans « Face avant ext », deux dans « Face avant toit »), reçoivent quatre cure-dents (« Cure-dent lame d'entrée 1 à 4 », 10 mm) ; on la retire en les tirant ou en les coupant.
+- **Toit** : le dessous du toit repose directement sur le chant des huit parois ; le haut du bloc d'entrée affleure ce chant (227 mm). **Fourreau de la gaine dans le toit** : 13 carrés de 26 mm (« Fourreau gaine toit 1 à 13 »), percés de Ø 18 mm, empilés et collés entre le dessous et le dessus du toit : l'isolant du toit est découpé autour. **Siège du ventilateur** : les trois parois de la goulotte sont dans le groupe « Toit » (la cassette et le reste de la ventilation gardent le groupe « Ventilation »).
 
 **Pièces fines de rechange.** Chaque plaque de contreplaqué fine a 3 exemplaires de rechange.
 
@@ -201,8 +208,20 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 - **Grille** : la grille de sortie est percée dans la plaque arrière du toit (fentes verticales de 4 mm) ; rien ne dépasse derrière.
 - **Ouverture du plafond** : elle reste ouverte quand le ventilateur est arrêté (sans clapet) ; par temps froid on pose le bloc isolant à la place de la cassette.
 - **Branchement** : le câble d'origine du ventilateur finit par sa prise 4 broches femelle, sur le bord avant du couvercle. La prise mâle de la rallonge 4 broches (12 V commuté, masse, PWM, tachymètre) est collée sur la face avant du siège et la femelle s'y emboîte à la verticale : on la débranche à la main avant de sortir la cassette, sans soudure. Les fils de la rallonge contournent le siège.
+
+**Brancher le ventilateur : quoi sur quoi.** Le câble vendu avec le Noctua est un seul câble noir gainé (quatre fils dedans) : la 3D le dessine en noir, sans couleur à suivre. On branche par le **numéro de broche de la prise 4 broches** (brochage standard des ventilateurs PWM : à confirmer sur la fiche Noctua avant de brancher) :
+
+| Broche de la prise | Fonction | Fil du toit qui s'y branche | Arrivée |
+| --- | --- | --- | --- |
+| 1 | masse (GND) | « Fil ventilateur − » et « Fil masse commune ventilateur » (deux fils sur cette broche) | Wago −, et broche 14 du Pi (GND) |
+| 2 | +12 V | « Fil interrupteur → ventilateur + » | sortie de l'interrupteur 12 V (jamais directement sur le rail) |
+| 3 | tachymètre | « Fil tachymètre ventilateur » | broche 11 du Pi (GPIO17) |
+| 4 | PWM | « Fil PWM ventilateur » | broche 12 du Pi (GPIO18) |
+
+Les prises sont détrompées : la rallonge ne s'enfiche que dans le bon sens sur la prise du ventilateur. Le +12 V ne doit jamais toucher le tachymètre ni le PWM : ils vont sur des GPIO du Pi, qui ne tolèrent que 3,3 V.
+
 - **Pilotage** : le Pi allume le ventilateur seulement quand il fait chaud, règle sa vitesse par PWM et peut couper son 12 V avec l'interrupteur (le Noctua tourne encore à environ 20 % à 0 % de PWM).
-- **Toit** : il tient seul, posé sur la plaque de verrouillage de l'isolant et retenu par l'habillage collé au corps ; pour accéder au grenier, on soulève le toit en okoumé.
+- **Toit** : il tient seul, posé sur le chant des parois du corps, calé par le cadre qui descend dans l'isolant et retenu par l'habillage collé au corps ; pour accéder au grenier, on soulève le toit en okoumé.
 
 **Été / hiver, en 4 lignes**
 
@@ -309,7 +328,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Mémoire | 2 Go suffisent avec Raspberry Pi OS Lite, flux caméra en 720p au plus, zram activé ; 1 Go est possible mais sans marge | — |
 | Niveaux GPIO | 3,3 V seulement (ne tolère pas 5 V) | — |
 | Ports caméra | 2 connecteurs CAM/DISP de 22 broches, côte à côte sur le bord long (à ≈ 49 et ≈ 55 mm du bord gauche, ≈ 8,5 mm du bord, d'après le dessin mécanique officiel) : nappes adaptatrices 22 → 15 broches vers les caméras | connecteurs à ces positions (dimensions du plan officiel, approximatives) ; le sens d'entrée des nappes est à vérifier sur la carte |
-| Prises | 2 × USB 3, 2 × USB 2, Ethernet, 2 × micro-HDMI, USB-C d'alimentation ; pas de jack audio | USB et Ethernet derrière la fenêtre de 60 × 24 mm de la plaque arrière |
+| Prises | 2 × USB 3, 2 × USB 2, Ethernet, 2 × micro-HDMI, USB-C d'alimentation ; pas de jack audio | USB et Ethernet derrière la fenêtre de 60 × 35,5 mm de la plaque arrière (et la grille de la plaque de ventilation) |
 | Consommation | au repos environ 3 W ; avec deux flux caméra environ 5 à 6 W (estimation, à mesurer avec l'INA219) | 5,5 W dans le programme du Pi |
 | Horloge | connecteur de pile RTC sur la carte : une pile rechargeable dédiée garde l'heure sans réseau | option, non comptée dans les prix |
 | Dimensions | 85 × 56 mm (comme le Pi 4), hauteur du composant environ 17 mm | 85 × 56 mm ; le dessin 3D est celui du Pi 4 (mêmes cotes, forme approchée) ; un STEP du Pi 5, s'il est fourni, donnerait la forme exacte |
@@ -484,7 +503,9 @@ Le bouton **Montage** de la barre de la vue (en haut à droite sur ordinateur, e
 - **Navigation** : boutons « ◀ Précédent » / « Suivant ▶ » (grands, en bas de la feuille), balayage horizontal sur la feuille, flèches ← → du clavier, Échap pour quitter, liste de saut rapide par bloc. Sur téléphone, la feuille occupe au plus 40 % de la hauteur, se replie en une barre fine (titre et « 12 / 140 ») et l'écran reste allumé tant que le mode est ouvert. L'étape courante est mémorisée et reprise après un rechargement.
 - **Ordre des blocs** : Aération du corps (huile, séchage et montage à part du module d'aération, les « Conduit d'air 1 à 5 », une étape par plaque), Nid (montage à part des quatre parois intérieures), Pièces d'hiver, Corps, Entrée, puis trois sous-ensembles montés à part : Zone caméra (les quatre murs du compartiment), Goulotte ventilateur (le siège, trois parois) et Cassette du ventilateur (cassette complète, câble d'origine et conduit de sortie), Toit (qui pose ces sous-ensembles d'un bloc par une étape de texte chacun, isole le toit en une seule étape), Habillage, Couvercle, Baguettes de cale, puis l'électronique (carte microSD et essais du Pi sur l'établi, composants et fils, essais avec la batterie) et, en tout dernier, le panneau solaire. Le câblage du ventilateur (rallonge, interrupteur et ses fils) se fait avant les essais, et le toit en okoumé ne se pose qu'après ces essais.
 - **Nid** : le bloc « Nid » monte les quatre parois intérieures d'un coup, sans les huiler (l'intérieur du nid reste brut) ; le nid monté est seul à l'écran, puis il est caché jusqu'à l'étape qui le pose dans le corps. De même, le module d'aération, la zone caméra, la goulotte et la cassette sont cachés entre la fin de leur bloc et leur étape de pose, visibles pendant leur bloc et après la pose.
-- **Dans le corps** : le corps commence par l'huile et le séchage ; viennent ensuite « Dessous ext » (COR-08), l'isolant sous le plancher (une seule étape pour les quatre pièces), la pose du module d'aération, déjà monté et assemblé à part (une étape de texte : le module est caché des étapes précédentes et apparaît à cet endroit, après l'isolation du bas qu'il traverse), « Plancher int » (COR-09), la pose du nid, déjà monté (une étape de texte : les quatre parois apparaissent en place, surlignées, sur le plancher), « Face avant ext » (COR-04), les autres parois extérieures, les nervures et les clavettes, la gaine des fils (passée pendant que tout est accessible), l'isolant autour du nid (une seule étape pour tous les pavés), « Côté gauche ext » (COR-07), les trois planches du cadre, la plaque de verrouillage de l'isolant (collée à plat sur le haut des parois, l'ouverture à l'avant laissant passer le bloc d'entrée) puis, en dernières étapes du bloc, les étriers du régulateur et ceux de la batterie.
+- **Dans le corps** : le corps commence par l'huile et le séchage ; viennent ensuite « Dessous ext » (COR-08), l'isolant sous le plancher (une seule étape pour les quatre pièces), la pose du module d'aération, déjà monté et assemblé à part (une étape de texte : le module est caché des étapes précédentes et apparaît à cet endroit, après l'isolation du bas qu'il traverse), « Plancher int » (COR-09), la pose du nid, déjà monté (une étape de texte : les quatre parois apparaissent en place, surlignées, sur le plancher), « Face avant ext » (COR-04), les autres parois extérieures, les nervures et les clavettes, la gaine des fils (passée pendant que tout est accessible), l'isolant autour du nid (une seule étape pour tous les pavés), « Côté gauche ext » (COR-07), puis, en dernières étapes du bloc, les étriers du régulateur et ceux de la batterie.
+- **Huile et séchage** : la procédure d'huilage est donnée une seule fois, à la première étape d'huile (conduit d'air), avec l'interdit : NE PAS HUILER l'intérieur du nid ni l'intérieur du trou d'envol ; les étapes d'huile suivantes disent seulement quelles pièces huiler.
+- **Câblage** : chaque étape de câblage dit d'où à où va le fil et nomme les broches du Raspberry Pi (par exemple « broche 12 (GPIO18, PWM) », « broche 6 (GND, masse) »), avec le raccord à utiliser.
 - **Finition** : l'huile de lin pure est appliquée avant le collage, en masquant dents, fentes et surfaces à coller, avec une semaine de séchage par couche (voir « Finition du bois ») ; les 22 lames de l'habillage sont peintes en blanc avant le collage (2 couches, ruban de peintre sur les surfaces à coller) ; le toit en okoumé est saturé (saturateur teck mat, 2 couches) une fois assemblé.
 - **Le Pi** : préparation de la carte microSD, installation du programme et du service, essais sur l'établi avec l'alimentation 27 W (capteur du nid, sonde de dehors, caméras, LED infrarouges par le module MOSFET, ventilateur et PWM, page web) avant de l'installer dans le nichoir ; puis essais avec la batterie, le fusible et le régulateur avant de brancher le panneau solaire.
 
@@ -498,7 +519,6 @@ Contrôle fait par calcul sur le modèle : recouvrement entre chaque composant e
 | Régulateur | sous le nichoir, à plat (61 × 137 × 33 mm), sans conflit : le lambris descend de 45 mm pour le protéger |
 | Fusible | sous le nichoir, collé contre le fond, derrière le régulateur (18 mm du régulateur, 5 mm des étriers de la batterie, 6 mm de la gaine) ; il ne tient aucune place dans le grenier |
 | Batterie | vraie taille (128 × 70 × 32 mm), sous le nichoir, à plat, à gauche du régulateur, tenue par quatre étriers ; 5 mm de jeu avec les étriers du régulateur, 9 mm avec le conduit d'air basse, plus de 20 mm avec la jupe de l'habillage ; aucun recouvrement avec le régulateur ni avec une autre pièce |
-| Plaque de verrouillage de l'isolant | posée à plat sur les huit parois (les parois sont 3 mm plus basses), le dessous du toit repose dessus : hauteur du corps inchangée ; le bloc d'entrée n'est pas recouvert (ouverture de 60 mm contre 59 mm de large) |
 | Raspberry Pi | passe (13 mm sous la pente) ; environ 5 mm d'écart avec le siège du ventilateur |
 | Convertisseur 12 → 5 V | à l'avant, taille estimée ; il passe sous la pente avec très peu de jeu |
 | Nappe de la caméra 1 | contourne le siège du ventilateur : elle passe devant lui, au-dessus des fils des LED |
@@ -612,17 +632,18 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 
 | Groupe | Élément | Prix | Modèle exact / lien | Vérifié |
 | --- | --- | --- | --- | --- |
-| Électronique | Raspberry Pi 5 (2 Go) | 76,80 € | [Kubii, Raspberry Pi 5 (2 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html#/ram-2_gb) | [ ] |
-| Électronique | Carte microSD officielle 32 Go | 34,20 € | [Kubii, carte micro-SD officielle 32 Go](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) | [ ] |
-| Électronique | Alimentation officielle Raspberry Pi 27 W USB-C (blanche, prise UE), pour configurer et tester le Pi sur l'établi | 12,90 € | [Kubii, alimentation Raspberry Pi 27 W USB-C](https://www.kubii.com/fr/alimentations/4107-1818-alimentation-raspberry-pi-27w-usb-c-3272496315761.html#/couleur-blanc/embout_d_alimentation-europeenne_ue) | [ ] |
+| Électronique | Raspberry Pi 5 (2 Go) | 76,80 € | [Kubii, Raspberry Pi 5 (2 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html#/ram-2_gb) | [x] |
+| Électronique | Carte microSD officielle 32 Go | 34,20 € | [Kubii, carte micro-SD officielle 32 Go](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) | [x] |
+| Électronique | Alimentation officielle Raspberry Pi 27 W USB-C (blanche, prise UE), pour configurer et tester le Pi sur l'établi | 12,90 € | [Kubii, alimentation Raspberry Pi 27 W USB-C](https://www.kubii.com/fr/alimentations/4107-1818-alimentation-raspberry-pi-27w-usb-c-3272496315761.html#/couleur-blanc/embout_d_alimentation-europeenne_ue) | [x] |
 | Électronique | 2 × Camera Module 3 NoIR 75° (34,90 € pièce) | 69,80 € | [Camera Module 3 NoIR 75°, Amazon](https://www.amazon.fr/dp/B0BRY3L9H7) | [x] |
-| Électronique | Active Cooler officiel Raspberry Pi 5 (ventilateur + dissipateur) | 6 € | [Kubii, ventilateur + dissipateur pour Raspberry Pi 5](https://www.kubii.com/fr/ventilateurs-dissipateurs-thermiques/4109-ventilateur-dissipateur-pour-raspberry-pi-5-5056561803357.html) | [ ] |
-| Électronique | 2 × nappe adaptatrice caméra 22 → 15 broches (une courte pour la caméra 1, une longue pour la caméra 2) | 10 € | courte : [Câble caméra Raspberry Pi 5, 22 → 15 broches, 200 mm (Adafruit 5818)](https://www.adafruit.com/product/5818) ; longue : lien à trouver — référence exacte : nappe caméra 22 → 15 broches pour Raspberry Pi 5, 500 mm ou plus, 16 mm de large (prix estimé, à confirmer) | [ ] |
+| Électronique | Active Cooler officiel Raspberry Pi 5 (ventilateur + dissipateur) | 6 € | [Kubii, ventilateur + dissipateur pour Raspberry Pi 5](https://www.kubii.com/fr/ventilateurs-dissipateurs-thermiques/4109-ventilateur-dissipateur-pour-raspberry-pi-5-5056561803357.html) | [x] |
+| Électronique | Nappe caméra 1 (courte) : câble caméra pour Raspberry Pi 5, 22 → 15 broches, 200 mm × 16 mm | 1,32 € | [Kubii, nappe CSI / MIPI caméra pour Raspberry Pi 5, 200 mm](https://www.kubii.com/fr/nappes-cables-adaptateurs/4116-1859-nappe-csi-mipi-camera-pour-raspberry-pi-5-3272496316669.html#/dimensions-200mm_x_16mm_8_x_06) ; câble adaptateur Raspberry Pi (référence fabricant SC1130 sur la fiche) ; trajet dessiné 14,4 cm | [ ] |
+| Électronique | Nappe caméra 2 (longue) : même câble, 500 mm × 16 mm | 3,72 € | [Kubii, nappe CSI / MIPI caméra pour Raspberry Pi 5, 500 mm](https://www.kubii.com/fr/nappes-cables-adaptateurs/4116-1861-nappe-csi-mipi-camera-pour-raspberry-pi-5-3272496316669.html#/dimensions-500mm_x_16mm_8_x_06) ; trajet dessiné 22,8 cm (existe aussi en 300 mm) ; câble réservé aux caméras, pas aux écrans | [ ] |
 | Électronique | 2 × carte 4 LED infrarouges 850 nm (fils pré-soudés) | 10 € | lien à trouver — référence exacte : carte de 4 LED infrarouges 850 nm, 5 V, environ 12 × 24 mm, fils pré-soudés | [ ] |
-| Électronique | Capteur BME280 Pimoroni PIM472 (Kubii) + cordons Dupont | 16 € | [Pimoroni BME280 Breakout (PIM472), Kubii, 15,88 €, 16 en stock](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html) : I2C, 19 × 19 × 2,75 mm, brochage fait pour les broches 1, 3, 5, 7, 9 du Pi ; puce : [Bosch BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) | [ ] |
+| Électronique | Capteur BME280 Pimoroni PIM472 (Kubii) + cordons Dupont | 15,88 € | [Pimoroni BME280 Breakout (PIM472), Kubii, 15,88 €, 16 en stock](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html) : I2C, 19 × 19 × 2,75 mm, brochage fait pour les broches 1, 3, 5, 7, 9 du Pi ; puce : [Bosch BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) | [x] |
 | Électronique | Sonde de température extérieure DS18B20 étanche (câble 1 à 3 m) + module 3 broches avec résistance 4,7 kΩ (prix estimé, à confirmer) | 5 € | lien à trouver — référence exacte : sonde DS18B20 étanche câble 1 m ou 3 m + module adaptateur 3 broches résistance 4,7 kΩ | [ ] |
-| Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € | [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 × 60 × 25 mm, 12 V, 4 broches) ; en France : [Amazon.fr, NF-A6x25 PWM marron](https://www.amazon.fr/dp/B00VXTANZ4) | [ ] |
-| Électronique | Grille de protection Noctua NA-FG1-6 Sx2 (lot de 2, métal, pour ventilateurs de 60 mm ; une seule est utilisée, sur la cassette) | 15 € | [Amazon.fr, Noctua NA-FG1-6 Sx2](https://www.amazon.fr/dp/B0B1QRWHW3) : le titre annonce 2 grilles métal pour ventilateurs de 60 mm ; prix 15,06 € lu sur la page ; épaisseur, entraxe (50 mm attendus) et vis fournies ou non : à vérifier sur la page | [ ] |
+| Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € | [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 × 60 × 25 mm, 12 V, 4 broches) ; en France : [Amazon.fr, NF-A6x25 PWM marron](https://www.amazon.fr/dp/B00VXTANZ4) | [x] |
+| Électronique | Grille de protection Noctua NA-FG1-6 Sx2 (lot de 2, métal, pour ventilateurs de 60 mm ; une seule est utilisée, sur la cassette) | 15 € | [Amazon.fr, Noctua NA-FG1-6 Sx2](https://www.amazon.fr/dp/B0B1QRWHW3) : le titre annonce 2 grilles métal pour ventilateurs de 60 mm ; prix 15,06 € lu sur la page ; épaisseur, entraxe (50 mm attendus) et vis fournies ou non : à vérifier sur la page | [x] |
 | Électronique | Module interrupteur 12 V côté + (P-MOSFET, commande 3,3 V) | 4 € | lien à trouver — référence exacte : module « high side switch » à P-MOSFET, 12 V, commande logique 3,3 V, borniers à vis | [ ] |
 | Électronique | Rallonge Noctua NA-EC1 4 broches (mâle ⇄ femelle, 30 cm), fournie avec le ventilateur | 0 € | incluse dans la boîte du ventilateur (câble NA-EC1, 4 broches, 30 cm) : voir [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) | [ ] |
 | Électronique | Module 2 × MOSFET | 5 € | lien à trouver — référence exacte : module 2 canaux MOSFET à niveau logique 3,3 V (IRLZ44N ou équivalent), borniers à vis | [ ] |
@@ -660,7 +681,7 @@ Le ventilateur, sa grille et son interrupteur coûtent environ 22 €. Le poste 
 - **Débit du ventilateur.** L'ouverture du plafond sous le ventilateur fait 56 × 30 mm (le ventilateur est à 1 cm du bloc de la caméra ; le mur du nid limite la profondeur) : le débit réel est à mesurer avec le vrai matériel, et la température du nid à surveiller. Sans joint, un peu d'air rejeté peut revenir à l'aspiration par les jeux de découpe : un ruban de mousse peut être collé à la demande.
 - **Batterie sous le nichoir.** Le BMS du pack doit couper la charge sous 0 °C (la batterie est dans l'air extérieur, à l'ombre de la jupe de l'habillage, sans la chaleur du nid) ; ni coffret étanche ni vernis ne sont prévus : la jupe protège de la pluie directe mais pas de l'humidité ni des éclaboussures. Un coffret étanche, s'il est ajouté, n'est pas compté dans les prix. À surveiller en hiver (température du pack) et après les premières pluies.
 - **Fusible sous le fond.** Il est collé contre le dessous du fond, à l'air libre : un porte-fusible étanche est utilisé (voir le tableau des prix) ; contrôler la colle à chaud en été.
-- **Régulateur sous le nichoir.** Il n'est protégé que par le lambris. Il chauffe de 2 à 5 W, donc ne pas le noyer dans l'isolant. La gaine de Ø 16 mm traverse huit plaques : le fond et le plancher intérieur par des trous de 16 mm, serrés, les trois planches du cadre, la plaque de verrouillage de l'isolant, le dessous et le dessus du toit par des trous de 18 mm : elle tient serrée dans le corps et passe tranquillement dans le toit. Le nichoir doit être posé assez haut pour que le régulateur (33 mm) ne touche pas le sol.
+- **Régulateur sous le nichoir.** Il n'est protégé que par le lambris. Il chauffe de 2 à 5 W, donc ne pas le noyer dans l'isolant. La gaine de Ø 16 mm traverse sept plaques : le fond et le plancher intérieur par des trous de 16 mm, serrés, la pièce en C, les trois planches du cadre, le dessous du toit, le fourreau et le dessus du toit par des trous de 18 mm : elle tient serrée dans le corps et passe tranquillement dans le toit. Le nichoir doit être posé assez haut pour que le régulateur (33 mm) ne touche pas le sol.
 - **Convertisseur 12 → 5 V.** Dessiné avec une taille estimée, à confirmer avec le module acheté.
 - **Pi 5 (forme 3D).** Le dessin 3D du Pi est celui du Pi 4 (mêmes cotes 85 × 56 mm, prises USB et Ethernet au même endroit) ; un STEP du Pi 5, s'il est fourni, donnerait la forme exacte. Les deux connecteurs de 22 broches sont placés d'après le dessin mécanique officiel (dimensions approximatives, non cotées) ; le sens d'entrée des nappes se vérifie sur la carte.
 - **Alimentation du Pi 5.** Convertisseur de 5 A continus au moins ; sans négociation USB-PD, le Pi limite le courant de ses ports USB. Référence à choisir (voir le tableau des prix).

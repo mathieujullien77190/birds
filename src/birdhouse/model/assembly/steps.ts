@@ -3,6 +3,7 @@ import { SPARE_RE } from '../nest/spares';
 import { plankCodes } from '../sheets/partCodes';
 import { ASSEMBLY_BLOCKS, LID_BACK, LID_RE, SEQ, SUBASSEMBLIES, type PieceRule, type Ref, type Text } from './data';
 import type { AssemblyBlock, AssemblyStep } from './types';
+import { wiringText } from './wiring';
 
 /**
  * Montage pas à pas (fonctions pures, aucun import de three.js) : `assemblySteps(scene)` donne les étapes dans l'ordre.
@@ -74,6 +75,9 @@ export function assemblySteps(s: PlankScene): AssemblyStep[] {
   // pièces que la table ne connaît pas : une étape chacune (ou par code), dans un bloc à part
   for (const g of split(pieces.filter((i) => !taken.has(i.p.id)))) out.push({ id: uniqueId(`divers.${slug(g[0].p.name)}`), title: groupTitle(g), kind: 'placer', block: 'divers', pieceIds: g.map((i) => i.p.id) });
 
+  // câblage : chaque étape « cabler » dit d'où à où va le fil et le NOM des broches du Pi (broche 12 = GPIO18, PWM…)
+  for (const st of out) if (st.kind === 'cabler' && st.pieceIds.length) { const w = wiringText(s.planks, st.pieceIds); if (w) st.text = st.text ? `${st.text}
+${w}` : w; }
   // le toit en okoumé est soulevé pendant tout le travail dans le grenier : caché de la première étape d'électronique jusqu'à sa pose
   const lid = pieces.filter((i) => LID_RE.test(i.p.name)).map((i) => i.p.id);
   const back = out.findIndex((st) => st.id === LID_BACK);

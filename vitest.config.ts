@@ -26,7 +26,7 @@ export default defineConfig({
         'src/birdhouse/PiSimulator.tsx', // simulateur du Pi : Pyodide + DOM + vue 3D, exige un navigateur (listé aussi par *.tsx)
         'src/birdhouse/three/scene/createScene.ts', // crée WebGLRenderer + canvas : exige WebGL
         'src/birdhouse/three/interactions/**', // gestionnaires de souris branchés sur le canvas WebGL (raycast, glissé) : exigent un navigateur
-        'src/birdhouse/three/piModel.ts', // charge public/models/pi4.bin (forme du Pi 4, cotes du Pi 5) par fetch dans le navigateur
+        'src/birdhouse/three/piModel.ts', // charge public/models/pi5.bin (modèle du Pi 5) par fetch dans le navigateur
         'src/features/viewer/hooks/useThreeView.ts', // monte la scène WebGL (createScene) dans un effet React : exige WebGL
         'src/features/viewer/hooks/useSceneSync.ts', // synchronise la scène avec la vue WebGL en direct (maillages, matériaux, coupe) : exige WebGL
         'src/features/docs/CodeBrowser/highlight.ts', // enregistre les langages de highlight.js : une ligne par langage, aucune logique

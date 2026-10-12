@@ -1,4 +1,4 @@
-// Modèle 3D du Pi (forme du Pi 4, mêmes cotes que le Pi 5) : une fois chargé (fetch doublé), piGeometry le clone et la clé de forme de la plaque change.
+// Modèle 3D du Pi (Pi 5) : une fois chargé (fetch doublé), piGeometry le clone et la clé de forme de la plaque change.
 import { describe, expect, it, vi } from 'vitest';
 import type { Plank } from '@/birdhouse/model';
 import { loadPiModel, piModel } from '@/birdhouse/three/piModel';
@@ -7,7 +7,7 @@ import { plankShapeKey } from '@/birdhouse/three/factories/plank';
 
 const pi: Plank = { id: 'pi', name: 'Raspberry Pi', w: 85, h: 56, pos: [0, 0, 0], rot: [0, 0, 0], notches: [], holes: [], special: 'pi' };
 
-/** pi4.bin minimal : un triangle (3 sommets), positions f32, couleurs u8, indices u32. */
+/** pi5.bin minimal : un triangle (3 sommets), positions f32, couleurs u8, indices u32. */
 function fakeBin(): ArrayBuffer {
   const nV = 3, nI = 3, buf = new ArrayBuffer(8 + nV * 15 + nI * 4), dv = new DataView(buf);
   dv.setUint32(0, nV, true); dv.setUint32(4, nI, true);
@@ -17,7 +17,7 @@ function fakeBin(): ArrayBuffer {
   return buf;
 }
 
-describe('modèle 3D du Pi (forme du Pi 4)', () => {
+describe('modèle 3D du Pi (Pi 5)', () => {
   it('avant le chargement : dessin simplifié, clé de forme sans modèle ; après : le modèle (cloné) et une autre clé', async () => {
     expect(piModel).toBeNull();
     const before = plankShapeKey(pi, 3), simple = piGeometry(pi);

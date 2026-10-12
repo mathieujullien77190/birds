@@ -7,6 +7,7 @@ import { useAssembly } from '@/features/viewer/hooks/useAssembly';
 import { useWakeLock } from '@/hooks';
 import { STORAGE } from '@/features/viewer/constants';
 import { ViewToolbar } from '@/features/viewer/components/ViewToolbar';
+import { ViewModeToggle } from '@/features/viewer/components/ViewModeToggle';
 import { MobileBar } from '@/features/viewer/components/MobileBar';
 import { buildNest } from './helpers';
 
@@ -57,6 +58,11 @@ describe('AssemblyPanel', () => {
     const r = render(<AssemblyPanel steps={steps} index={start} setIndex={setIndex} onClose={onClose} mobile={mobile} />);
     return { setIndex, onClose, ...r };
   };
+  it('sur ordinateur, la feuille de montage est AU-DESSUS de la bascule 3D / Planches (bottom-14) ; sur téléphone, en bas pleine largeur', () => {
+    const { container, unmount } = setup(false, 1); const desk = container.firstElementChild as HTMLElement;
+    expect(desk.className).toContain('bottom-14'); expect(desk.className).not.toContain('bottom-3'); unmount();
+    const m = setup(true, 1); expect((m.container.firstElementChild as HTMLElement).className).toContain('bottom-0');
+  });
   it('affiche le titre, la nature, la progression, la consigne en paragraphes et puces', () => {
     setup(true, 1);
     expect(screen.getByText('Titre b')).toBeTruthy();
@@ -134,6 +140,22 @@ describe('boutons « Montage »', () => {
     const f = vi.fn();
     render(<ViewToolbar assemblyOn={false} onToggleAssembly={f} winter={w} onToggleCassette={() => undefined} onTogglePlug={() => undefined} schemaOn={false} onToggleSchema={() => undefined} onOpenPi={() => undefined} cutOn={false} onToggleCut={() => undefined} />);
     fireEvent.click(screen.getByText('Montage')); expect(f).toHaveBeenCalled();
+  });
+  it('ViewToolbar : le bouton « Dossier » est collé au bouton « Schéma »', () => {
+    const f = vi.fn();
+    render(<ViewToolbar assemblyOn={false} onToggleAssembly={() => undefined} winter={w} onToggleCassette={() => undefined} onTogglePlug={() => undefined} schemaOn={false} onToggleSchema={() => undefined} onOpenPi={() => undefined} onOpenDoc={f} cutOn={false} onToggleCut={() => undefined} />);
+    const b = screen.getByText('Dossier').closest('button')!, schema = screen.getByText('Schéma').closest('button')!;
+    expect(b.parentElement).toBe(schema.parentElement); fireEvent.click(b); expect(f).toHaveBeenCalled();
+  });
+  it('ViewModeToggle : bascule 3D / Planches en bas à droite', () => {
+    const f = vi.fn();
+    const { rerender } = render(<ViewModeToggle sheets={false} onChange={f} />);
+    expect(screen.getByText('3D').closest('button')!.getAttribute('aria-pressed')).toBe('true'); expect(screen.getByText('Planches').closest('button')!.getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(screen.getByText('Planches')); expect(f).toHaveBeenLastCalledWith(true);
+    rerender(<ViewModeToggle sheets onChange={f} />);
+    expect(screen.getByText('Planches').closest('button')!.getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(screen.getByText('3D')); expect(f).toHaveBeenLastCalledWith(false);
+    expect(screen.getByRole('group', { name: 'Vue' }).className).toContain('bottom-3'); // toujours en bas : la feuille de montage est posée au-dessus (bottom-14)
   });
   it('MobileBar : le bouton « Montage » est dans la barre du haut', () => {
     const f = vi.fn();

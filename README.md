@@ -8,7 +8,7 @@ Un nichoir à mésanges isolé, dessiné en 3D dans le navigateur et découpé a
 
 **Concevoir le nichoir**
 - Un nichoir complet généré en 3D (Three.js) à partir de quelques curseurs : taille intérieure, hauteur et diamètre du trou d'envol. Option : 2ᵉ caméra (le panneau solaire est toujours là).
-- Montage sans soudure : cordons Dupont, borniers à vis, Wago 221 et prises d'origine ; voir la section « Montage sans soudure » du document « Schéma électronique ».
+- Montage sans soudure : cordons Dupont, borniers à vis, Wago 221 et prises d'origine ; voir la section « Montage sans soudure » du document « Dossier du nichoir ».
 - Chaque pièce est une plaque de contreplaqué de 3 mm à crans qui s'emboîtent, avec isolant, habillage en lambris, toit, ventilateur amovible avec son conduit de sortie, prise d'air basse et fixation à l'arbre. L'électronique est modélisée aussi (Raspberry Pi, caméras, batterie, régulateur, fils et nappes à leur vraie taille).
 - Vue 3D interactive : survol et sélection des pièces, liste « Pièces » (groupes, œil pour cacher, renommer, dupliquer), plan de coupe, tirer une face, trou par clic droit, historique avec « Retour ».
 - Mode **jour / nuit** de la scène, et **schéma électronique** à côté de la 3D : survoler un fil ou un composant le met en surbrillance des deux côtés, clic sur un module pour sa fiche.
@@ -29,11 +29,11 @@ Un nichoir à mésanges isolé, dessiné en 3D dans le navigateur et découpé a
 
 ## Documentation
 
-Cinq documents Markdown dans [`docs/`](docs/), lisibles aussi dans l'application (pièce « Schéma électronique » du volet « Pièces ») :
+Cinq documents Markdown dans [`docs/`](docs/), lisibles aussi dans l'application (bouton « Dossier » de la barre du haut, collé au bouton « Schéma ») :
 
 | Document | Contenu |
 | --- | --- |
-| [`docs/schema-electronique.md`](docs/schema-electronique.md) | **Schéma électronique** : schéma général (branchements fil par fil, broches du Raspberry Pi), paramètres à respecter pour chaque composant, vérification des branchements, poids, prix par groupe (cases à cocher dans l'app), stratégie d'énergie. |
+| [`docs/schema-electronique.md`](docs/schema-electronique.md) | **Dossier du nichoir** : schéma électronique général (branchements fil par fil, broches du Raspberry Pi), paramètres à respecter pour chaque composant, vérification des branchements, poids, prix par groupe (cases à cocher dans l'app), stratégie d'énergie. |
 | [`docs/logiciel.md`](docs/logiciel.md) | **Logiciel** : programme Python sur le Pi (capteurs, ventilateur, LED, caméras), sécurités (alerte à 35 °C, capteur muet, ventilateur en panne, batterie faible), sonde de température extérieure, niveau de batterie et consommation, page web React, simulateur et essais, service systemd, accès à distance. |
 | [`docs/architecture-3d.md`](docs/architecture-3d.md) | **Architecture 3D** : modèle pur et couche Three.js, comment ajouter une pièce, libération des ressources, tests. |
 | [`docs/checklist-changements.md`](docs/checklist-changements.md) | **Checklist** : quand je change X, quels fichiers mettre à jour et quelle commande vérifie. |

@@ -15,8 +15,6 @@ export interface PiecesListProps {
   setDropOn: Dispatch<SetStateAction<string | null>>;
   setHover: (h: Hover | null) => void;
   confirmAll: boolean;
-  docOpen: string | null;
-  setDocOpen: (d: string | null) => void;
   setSelectedId: (id: string | null) => void;
   setGroupSel: (g: string | null) => void;
   setExtra: (e: Set<string>) => void;

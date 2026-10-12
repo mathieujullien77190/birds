@@ -4,7 +4,7 @@ import laser from '../../../../docs/laser.md?raw';
 import type { DocDef } from './types';
 
 /** Documents lisibles dans l'app (fichiers Markdown du dossier docs/). `docs/architecture-3d.md` et `docs/checklist-changements.md` restent dans le dépôt mais ne sont volontairement pas exposés ici. */
-export const DOCS: DocDef[] = [{ id: 'schema', title: 'Schéma électronique', md: schema }, { id: 'logiciel', title: 'Logiciel (Pi, page web)', md: logiciel }, { id: 'laser', title: 'Laser (pilotage)', md: laser }, { id: 'code', title: 'Code', md: '' }];
+export const DOCS: DocDef[] = [{ id: 'schema', title: 'Dossier du nichoir', md: schema }, { id: 'logiciel', title: 'Logiciel (Pi, page web)', md: logiciel }, { id: 'laser', title: 'Laser (pilotage)', md: laser }, { id: 'code', title: 'Code', md: '' }];
 
 export const DOC_CSS = `
 .doc-md{font:15px/1.65 system-ui,sans-serif;color:#1c1917}

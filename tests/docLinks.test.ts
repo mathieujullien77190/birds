@@ -5,7 +5,7 @@ import { renderDoc } from '@/features/docs/DocModal/helpers';
 
 const md = readFileSync(join(__dirname, '..', 'docs', 'schema-electronique.md'), 'utf8');
 
-describe('liens du document « Schéma électronique »', () => {
+describe('liens du document « Dossier du nichoir »', () => {
   it('chaque ligne du tableau des prix donne le modèle exact : un lien, ou la référence exacte à chercher', () => {
     const start = md.indexOf('| Groupe | Élément | Prix |'), rows = md.slice(start, md.indexOf('\n\n', start)).split('\n').slice(2);
     expect(rows.length).toBeGreaterThan(30);

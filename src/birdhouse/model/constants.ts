@@ -35,7 +35,7 @@ export const OKOUME_NATURAL = '#c98f69';
  *  centres à ≈ 48,7 mm et ≈ 55,0 mm du bord gauche, ≈ 8,5 mm du bord avant. Le sens d'entrée de la nappe (côté du levier) n'est pas lisible sur le dessin : à vérifier sur la carte réelle. */
 export const PI_CSI2: [number, number] = [-42.5 + 48.7, -28 + 8.5];
 
-/** Raspberry Pi 5 : carte de 85 × 56 mm (mêmes cotes que le Pi 4), posée à plat sur le toit sur 3 mm de cales. Le dessin 3D (public/models/pi4.bin) est celui du Pi 4 : forme approchée, mêmes cotes que le Pi 5 ; à remplacer par un STEP du Pi 5 si fourni. */
+/** Raspberry Pi 5 : carte de 85 × 56 mm , posée à plat sur le toit sur 3 mm de cales. Le dessin 3D (public/models/pi5.bin) vient du STEP du Pi 5. */
 export const PI_W = 85, PI_H = 56;
 /** Boîtier du Pi (hauteur et paroi, mm) : transparent dans la vue pour voir la carte. */
 export const CASE_H = 35, CASE_WALL = 2.5;

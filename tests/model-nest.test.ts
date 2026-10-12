@@ -39,9 +39,9 @@ describe('makeNest : dimensions déduites des réglages', () => {
     const bodyH = 130 + 32 + 20 + 2 * t + 2 * e - roofH;
     const front = byName(planks, /^Face avant ext$/);
     expect(front.w).toBe(W);
-    expect(front.h).toBe(bodyH - t); // les parois s'arrêtent t sous bodyH : la plaque de verrouillage de l'isolant (en C) occupe cette hauteur
+    expect(front.h).toBe(bodyH); // les parois montent jusqu'à bodyH (plus de plaque de verrouillage de l'isolant)
     expect(byName(planks, /^Dessous ext$/)).toMatchObject({ w: W, h: W });
-    expect(byName(planks, /^Face avant int$/)).toMatchObject({ w: 120 + 2 * t, h: bodyH - t - e });
+    expect(byName(planks, /^Face avant int$/)).toMatchObject({ w: 120 + 2 * t, h: bodyH - e });
     expect(byName(planks, /^Plancher int$/)).toMatchObject({ w: W, h: W });
     // le toit se pose sur le corps
     expect(byName(planks, /^Dessous toit$/).pos[2]).toBe(bodyH + t / 2);
@@ -118,10 +118,10 @@ describe('makeNest : pièces présentes / absentes selon les options', () => {
   });
   it('groupes : les pièces ont un groupe connu et nommé ; l\'habillage et l\'électronique existent', () => {
     const { planks, groupNames } = build();
-    expect(Object.values(groupNames).sort()).toEqual(['Aération du corps', 'Baguettes de cale (à couper)', 'Corps', 'Couvercle', 'Entrée', 'Habillage', 'Isolant', 'Pièces d\'hiver (rechange)', 'Pièces fines de rechange', 'Schéma électronique', 'Toit', 'Ventilation', 'Électronique'].sort());
+    expect(Object.values(groupNames).sort()).toEqual(['Aération du corps', 'Baguettes de cale (à couper)', 'Corps', 'Couvercle', 'Entrée', 'Habillage', 'Isolant', 'Pièces d\'hiver (rechange)', 'Pièces fines de rechange', 'Toit', 'Ventilation', 'Électronique'].sort());
     for (const p of planks) if (p.group) expect(groupNames[p.group], p.name).toBeDefined();
     expect(planks.some((p) => /^Lambris/.test(p.name))).toBe(true);
-    expect(byName(planks, /^Schéma électronique$/).special).toBe('doc');
+    expect(planks.some((p) => p.special === 'doc')).toBe(false); // le dossier est ouvert par le bouton « Dossier » de la barre du haut, plus par une pièce de « Pièces »
   });
 });
 
@@ -166,9 +166,9 @@ describe('makeNest : invariants sur toutes les tailles', () => {
         expect(bb.min[1]).toBeCloseTo(-bb.max[1], 6);
       });
       it('le toit et le corps ne se recouvrent pas : le dessous du toit repose sur le haut des murs', () => {
-        const wall = byName(planks, /^Côté droit ext$/), floorRoof = byName(planks, /^Dessous toit$/), lock = byName(planks, /^Plaque de verrouillage de l'isolant$/);
-        expect(lock.pos[2] - T / 2).toBeCloseTo(wall.pos[2] + wall.h / 2, 6); // la plaque en C repose sur le chant des parois
-        expect(floorRoof.pos[2] - T / 2).toBeCloseTo(lock.pos[2] + T / 2, 6); // et le dessous du toit sur la plaque : la hauteur totale du corps ne change pas
+        const wall = byName(planks, /^Côté droit ext$/), floorRoof = byName(planks, /^Dessous toit$/);
+        expect(planks.some((p) => /verrouillage/.test(p.name))).toBe(false); // la plaque en C est supprimée
+        expect(floorRoof.pos[2] - T / 2).toBeCloseTo(wall.pos[2] + wall.h / 2, 6); // le dessous du toit repose directement sur le chant des parois
       });
       it('les noms de pièces de bois à découper sont uniques', () => {
         const wood = planks.filter((p) => !p.special);
@@ -347,7 +347,7 @@ describe('pièces d\'hiver', () => {
   });
   it('les fils de la cassette bougent par leur chemin (pos reste 0)', () => {
     const s = nest();
-    const wire = s.planks.find((p) => /^Fil cassette/.test(p.name));
+    const wire = s.planks.find((p) => /^Câble d'origine du ventilateur/.test(p.name));
     if (!wire) return; // pas de fil nommé ainsi dans ce modèle : le déplacement par pos est couvert par la cassette
     const w = setWinterCassette(s, true);
     const moved = w.planks.find((p) => p.id === wire.id)!;
