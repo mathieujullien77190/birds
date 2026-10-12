@@ -3,37 +3,9 @@
  * fiches des composants), `docs/logiciel.md` et `pi/README.md` : rien n'est inventé ici.
  */
 
-/** Procédure d'huilage complète (première étape d'huile) : section « Finition du bois (huile de lin, saturateur, peinture) ». */
-export const OIL_FULL = [
-  "Huile de lin pure (non cuite, Mieuxa) sur le contreplaqué de peuplier, sur l'extérieur seulement. Option : mélange 50 % huile de lin et 50 % essence de térébenthine pour la première couche des chants, 1 % de siccatif pour accélérer le séchage.",
-  '- Brosser et poncer la suie de découpe (papier de verre grain 120, puis grain 180).',
-  "- Masquer au ruban de peintre les dents, les fentes et toutes les surfaces à coller : l'huile empêche la colle d'accrocher.",
-  '- Passer une première couche fine au pinceau ou au chiffon ; les chants en reçoivent deux, car ils boivent.',
-  "- Essuyer l'excès après 15 à 30 minutes.",
-  "NE PAS HUILER l'intérieur du nid (parois intérieures, face supérieure du plancher intérieur) NI l'intérieur du trou d'envol (le tunnel d'entrée, face côté nid du bloc comprise) : ces surfaces restent brutes, poncées, sans suie de découpe. Les masquer au ruban si besoin.",
-  "Cette procédure n'est donnée qu'ici, à la première étape d'huile : les étapes d'huile suivantes disent seulement quelles pièces huiler.",
-  "Sécurité : un chiffon imbibé d'huile de lin peut s'enflammer tout seul en séchant en tas. On l'étale à plat dehors, ou on le noie dans l'eau avant de le jeter.",
-].join('\n');
-
-/** Rappel court de la procédure, pour les huilages suivants. */
-export const OIL_SHORT = [
-  "Même procédure que pour le conduit d'air : poncer, masquer dents, fentes et surfaces à coller, couche fine, chants en deux couches, essuyer l'excès après 15 à 30 minutes.",
-  "Sécurité : les chiffons imbibés d'huile de lin s'étalent à plat dehors ou se noient dans l'eau.",
-].join('\n');
-
-/** Séchage plus court des étapes suivantes (la durée et le reste sont donnés à la première étape de séchage). */
-export const DRY_SHORT = 'Laisser sécher, enlever le ruban, puis coller.';
-
-/** Séchage entre les couches et avant le collage (première étape de séchage). */
-export const DRY_TEXT = [
-  '- Laisser sécher environ une semaine par couche (durée indicative : elle dépend de la température et de l\'humidité), puis passer la seconde couche.',
-  '- Enlever le ruban, puis coller (colle à bois de classe D3 ou D4).',
-  "- Aérer 2 à 4 semaines avant le montage (le nichoir est mis en service au printemps) : l'odeur ne doit pas rester dans le nid.",
-].join('\n');
-
-/** Saturateur du toit en okoumé : section « Finition du bois (huile de lin, saturateur, peinture) ». */
+/** Saturateur du toit en okoumé : section « Finition du bois (saturateur, peinture) ». */
 export const SAT_TEXT = [
-  "Saturateur à l'eau Luxens teck mat sur les deux plaques d'okoumé du toit, à la place de l'huile de lin. Essai sur une chute avant de traiter : c'est un gel anti-glisse conçu pour les terrasses.",
+  "Saturateur à l'eau Luxens teck mat sur les deux plaques d'okoumé du toit. Essai sur une chute avant de traiter : c'est un gel anti-glisse conçu pour les terrasses.",
   "- Appliquer uniquement sur les pièces du toit, à l'extérieur, jamais sur ce qui touche le nid.",
   '- Masquer au ruban de peintre les surfaces à coller (face de dessus de la plaque crénelée, dents, fentes).',
   '- 2 couches, chants compris.',
@@ -52,7 +24,7 @@ export const PAINT_TEXT = [
   '- 2 faces et les chants, 2 couches.',
   '- Masquer au ruban de peintre les surfaces à coller.',
   "- Nettoyer les outils à l'eau.",
-  "Étiquette : « dangereux : respecter les précautions d'emploi ». L'habillage est peint, pas huilé : la peinture ne tient pas sur une surface huilée.",
+  "Étiquette : « dangereux : respecter les précautions d'emploi ».",
 ].join('\n');
 
 /** Séchage de la peinture de l'habillage. */

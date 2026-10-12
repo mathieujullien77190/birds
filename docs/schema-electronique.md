@@ -111,7 +111,7 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 | Liaison | De | Vers | Remarque |
 | --- | --- | --- | --- |
 | Câble 12 V | Panneau solaire | Régulateur de charge, sous le nichoir | Longe le sol et arrive sous le nichoir, à l'abri du lambris |
-| Charge | Régulateur | Batterie, via le fusible | Tout se passe sous le nichoir, dans la jupe de l'habillage : le régulateur (à droite), la batterie (à gauche, à plat, tenue par quatre étriers) et le fusible (collé sous le fond, derrière le régulateur). Deux fils courts de 2,5 mm² (≈ 4 cm pour le + et ≈ 10 cm pour le −) relient les sorties du régulateur, côté arrière, au fusible (lame A, avec le + de la batterie) et à la borne − de la batterie. La charge ne passe pas par la lame B du fusible |
+| Charge | Régulateur | Batterie, via le fusible | Tout se passe sous le nichoir, dans la jupe de l'habillage : le régulateur Victron (à l'avant droit), la batterie (à l'arrière gauche, à plat, tournée de 90°, tenue par quatre étriers) et le fusible (collé sous le fond, entre la batterie et le mur droit). Deux fils de 2,5 mm² (≈ 8 cm pour le + et ≈ 13 cm pour le −) relient les bornes batterie du régulateur, sur sa face est, au fusible (lame A, avec le + de la batterie) et à la borne − de la batterie. La charge ne passe pas par la lame B du fusible |
 | Montée vers le toit | Fusible (lame B) et borne − de la batterie | Wago + et Wago −, sur le dessus du toit | Deux fils de 2,5 mm² montent dans une gaine de Ø 16 mm, dans l'isolant du coin arrière droit (à 5 mm du mur arrière et à 5 mm du mur de droite) : ils traversent le fond et le plancher intérieur par des trous de 16 mm, pile le diamètre de la gaine, puis la pièce en C, les trois planches du cadre, le dessous du toit, le fourreau de petits carrés empilés dans le toit et son dessus par des trous de Ø 18 mm (la gaine y passe tranquillement), et arrivent sur le dessus du toit (≈ 37 cm de fil pour le + et ≈ 49 cm pour le −). Le fusible protège la batterie et le câblage du rail |
 | Rail 12 V | Fusible / batterie (par la gaine) | Convertisseur 12 → 5 V et ventilateur (par son interrupteur) | Fils rouge (+) et noir (−), répartis par un **Wago 221-413 à 3 entrées pour le +** (fusible, interrupteur du ventilateur, convertisseur) et un **Wago 221-415 à 5 entrées pour le −** (batterie, convertisseur, ventilateur, masse de l'interrupteur, une entrée de réserve), posés à droite de la sortie de la gaine : chaque fil a sa propre entrée |
 | Alimentation du Pi | Convertisseur 12 → 5 V | Prise USB-C du Pi 5 | 5 V, 5 A recommandés pour le Pi 5 |
@@ -135,16 +135,16 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 
 - Le panneau de 100 W est déporté à environ 70 cm du nichoir, incliné de 35° vers l'avant, son bord bas près du sol.
 - Son câble 12 V longe le sol et arrive sous le nichoir, où est le régulateur de charge, posé à plat sous le plancher.
-- Le lambris descend de 45 mm sous le nichoir pour protéger le régulateur de la pluie ; le câble du panneau passe sous l'habillage, sans le percer.
+- Le lambris descend de 50 mm sous le nichoir pour protéger le régulateur de la pluie ; le câble du panneau passe sous l'habillage, sans le percer.
 - Il charge la batterie par deux fils courts : tout cela est sous le nichoir, dans la jupe de l'habillage.
 
 **Stockage.**
 
 - La batterie est un pack LiFePO4 12,8 V de 6 Ah : 4 cellules 32700 en série, environ 77 Wh.
 - Ce chimisme est plus sûr que le lithium-ion classique, mais le régulateur doit avoir un profil de charge LiFePO4 et le pack doit avoir un BMS.
-- La batterie est sous le nichoir, à plat, à gauche du régulateur : 128 mm le long de y, 70 mm en x, 32 mm de haut, centre en x = −19 mm et y = +20 mm. Elle est tenue par quatre étriers en U de contreplaqué (« Étrier batterie 1 à 4 », mêmes tenons que ceux du régulateur dans des fentes du fond), plaques à y = 0, 33, 57 et 78 mm.
-- Elle est à 9 mm du conduit d'air basse (sa sous-boîte se retire par le dessous) et à 5 mm de l'étrier du régulateur le plus proche ; elle est protégée du soleil par la jupe de l'habillage, qui descend de 45 mm sous le nichoir, à plus de 20 mm de la batterie.
-- Ses deux bornes regardent l'arrière : le fusible est collé contre le dessous du fond, derrière le régulateur, à environ 4 cm de fil du + de la batterie.
+- La batterie est sous le nichoir, à plat, à l'arrière gauche et tournée de 90° : 128 mm le long de x (de −97 à +31 mm), 70 mm en y (de 20 à 90 mm), 32 mm de haut. Elle est tenue par quatre étriers en U de contreplaqué (« Étrier batterie 1 à 4 », tenons de 5 mm dans des fentes du fond), plaques debout à x = −88, −63, −38 et −17 mm.
+- Elle est à plus de 25 mm du conduit d'air basse (sa sous-boîte se retire par le dessous) et à 5 mm de l'étrier du régulateur le plus proche ; elle est protégée du soleil par la jupe de l'habillage, qui descend de 50 mm sous le nichoir.
+- Ses deux bornes regardent l'est (le régulateur) : le fusible est collé contre le dessous du fond, dans le couloir entre la batterie et le mur droit, à environ 3 cm de fil du + de la batterie.
 - Deux fils de 2,5 mm² (+ du fusible, − de la batterie) montent dans une gaine électrique ICTA de Ø 16 mm (≈ 12 mm utiles, soit 113 mm²) : deux fils de Ø 3,6 mm en occupent 20 mm², 18 % de la section ; quatre fils au plus (36 %) resteraient raisonnables.
 
 **Régulation.** Le régulateur de charge reçoit le panneau, charge la batterie et empêche la surcharge. Un fusible collé tout près de la batterie protège tout le reste : le + de la batterie et le + du régulateur arrivent sur sa lame A, la lame B part vers le rail 12 V.
@@ -261,10 +261,12 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | --- | --- | --- |
 | Type | 12 V nominal, monocristallin, cadre alu | Oui |
 | Puissance | 100 W | 100 W |
-| Tension à puissance max (Vmp) | environ 17 à 18 V | — |
-| Courant à puissance max (Imp) | environ 5,8 A | — |
-| Tension à vide (Voc) | environ 21 à 22 V : doit rester sous la limite d'entrée du régulateur | — |
-| Dimensions | selon le modèle, par exemple 970 × 585 × 30 mm | 970 × 585 × 30 mm |
+| Tension à puissance max (Vmp) | 17 V (fiche AST100-17M) | — |
+| Courant à puissance max (Imp) | 5,8 A (fiche AST100-17M) | — |
+| Tension à vide (Voc) | 20,5 V (fiche AST100-17M) : reste sous la limite d'entrée du régulateur | — |
+| Courant de court-circuit (Isc) | 6,2 A (fiche AST100-17M) | — |
+| Température nominale des cellules (NOCT) | 45 ± 2 °C | — |
+| Dimensions et poids | 970 × 585 × 30 mm, 8 kg (fiche AST100-17M) | 970 × 585 × 30 mm |
 | Connecteurs et câble | MC4, 2 fils de 4 mm² environ, boîte de jonction étanche | câble Ø 7 mm |
 | Modèle exact / lien | [Panneau 100 Wc monocristallin AST100-17M, 970 × 585 × 30 mm (Wattuneed)](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html) | — |
 
@@ -274,12 +276,12 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | --- | --- | --- |
 | Tension batterie | 12 V | 12 V |
 | Profil de charge | LiFePO4 obligatoire (fin de charge 14,2 à 14,6 V pour 4 cellules) | — |
-| Courant | au moins 10 A (le panneau donne environ 6 A) | 10,5 A (Genasun) |
-| Tension d'entrée maximale | au moins 25 V, mieux 30 V ou plus | — |
-| Type | MPPT (meilleur rendement) ou PWM (moins cher) | — |
+| Courant | au moins 10 A (le panneau donne environ 6 A) | 10 A (Victron SmartSolar 75/10) |
+| Tension d'entrée maximale | au moins 25 V, mieux 30 V ou plus | 75 V |
+| Type | MPPT (meilleur rendement) ou PWM (moins cher) | MPPT, Bluetooth intégré (appli VictronConnect) |
 | Protections | surcharge, décharge profonde, inversion de polarité, court-circuit | — |
-| Dimensions | exemple Genasun GV-10-Li : 137 × 61 × 33 mm | 137 × 61 × 33 mm (vraie taille), à plat sous le nichoir |
-| Modèle exact / lien | [Genasun GV-10-Li-14.2V (4S LiFePO4, 10,5 A)](https://sunforgellc.com/product/gv-10/) ; revendeur : [DigiKey GV-10-Li-14.2V-OEM](https://www.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948) | — |
+| Dimensions | Victron SmartSolar 75/10 : 100 × 113 × 40 mm, 0,5 kg | 100 × 113 × 40 mm (vraie taille), à plat sous le nichoir, bornes sur la face est |
+| Modèle exact / lien | [Victron Energy SmartSolar MPPT 75/10 (Amazon, boutique Victron Energy)](https://www.amazon.fr/dp/B075NTT8GH) | — |
 
 ### Batterie LiFePO4 12,8 V
 
@@ -293,8 +295,8 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Courant de décharge continu du BMS | au moins 5 A (Pi, caméras, ventilateur et marge) | — |
 | BMS | obligatoire : équilibrage, coupure haute et basse, court-circuit | — |
 | Température de charge | pas de charge sous 0 °C : BMS avec protection basse température (important pour un nichoir dehors) | — |
-| Dimensions du pack | environ 70 × 128 × 32 mm pour 4 cellules côte à côte | 128 × 70 × 32 mm (vraie taille), sous le nichoir, à plat, à gauche du régulateur, tenue par quatre étriers |
-| Position | à l'abri du soleil direct et loin de la laine de bois et du nid ; fils de charge courts | sous le fond, dans la jupe de l'habillage (45 mm), bornes côté arrière, 5 mm de jeu avec les étriers du régulateur, 9 mm avec le conduit d'air basse |
+| Dimensions du pack | environ 70 × 128 × 32 mm pour 4 cellules côte à côte | 128 × 70 × 32 mm (vraie taille), sous le nichoir, à plat, à l'arrière gauche, tournée de 90°, tenue par quatre étriers |
+| Position | à l'abri du soleil direct et loin de la laine de bois et du nid ; fils de charge courts | sous le fond, dans la jupe de l'habillage (50 mm), bornes côté est, 5 mm de jeu avec les étriers du régulateur, plus de 25 mm avec le conduit d'air basse |
 | Froid et humidité | la charge est interdite sous 0 °C ; ni coffret ni vernis ne sont prévus | voir « Points à vérifier » |
 | Modèle exact / lien | [Cellule HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523) ; BMS 4S LiFePO4 et support : lien à trouver | — |
 
@@ -303,7 +305,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
 | Calibre | 15 A suffit (charge au plus 10 A, décharge environ 8 A) ; il doit être inférieur à ce que le câble supporte | 15 A |
-| Type | fusible à lame automobile 12 V avec porte-fusible, placé au plus près du + de la batterie | 19 × 18,5 × 5 mm, posé à plat, collé contre le dessous du fond, derrière le régulateur ; lame A : + de la batterie et + du régulateur, lame B : vers le rail |
+| Type | fusible à lame automobile 12 V avec porte-fusible, placé au plus près du + de la batterie | 19 × 18,5 × 5 mm, posé à plat, collé contre le dessous du fond, entre la batterie et le mur droit ; lame A : + de la batterie et + du régulateur, lame B : vers le rail |
 | Modèle exact / lien | [Amazon.fr, JOREST, 5 porte-fusibles étanches en ligne ATC/ATO dont 1 à fils de 12 AWG et 4 de 16 AWG, avec 14 fusibles standard de 2 à 35 A](https://www.amazon.fr/dp/B0DBPQBGBQ) : on utilise le porte-fusible à fils de **12 AWG** avec le fusible de **15 A** du lot ; [Amazon.fr, SeKi, 5 fusibles à lame ATO standard 15 A bleu, 19 mm, 32 V DC](https://www.amazon.fr/dp/B0CVQGRH7L) en rechange (prix non lisibles en ligne, à confirmer) ; un seul fusible sur le rail, on garde le plan de base | — |
 
 ### Convertisseur 12 V → 5 V
@@ -390,7 +392,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Pièces | **Boîte de contreplaqué crénelée**, comme les autres boîtes du nichoir (« Conduit d'air 1 à 5 », groupe « Aération du corps », codes A-01 à A-04)<br>• 4 parois qui s'emboîtent par 11 dents verticales par arête ; un couvercle à 3 dents par bord s'emboîte dans le haut des parois ; ouverte en dessous<br>• **Posée sur le fond sans crénelage** : le bas des parois est droit et repose sur « Dessous ext », qui a une ouverture rectangulaire = l'intérieur du conduit ; « Plancher int » n'a que le passage du conduit<br>• **Collée contre la face extérieure** de la paroi intérieure « Côté gauche int », jeu 0, sa fente de 34 × 30 mm face à la grille de la paroi : l'air du nid débouche dans le conduit et peut s'y vider vers le dessous<br>• **Évacuation de l'eau** : une ouverture rectangulaire de 6 mm de haut, sans rien dedans, au ras du plancher intérieur (son bas est le dessus de « Plancher int ») ; trois ouvertures partagent le même axe, celui de la fente d'aération (au centième de mm près)<br>• Un trou de 26 mm de large dans « Conduit d'air 2 » et, pile en face, une **encoche** du bord bas de « Côté gauche int » (COR-13) de 28 mm de large (de 14 à 42 mm depuis le coin avant de la paroi, profondeur 9 mm : 6 au-dessus du plancher), entre la grille de 6 fentes et le plancher<br>• Bord bas de COR-13 : cran de coin [0 ; 14] (3 mm), encoche [14 ; 42] (9 mm), dent [42 ; 56] dans le plancher, crans [56 ; 70], [84 ; 98] et [112 ; 126] (3 mm) ; le coin reste en bois<br>• L'eau qui coule sur le plancher passe sous la paroi, dans le conduit, et sort par l'ouverture du fond<br>• **Limite** : en hiver, la sous-boîte isolante bouche le conduit et l'eau reste sur le plancher<br>• Étanche à l'air et à l'humidité de la laine | oui |
 | Protection | **Grille de bois** (contreplaqué 3 mm, fentes de 4 mm) sur la fente côté nid<br>• **Aucun grillage** sous l'ouverture du dessous : il gênerait la sous-boîte ; les guêpes peuvent entrer dans le conduit en été, c'est accepté, le remède est de poser la sous-boîte isolante quand on n'a pas besoin de la prise d'air<br>• **Pas de clapet** : la prise d'air reste ouverte, la sous-boîte isolante la bouche en hiver<br>• Pas d'auvent : l'ouverture est sous la boîte, rien ne dépasse sous le fond | oui |
 | Sous-boîte isolante (bouchon) | **Boîte de contreplaqué crénelée fermée** (4 parois, fond, couvercle emboîté), pleine hauteur et sans ouverture<br>• Elle passe pile dans l'intérieur libre du conduit (23,6 × 46 mm, jeu 0) et tient en force, sans aucun verrou (au besoin un point de ruban adhésif)<br>• Son fond est à fleur du dessous du nichoir : rien ne dépasse<br>• **Poignée** : un U de contreplaqué (trois couches de 3 mm collées, 9 mm d'épaisseur) incrusté par ses deux pieds dans deux fentes du fond, centré, dépasse de 15 mm sous le fond (ouverture 12 × 24 mm pour les doigts)<br>• **Mode d'emploi hiver** : on pousse la sous-boîte par le dessous jusqu'à ce que son fond affleure, on la ressort par la languette | pièce de rechange (parois « Bouchon-boîte prise d'air 1 à 4 », fond, couvercle, poignée, « Laine bouchon prise d'air ») |
-| Habillage | le lambris descend de 45 mm sous la boîte : il ne ferme pas le dessous, l'air entre par en bas ; le régulateur solaire est à droite et ne bouche pas l'ouverture | oui |
+| Habillage | le lambris descend de 50 mm sous la boîte : il ne ferme pas le dessous, l'air entre par en bas ; le régulateur solaire est à l'avant droit et ne bouche pas l'ouverture | oui |
 
 ### Carte de 4 LED infrarouges
 
@@ -476,7 +478,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Sonde de température extérieure DS18B20 étanche | sonde **étanche avec câble de 1 m ou 3 m** (3 fils) + **module adaptateur 3 broches avec résistance de rappel de 4,7 kΩ** et bornier à vis (ou broches) | fils du câble de la sonde (≈ 0,25 mm²) | les trois fils de la sonde dans le bornier à vis du module (rouge 3,3 V, noir masse, jaune donnée) ; trois cordons Dupont du module aux broches 17, 7 et 20 du Pi ; le surplus de câble s'enroule dans le grenier |
 | Cartes de 4 LED infrarouges 850 nm | modèle à **fils pré-soudés** ou à **bornier à vis** | fils fournis (≈ 0,3 mm²) | 5 V sur la broche 2 ou 4 du Pi par un cordon Dupont ; l'autre fil dans le bornier du module MOSFET |
 | Module 2 × MOSFET (LED) et module interrupteur 12 V du ventilateur | cartes **avec borniers à vis** | 0,25 à 0,5 mm² | fil dénudé de 6 mm dans le bornier, vis serrée au tournevis plat de 2 mm ; commande par cordon Dupont sur le GPIO |
-| Régulateur solaire Genasun | modèle d'origine à **borniers à vis** | 4 mm² côté panneau, 2,5 mm² côté batterie | fils dénudés de 8 mm avec embouts, vis serrées à fond |
+| Régulateur solaire Victron SmartSolar 75/10 | modèle d'origine à **borniers à vis** | 4 mm² côté panneau, 2,5 mm² côté batterie | fils dénudés de 8 mm avec embouts, vis serrées à fond |
 | Fusible | porte-fusible lame **avec fils déjà montés** | 2,5 mm² | on le met en série sur le fil + de la batterie, avec les Wago |
 | Rail 12 V | Wago 221-413 (3 entrées) pour le + et Wago 221-415 (5 entrées) pour le −, sans outil, aucune soudure | 0,2 à 4 mm² | on lève le levier, on glisse le fil dénudé de 11 mm (fil souple avec embout conseillé), on rabat le levier |
 | Convertisseur 12 V → 5 V | modèle de **5 A continus au moins** avec **sortie USB-C** et entrée à bornier à vis | 2,5 mm² côté 12 V | sortie USB-C directement dans le Pi, pas de câble à confectionner |
@@ -501,12 +503,11 @@ Le bouton **Montage** de la barre de la vue (en haut à droite sur ordinateur, e
 - **Étapes** : une étape par pièce ; les pièces strictement identiques (même code de plaque) se posent ensemble dans une seule étape. Une consigne n'est écrite que quand il y a quelque chose de particulier à dire : ordre à respecter, pièce qui se pose avant l'isolant, précaution, finition.
 - **Dans la 3D** : seules les pièces des étapes déjà faites et de l'étape en cours sont affichées ; celles de l'étape en cours sont surlignées en ambre. Les réglages de visibilité de « Pièces » ne changent pas et sont rétablis à la sortie. Pendant les étapes d'électronique, le toit en okoumé est soulevé (caché) ; il est reposé juste avant le panneau solaire.
 - **Navigation** : boutons « ◀ Précédent » / « Suivant ▶ » (grands, en bas de la feuille), balayage horizontal sur la feuille, flèches ← → du clavier, Échap pour quitter, liste de saut rapide par bloc. Sur téléphone, la feuille occupe au plus 40 % de la hauteur, se replie en une barre fine (titre et « 12 / 140 ») et l'écran reste allumé tant que le mode est ouvert. L'étape courante est mémorisée et reprise après un rechargement.
-- **Ordre des blocs** : Aération du corps (huile, séchage et montage à part du module d'aération, les « Conduit d'air 1 à 5 », une étape par plaque), Nid (montage à part des quatre parois intérieures), Pièces d'hiver, Corps, Entrée, puis trois sous-ensembles montés à part : Zone caméra (les quatre murs du compartiment), Goulotte ventilateur (le siège, trois parois) et Cassette du ventilateur (cassette complète, câble d'origine et conduit de sortie), Toit (qui pose ces sous-ensembles d'un bloc par une étape de texte chacun, isole le toit en une seule étape), Habillage, Couvercle, Baguettes de cale, puis l'électronique (carte microSD et essais du Pi sur l'établi, composants et fils, essais avec la batterie) et, en tout dernier, le panneau solaire. Le câblage du ventilateur (rallonge, interrupteur et ses fils) se fait avant les essais, et le toit en okoumé ne se pose qu'après ces essais.
-- **Nid** : le bloc « Nid » monte les quatre parois intérieures d'un coup, sans les huiler (l'intérieur du nid reste brut) ; le nid monté est seul à l'écran, puis il est caché jusqu'à l'étape qui le pose dans le corps. De même, le module d'aération, la zone caméra, la goulotte et la cassette sont cachés entre la fin de leur bloc et leur étape de pose, visibles pendant leur bloc et après la pose.
-- **Dans le corps** : le corps commence par l'huile et le séchage ; viennent ensuite « Dessous ext » (COR-08), l'isolant sous le plancher (une seule étape pour les quatre pièces), la pose du module d'aération, déjà monté et assemblé à part (une étape de texte : le module est caché des étapes précédentes et apparaît à cet endroit, après l'isolation du bas qu'il traverse), « Plancher int » (COR-09), la pose du nid, déjà monté (une étape de texte : les quatre parois apparaissent en place, surlignées, sur le plancher), « Face avant ext » (COR-04), les autres parois extérieures, les nervures et les clavettes, la gaine des fils (passée pendant que tout est accessible), l'isolant autour du nid (une seule étape pour tous les pavés), « Côté gauche ext » (COR-07), puis, en dernières étapes du bloc, les étriers du régulateur et ceux de la batterie.
-- **Huile et séchage** : la procédure d'huilage est donnée une seule fois, à la première étape d'huile (conduit d'air), avec l'interdit : NE PAS HUILER l'intérieur du nid ni l'intérieur du trou d'envol ; les étapes d'huile suivantes disent seulement quelles pièces huiler.
+- **Ordre des blocs** : Pièces d'hiver (bloc isolant d'hiver et bouchon de la prise d'air, en premier), Aération du corps (montage à part du module d'aération, les « Conduit d'air 1 à 5 », une étape par plaque), Nid (montage à part : pièce en C, puis les quatre parois intérieures), Corps, Entrée, puis trois sous-ensembles montés à part : Zone caméra (les quatre murs du compartiment), Goulotte ventilateur (le siège, trois parois) et Cassette du ventilateur (cassette complète, câble d'origine et conduit de sortie), Toit (qui pose ces sous-ensembles d'un bloc par une étape de texte chacun, isole le toit en une seule étape), Habillage, Couvercle, Baguettes de cale, puis l'électronique (carte microSD et essais du Pi sur l'établi, composants et fils, essais avec la batterie) et, en tout dernier, le panneau solaire. Le câblage du ventilateur (rallonge, interrupteur et ses fils) se fait avant les essais, et le toit en okoumé ne se pose qu'après ces essais.
+- **Nid** : le bloc « Nid » commence par la pièce en C (COR-15, posée à plat), puis monte les quatre parois intérieures une à une (avant, droite, arrière, gauche) (l'intérieur du nid reste brut) ; le nid monté est seul à l'écran, puis il est caché jusqu'à l'étape qui le pose dans le corps. De même, le module d'aération, la zone caméra, la goulotte et la cassette sont cachés entre la fin de leur bloc et leur étape de pose, visibles pendant leur bloc et après la pose.
+- **Dans le corps** : le corps commence par « Dessous ext » ; viennent ensuite (COR-08), l'isolant sous le plancher (une seule étape pour les quatre pièces), la pose du module d'aération, déjà monté et assemblé à part (une étape de texte : le module est caché des étapes précédentes et apparaît à cet endroit, après l'isolation du bas qu'il traverse), « Plancher int » (COR-09), la pose du nid, déjà monté (une étape de texte : les quatre parois apparaissent en place, surlignées, sur le plancher), « Face avant ext » (COR-04), les autres parois extérieures, les nervures et les clavettes, la gaine des fils (passée pendant que tout est accessible), l'isolant autour du nid (une seule étape pour tous les pavés), « Côté gauche ext » (COR-07), puis, en dernières étapes du bloc, les étriers du régulateur et ceux de la batterie.
 - **Câblage** : chaque étape de câblage dit d'où à où va le fil et nomme les broches du Raspberry Pi (par exemple « broche 12 (GPIO18, PWM) », « broche 6 (GND, masse) »), avec le raccord à utiliser.
-- **Finition** : l'huile de lin pure est appliquée avant le collage, en masquant dents, fentes et surfaces à coller, avec une semaine de séchage par couche (voir « Finition du bois ») ; les 22 lames de l'habillage sont peintes en blanc avant le collage (2 couches, ruban de peintre sur les surfaces à coller) ; le toit en okoumé est saturé (saturateur teck mat, 2 couches) une fois assemblé.
+- **Finition** : les 22 lames de l'habillage sont peintes en blanc avant le collage (2 couches, ruban de peintre sur les surfaces à coller) ; le toit en okoumé est saturé (saturateur teck mat, 2 couches) une fois assemblé.
 - **Le Pi** : préparation de la carte microSD, installation du programme et du service, essais sur l'établi avec l'alimentation 27 W (capteur du nid, sonde de dehors, caméras, LED infrarouges par le module MOSFET, ventilateur et PWM, page web) avant de l'installer dans le nichoir ; puis essais avec la batterie, le fusible et le régulateur avant de brancher le panneau solaire.
 
 ## Vérification que rien ne coince
@@ -516,9 +517,9 @@ Contrôle fait par calcul sur le modèle : recouvrement entre chaque composant e
 | Composant | Résultat |
 | --- | --- |
 | Ventilateur et son siège | cassette (66 × 66 mm, 97 mm de haut) posée dans un siège de 73 mm de large collé sur le plancher du toit, à 1 cm du compartiment de la caméra (le siège va jusqu'à la plaque arrière, le conduit de sortie de 10,6 mm comble l'espace derrière la cassette) : à environ 8 mm de la gaine, à environ 5 mm du Pi, loin de la batterie (plus de 5 cm) ; la poignée de la cassette est à environ 3 mm sous la pente du toit |
-| Régulateur | sous le nichoir, à plat (61 × 137 × 33 mm), sans conflit : le lambris descend de 45 mm pour le protéger |
-| Fusible | sous le nichoir, collé contre le fond, derrière le régulateur (18 mm du régulateur, 5 mm des étriers de la batterie, 6 mm de la gaine) ; il ne tient aucune place dans le grenier |
-| Batterie | vraie taille (128 × 70 × 32 mm), sous le nichoir, à plat, à gauche du régulateur, tenue par quatre étriers ; 5 mm de jeu avec les étriers du régulateur, 9 mm avec le conduit d'air basse, plus de 20 mm avec la jupe de l'habillage ; aucun recouvrement avec le régulateur ni avec une autre pièce |
+| Régulateur | sous le nichoir, à plat (100 × 113 × 40 mm), sans conflit : le lambris descend de 50 mm pour le protéger |
+| Fusible | sous le nichoir, collé contre le fond, dans le couloir entre la batterie et le mur droit (≈ 9 mm du régulateur, 17 mm de la batterie, 25 mm de la gaine) ; il ne tient aucune place dans le grenier |
+| Batterie | vraie taille (128 × 70 × 32 mm), sous le nichoir, à plat, à l'arrière gauche, tournée de 90°, tenue par quatre étriers ; 5 mm de jeu avec les étriers du régulateur, plus de 25 mm avec le conduit d'air basse, plus de 50 mm avec la jupe de l'habillage ; aucun recouvrement avec le régulateur ni avec une autre pièce |
 | Raspberry Pi | passe (13 mm sous la pente) ; environ 5 mm d'écart avec le siège du ventilateur |
 | Convertisseur 12 → 5 V | à l'avant, taille estimée ; il passe sous la pente avec très peu de jeu |
 | Nappe de la caméra 1 | contourne le siège du ventilateur : elle passe devant lui, au-dessus des fils des LED |
@@ -570,7 +571,7 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 | Toit en okoumé 2 × 5 mm (2 plaques de 0,082 m²) + 4 baguettes de 3 mm | 0,4 kg |
 | Isolant fibre de bois 39 mm, 50 kg/m³ (murs, fond, toit : 6,95 L) | 0,35 kg |
 | Batterie 4 × 32700 + BMS + support (sous le nichoir, avec le régulateur) | 0,6 kg |
-| Régulateur de charge Genasun | 0,25 kg |
+| Régulateur de charge Victron SmartSolar 75/10 | 0,5 kg |
 | Raspberry Pi 5 + carte microSD | 0,05 kg |
 | Caméras, LED, capteurs (nid et dehors), convertisseur, modules, fusible | 0,15 kg |
 | Ventilateur, prise et rallonge, interrupteur, plots, mousse, bloc d'hiver | 0,15 kg |
@@ -583,29 +584,15 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 
 **Tenue de la fixation.** 4,1 kg font 40 N. Ils sont repris par 4 dents de 9 × 32 mm dans du contreplaqué de 3 mm : la pression sur le bois reste sous 1 MPa, pour une résistance d'au moins 20 MPa. Le centre de gravité est à environ 11 cm du dos, ce qui ajoute un couple de 4,5 N·m, soit un effort d'environ 45 N sur la dent du haut : toujours loin de la limite. Les 4 vis Ø 5 dans le tronc (ou une sangle) tiennent cela sans difficulté. Les points à soigner : le collage des 3 plaques de chaque nervure, et des vis inox de 5 × 60 dans du bois sain.
 
-## Finition du bois (huile de lin, saturateur, peinture)
+## Finition du bois (saturateur, peinture)
 
-**Règle.** Chaque zone a sa finition. Le contreplaqué de peuplier de 3 mm est huilé à l'huile de lin pure (non cuite). Les deux plaques d'okoumé du toit reçoivent un saturateur teck mat à l'eau. Les 22 lames d'okoumé de l'habillage sont peintes en blanc. Tout ce qui touche l'espace des oiseaux (les parois, le plancher intérieur, le bloc d'entrée côté nid et la face intérieure du tunnel : « Face avant int », « Côté … int », « Plancher int ») reste brut, poncé, sans suie de découpe. Le nichoir est mis en service au printemps : le séchage et l'aération se font pendant l'automne et l'hiver.
+**Règle.** Chaque zone a sa finition. Les deux plaques d'okoumé du toit reçoivent un saturateur teck mat à l'eau. Les 22 lames d'okoumé de l'habillage sont peintes en blanc. Tout ce qui touche l'espace des oiseaux (les parois, le plancher intérieur, le bloc d'entrée côté nid et la face intérieure du tunnel : « Face avant int », « Côté … int », « Plancher int ») reste brut, poncé, sans suie de découpe. Le nichoir est mis en service au printemps : le séchage et l'aération se font pendant l'automne et l'hiver.
 
 | Zone | Finition | Pourquoi |
 | --- | --- | --- |
-| Nid (parois intérieures, plancher intérieur, bloc d'entrée côté nid, face intérieure du tunnel) | brut, poncé (grains 120 puis 180), sans suie de découpe | l'huile et son odeur ne doivent pas rester là où vivent les oiseaux |
-| Pièces cachées en peuplier (parois extérieures, « Dessous ext », conduit d'air, toit, cadres, baguettes, étriers, clavettes, nervures) | huile de lin pure, 2 couches | protège le bois de l'humidité de l'isolant et de la condensation |
-| Chants (tranches découpées) du peuplier | 2 couches d'huile ; la première peut être diluée à 50 % d'essence de térébenthine | les chants boivent l'huile et l'eau par les fibres |
-| Toit en okoumé de 5 mm (deux plaques) | saturateur teck mat à l'eau Luxens, 2 couches, chants compris, pas sur les surfaces à coller (face de dessus de la plaque crénelée, dents, fentes) ; pas d'huile de lin sur cette zone | teinté teck, résiste aux UV et aux intempéries ; seulement sur les pièces du toit, à l'extérieur, jamais sur ce qui touche le nid |
-| Habillage en okoumé (22 lames « Lambris … ») | peinture extérieure blanche satinée Luxens « Conditions extrêmes », sans sous-couche, 2 couches, 2 faces et chants, pas d'huile | microporeuse, protection UV et intempéries ; la peinture ne tient pas sur une surface huilée |
-
-**Huile de lin (Mieuxa, 1 L).** L'huile est pure, non cuite. Étiquette : protège des intempéries, du gel et de l'humidité les bois ; à employer pure ou mélangée à de l'essence de térébenthine Mieuxa ; préparation : 50 % d'huile de lin et 50 % d'essence de térébenthine ; pour accélérer le séchage, ajouter 1 % de siccatif Mieuxa ; risque d'auto-inflammation sur matériaux poreux (chiffons, papiers) : les faire tremper dans l'eau avant de les jeter. Le mélange 50 / 50 (première couche des chants) et le siccatif à 1 % sont des options : l'essence de térébenthine et le siccatif ne figurent pas dans le tableau des prix.
-
-**Procédure d'huilage.**
-
-1. Découper au laser, puis brosser et poncer la suie (papier de verre grain 120, puis grain 180).
-2. Repérer et masquer au ruban de peintre les dents, les fentes et toutes les surfaces à coller : l'huile empêche la colle d'accrocher.
-3. Appliquer une première couche fine au pinceau ou au chiffon ; les chants en reçoivent deux, car ils boivent.
-4. Essuyer l'excès après 15 à 30 minutes.
-5. Laisser sécher environ une semaine par couche (temps indicatif, il dépend de la température et de l'humidité), puis passer la seconde couche.
-6. Enlever le ruban, puis coller (colle à bois de classe D3 ou D4).
-7. Aérer 2 à 4 semaines avant le montage : l'odeur ne doit pas rester dans le nid.
+| Nid (parois intérieures, plancher intérieur, bloc d'entrée côté nid, face intérieure du tunnel) | brut, poncé (grains 120 puis 180), sans suie de découpe | aucun produit là où vivent les oiseaux |
+| Toit en okoumé de 5 mm (deux plaques) | saturateur teck mat à l'eau Luxens, 2 couches, chants compris, pas sur les surfaces à coller (face de dessus de la plaque crénelée, dents, fentes) | teinté teck, résiste aux UV et aux intempéries ; seulement sur les pièces du toit, à l'extérieur, jamais sur ce qui touche le nid |
+| Habillage en okoumé (22 lames « Lambris … ») | peinture extérieure blanche satinée Luxens « Conditions extrêmes », sans sous-couche, 2 couches, 2 faces et chants | microporeuse, protection UV et intempéries |
 
 **Saturateur du toit (Luxens teck mat, 1 L).** Produit à l'eau, teinté teck, qui résiste aux UV et aux intempéries ; séchage au toucher : 1 h. L'étiquette porte « dangereux : respecter les précautions d'emploi ». C'est un gel anti-glisse conçu pour les terrasses : un essai sur une chute d'okoumé précède le traitement du toit. Il s'applique uniquement sur les deux plaques d'okoumé du toit, à l'extérieur, jamais sur ce qui touche le nid.
 
@@ -621,8 +608,6 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 2. Masquer au ruban de peintre les surfaces à coller.
 3. Peindre 2 faces et les chants, 2 couches, avec 6 h entre les deux (selon l'étiquette).
 4. Laisser sécher 12 h au moins, enlever le ruban, puis coller.
-
-**Sécurité.** Un chiffon imbibé d'huile de lin peut s'enflammer tout seul en séchant en tas : on l'étale à plat dehors, ou on le noie dans l'eau avant de le jeter.
 
 **Choix du contreplaqué.** Colle extérieure (classe 3 / CTBX), ou au minimum résistante à l'humidité, et classe d'émission E1 : le peuplier courant est collé « intérieur » et se décolle dans un nichoir dehors.
 
@@ -657,7 +642,7 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Gaine ICTA Ø 16 mm, rouleau de 100 m (il en faut environ 30 cm : le rouleau est 100 fois trop long, mais c'est le conditionnement vendu) | 25 € | [Leroy Merlin, gaine ICTA Ø 16 mm, 100 m (réf. 62900236)](https://www.leroymerlin.fr/produits/gaine-icta-diam-16-mm-l-100-m-62900236.html) ; prix estimé d'après d'autres revendeurs (≈ 25 € la couronne), page non lisible en ligne : à confirmer | [ ] |
 | Électronique | Câbles (2,5 mm², 4 mm², signaux), presse-étoupe, cosses | 20 € | lien à trouver — référence exacte : fil souple 2,5 mm² et 4 mm² (rouge / noir), fil de signal 0,25 mm², cosses isolées | [ ] |
 | Solaire | Panneau solaire 100 W | 90 € | [Panneau 100 Wc monocristallin AST100-17M, 970 × 585 × 30 mm (Wattuneed)](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html) | [ ] |
-| Solaire | Régulateur de charge Genasun GV-10-Li | 120 € | [Genasun GV-10-Li-14.2V (4S LiFePO4, 10,5 A)](https://sunforgellc.com/product/gv-10/) ; revendeur : [DigiKey GV-10-Li-14.2V-OEM](https://www.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948) | [ ] |
+| Solaire | Régulateur de charge Victron SmartSolar MPPT 75/10 | 55,13 € | [Victron Energy SmartSolar MPPT 75/10 (Amazon, boutique Victron Energy)](https://www.amazon.fr/dp/B075NTT8GH) : bornier à vis, Bluetooth, 75 V / 10 A | [ ] |
 | Corps | Contreplaqué peuplier 3 mm (9 planches de 41 × 40 cm, baguettes de cale et pièces fines de rechange comprises : elles se rangent dans les creux des planches) | 22 € | lien à trouver — référence exacte : contreplaqué peuplier 3 mm, planches de 41 × 40 cm | [ ] |
 | Corps | Panneau isolant en fibre de bois Soprema 122 × 60 cm, 40 mm (1 panneau ; vendu en lot de 10 sur la page, un seul suffit : ≈ 0,73 m² pour ≈ 0,18 m² utiles) | 2,80 € | [Leroy Merlin, 10 panneaux isolants en fibre de bois Soprema 122 × 60 cm, ép. 4 cm, R 1,05 (réf. 80145323)](https://www.leroymerlin.fr/produits/10-panneaux-isolants-en-fibre-de-bois-soprema-122x60cm-ep-4-cm-r-1-05-80145323.html) : le lot de 10 (7,32 m², 19 kg, 3,82 € le m²) est la seule référence de la page, le magasin peut le vendre à l'unité ; λ 0,038 W/mK, R 1,05 pour 40 mm, densité 50 kg/m³, fabrication française ; panneau semi-rigide de 40 mm pour une cavité de 39 mm : on le comprime de 1 mm ou on le ponce ; prix d'un panneau = 0,732 m² × 3,82 € | [ ] |
 | Corps | Colle à bois D3 / D4 (résistante à l'eau), vis inox | 8 € | lien à trouver — référence exacte : colle à bois vinylique D3 ou D4 (résistante à l'eau), vis inox A2 | [ ] |
@@ -666,13 +651,12 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Corps | Sous-boîte isolante de la prise d'air (contreplaqué + laine de bois) | 1 € | fabriquée : contreplaqué + laine de bois | [ ] |
 | Habillage | 2 panneaux de contreplaqué okoumé extérieur 5 mm de 800 × 600 mm (15,90 € pièce) pour l'habillage (22 lames, peint en blanc) et le toit (2 plaques, au naturel) ; chaque panneau est recoupé en deux carreaux de 400 × 400 mm et deux bandes de 400 × 200 mm pour la laser (4 carreaux, marge de bord de 4 mm) | 31,80 € | [Leroy Merlin, prédécoupe contreplaqué okoumé extérieur ép. 5 mm, 80 × 60 cm](https://www.leroymerlin.fr/produits/predecoupe-contreplaque-okoume-exterieur-ep-5-mm-l-80-x-l-60-cm-70753963.html) : nautique / extérieur plein air, densité 430 kg/m³, 1,032 kg la pièce, PEFC, fabrication française | [ ] |
 | Finition | Peinture extérieure bois / MDF / OSB « Conditions extrêmes » Luxens, blanc satiné 2,5 L (RAL 9016), pour les 22 lames de l'habillage | 34,90 € | [Leroy Merlin, peinture extérieure bois, MDF, OSB Luxens « Conditions extrêmes », blanc satiné 2,5 L](https://www.leroymerlin.fr/produits/peinture-exterieure-bois-mdf-osb-conditions-extremes-luxens-blanc-satine-2-5l-82396898.html) : sans sous-couche sur bois neuf, microporeuse, protection UV et intempéries 10 ans, séchage 12 h au toucher, 6 h entre deux couches, rendement 12 m² / L, COV 4 g / L, nettoyage à l'eau | [ ] |
-| Finition | Huile de lin pure (non cuite) Mieuxa, 1 L | 7,59 € | [Leroy Merlin, huile de lin Mieuxa 1 L](https://www.leroymerlin.fr/produits/huile-de-lin-mieuxa-1l-53154213.html) : à employer pure ; options non comptées : essence de térébenthine Mieuxa (50 / 50 pour la première couche des chants) et siccatif Mieuxa (1 %) | [ ] |
 | Finition | Saturateur pour bois extérieur Luxens teck mat, 1 L, pour les deux plaques d'okoumé du toit | 21,90 € | [Leroy Merlin, saturateur pour bois extérieur Luxens teck mat 1 L](https://www.leroymerlin.fr/produits/saturateur-pour-bois-exterieur-luxens-teck-mat-1-l-88692969.html) : à l'eau, teinté teck, résiste aux UV et aux intempéries, séchage au toucher 1 h ; gel anti-glisse conçu pour terrasses : essai sur une chute avant de traiter ; étiquette « dangereux : respecter les précautions d'emploi » | [ ] |
 | Finition | Pinceau et chiffons : prix estimé, à confirmer | 5 € | lien à trouver — référence exacte : pinceau plat de 30 à 50 mm et chiffons de coton non pelucheux | [ ] |
 | Finition | Ruban de peintre : prix estimé, à confirmer | 4 € | lien à trouver — référence exacte : ruban de peintre (masquage) de 25 à 30 mm | [ ] |
 | Finition | Papier de verre grains 120 et 180 : prix estimé, à confirmer | 4 € | lien à trouver — référence exacte : papier de verre grain 120 et grain 180, feuilles pour ponçage à la main | [ ] |
 
-Le ventilateur, sa grille et son interrupteur coûtent environ 22 €. Le poste le plus cher est le régulateur Genasun (120 €) : un régulateur PWM LiFePO4 à 20 € ferait le travail avec un rendement moindre, et enlèverait 100 € au total. La découpe laser n'est pas comptée.
+Le ventilateur, sa grille et son interrupteur coûtent environ 22 €. Le régulateur Victron SmartSolar 75/10 (55,13 €, boutique officielle Victron Energy sur Amazon) remplace le Genasun (120 €) : même rendement MPPT et un profil LiFePO4 réglable depuis le téléphone ; un régulateur PWM à 20 € ferait le travail avec un rendement moindre. La découpe laser n'est pas comptée.
 
 ## Points à vérifier avant de construire
 
@@ -700,8 +684,7 @@ Les liens des composants sont ceux des fiches ci-dessus ; la colonne « Vérifi�
 - [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 mm, 12 V, 4 broches ; la boîte contient la rallonge NA-EC1 de 30 cm) ; [grille de protection Noctua NA-FG1-6 Sx2, 2 pièces, pour ventilateurs de 60 mm (Amazon.fr)](https://www.amazon.fr/dp/B0B1QRWHW3) ; [la même référence sur Amazon.fr](https://www.amazon.fr/dp/B00VXTANZ4) (page ouverte : modèle NF-A6x25 PWM, 60 × 25 mm, 3000 tr/min, 4 broches ; contenu de la boîte non lisible sur la page)
 - [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413)
 - [WAGO 221-415, borne à levier 5 conducteurs](https://www.wago.com/221-415)
-- [Régulateur Genasun GV-10-Li-14.2V (page fabricant Sunforge)](https://sunforgellc.com/product/gv-10/)
-- [Régulateur Genasun GV-10-Li-14.2V-OEM (DigiKey)](https://www.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948)
+- [Régulateur Victron SmartSolar MPPT 75/10 (Amazon, boutique Victron Energy)](https://www.amazon.fr/dp/B075NTT8GH)
 - [Capteur BME280 Pimoroni PIM472, I2C (Kubii)](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html)
 - [Capteur BME280, page Bosch Sensortec](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/)
 - [Cellule LiFePO4 HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523)

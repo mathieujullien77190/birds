@@ -15,7 +15,7 @@ export const CAM_Y = -10;
 export const FAN = 60, FAN_T = 25, FAN_OPEN = 56, FAN_PLOT = 3;
 
 /** Capteur température / humidité (carte type BME280 / DHT22, 15 × 11) fixé à l'intérieur du mur arrière, fils vers le GPIO du Pi. */
-export const SENSOR_X = 33, SENSOR_Y = -14; // DANS le compartiment de la caméra (agrandi vers l'est) : ≥ 4,5 mm de bois entre son logement, la fenêtre des LED et les fentes des murs du compartiment ; // décalé de 1 cm vers le centre : la fente de ses fils (12 × 6 en x = 30,25) reste dans le compartiment, elle passait sous son mur droit (x = 43) // collé sous le plafond (le dessous du plancher du toit), à droite de la caméra, hors de la plaque alu
+export const SENSOR_X = 36, SENSOR_Y = -14; // DANS le compartiment de la caméra (agrandi vers l'est) : ≥ 4,5 mm de bois entre son logement, la fenêtre des LED et les fentes des murs du compartiment ; // décalé de 1 cm vers le centre : la fente de ses fils (12 × 6 en x = 30,25) reste dans le compartiment, elle passait sous son mur droit (x = 43) // collé sous le plafond (le dessous du plancher du toit), à droite de la caméra, hors de la plaque alu
 
 /** Trou de l'objectif dans le plafond intérieur, trou du câble dans le toit extérieur (mm). */
 export const LENS_HOLE = 10;
@@ -24,10 +24,10 @@ export const CAM_W = 25, CAM_H = 24;
 /** Petite carte de 4 LED infrarouges 850 nm, posée à côté de la caméra : 12 × 24 mm. */
 export const IR_W = 12, IR_H = 24;
 /** Abscisses (centre) de la caméra et de la carte IR dans le compartiment : l'ensemble de 37 mm est centré. */
-export const CAM_X = -6, IR_X = 12.5;
+export const CAM_X = 0, IR_X = 18.5; // objectif centré à droite / gauche sur le plafond (x = 0), carte des LED 18,5 mm à sa droite
 /** Épaisseur du contreplaqué okoumé extérieur peint en blanc (habillage), en mm. */
 export const OKOUME_T = 5, OKOUME_COLOR = '#f5f5f4';
-/** Okoumé NON peint (brun-rosé chaud) : le pan du toit, que l'utilisateur huile ou sature lui-même pour l'extérieur (l'habillage, lui, est peint en blanc : `OKOUME_COLOR`). */
+/** Okoumé NON peint (brun-rosé chaud) : le pan du toit, que l'utilisateur sature lui-même pour l'extérieur (l'habillage, lui, est peint en blanc : `OKOUME_COLOR`). */
 export const OKOUME_NATURAL = '#c98f69';
 /** Deuxième caméra : NUE, À L'EXTÉRIEUR, sous le débord du toit en okoumé, à l'avant gauche, inclinée et tournée pour viser le trou d'entrée (boîte en okoumé essayée puis retirée). Une longue nappe sort du Pi par une fente de la plaque avant du toit.
  *  PI_CSI2 = le connecteur de GAUCHE des deux ports de 22 broches du Pi 5 (caméra 2), dans le repère de la carte. Les deux connecteurs de 22 broches du Pi 5 (CAM/DISP 0 et 1) sont côte à côte sur le bord long, entre la 2ᵉ micro-HDMI et le bloc Ethernet :
