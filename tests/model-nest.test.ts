@@ -200,7 +200,7 @@ describe('makeNest : balayage de la taille intérieure (120 à 300 par pas de 10
       const front = planks.filter((p) => /^Lambris avant [0-9]/.test(p.name));
       const widths = new Set(front.map((p) => +p.w.toFixed(2)));
       expect(widths.size, `largeurs ${[...widths]}`).toBe(1);
-      const k = front.length;
+      const k = new Set(front.map((p) => p.pos[0])).size; // la lame d'entrée est coupée en deux par la plaque de la caméra : deux morceaux au même x
       expect(k * [...widths][0]).toBeCloseTo(W + 10, 1);
       expect(byName(planks, /^Isolant sous le bloc d'entrée$/).depth).toBeGreaterThan(0);
     });
@@ -216,14 +216,14 @@ describe('makeNest : balayage de la taille intérieure (120 à 300 par pas de 10
 describe("habillage : trou d'envol dans la façade", () => {
   const entry = (over: Partial<NestParams>) => {
     const { planks } = build(over);
-    return planks.filter((p) => /^Lambris avant/.test(p.name) && p.holes.some((h) => h.shape === 'round'));
+    return planks.filter((p) => /^Lambris avant/.test(p.name) && p.holes.some((h) => h.shape === 'round' && h.size > 5));
   };
   it('une seule lame est percée, au milieu (x = 0), du diamètre du trou', () => {
     for (const l of [120, 130, 140, 190, 230, 290]) {
       const e = entry({ l, L: l });
       expect(e, `l = ${l}`).toHaveLength(1);
-      expect(e[0].name.endsWith('(percé)')).toBe(true);
-      expect(e[0].holes.find((h) => h.shape === 'round')).toMatchObject({ x: 0, size: 32 });
+      expect(e[0].name).toContain('(percé)');
+      expect(e[0].holes.find((h) => h.shape === 'round' && h.size > 5)).toMatchObject({ x: 0, size: 32 });
       expect(e[0].pos[0]).toBeCloseTo(0, 9);
     }
   });
@@ -235,7 +235,7 @@ describe("habillage : trou d'envol dans la façade", () => {
   // BUG connu : un trou plus large que la lame (46 mm) donne un trou qui dépasse de la planche.
   it.fails('BUG : trou d envol plus large que la lame centrale', () => {
     const e = entry({ l: 120, hole: 94 })[0];
-    const h = e.holes.find((x) => x.shape === 'round')!;
+    const h = e.holes.find((x) => x.shape === 'round' && x.size > 5)!;
     expect(Math.abs(h.x) + h.size / 2).toBeLessThanOrEqual(e.w / 2);
   });
 });

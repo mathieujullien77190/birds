@@ -81,7 +81,7 @@ ${w}` : w; }
   // le toit en okoumé est soulevé pendant tout le travail dans le grenier : caché de la première étape d'électronique jusqu'à sa pose
   const lid = pieces.filter((i) => LID_RE.test(i.p.name)).map((i) => i.p.id);
   const back = out.findIndex((st) => st.id === LID_BACK);
-  const from = out.findIndex((st) => st.block === 'banc');
+  const from = out.findIndex((st) => st.block === 'elec');
   if (lid.length && back > from && from >= 0) for (let k = from; k < back; k++) out[k].hideIds = lid;
   // sous-ensembles montés à part (module d'aération, zone caméra, goulotte) : cachés des étapes qui suivent leur bloc jusqu'à leur pose
   for (const sub of SUBASSEMBLIES) {

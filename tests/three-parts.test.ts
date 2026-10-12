@@ -182,6 +182,19 @@ describe('partGeometry : aiguillage par type', () => {
   });
 });
 
+describe('cure-dent', () => {
+  it('un cylindre de diamètre w et de longueur depth le long de z (pas une boîte)', () => {
+    const g = partGeometry(P({ special: 'pin', w: 2, h: 2, depth: 10, color: '#d9b779' }), 3).geo;
+    g.computeBoundingBox();
+    const b = g.boundingBox!;
+    expect(b.max.x - b.min.x).toBeCloseTo(2, 5);
+    expect(b.max.y - b.min.y).toBeCloseTo(2, 5);
+    expect(b.max.z - b.min.z).toBeCloseTo(10, 5);
+    expect(g.attributes.position.count).toBeGreaterThan(24); // une boîte n'en a que 24
+    expect(g.attributes.color).toBeDefined();
+  });
+});
+
 describe('plankGeometry / PlankMesh', () => {
   it("MDF : dessus, dessous et tranche aux couleurs MDF, distinctes du contreplaqué", () => {
     const ply = plankGeometry(P({ w: 20, h: 20 }), 3).geo, mdf = plankGeometry(P({ w: 20, h: 20, material: 'mdf' }), 3).geo;

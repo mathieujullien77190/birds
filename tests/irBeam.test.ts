@@ -24,13 +24,11 @@ describe('faisceaux infrarouges : fonctions pures', () => {
     expect(fadeLevel(0.5, 0, 0.03)).toBeLessThan(0.5); expect(fadeLevel(0.5, 0, 0.03)).toBeGreaterThanOrEqual(0);
   });
   it('de jour plus discret que de nuit', () => { expect(ambientFactor(true)).toBe(1); expect(ambientFactor(false)).toBe(0.5); });
-  it('l\'axe du cône est l\'axe d\'objectif de la carte (−z local) : vers le bas pour la carte du nid, vers le trou d\'envol (−y) pour celle de l\'extérieur', () => {
+  it('l\'axe du cône est l\'axe d\'objectif de la carte (−z local) : vers le bas pour la carte du nid comme pour celle de l\'extérieur (sur sa plaque, droit vers le bas)', () => {
     const sc = buildNest({}), q = (name: string) => { const p = sc.planks.find((x) => x.name === name)!; return new Quaternion().setFromEuler(new Euler(...(p.rot.map((d) => (d * Math.PI) / 180) as [number, number, number]), 'XYZ')); };
     const nid = beamDirection(q('LED infrarouges')), ext = beamDirection(q('LED infrarouges extérieures'));
     expect(nid.distanceTo(new Vector3(0, 0, -1))).toBeLessThan(1e-6);
-    const card = sc.planks.find((x) => x.name === 'LED infrarouges extérieures')!, front = sc.planks.find((x) => /^Lambris avant .*percé/.test(x.name))!, hole = front.holes.find((h) => h.shape === 'round')!;
-    const toHole = new Vector3(front.pos[0] + hole.x, front.pos[1], front.pos[2] + hole.y).sub(new Vector3(...card.pos)).normalize();
-    expect(ext.dot(toHole)).toBeGreaterThan(0.95); // le faisceau extérieur vise le trou d'envol
+    expect(ext.distanceTo(new Vector3(0, 0, -1))).toBeLessThan(1e-6); // le faisceau extérieur regarde droit vers le bas, depuis la plaque au-dessus du trou d'envol
     const pose = conePose(new Vector3(1, 2, 3), ext, 250);
     expect(pose.position.distanceTo(new Vector3(1, 2, 3).addScaledVector(ext, 125))).toBeLessThan(1e-6); // le cône part de la carte
     expect(new Vector3(0, -1, 0).applyQuaternion(pose.quaternion).distanceTo(ext)).toBeLessThan(1e-6);

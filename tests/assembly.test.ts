@@ -74,7 +74,7 @@ describe('assemblySteps : chaque pièce dans UNE étape', () => {
 
 describe('assemblySteps : les ordres imposés', () => {
   it('Aération du corps < Nid < Pièces d\'hiver < Corps < Entrée < Toit < Électronique < Panneau solaire', () => {
-    const order = ['hiver', 'aeration', 'nid', 'corps', 'entree', 'zonecam', 'goulotte', 'cassette', 'toit', 'habillage', 'couvercle', 'baguettes', 'banc', 'elec', 'essais', 'solaire'];
+    const order = ['hiver', 'aeration', 'nid', 'corps', 'entree', 'zonecam', 'goulotte', 'cassette', 'toit', 'habillage', 'couvercle', 'baguettes', 'elec', 'essais', 'solaire'];
     const firsts = order.map(blockFirst);
     expect(firsts.every((i) => i >= 0)).toBe(true);
     expect([...firsts].sort((a, b) => a - b)).toEqual(firsts);
@@ -93,17 +93,20 @@ describe('assemblySteps : les ordres imposés', () => {
     expect(plankCodes(sc0).get(byName(sc0, /^Plancher int$/).id)).toBe('COR-09');
     expect(plankCodes(sc0).get(byName(sc0, /^Face avant ext$/).id)).toBe('COR-04');
     const nid = ['Pièce en C sous le cadre', 'Côté droit int', 'Côté gauche int', 'Face arrière int', 'Face avant int'].map((n) => idx(new RegExp(`^${n}`)));
+    const liners = [idx(/^Plaque isolant entrée droite$/), idx(/^Plaque isolant entrée dessous$/)]; // COR-16 puis COR-17, juste après COR-11 et COR-10, encore dans le bloc Nid
+    expect(liners[0]).toBeGreaterThan(nid[4]); expect(liners[1]).toBeGreaterThan(liners[0]); for (const k of liners) expect(steps0[k].block).toBe('nid');
     expect(new Set(nid).size).toBe(5); expect(nid).toEqual([...nid].sort((x, y) => x - y)); // la pièce en C (COR-15) d'abord, puis les 4 parois intérieures une à une, toutes dans le bloc Nid (avant le Corps)
     for (const k of nid) { expect(steps0[k].pieceIds).toHaveLength(1); expect(steps0[k].block).toBe('nid'); }
-    expect(blockFirst('nid')).toBeLessThan(blockFirst('corps')); expect(steps0.filter((s) => s.block === 'nid')).toHaveLength(5); expect(steps0[blockFirst('nid')].pieceIds).toEqual([byName(sc0, /^Pièce en C sous le cadre/).id]);
+    expect(blockFirst('nid')).toBeLessThan(blockFirst('corps')); expect(steps0.filter((s) => s.block === 'nid')).toHaveLength(7); expect(steps0[blockFirst('nid')].pieceIds).toEqual([byName(sc0, /^Pièce en C sous le cadre/).id]);
     const pose = stepIdx('corps-nid-pose'); // le nid se pose après le plancher intérieur (COR-09) et avant la paroi extérieure avant (COR-04)
-    expect(steps0[pose].block).toBe('corps'); expect(steps0[pose].pieceIds).toEqual([]); expect(steps0[pose].focusIds).toEqual(sc0.planks.filter((q) => /^(Face avant|Face arrière|Côté droit|Côté gauche) int$|^Pièce en C sous le cadre/.test(q.name)).map((q) => q.id));
+    expect(steps0[pose].block).toBe('corps'); expect(steps0[pose].pieceIds).toEqual([]); expect(steps0[pose].focusIds).toEqual(sc0.planks.filter((q) => /^(Face avant|Face arrière|Côté droit|Côté gauche) int$|^Pièce en C sous le cadre|^Plaque isolant entrée/.test(q.name)).map((q) => q.id));
     expect(pose).toBeGreaterThan(plancher); expect(pose).toBeLessThan(avant);
     expect(dessous).toBeLessThan(bas[0]);
     const autour = [/^Isolant gauche 1$/, /^Isolant gauche 2$/, /^Isolant gauche 3$/, /^Isolant gauche dessus conduit/, /^Isolant droite$/, /^Isolant arrière$/, /^Isolant avant gauche$/, /^Isolant avant droite$/, /^Isolant sous le bloc d'entrée$/].map((re) => idx(re));
-    expect(new Set(autour).size).toBe(1); // l'isolant autour du nid : une seule étape, après l'aération et la gaine, avant « Côté gauche ext »
+    expect(new Set(autour).size).toBe(1); // l'isolant autour du nid : une seule étape, après l'aération, avant toutes les parois extérieures
     expect(steps0[autour[0]].pieceIds).toHaveLength(9); // avec l'isolant du bloc d'entrée (sous le bloc, avant gauche, avant droite) : plus d'étape d'isolant dans le bloc Entrée
-    expect(autour[0]).toBeGreaterThan(gaine); expect(autour[0]).toBeGreaterThan(module); expect(autour[0]).toBeLessThan(cote);
+    expect(autour[0]).toBeGreaterThan(module); expect(autour[0]).toBeLessThan(avant); // tout l'isolant avant COR-04
+    expect(idx(/^Face arrière ext$/)).toBeGreaterThan(avant); expect(gaine).toBeGreaterThan(idx(/^Face arrière ext$/)); expect(gaine).toBeLessThan(idx(/^Côté droit ext$/)); // COR-04, COR-05, puis la gaine entre l'isolant, puis COR-06
     expect(steps0[stepIdx('corps-etriers')].pieceIds).toHaveLength(4);
     for (const c of conduit) { expect(steps0[c].block).toBe('aeration'); expect(c).toBeGreaterThan(blockFirst('hiver')); expect(blockFirst('aeration')).toBeLessThanOrEqual(c); } // le module se monte à part, avant le Corps
     expect(bas[0]).toBeLessThan(module); expect(module).toBeLessThan(plancher); expect(steps0[module].pieceIds).toEqual([]); expect(steps0[module].block).toBe('corps');
@@ -154,7 +157,7 @@ describe('assemblySteps : les ordres imposés', () => {
     const i = stepIdx('toit-cassette');
     expect(steps0[i].pieceIds).toEqual([]); expect(steps0[i].focusIds!.length).toBeGreaterThan(0);
     expect(i).toBeGreaterThan(stepIdx('toit-goulotte')); expect(i).toBeLessThan(blockFirst('habillage'));
-    expect(i).toBeLessThan(blockFirst('banc'));
+    expect(i).toBeLessThan(blockFirst('elec'));
     expect(steps0[i].text).toContain('se glisse par le haut dans la goulotte');
     steps0.forEach((st, k) => { for (const p of pieces) expect((st.hideIds ?? []).includes(p.id), `${st.id} ${p.name}`).toBe(k > Math.max(...steps0.map((x, j) => (x.block === 'cassette' ? j : -1))) && k < i); });
   });
@@ -163,8 +166,6 @@ describe('assemblySteps : les ordres imposés', () => {
     const fan = sc0.planks.filter((p) => /^(Rallonge ventilateur|Module interrupteur 12 V ventilateur|Fil (PWM|tachymètre|masse commune|commande interrupteur) ventilateur|Fil (Wago \+ → interrupteur|interrupteur → ventilateur|ventilateur −|masse interrupteur))/.test(p.name));
     expect(fan.length).toBeGreaterThanOrEqual(10);
     for (const p of fan) { const i = stepOf(steps0, p.id); expect(i, p.name).toBeGreaterThan(cassette); expect(i, p.name).toBeLessThan(stepIdx('essai-multimetre')); expect(i, p.name).toBeLessThan(toitOkoume); }
-    expect(blockFirst('banc')).toBeLessThan(stepOf(steps0, fan[0].id)); // essai du ventilateur sur l'établi avant tout câblage dans le nichoir
-    expect(stepIdx('banc-ventilateur')).toBeLessThan(stepIdx('essai-multimetre'));
     expect(stepIdx('essai-multimetre')).toBeLessThan(stepIdx('essai-batterie')); expect(stepIdx('essai-batterie')).toBeLessThan(toitOkoume);
     expect(steps0[toitOkoume].block).toBe('essais');
   });
@@ -188,9 +189,10 @@ describe('assemblySteps : les ordres imposés', () => {
     for (const p of m) expect(codes.get(p.id)).toMatch(/^A-\d\d$/);
     for (const p of sc0.planks.filter((q) => q.group && sc0.groupNames?.[q.group] === 'Ventilation')) expect(codes.get(p.id) ?? 'V-').toMatch(/^V-/);
   });
-  it('électronique : essais sur l\'établi avant l\'installation, essais avec la batterie avant le panneau solaire, panneau solaire en dernier', () => {
-    const install = idx(/^Raspberry Pi/), bench = ['pi-sd', 'pi-programme', 'banc-capteurs', 'banc-cameras', 'banc-ventilateur', 'banc-page'].map(stepIdx);
-    for (const b of bench) expect(b).toBeLessThan(install);
+  it('électronique : plus de bloc « Pi et essais sur l\'établi », essais avec la batterie avant le panneau solaire, panneau solaire en dernier', () => {
+    expect(steps0.some((x) => x.block === 'banc')).toBe(false); // retiré du montage à la demande de l'utilisateur (textes gardés dans archives/montage-pi-etabli.md)
+    for (const id of ['pi-sd', 'pi-programme', 'banc-capteurs', 'banc-cameras', 'banc-ventilateur', 'banc-page']) expect(steps0.some((x) => x.id === id), id).toBe(false);
+    expect(ASSEMBLY_BLOCKS.some((b) => b.id === 'banc')).toBe(false);
     const tests = ['essai-multimetre', 'essai-batterie'].map(stepIdx);
     const panel = idx(/^Panneau solaire/), cable = idx(/^Câble 12 V vers le toit/);
     for (const t of tests) { expect(t).toBeGreaterThan(idx(/^Batterie/)); expect(t).toBeGreaterThan(idx(/^Fusible/)); expect(t).toBeGreaterThan(idx(/^Régulateur de charge/)); expect(t).toBeLessThan(panel); }
@@ -198,12 +200,6 @@ describe('assemblySteps : les ordres imposés', () => {
     expect(cable).toBe(steps0.length - 1);
     const lastKinds = steps0.slice(steps0.findIndex((s) => s.block === 'solaire')).map((s) => s.block);
     expect(new Set(lastKinds)).toEqual(new Set(['solaire']));
-    for (const s of steps0.filter((x) => x.block === 'banc')) expect(s.kind === 'installer' || s.kind === 'tester').toBe(true);
-    expect(steps0[stepIdx('pi-sd')].text).toContain('1-Wire');
-    expect(steps0[stepIdx('pi-sd')].text).toContain('dtoverlay=w1-gpio');
-    expect(steps0[stepIdx('pi-programme')].text).toContain('nichoir.service');
-    expect(steps0[stepIdx('banc-capteurs')].text).toContain('8080');
-    expect(steps0[stepIdx('banc-ventilateur')].text).toContain('PWM');
   });
   it('la finition est au bon moment : peinture avant le collage de l\'habillage, toit en okoumé saturé', () => {
     expect(stepIdx('hab-peinture')).toBeLessThan(stepIdx('hab-cotes.lambris-droite-1'));
@@ -232,11 +228,11 @@ describe('assemblySteps : les ordres imposés', () => {
         }
       });
     }
-    const nid = sc0.planks.filter((q) => /^(Face avant|Face arrière|Côté droit|Côté gauche) int$|^Pièce en C sous le cadre/.test(q.name)).map((q) => q.id);
+    const nid = sc0.planks.filter((q) => /^(Face avant|Face arrière|Côté droit|Côté gauche) int$|^Pièce en C sous le cadre|^Plaque isolant entrée/.test(q.name)).map((q) => q.id);
     const seul = viewOf(steps0, steps0.map((s) => s.block).lastIndexOf('nid')).visible; // pendant le bloc Nid : le nid monté seul
     for (const id of nid) expect(seul.has(id)).toBe(true);
     const hiv = steps0.filter((x) => x.block === 'hiver').flatMap((x) => x.pieceIds); expect(seul.size).toBe(nid.length + hiv.length); // le nid monté est seul à l'écran avec les pièces d'hiver déjà faites (le module d'aération est caché dès la fin de son bloc)
-    expect(viewOf(steps0, stepIdx('corps-nid-pose')).highlight.size).toBe(nid.length); // à la pose : la pièce en C et les quatre parois surlignées en place
+    expect(viewOf(steps0, stepIdx('corps-nid-pose')).highlight.size).toBe(nid.length); // à la pose : la pièce en C, les quatre parois et les plaques de l'entrée surlignées en place
   });
   it('les baguettes de cale : une seule étape de texte ; les composants se calent avec', () => {
     const s = steps0.filter((x) => x.block === 'baguettes');
@@ -248,7 +244,7 @@ describe('assemblySteps : les ordres imposés', () => {
     const lid = sc0.planks.filter((p) => /^(Toit en okoumé|Baguette couvercle)/.test(p.name)).map((p) => p.id);
     const back = stepIdx('elec-pose-toit');
     steps0.forEach((s, i) => {
-      if (i >= blockFirst('banc') && i < back) expect(s.hideIds, s.id).toEqual(lid); else expect((s.hideIds ?? []).filter((id) => lid.includes(id)), s.id).toEqual([]); // hors du grenier, seul le module d'aération (non posé) peut être caché
+      if (i >= blockFirst('elec') && i < back) expect(s.hideIds, s.id).toEqual(lid); else expect((s.hideIds ?? []).filter((id) => lid.includes(id)), s.id).toEqual([]); // hors du grenier, seul le module d'aération (non posé) peut être caché
     });
     expect(steps0[back].focusIds).toEqual(lid);
   });

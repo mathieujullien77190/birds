@@ -1,5 +1,5 @@
 import type { AssemblyBlock, AssemblyKind } from './types';
-import { BENCH_CAMERAS, BENCH_FAN, BENCH_PAGE, BENCH_SENSORS, PAINT_DRY, PAINT_TEXT, PI_PROGRAM, PI_SD, SAT_DRY, SAT_TEXT, TEST_BATTERY, TEST_MULTIMETER } from './texts';
+import { PAINT_DRY, PAINT_TEXT, SAND_TEXT, SAT_DRY, SAT_TEXT, TEST_BATTERY, TEST_MULTIMETER } from './texts';
 
 /** Blocs du montage, dans l'ordre. */
 export const ASSEMBLY_BLOCKS: AssemblyBlock[] = [
@@ -15,7 +15,6 @@ export const ASSEMBLY_BLOCKS: AssemblyBlock[] = [
   { id: 'habillage', title: 'Habillage' },
   { id: 'couvercle', title: 'Couvercle' },
   { id: 'baguettes', title: 'Baguettes de cale' },
-  { id: 'banc', title: "Électronique : Pi et essais sur l'établi" },
   { id: 'elec', title: 'Électronique : composants et fils' },
   { id: 'essais', title: 'Électronique : essais avec la batterie' },
   { id: 'solaire', title: 'Panneau solaire' },
@@ -50,7 +49,7 @@ export const LID_BACK = 'elec-pose-toit';
 /** Sous-ensembles montés à part dans leur propre bloc, puis posés d'un bloc par une étape de texte : pièces, bloc de montage, étape de pose. */
 export const SUBASSEMBLIES: { re: RegExp; block: string; put: string }[] = [
   { re: /^Conduit d'air/, block: 'aeration', put: 'corps-module-air' },
-  { re: /^(Face avant|Face arrière|Côté droit|Côté gauche) int$|^Pièce en C sous le cadre/, block: 'nid', put: 'corps-nid-pose' },
+  { re: /^(Face avant|Face arrière|Côté droit|Côté gauche) int$|^Pièce en C sous le cadre|^Plaque isolant entrée/, block: 'nid', put: 'corps-nid-pose' },
   { re: /^(Face (avant|arrière)|Côté (droit|gauche)) caméra 1$/, block: 'zonecam', put: 'toit-zone-camera' },
   { re: /^Goulotte ventilateur (gauche|droite|avant)$/, block: 'goulotte', put: 'toit-goulotte' },
   { re: /^(Cassette ventilateur|Grille de protection ventilateur|Plot caoutchouc ventilateur|Ventilateur Noctua|Poignée cassette|Prise 4 broches du ventilateur|Câble d'origine du ventilateur|Conduit de sortie)/, block: 'cassette', put: 'toit-cassette' },
@@ -87,25 +86,25 @@ export const SEQ: Rule[] = [
   P('nid-gauche', 'nid', 'emboiter', /^Côté gauche int$/, { text: (r) => `Deuxième paroi, en face de la première : dents du haut dans la pièce en C. La grille de ${r(/^Côté gauche int$/)} (six fentes de 4 mm) est tournée vers le nid ; le module d'aération se colle contre sa face extérieure.` }),
   P('nid-arriere', 'nid', 'emboiter', /^Face arrière int$/, { text: 'Emboîter les dents des angles avec les deux côtés, dents du haut dans la pièce en C.' }),
   P('nid-avant', 'nid', 'emboiter', /^Face avant int$/, { text: 'Dernière paroi : elle ferme la boîte. Emboîter les dents des angles avec les deux côtés, dents du haut dans la pièce en C ; son encoche reste ouverte vers le haut pour le bloc d\'entrée.' }),
+  P('nid-liner', 'nid', 'emboiter', /^Plaque isolant entrée (gauche|droite)$/, { all: true, title: "Plaques qui cachent l'isolant, de chaque côté du bloc d'entrée", text: (r) => `Les deux plaques debout (COR-16) bordent le puits du bloc d'entrée, juste après ${r(/^Face avant int$/)} : crénelées aux deux bouts, leurs dents du côté du nid entrent dans les fentes de cette paroi et le plat du bout se colle contre elle ; leur haut se colle à plat sous la pièce en C, alignées sur les flancs de son ouverture, sans y entrer. Leurs dents côté extérieur recevront ${r(/^Face avant ext$/)} plus tard.` }),
+  P('nid-liner-dessous', 'nid', 'emboiter', /^Plaque isolant entrée dessous$/, { text: (r) => `À plat entre les deux plaques, sous le bloc d'entrée (COR-17), crénelée aux deux bouts : ses dents entrent dans ${r(/^Face avant int$/)} et le plat se colle contre elle ; ${r(/^Face avant ext$/)} se pose plus tard sur ses dents extérieures. Le nid est alors terminé.` }),
 
   // ---- c. Corps ----
   P('corps-dessous', 'corps', 'placer', /^Dessous ext$/, { text: "À plat. Son ouverture rectangulaire laisse passer plus tard le module d'aération." }),
   P('corps-iso-bas', 'corps', 'isoler', /^Isolant sous le plancher/, { all: true, text: "L'isolation du bas se met AVANT le module d'aération, qui la traverse : les quatre pièces se posent ensemble sous le fond." }),
   N('corps-module-air', 'corps', 'installer', "Poser le module d'aération (déjà monté)", "Le module est monté à part (bloc « Aération du corps ») : on le pose d'un bloc, déjà assemblé, après l'isolant du plancher.", [/^Conduit d'air/]),
   P('corps-plancher', 'corps', 'emboiter', /^Plancher int$/, { text: "Ses dents traversent les fentes des murs extérieurs. Il n'a que le passage du conduit d'air." }),
-  N('corps-nid-pose', 'corps', 'installer', 'Poser le nid dans le corps (déjà monté)', "Le nid se monte à part (bloc « Nid ») : on le pose d'un bloc (pièce en C et quatre parois, déjà assemblées), sur le plancher intérieur ; les dents du bas des quatre parois entrent dans les fentes du plancher.", [/^(Face avant|Face arrière|Côté droit|Côté gauche) int$|^Pièce en C sous le cadre/]),
-  P('corps-liner', 'corps', 'emboiter', /^Plaque isolant entrée (gauche|droite)$/, { all: true, title: "Plaques qui cachent l'isolant, de chaque côté du bloc d'entrée", text: (r) => `Les deux plaques debout bordent le puits du bloc d'entrée : plaques crénelées aux deux bouts : leurs dents du côté du nid entrent dans les fentes de ${r(/^Face avant int$/)} (déjà en place avec le nid), le plat des bouts se colle contre elle, et le haut contre la pièce en C sans y entrer. Leurs dents côté extérieur recevront ${r(/^Face avant ext$/)} à l'étape suivante.` }),
-  P('corps-liner-dessous', 'corps', 'emboiter', /^Plaque isolant entrée dessous$/, { text: (r) => `À plat entre les deux plaques, sous le bloc d'entrée, crénelée aux deux bouts : ses dents entrent dans ${r(/^Face avant int$/)} et le plat se colle contre elle ; ${r(/^Face avant ext$/)} se pose ensuite sur ses dents extérieures.` }),
-  P('corps-avant-ext', 'corps', 'emboiter', /^Face avant ext$/, { text: (r) => `Ne pas monter ${r(/^Côté gauche ext$/)} maintenant : c'est la dernière paroi du corps, après le module d'aération et l'isolation.` }),
+  N('corps-nid-pose', 'corps', 'installer', 'Poser le nid dans le corps (déjà monté)', "Le nid se monte à part (bloc « Nid ») : on le pose d'un bloc (pièce en C, quatre parois et plaques de l'entrée, déjà assemblées), sur le plancher intérieur ; les dents du bas des quatre parois entrent dans les fentes du plancher.", [/^(Face avant|Face arrière|Côté droit|Côté gauche) int$|^Pièce en C sous le cadre|^Plaque isolant entrée/]),
+  P('corps-iso-nid', 'corps', 'isoler', /^Isolant (gauche|droite$|arrière$|avant gauche$|avant droite$|sous le bloc d'entrée$)/, { all: true, title: "Isolant autour du nid et du bloc d'entrée", text: "Tous les isolants du corps se posent d'un coup : ceux qui entourent le nid et ceux qui entourent le bloc d'entrée (sous le bloc, avant gauche et avant droite). APRÈS le module d'aération et AVANT toutes les parois extérieures (COR-04 à COR-07) : on pose d'abord tout l'isolant. La gaine des fils se poussera dans la laine plus tard, après la paroi arrière. Le bloc d'entrée lui-même se pose plus tard." }),
+  P('corps-avant-ext', 'corps', 'emboiter', /^Face avant ext$/, { text: (r) => `Ne pas monter ${r(/^Côté gauche ext$/)} maintenant : c'est la dernière paroi du corps, après toutes les autres. L'isolant est déjà en place : les parois extérieures se posent ensuite, COR-04 puis COR-05, la gaine, COR-06.` }),
   P('corps-arriere-ext', 'corps', 'emboiter', /^Face arrière ext$/),
+  P('corps-gaine', 'corps', 'installer', /^Gaine des fils/, { text: [
+    "À passer APRÈS la paroi arrière (COR-05) et AVANT la paroi du côté droit (COR-06), entre l'isolant déjà posé. Elle monte dans le coin arrière droit, à 1 cm du mur arrière, et traverse des trous de Ø 16 mm, serrés, dans le fond et le plancher intérieur, puis plus tard des trous de Ø 18 mm dans les trois planches du cadre du toit, le dessous et le dessus du toit.",
+    "L'isolant n'est pas découpé autour : on pousse la gaine dans la laine.",
+  ].join('\n') }),
   P('corps-droit-ext', 'corps', 'emboiter', /^Côté droit ext$/),
   P('corps-nervures', 'corps', 'coller', /^Fixation arbre/, { text: 'Chaque nervure est faite de trois plaques collées face à face. Les dents traversent les fentes du mur arrière extérieur et ressortent de 6 mm dans l\'isolant, avec un trou de 3 × 20 mm pour la clavette. Soigner le collage.' }),
   P('corps-clavettes', 'corps', 'coller', /^Clavette fixation/, { text: 'Chaque clavette traverse les trois plaques de sa nervure par le trou de 3 × 20 mm et les verrouille contre la face intérieure du mur, sans espace.' }),
-  P('corps-gaine', 'corps', 'installer', /^Gaine des fils/, { text: [
-    "À passer maintenant, pendant que tout est accessible. Elle monte dans le coin arrière droit, à 1 cm du mur arrière, et traverse des trous de Ø 16 mm, serrés, dans le fond et le plancher intérieur, puis plus tard des trous de Ø 18 mm dans les trois planches du cadre du toit, le dessous et le dessus du toit.",
-    "L'isolant n'est pas découpé autour : on pousse la gaine dans la laine.",
-  ].join('\n') }),
-  P('corps-iso-nid', 'corps', 'isoler', /^Isolant (gauche|droite$|arrière$|avant gauche$|avant droite$|sous le bloc d'entrée$)/, { all: true, title: "Isolant autour du nid et du bloc d'entrée", text: "Tous les isolants du corps se posent d'un coup : ceux qui entourent le nid et ceux qui entourent le bloc d'entrée (sous le bloc, avant gauche et avant droite). APRÈS le module d'aération et la gaine des fils (ils passent déjà dans ces isolants) et AVANT la paroi extérieure gauche. Le bloc d'entrée lui-même se pose plus tard." }),
   P('corps-gauche-ext', 'corps', 'emboiter', /^Côté gauche ext$/, { text: "Dernière paroi du corps : le module d'aération et l'isolation sont en place." }),
   P('corps-etriers', 'corps', 'coller', /^Étrier régulateur/, { text: 'Les tenons des bras traversent le fond par des fentes de 8 × 3 mm et affleurent son dessus : ils tiendront le régulateur sous le nichoir. Le régulateur se fixe dessous après le montage du corps.' }),
   P('corps-etriers-bat', 'corps', 'coller', /^Étrier batterie/, { text: 'Quatre étriers identiques, à l\'arrière gauche, plaques debout dans le sens de la largeur de la batterie (elle est tournée de 90° : ses 128 mm vont de gauche à droite) : leurs tenons traversent le fond par des fentes de 5 × 3 mm et affleurent son dessus ; ils tiendront la batterie sous le nichoir, à plat. Dernières pièces du corps.' }),
@@ -141,13 +140,15 @@ export const SEQ: Rule[] = [
 
   // ---- e. Toit ----
   P('toit-dessous', 'toit', 'placer', /^Dessous toit$/),
-  P('toit-fourreau', 'toit', 'coller', /^Fourreau gaine toit/, { all: true, title: 'Fourreau de la gaine dans le toit', text: "Treize petits carrés percés de Ø 18 mm, empilés et collés sur le dessous du toit autour du trou de la gaine : ils tiennent la gaine à travers l'isolant jusqu'au dessus du toit." }),
   P('toit-avant', 'toit', 'emboiter', /^Face avant toit$/),
+  P('toit-plaque-camera', 'toit', 'emboiter', /^Plaque caméra extérieure$/, { text: (r) => `Plaque horizontale, perpendiculaire à la façade, au-dessus du trou d'envol, au centre : ses dents entrent dans les fentes de ${r(/^Face avant toit$/)} et elle dépasse devant, sous le débord du toit. Elle porte l'objectif Ø 10 et la fenêtre des LED de la caméra extérieure (trous à fleur). Elle traverse plus tard l'habillage : la lame d'entrée est coupée en deux autour d'elle.` }),
   P('toit-arriere', 'toit', 'emboiter', /^Face arrière toit$/),
-  P('toit-cotes', 'toit', 'emboiter', /^Côté (droit|gauche) toit$/),
+  P('toit-cote-droit', 'toit', 'emboiter', /^Côté droit toit$/),
+  P('toit-fourreau', 'toit', 'coller', /^Fourreau gaine toit/, { all: true, title: 'Fourreau de la gaine dans le toit', text: "Treize petits carrés percés de Ø 18 mm, empilés et collés sur le dessous du toit autour du trou de la gaine, dans le coin arrière droit, juste après la plaque du côté droit du toit (T-06) : ils tiennent la gaine à travers l'isolant jusqu'au dessus du toit." }),
+  P('toit-cote-gauche', 'toit', 'emboiter', /^Côté gauche toit$/),
   N('toit-zone-camera', 'toit', 'installer', 'Poser la zone caméra (déjà montée)', "La zone caméra se monte à part (bloc « Zone caméra ») : on la pose d'un bloc dans les fentes du plancher du toit.", [/^(Face (avant|arrière)|Côté (droit|gauche)) caméra 1$/]),
   N('toit-goulotte', 'toit', 'installer', 'Poser la goulotte du ventilateur (déjà montée)', "La goulotte se monte à part (bloc « Goulotte ventilateur ») : ses dents du bas se posent d'un bloc dans les fentes du plancher du toit ; la plaque arrière du toit fait la quatrième paroi.", [/^Goulotte ventilateur (gauche|droite|avant)$/]),
-  N('toit-cassette', 'toit', 'installer', 'Glisser la cassette dans la goulotte', "La cassette se monte à part (bloc « Cassette du ventilateur ») ; elle se glisse par le haut dans la goulotte, ajustée au ponçage si besoin ; la prise d'origine (femelle) s'emboîte sur la prise mâle collée sur la face avant de la goulotte ; la rallonge se branche ensuite. On la retire à la main par le haut, après avoir débranché la prise 4 broches.", [/^Cassette ventilateur/]),
+  N('toit-cassette', 'toit', 'installer', 'Glisser la cassette dans la goulotte', "La cassette se monte à part (bloc « Cassette du ventilateur ») ; elle se glisse par le haut dans la goulotte. Elle est taillée pile, sans jeu : si elle passe mal, la poncer légèrement (papier de verre grain 120 puis 180, sur les faces qui frottent) jusqu'à ce qu'elle coulisse sans forcer ; la prise d'origine (femelle) s'emboîte sur la prise mâle collée sur la face avant de la goulotte ; la rallonge se branche ensuite. On la retire à la main par le haut, après avoir débranché la prise 4 broches.", [/^Cassette ventilateur/]),
   P('toit-bag-cotes', 'toit', 'coller', /^Baguette dessus toit (gauche|droite)$/, { text: 'Les baguettes se posent à plat contre la face intérieure des plaques du toit, dents dans les fentes : elles portent « Dessus toit ».' }),
   P('toit-bag-avant', 'toit', 'coller', /^Baguette dessus toit avant$/),
   P('toit-bag-arriere-1', 'toit', 'coller', /^Baguette dessus toit arrière 1$/, { text: 'La baguette arrière est en deux morceaux : elle contourne le siège du ventilateur.' }),
@@ -157,11 +158,14 @@ export const SEQ: Rule[] = [
   P('toit-cadre', 'toit', 'coller', /^Cadre toit/, { text: "Coller les trois planches l'une sur l'autre. Elles descendent dans l'isolant entre les murs extérieur et intérieur et calent le toit. Dernière étape du toit : on les enfile sur la gaine (trou de Ø 18 mm) et on les colle sous le toit assemblé." }),
 
   // ---- f. Le reste : habillage, couvercle, baguettes de cale ----
+  N('hab-poncage', 'habillage', 'peindre', "Poncer et arrondir les arêtes des lames", SAND_TEXT, [/^Lambris/]),
   N('hab-peinture', 'habillage', 'peindre', "Peindre l'habillage en blanc", PAINT_TEXT, [/^(Lambris|Plaque de ventilation)/]),
   N('hab-sechage', 'habillage', 'attendre', "Séchage de la peinture de l'habillage", PAINT_DRY, [/^(Lambris|Plaque de ventilation)/]),
+  P('hab-curedents-tour', 'habillage', 'placer', /^Cure-dent habillage \d+$/, { all: true, text: "Système de positionnement : chaque lame est placée parfaitement (même hauteur, bon écartement) par deux cure-dents de 10 mm, sur tout le tour du nichoir, à la hauteur des deux du bas de la lame d'entrée. À planter AVANT de coller les lames, dans les trous de Ø 2,2 mm des parois du corps (un peu de colle) : 5 mm dépassent pour que chaque lame s'enfile dessus et se place exactement." }),
   P('hab-cotes', 'habillage', 'coller', /^Lambris (droite|gauche)/, { text: "Les lames des côtés se collent d'abord : la façade et l'arrière recouvrent leurs bouts." }),
   P('hab-avant', 'habillage', 'coller', /^Lambris avant \d+$/),
-  P('hab-avant-perce', 'habillage', 'placer', /^Lambris avant \d+ \(percé\)$/, { text: "La lame du trou d'envol NE SE COLLE PAS : elle se retire pour accéder à l'entrée. Elle se pose sur la façade et tient par quatre cure-dents, un à chaque coin." }),
+  P('hab-avant-perce-bas', 'habillage', 'placer', /^Lambris avant \d+ \(percé\)(\.1)?$/, { title: "Lame du trou d'envol : morceau du bas", text: "La lame du trou d'envol NE SE COLLE PAS : elle se retire pour accéder à l'entrée. La plaque de la caméra extérieure la coupe en deux : ce morceau du bas (avec le trou d'envol) se pose sous la plaque et tient par deux cure-dents, un à chaque coin du bas." }),
+  P('hab-avant-perce-haut', 'habillage', 'placer', /^Lambris avant \d+ \(percé\)\.2$/, { title: "Lame du trou d'envol : morceau du haut", text: "Morceau du haut de la lame d'entrée, au-dessus de la plaque de la caméra : non collé non plus, deux cure-dents (un peu descendus par rapport au bord haut) dans la plaque avant du toit." }),
   P('hab-curedents', 'habillage', 'placer', /^Cure-dent lame d'entrée/, { all: true, text: "Quatre cure-dents enfoncés dans les quatre trous de Ø 2,2 mm de la lame, à travers la paroi derrière (un peu de colle sur les cure-dents du bas si besoin, jamais sur la lame), coupés à ras de la lame. Pour retirer la lame : les tirer ou les couper." }),
   P('hab-arriere', 'habillage', 'coller', /^Lambris arrière/),
   P('hab-ventilation', 'habillage', 'coller', /^Plaque de ventilation arrière/, { text: "S'emboîte dans l'ouverture de l'habillage arrière, jeu 0 : à gauche (vue de derrière) la grille de la sortie du ventilateur, à droite celle du Raspberry Pi. Elle tient par quatre cure-dents, un à chaque coin : percer ou repasser les quatre trous de Ø 2,2 mm à travers la plaque, puis la plaque arrière du toit (3 mm), enfoncer les cure-dents avec un peu de colle et les couper à ras." }),
@@ -175,12 +179,6 @@ export const SEQ: Rule[] = [
   P('bag-cale', 'baguettes', 'placer', /^Baguette de cale/, { all: true, title: 'Couper les baguettes de cale à la demande', text: 'Baguettes de contreplaqué de 3 mm, 5 mm de large, trois fois plus qu\'il n\'en faut : au montage, couper un morceau à la longueur voulue et le coller contre le composant (Pi, convertisseur, batterie, interrupteur du ventilateur), une fois celui-ci posé à sa place.' }),
 
   // ---- g. Électronique : Pi, essais sur l'établi ----
-  N('pi-sd', 'banc', 'installer', 'Préparer la carte microSD du Pi', PI_SD),
-  N('pi-programme', 'banc', 'installer', 'Installer le programme du nichoir sur le Pi', PI_PROGRAM),
-  N('banc-capteurs', 'banc', 'tester', "Essai sur l'établi : capteur du nid et sonde de dehors", BENCH_SENSORS),
-  N('banc-cameras', 'banc', 'tester', "Essai sur l'établi : caméras et LED infrarouges", BENCH_CAMERAS),
-  N('banc-ventilateur', 'banc', 'tester', "Essai sur l'établi : ventilateur et PWM", BENCH_FAN),
-  N('banc-page', 'banc', 'tester', "Essai sur l'établi : page web", BENCH_PAGE),
 
   // ---- g. Électronique : installation dans le nichoir ----
   P('elec-pi', 'elec', 'installer', /^Raspberry Pi/, { text: "Posé sur des entretoises de 6 mm dans le coin arrière gauche du toit, calé par des morceaux de baguette collés sur tous les côtés. Ses prises USB et Ethernet regardent la fenêtre de 60 × 24 mm de la plaque arrière ; son USB-C et ses micro-HDMI sont tournés vers le centre du toit." }),

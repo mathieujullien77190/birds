@@ -11,6 +11,7 @@ import { fanGeometry } from './fan';
 import { guardGeometry } from './guard';
 import { irBoardGeometry } from './ir';
 import { piGeometry } from './pi';
+import { pinGeometry } from './pin';
 import { sensorGeometry } from './sensor';
 import { solarGeometry } from './solar';
 
@@ -34,6 +35,7 @@ const FACTORIES: Partial<Record<Special, PartFactory>> = {
   wire: wireGeometry,
   pi: piGeometry,
   bar: barGeometry,
+  pin: pinGeometry,
   ir: irBoardGeometry,
   camera: cameraBoardGeometry,
 };

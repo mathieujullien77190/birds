@@ -44,7 +44,7 @@ describe.each(Object.entries(VARIANTS))('sonde extérieure (%s)', (_nom, over) =
 
   it('le câble passe DANS le toit : canal oblong de 8 mm dans la plaque crénelée, fermé par la plaque pleine ; ni la lame d habillage ni la plaque gauche du toit ne sont percées', () => {
     const side = find(/^Côté gauche toit/), full = find(/^Toit en okoumé \(plaque pleine\)/);
-    for (const plate of [side, ...all(/^Lambris gauche/)]) expect(plate.holes.filter((h) => h.shape === 'round'), plate.name).toEqual([]);
+    for (const plate of [side, ...all(/^Lambris gauche/)]) expect(plate.holes.filter((h) => h.shape === 'round' && h.size >= 5), plate.name).toEqual([]);
     expect(full.holes).toEqual([]);
     const chan = pan.holes.filter((h) => h.r !== undefined && h.sh === 8);
     expect(chan).toHaveLength(1); expect(chan[0].r).toBe(4); // bouts ronds, 8 mm de large

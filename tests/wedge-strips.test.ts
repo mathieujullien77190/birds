@@ -13,7 +13,7 @@ describe('baguettes de cale (à couper au montage) à la place des cales de bois
       const list = strips(sc);
       expect(list.length).toBeGreaterThanOrEqual(4);
       expect(t).toBe(3);
-      expect(STRIP.length).toBe(394); // planche 410 × 400, marge 8 mm : plus grande dimension utile
+      expect(STRIP.length).toBe(384); // marge 8 mm, plus petite dimension (400) : tient sur 410 × 400 comme sur 400 × 400
       for (const p of list) {
         expect(p.w).toBe(STRIP.length); expect(p.h).toBe(5); expect(p.special).toBeUndefined();
         expect(p.holes).toEqual([]); expect(p.notches).toEqual([]);
@@ -48,7 +48,7 @@ describe('baguettes de cale (à couper au montage) à la place des cales de bois
       for (const { s, it } of found) {
         expect(s.material, it.plank.name).toBeUndefined(); // contreplaqué (ni MDF ni okoumé)
         const pts = outline(it.plank);
-        expect(Math.max(...pts.map((q) => q[0])) - Math.min(...pts.map((q) => q[0]))).toBeCloseTo(394, 3);
+        expect(Math.max(...pts.map((q) => q[0])) - Math.min(...pts.map((q) => q[0]))).toBeCloseTo(384, 3);
         const w = it.w, h = it.h; // dimensions posées (déjà tournées)
         expect(it.x, it.plank.name).toBeGreaterThanOrEqual(margin - 1e-6); expect(it.y, it.plank.name).toBeGreaterThanOrEqual(margin - 1e-6);
         expect(it.x + w, it.plank.name).toBeLessThanOrEqual(W - margin + 1e-6); expect(it.y + h, it.plank.name).toBeLessThanOrEqual(H - margin + 1e-6);

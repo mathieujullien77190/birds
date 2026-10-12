@@ -37,7 +37,8 @@ describe('baguettes qui portent le dessus du toit (contreplaqué 3 mm, dents dan
       const carriers: [RegExp, RegExp][] = [[/^Côté gauche toit/, /gauche$/], [/^Côté droit toit/, /droite$/], [/^Face avant toit$/, /avant$/], [/^Face arrière toit$/, /arrière \d$/]];
       for (const [cre, bre] of carriers) {
         const car = one(sc, cre), mine = bag.filter((p) => bre.test(p.name));
-        const slots = car.holes.filter((h) => Math.min(h.size, h.sh ?? h.size) <= 3.01 && Math.max(h.size, h.sh ?? h.size) > 8 && Math.max(h.size, h.sh ?? h.size) < 40);
+        const plate = sc.planks.find((p) => /^Plaque caméra extérieure$/.test(p.name)); // ses fentes (dents de la plaque de la caméra extérieure) ne sont pas celles des baguettes
+        const slots = car.holes.filter((h) => Math.min(h.size, h.sh ?? h.size) <= 3.01 && Math.max(h.size, h.sh ?? h.size) > 8 && Math.max(h.size, h.sh ?? h.size) < 40 && !(plate && Math.abs(car.pos[2] + h.y - plate.pos[2]) < 2 && /^Face avant toit$/.test(car.name)));
         let teeth = 0;
         const used = new Set<string>();
         for (const p of mine) {
