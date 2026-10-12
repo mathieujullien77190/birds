@@ -11,7 +11,7 @@ describe('baguettes de cale (à couper au montage) à la place des cales de bois
     it(`plus aucune cale de composant, des baguettes de 3 × 5 mm de longueur maximale, hors du nichoir (${name})`, () => {
       expect(sc.planks.filter((p) => /^Cale /.test(p.name))).toEqual([]);
       const list = strips(sc);
-      expect(list.length).toBeGreaterThanOrEqual(6);
+      expect(list.length).toBeGreaterThanOrEqual(4);
       expect(t).toBe(3);
       expect(STRIP.length).toBe(394); // planche 410 × 400, marge 8 mm : plus grande dimension utile
       for (const p of list) {
@@ -19,9 +19,9 @@ describe('baguettes de cale (à couper au montage) à la place des cales de bois
         expect(p.holes).toEqual([]); expect(p.notches).toEqual([]);
         expect(p.group).toBeDefined(); expect(sc.groupNames?.[p.group!]).toBe('Baguettes de cale (à couper)');
       }
-      // le triple du besoin : le besoin (somme des anciennes cales : Pi 96, convertisseur 204, interrupteur 96, batterie ≥ 330 mm) est entre 726 et 804 mm
-      expect(list.length).toBeGreaterThanOrEqual(Math.ceil((3 * 726) / STRIP.length));
-      expect(list.length).toBeLessThanOrEqual(Math.ceil((3 * 804) / STRIP.length));
+      // le triple du besoin : le besoin (somme des anciennes cales : Pi 96, convertisseur 204, interrupteur 96 : 396 mm, la batterie est sous le nichoir dans des étriers) donne 4 baguettes
+      expect(list.length).toBeGreaterThanOrEqual(Math.ceil((3 * 396) / STRIP.length));
+      expect(list.length).toBeLessThanOrEqual(Math.ceil((3 * 420) / STRIP.length));
       expect(new Set(list.map((p) => p.group)).size).toBe(1);
     });
     it(`posées au sol à l'écart du nichoir, sans recouvrement entre elles ni avec les autres pièces (${name})`, () => {

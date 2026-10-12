@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { PI_PIN_X0, PI_PIN_Y, type Plank } from '@/birdhouse/model';
+import { PI_PIN_X0, PI_PIN_Y } from '@/birdhouse/model';
 import { buildNest, VARIANTS } from './helpers';
 import { obb, pathItems } from './geomChecks';
-import { materialAt } from './wireChecks';
+import { crossings } from './wireChecks';
+import { ligament } from './geomLigament';
 
-/** Sonde de température extérieure DS18B20 : collée sous le débord du pan en okoumé (côté gauche, y ≈ +40), câble par un trou Ø 5 de la lame d'habillage et de la plaque gauche du toit,
+/** Sonde de température extérieure DS18B20 : collée sous le débord du pan en okoumé (côté gauche, y ≈ +40), câble par un canal oblong de 8 mm du toit (plaque crénelée fermée par la plaque pleine),
  *  module 3 broches près du Pi, trois cordons Dupont vers les broches 17 (3,3 V), 7 (GPIO4) et 20 (masse). */
 describe.each(Object.entries(VARIANTS))('sonde extérieure (%s)', (_nom, over) => {
   const sc = buildNest(over), t = sc.t;
@@ -41,22 +42,38 @@ describe.each(Object.entries(VARIANTS))('sonde extérieure (%s)', (_nom, over) =
     expect(dz).toBeLessThan(0); // dessous
   });
 
-  it('le câble traverse la lame d\'habillage et la plaque gauche du toit par leur trou de 5 mm, sous la baguette du couvercle', () => {
-    const side = find(/^Côté gauche toit/), lam = all(/^Lambris gauche/).find((p) => Math.abs(p.pos[1] - probe.pos[1]) < p.w / 2)!;
-    for (const plate of [side, lam]) expect(plate.holes.filter((h) => h.shape === 'round' && h.size === 5), plate.name).toHaveLength(1);
-    const pts = pathItems([cable])[0].pts;
-    const xs = [-W / 2 - 4.9, -W / 2 - 2.5, -W / 2 - 0.1], xt = [-W / 2 + 0.1, -W / 2 + t / 2, -W / 2 + t - 0.1];
-    for (const [plate, list] of [[lam, xs], [side, xt]] as [Plank, number[]][]) {
-      for (const x of list) {
-        const i = pts.findIndex((q, k) => k > 0 && (pts[k - 1].x - x) * (q.x - x) <= 0), a = pts[i - 1], b = pts[i];
-        const q = a.clone().lerp(b, (x - a.x) / (b.x - a.x));
-        expect(materialAt(plate, q, t, 0), `${plate.name} à x = ${x.toFixed(1)}`).toBe(false); // dans le trou
-        const hole = plate.holes.find((h) => h.size === 5)!, pb = obb(plate, t), d = q.clone().sub(pb.c);
-        expect(Math.hypot(d.dot(pb.ax[0]) - hole.x, d.dot(pb.ax[1]) - hole.y)).toBeLessThan(hole.size / 2 - 1.45 + 1e-6); // le câble (Ø 2,9) tient dans le trou
-      }
+  it('le câble passe DANS le toit : canal oblong de 8 mm dans la plaque crénelée, fermé par la plaque pleine ; ni la lame d habillage ni la plaque gauche du toit ne sont percées', () => {
+    const side = find(/^Côté gauche toit/), full = find(/^Toit en okoumé \(plaque pleine\)/);
+    for (const plate of [side, ...all(/^Lambris gauche/)]) expect(plate.holes.filter((h) => h.shape === 'round'), plate.name).toEqual([]);
+    expect(full.holes).toEqual([]);
+    const chan = pan.holes.filter((h) => h.r !== undefined && h.sh === 8);
+    expect(chan).toHaveLength(1); expect(chan[0].r).toBe(4); // bouts ronds, 8 mm de large
+    const c = chan[0], pb = obb(pan, t);
+    const xa = c.x - c.size / 2, xb = c.x + c.size / 2, ya = c.y - 4, yb = c.y + 4;
+    expect(xa).toBeLessThan(probe.pos[0]); expect(xa).toBeGreaterThan(probe.pos[0] - 6); // commence à l'aplomb de la sonde
+    const left = find(/^Baguette couvercle gauche/), lb = obb(left, t);
+    expect(xb).toBeGreaterThan(lb.c.x + t / 2 + 8); // finit dans le caisson, derrière la baguette gauche
+    expect(Math.min(xa + pan.w / 2, pan.w / 2 - xb, ya + pan.h / 2, pan.h / 2 - yb)).toBeGreaterThanOrEqual(3); // bords de la plaque
+    expect(ligament(pan, c).min).toBeGreaterThanOrEqual(3 - 1e-6); // ligaments de bois autour du canal (fentes des baguettes, autres canaux, bords)
+    // la baguette gauche n'a aucune dent dans le canal + 3 mm de chaque côté : aucune fente de la plaque crénelée à ces ordonnées
+    const slotsLeft = pan.holes.filter((h) => h.r === undefined && Math.abs(h.x - lb.c.x) < 2);
+    expect(slotsLeft.length).toBeGreaterThan(2);
+    for (const h of slotsLeft) expect(h.y + (h.sh ?? 0) / 2 < ya - 3 + 1e-6 || h.y - (h.sh ?? 0) / 2 > yb + 3 - 1e-6, `fente à y = ${h.y}`).toBe(true);
+    // le câble : dans le canal quand il est entre les deux plaques, jamais dans la baguette, jamais au-dessus de la plaque crénelée
+    const pts = pathItems([cable])[0].pts; let inChannel = 0;
+    for (const q of pts) {
+      const d = q.clone().sub(pb.c), lx = d.dot(pb.ax[0]), ly = d.dot(pb.ax[1]), lz = d.dot(pb.ax[2]);
+      expect(lz, 'sous la plaque pleine').toBeLessThanOrEqual((pan.depth ?? t) / 2 - 1.45 + 0.1);
+      if (lz > -(pan.depth ?? t) / 2 + 0.05) { inChannel++; expect(lx > xa - 0.1 && lx < xb + 0.1 && Math.abs(ly - c.y) <= 4 - 1.45 + 0.1, `dans le canal (${lx.toFixed(1)}, ${ly.toFixed(1)})`).toBe(true); }
     }
-    const strip = find(/^Baguette couvercle gauche/), sb = obb(strip, t);
-    for (const q of pts) expect(Math.abs(q.clone().sub(sb.c).dot(sb.ax[0])) < sb.h[0] && Math.abs(q.clone().sub(sb.c).dot(sb.ax[1])) < sb.h[1] && Math.abs(q.clone().sub(sb.c).dot(sb.ax[2])) < sb.h[2] + 1.45, 'le câble ne touche pas la baguette').toBe(false);
+    expect(inChannel).toBeGreaterThan(20);
+  });
+  it('le câble ne traverse aucune pièce solide (hors le canal) et reste sous la pente', () => {
+    expect(crossings(sc).filter(([w]) => /^Câble sonde/.test(w))).toEqual([]);
+    const pts = pathItems([cable])[0].pts, pb = obb(pan, t);
+    for (const q of pts) expect(q.clone().sub(pb.c).dot(pb.ax[2]), 'au plus à la mi-épaisseur de la plaque crénelée').toBeLessThanOrEqual(0.1);
+    const len = pts.reduce((s, q, i) => (i ? s + q.distanceTo(pts[i - 1]) : 0), 0);
+    expect(len / 10, 'longueur du trajet dessiné (cm)').toBeGreaterThan(10); expect(len / 10).toBeLessThan(80);
   });
 
   it('le module est près du Pi et les trois cordons finissent sur les broches 7, 17 et 20', () => {

@@ -39,9 +39,9 @@ describe('makeNest : dimensions déduites des réglages', () => {
     const bodyH = 130 + 32 + 20 + 2 * t + 2 * e - roofH;
     const front = byName(planks, /^Face avant ext$/);
     expect(front.w).toBe(W);
-    expect(front.h).toBe(bodyH);
+    expect(front.h).toBe(bodyH - t); // les parois s'arrêtent t sous bodyH : la plaque de verrouillage de l'isolant (en C) occupe cette hauteur
     expect(byName(planks, /^Dessous ext$/)).toMatchObject({ w: W, h: W });
-    expect(byName(planks, /^Face avant int$/)).toMatchObject({ w: 120 + 2 * t, h: bodyH - e });
+    expect(byName(planks, /^Face avant int$/)).toMatchObject({ w: 120 + 2 * t, h: bodyH - t - e });
     expect(byName(planks, /^Plancher int$/)).toMatchObject({ w: W, h: W });
     // le toit se pose sur le corps
     expect(byName(planks, /^Dessous toit$/).pos[2]).toBe(bodyH + t / 2);
@@ -166,8 +166,9 @@ describe('makeNest : invariants sur toutes les tailles', () => {
         expect(bb.min[1]).toBeCloseTo(-bb.max[1], 6);
       });
       it('le toit et le corps ne se recouvrent pas : le dessous du toit repose sur le haut des murs', () => {
-        const wall = byName(planks, /^Côté droit ext$/), floorRoof = byName(planks, /^Dessous toit$/);
-        expect(floorRoof.pos[2] - T / 2).toBeCloseTo(wall.pos[2] + wall.h / 2, 6);
+        const wall = byName(planks, /^Côté droit ext$/), floorRoof = byName(planks, /^Dessous toit$/), lock = byName(planks, /^Plaque de verrouillage de l'isolant$/);
+        expect(lock.pos[2] - T / 2).toBeCloseTo(wall.pos[2] + wall.h / 2, 6); // la plaque en C repose sur le chant des parois
+        expect(floorRoof.pos[2] - T / 2).toBeCloseTo(lock.pos[2] + T / 2, 6); // et le dessous du toit sur la plaque : la hauteur totale du corps ne change pas
       });
       it('les noms de pièces de bois à découper sont uniques', () => {
         const wood = planks.filter((p) => !p.special);

@@ -8,14 +8,16 @@ Un panneau solaire de 100 W charge une batterie LiFePO4 12,8 V ; la batterie ali
 flowchart TB
   subgraph DEHORS["Dehors"]
     PV["Panneau solaire 100 W<br/>12 V nominal"]
-    MPPT["Régulateur de charge solaire<br/>compatible LiFePO4<br/>sous le nichoir, protégé<br/>par le lambris"]
     CAM2["Caméra 2 (dehors)<br/>Camera Module 3"]
     IR2["Carte 4 LED infrarouges<br/>extérieures"]
     SONDE["Sonde de température extérieure<br/>DS18B20 étanche, sous le débord du toit<br/>(module 3 broches dans le grenier)"]
   end
-  subgraph TOIT["Électronique dans le grenier"]
+  subgraph SOUS["Sous le nichoir, protégé par le lambris"]
+    MPPT["Régulateur de charge solaire<br/>compatible LiFePO4"]
     FUSE["Fusible"]
     BAT["Batterie LiFePO4 12,8 V 6 Ah<br/>4 cellules 32700 en série + BMS"]
+  end
+  subgraph TOIT["Électronique dans le grenier"]
     RAIL(("Rail 12 V<br/>Wago 221-413 (+) et 221-415 (−)"))
     BUCK["Convertisseur 12 V → 5 V 5 A<br/>sortie USB-C"]
     PI["Raspberry Pi 5"]
@@ -29,9 +31,9 @@ flowchart TB
     SENS["Capteur température / humidité"]
   end
   PV -->|"câble 12 V"| MPPT
-  MPPT -->|"2 fils, passe-câble Ø 10 du toit"| FUSE
+  MPPT -->|"2 fils courts sous le fond"| FUSE
   FUSE <-->|"charge le jour, alimente la nuit"| BAT
-  FUSE --> RAIL
+  FUSE -->|"2 fils (+ du fusible, − de la batterie)<br/>par la gaine Ø 16"| RAIL
   RAIL --> BUCK
   BUCK -->|"5 V USB-C"| PI
   RAIL -->|"12 V + / −"| SWF
@@ -103,8 +105,9 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 | Liaison | De | Vers | Remarque |
 | --- | --- | --- | --- |
 | Câble 12 V | Panneau solaire | Régulateur de charge, sous le nichoir | Longe le sol et arrive sous le nichoir, à l'abri du lambris |
-| Charge | Régulateur | Batterie, via le fusible | Deux fils (rouge et noir) montent dans une gaine de Ø 16 mm, dans l'isolant du coin arrière droit (à 1 cm du mur arrière, pile sur le joint entre la plaque d'isolant du mur droit et celle du mur arrière) : ils traversent le fond et le plancher intérieur par des trous de 16 mm, pile le diamètre de la gaine, puis le cadre du toit, le dessous et le dessus du toit par des trous de Ø 18 mm (la gaine y passe tranquillement), et arrivent sur le dessus du toit. Le fusible protège la batterie et le câblage |
-| Rail 12 V | Batterie / fusible | Convertisseur 12 → 5 V et ventilateur (par son interrupteur) | Fils rouge (+) et noir (−), répartis par un **Wago 221-413 à 3 entrées pour le +** (fusible, interrupteur du ventilateur, convertisseur) et un **Wago 221-415 à 5 entrées pour le −** (batterie, convertisseur, ventilateur, masse de l'interrupteur, une entrée de réserve), posés à droite du fusible : chaque fil a sa propre entrée |
+| Charge | Régulateur | Batterie, via le fusible | Tout se passe sous le nichoir, dans la jupe de l'habillage : le régulateur (à droite), la batterie (à gauche, à plat, tenue par quatre étriers) et le fusible (collé sous le fond, derrière le régulateur). Deux fils courts de 2,5 mm² (≈ 4 cm pour le + et ≈ 10 cm pour le −) relient les sorties du régulateur, côté arrière, au fusible (lame A, avec le + de la batterie) et à la borne − de la batterie. La charge ne passe pas par la lame B du fusible |
+| Montée vers le toit | Fusible (lame B) et borne − de la batterie | Wago + et Wago −, sur le dessus du toit | Deux fils de 2,5 mm² montent dans une gaine de Ø 16 mm, dans l'isolant du coin arrière droit (à 1 cm du mur arrière, pile sur le joint entre la plaque d'isolant du mur droit et celle du mur arrière) : ils traversent le fond et le plancher intérieur par des trous de 16 mm, pile le diamètre de la gaine, puis les trois planches du cadre, la plaque de verrouillage de l'isolant, le dessous et le dessus du toit par des trous de Ø 18 mm (la gaine y passe tranquillement), et arrivent sur le dessus du toit (≈ 37 cm de fil pour le + et ≈ 49 cm pour le −). Le fusible protège la batterie et le câblage du rail |
+| Rail 12 V | Fusible / batterie (par la gaine) | Convertisseur 12 → 5 V et ventilateur (par son interrupteur) | Fils rouge (+) et noir (−), répartis par un **Wago 221-413 à 3 entrées pour le +** (fusible, interrupteur du ventilateur, convertisseur) et un **Wago 221-415 à 5 entrées pour le −** (batterie, convertisseur, ventilateur, masse de l'interrupteur, une entrée de réserve), posés à droite de la sortie de la gaine : chaque fil a sa propre entrée |
 | Alimentation du Pi | Convertisseur 12 → 5 V | Prise USB-C du Pi 5 | 5 V, 5 A recommandés pour le Pi 5 |
 | Interrupteur du ventilateur | Wago + (12 V) ; Pi GPIO27 (broche 13) ; masse sur le Wago − | Entrée, commande 3,3 V et masse du module interrupteur 12 V (côté +) | Le Noctua ne s'arrête pas à 0 % de PWM (il tourne à environ 20 %) : on coupe son 12 V. Côté **+**, pas côté masse : une masse coupée ferait remonter jusqu'à 12 V dans les fils PWM et tachymètre vers les GPIO |
 | 12 V du ventilateur | Sortie de l'interrupteur (+, rouge) ; Wago − (−, noir) | Prise 4 broches d'origine du ventilateur (sur le bord avant du couvercle de la cassette) + rallonge 4 broches (prise mâle collée sur la face avant du siège) | Fils de 1,6 mm de diamètre ; on débranche la prise à la main, une seule fois, avant de sortir la cassette ; aucune soudure |
@@ -115,7 +118,7 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 | LED infrarouges extérieures | Pi broche 2 (5 V) | Carte 4 LED IR à côté de la caméra 2 | Masse par le module MOSFET (OUT2) ; les fils suivent la nappe dans le même canal |
 | Module MOSFET | Pi GPIO23 (broche 16), GPIO24 (broche 18), masse broche 6 | Module 2 canaux (MOSFET logique 3,3 V) | Coupe la masse de chaque carte de LED ; 5 V direct, courant des LED hors du GPIO |
 | Capteur température / humidité | Pi broches 1 (3,3 V), 3 (SDA), 5 (SCL), 9 (masse) | Capteur dans le compartiment de la caméra, à fleur du plafond | Liaison I2C, 4 fils |
-| Sonde de température extérieure | Pi : broche 17 (3,3 V), GPIO4 (broche 7, donnée 1-Wire), broche 20 (masse) | Module 3 broches DS18B20 (résistance de rappel de 4,7 kΩ), puis la sonde étanche par son câble de 3 conducteurs | Trois cordons Dupont du Pi au module ; le câble de la sonde (rouge 3,3 V, noir masse, jaune donnée) entre dans le grenier par un trou de 5 mm dans la lame d'habillage gauche et dans la plaque gauche du toit. Le 1-Wire est activé par `dtoverlay=w1-gpio` dans `/boot/firmware/config.txt` |
+| Sonde de température extérieure | Pi : broche 17 (3,3 V), GPIO4 (broche 7, donnée 1-Wire), broche 20 (masse) | Module 3 broches DS18B20 (résistance de rappel de 4,7 kΩ), puis la sonde étanche par son câble de 3 conducteurs | Trois cordons Dupont du Pi au module ; le câble de la sonde (rouge 3,3 V, noir masse, jaune donnée) entre dans le toit par un canal oblong de 8 mm de la plaque crénelée du pan (fermé par la plaque pleine) et ressort dans le caisson, derrière la baguette gauche du couvercle. Le 1-Wire est activé par `dtoverlay=w1-gpio` dans `/boot/firmware/config.txt` |
 | Prise d'air basse | — (pas d'électronique) | Conduit de contreplaqué dans l'isolant du mur gauche avant, fente dans la paroi intérieure à mi-hauteur | Section libre 10,9 cm² ; grille de bois sur la fente (la prise d'air reste toujours ouverte, sans clapet), ouverture de 26 × 6 mm au ras du plancher pour l'eau, sous-boîte isolante amovible par le dessous (lèvre de 11 mm sous le fond) |
 
 **Fiche d'un fil dans l'application.** Un clic sur un fil (ou sur sa carte dans « Pièces ») de la vue 3D ouvre sa fiche : couleur, diamètre dessiné et section, longueur du trajet, longueur de cordon à prévoir, de → vers (broche et GPIO du Pi, borne, Wago), rôle, tension, courant, raccord. Les broches de cette fiche sont celles de ce tableau ; la longueur est calculée sur le trajet dessiné.
@@ -127,16 +130,18 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 - Le panneau de 100 W est déporté à environ 70 cm du nichoir, incliné de 35° vers l'avant, son bord bas près du sol.
 - Son câble 12 V longe le sol et arrive sous le nichoir, où est le régulateur de charge, posé à plat sous le plancher.
 - Le lambris descend de 45 mm sous le nichoir pour protéger le régulateur de la pluie ; le câble du panneau passe sous l'habillage, sans le percer.
-- Deux fils montent dans l'isolant du coin arrière droit, dans une gaine électrique ICTA de Ø 16 mm, jusqu'au dessus du toit.
+- Il charge la batterie par deux fils courts : tout cela est sous le nichoir, dans la jupe de l'habillage.
 
 **Stockage.**
 
 - La batterie est un pack LiFePO4 12,8 V de 6 Ah : 4 cellules 32700 en série, environ 77 Wh.
 - Ce chimisme est plus sûr que le lithium-ion classique, mais le régulateur doit avoir un profil de charge LiFePO4 et le pack doit avoir un BMS.
-- Dans le modèle, la batterie est dans le grenier, à plat sur le dessus du toit, dans le coin avant droit, à 1 cm des murs.
-- Elle est calée au montage par des morceaux de baguette de contreplaqué collés tout autour (voir « Cales ») ; le toit est relevé pour la loger.
+- La batterie est sous le nichoir, à plat, à gauche du régulateur : 128 mm le long de y, 70 mm en x, 32 mm de haut, centre en x = −19 mm et y = +20 mm. Elle est tenue par quatre étriers en U de contreplaqué (« Étrier batterie 1 à 4 », mêmes tenons que ceux du régulateur dans des fentes du fond), plaques à y = 0, 33, 57 et 78 mm.
+- Elle est à 9 mm du conduit d'air basse (sa sous-boîte se retire par le dessous) et à 5 mm de l'étrier du régulateur le plus proche ; elle est protégée du soleil par la jupe de l'habillage, qui descend de 45 mm sous le nichoir, à plus de 20 mm de la batterie.
+- Ses deux bornes regardent l'arrière : le fusible est collé contre le dessous du fond, derrière le régulateur, à environ 4 cm de fil du + de la batterie.
+- Deux fils de 2,5 mm² (+ du fusible, − de la batterie) montent dans une gaine électrique ICTA de Ø 16 mm (≈ 12 mm utiles, soit 113 mm²) : deux fils de Ø 3,6 mm en occupent 20 mm², 18 % de la section ; quatre fils au plus (36 %) resteraient raisonnables.
 
-**Régulation.** Le régulateur de charge reçoit le panneau, charge la batterie et empêche la surcharge. Un fusible placé juste après la batterie protège tout le reste.
+**Régulation.** Le régulateur de charge reçoit le panneau, charge la batterie et empêche la surcharge. Un fusible collé tout près de la batterie protège tout le reste : le + de la batterie et le + du régulateur arrivent sur sa lame A, la lame B part vers le rail 12 V.
 
 **Cerveau.** Le Raspberry Pi 5 pilote tout le montage.
 
@@ -150,14 +155,15 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 **Température de dehors.** Une sonde DS18B20 étanche mesure l'air extérieur ; aucun service en ligne n'intervient.
 
 - **Position** : sur le côté gauche, sous le débord de 30 mm du toit, collée contre le dessous du pan en okoumé, à y = +42 mm (vers l'arrière). Elle est à l'ombre, à 129 mm du ventilateur et de sa sortie (arrière droit), à 176 mm de la caméra 2 et de ses LED infrarouges (avant gauche) et à 191 mm du régulateur solaire (sous le nichoir, à droite).
-- **Passage du câble** : un trou rond de 5 mm dans la lame d'habillage gauche et dans la plaque gauche du toit, à 15 mm sous le dessous du pan, sous le corps de 10 mm de la baguette gauche du couvercle. Le pan en okoumé n'est pas percé.
+- **Passage du câble** : il passe dans le toit, comme la nappe de la caméra 2. Un canal oblong de 8 mm de large et 37 mm de long (bouts ronds) est percé dans la plaque crénelée du pan en okoumé, de l'à-plomb du bout de la sonde (x = −121 mm) jusque dans le caisson (x = −84 mm), 15 mm derrière la baguette gauche du couvercle ; la plaque pleine le ferme. Le câble sort du bout de la sonde, monte dans le canal, circule entre les deux plaques à 2,5 mm du dessous du pan, passe au-dessus du chant de la baguette gauche et ressort dans le caisson ; il n'y a aucun trou dans la lame d'habillage gauche ni dans la plaque gauche du toit.
+- **Baguette gauche** : elle n'a pas de dent dans le canal ni à 3 mm de chaque côté (une dent sur six omise) ; ligaments de bois autour du canal : 14 mm au moins, contre 3 mm exigés.
 - **Module** : le câble de 3 conducteurs finit dans un module 3 broches (résistance de rappel de 4,7 kΩ) posé sur le dessus du toit, devant le Pi, contre le mur gauche. Trois cordons Dupont le relient au Pi : 3,3 V (broche 17), donnée sur GPIO4 (broche 7), masse (broche 20).
 - **Lecture** : le noyau lit la sonde par le 1-Wire dans `/sys/bus/w1/devices/28-*/w1_slave`. Le programme refuse un CRC mauvais, la valeur d'erreur 85,0 °C du DS18B20 et toute valeur hors −40 à 60 °C.
 - **Ventilation automatique** : la comparaison nid / dehors utilise cette mesure. Sans mesure valable de dehors (sonde absente, muette ou hors plage), l'automatique ne démarre pas, la page l'indique (état « sécurité », avertissement) ; l'alerte à 35 °C du nid ne dépend pas de la sonde.
 
-**Cales.** Le Pi, le convertisseur, la batterie et l'interrupteur du ventilateur se calent avec des morceaux de baguette (19 morceaux, 726 mm en tout).
+**Cales.** Le Pi, le convertisseur et l'interrupteur du ventilateur se calent avec des morceaux de baguette (14 morceaux, 396 mm en tout).
 
-- Le groupe « Baguettes de cale (à couper) » contient **6 baguettes** de contreplaqué de 3 mm : 394 mm de long (la plus grande longueur qui tient sur la planche de 410 × 400 mm avec 8 mm de marge) et 5 mm de large, soit le triple du besoin pour garder de la marge.
+- Le groupe « Baguettes de cale (à couper) » contient **4 baguettes** de contreplaqué de 3 mm : 394 mm de long (la plus grande longueur qui tient sur la planche de 410 × 400 mm avec 8 mm de marge) et 5 mm de large, soit le triple du besoin pour garder de la marge.
 - Elles sont découpées au laser avec le reste du contreplaqué (elles se rangent dans les creux des planches) et posées dans la 3D au sol, à gauche des pièces d'hiver, hors du nichoir.
 - Posée à plat, une baguette fait 3 mm de haut et 5 mm de large.
 - **Mode d'emploi : au montage, on coupe un morceau de baguette à la longueur voulue et on le colle contre le composant, une fois celui-ci posé à sa place.**
@@ -171,9 +177,17 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 - Le dessus des baguettes affleure le dessous du dessus du toit ; chaque baguette fait 3 mm de haut (l'épaisseur du contreplaqué) sur 5 mm de large.
 - Ligaments de bois autour des fentes : 4,5 mm ou plus.
 
+**Corps, isolant et plaque de verrouillage.** Le corps est fait de huit parois de contreplaqué 3 mm : quatre extérieures (« Face avant ext », « Face arrière ext », « Côté gauche ext », « Côté droit ext ») hautes de 224 mm et quatre intérieures (« … int ») hautes de 182 mm, dont le haut est à 3 mm sous le dessous du toit (227 mm).
+
+- **Isolant** : de la fibre de bois de 39 mm remplit la couronne entre les murs extérieurs et intérieurs ; elle s'arrête 9 mm sous le haut des parois, sous le cadre.
+- **Cadre** : trois planches de contreplaqué collées (« Cadre toit haut / milieu / bas », 9 mm, groupe « Corps ») ferment la couronne par le haut, à fleur du chant des parois ; leur ouverture, en U, est ouverte vers l'avant sur toute la largeur du nid.
+- **Plaque de verrouillage de l'isolant** : plaque de contreplaqué 3 mm de 210 × 210 mm en forme de C, collée à plat sur le chant des huit parois, sur l'isolant et sur le cadre ; elle occupe les 3 mm entre le haut des parois et le dessous du toit, donc la hauteur du corps est de 227 mm. Son trou est l'intérieur du nid (120 × 120 mm, ouvert vers le haut). À l'avant elle est ouverte sur 60 mm de large, le plus large carré du bloc d'entrée (59 mm) plus 1 mm : le bloc d'entrée se retire par le haut, aucune de ses pièces n'est recouverte. La gaine la traverse par un trou de Ø 18 mm.
+- **Recouvrement** : la plaque recouvre toute l'épaisseur de chaque paroi (3 mm) et l'isolant ; elle est collée à plat, sans dents.
+- **Toit** : il repose sur cette plaque ; le haut du bloc d'entrée et des plaques d'isolant du bloc affleure le dessous de la plaque (224 mm).
+
 **Pièces fines de rechange.** Chaque plaque de contreplaqué fine a 3 exemplaires de rechange.
 
-- **Seuil** : plus petit côté ou largeur moyenne (2 × aire / périmètre du contour) d'au plus 12 mm. Cela couvre les baguettes du couvercle et du dessus du toit, les poignées en U, les étriers du régulateur, les clavettes de la fixation à l'arbre et les plaques du conduit de sortie.
+- **Seuil** : plus petit côté ou largeur moyenne (2 × aire / périmètre du contour) d'au plus 12 mm. Cela couvre les baguettes du couvercle et du dessus du toit, les poignées en U, les étriers du régulateur et de la batterie, les clavettes de la fixation à l'arbre et les plaques du conduit de sortie.
 - Le groupe « Pièces fines de rechange » contient **3 exemplaires identiques** (« … (rechange 1) » à « (rechange 3) »), posés à plat sur le sol, à gauche du nichoir et derrière les pièces d'hiver et les baguettes de cale.
 - Ils sont découpés au laser avec le reste et portent **le même numéro que l'original**.
 - Les baguettes de cale (déjà en triple) et les composants achetés n'ont pas de rechange.
@@ -188,7 +202,7 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 - **Ouverture du plafond** : elle reste ouverte quand le ventilateur est arrêté (sans clapet) ; par temps froid on pose le bloc isolant à la place de la cassette.
 - **Branchement** : le câble d'origine du ventilateur finit par sa prise 4 broches femelle, sur le bord avant du couvercle. La prise mâle de la rallonge 4 broches (12 V commuté, masse, PWM, tachymètre) est collée sur la face avant du siège et la femelle s'y emboîte à la verticale : on la débranche à la main avant de sortir la cassette, sans soudure. Les fils de la rallonge contournent le siège.
 - **Pilotage** : le Pi allume le ventilateur seulement quand il fait chaud, règle sa vitesse par PWM et peut couper son 12 V avec l'interrupteur (le Noctua tourne encore à environ 20 % à 0 % de PWM).
-- **Toit** : il tient seul, posé sur le cadre et retenu par l'habillage collé au corps ; pour accéder au grenier, on soulève le toit en okoumé.
+- **Toit** : il tient seul, posé sur la plaque de verrouillage de l'isolant et retenu par l'habillage collé au corps ; pour accéder au grenier, on soulève le toit en okoumé.
 
 **Été / hiver, en 4 lignes**
 
@@ -260,7 +274,9 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Courant de décharge continu du BMS | au moins 5 A (Pi, caméras, ventilateur et marge) | — |
 | BMS | obligatoire : équilibrage, coupure haute et basse, court-circuit | — |
 | Température de charge | pas de charge sous 0 °C : BMS avec protection basse température (important pour un nichoir dehors) | — |
-| Dimensions du pack | environ 70 × 128 × 32 mm pour 4 cellules côte à côte | 128 × 70 × 32 mm (vraie taille), dans le grenier |
+| Dimensions du pack | environ 70 × 128 × 32 mm pour 4 cellules côte à côte | 128 × 70 × 32 mm (vraie taille), sous le nichoir, à plat, à gauche du régulateur, tenue par quatre étriers |
+| Position | à l'abri du soleil direct et loin de la laine de bois et du nid ; fils de charge courts | sous le fond, dans la jupe de l'habillage (45 mm), bornes côté arrière, 5 mm de jeu avec les étriers du régulateur, 9 mm avec le conduit d'air basse |
+| Froid et humidité | la charge est interdite sous 0 °C ; ni coffret ni vernis ne sont prévus | voir « Points à vérifier » |
 | Modèle exact / lien | [Cellule HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523) ; BMS 4S LiFePO4 et support : lien à trouver | — |
 
 ### Fusible
@@ -268,7 +284,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
 | Calibre | 15 A suffit (charge au plus 10 A, décharge environ 8 A) ; il doit être inférieur à ce que le câble supporte | 15 A |
-| Type | fusible à lame automobile 12 V avec porte-fusible, placé au plus près du + de la batterie | 19 × 18,5 × 5 mm, posé à plat |
+| Type | fusible à lame automobile 12 V avec porte-fusible, placé au plus près du + de la batterie | 19 × 18,5 × 5 mm, posé à plat, collé contre le dessous du fond, derrière le régulateur ; lame A : + de la batterie et + du régulateur, lame B : vers le rail |
 | Modèle exact / lien | [Amazon.fr, JOREST, 5 porte-fusibles étanches en ligne ATC/ATO dont 1 à fils de 12 AWG et 4 de 16 AWG, avec 14 fusibles standard de 2 à 35 A](https://www.amazon.fr/dp/B0DBPQBGBQ) : on utilise le porte-fusible à fils de **12 AWG** avec le fusible de **15 A** du lot ; [Amazon.fr, SeKi, 5 fusibles à lame ATO standard 15 A bleu, 19 mm, 32 V DC](https://www.amazon.fr/dp/B0CVQGRH7L) en rechange (prix non lisibles en ligne, à confirmer) ; un seul fusible sur le rail, on garde le plan de base | — |
 
 ### Convertisseur 12 V → 5 V
@@ -393,7 +409,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Plage et précision | −55 à +125 °C, ± 0,5 °C de −10 à +85 °C ; le programme du Pi refuse le CRC mauvais, 85,0 °C (valeur d'erreur à la mise sous tension) et les valeurs hors −40 à 60 °C | — |
 | Activation du 1-Wire | `dtoverlay=w1-gpio` dans `/boot/firmware/config.txt`, puis redémarrage ; lecture dans `/sys/bus/w1/devices/28-*/w1_slave` | — |
 | Position | sous le débord de 30 mm du côté gauche, collée contre le dessous du pan en okoumé, à l'ombre, à environ y = +40 mm | x = −117 mm, y = +42 mm, face haute contre le dessous du pan ; 129 mm du ventilateur, 176 mm de la caméra 2, 191 mm du régulateur |
-| Passage du câble | un trou rond de 5 mm dans la lame d'habillage gauche et dans la plaque gauche du toit, sous le corps de la baguette gauche du couvercle ; le pan n'est pas percé | trou à 15 mm sous le dessous du pan, y = +42 mm |
+| Passage du câble | un canal oblong de 8 mm de large dans la plaque crénelée du pan, fermé par la plaque pleine ; la baguette gauche du couvercle omet sa dent dans le canal ; ni la lame d'habillage ni la plaque gauche du toit ne sont percées | canal de 37 × 8 mm (bouts ronds, x de −121 à −84 mm), câble à 2,5 mm du dessous du pan, trajet dessiné de 15 cm jusqu'au module |
 | Remarque | en plein soleil ou contre un mur chaud, la sonde lit 1 à 2 °C de trop : l'ombre du débord limite l'écart | — |
 | Rôle | température de dehors pour la comparaison nid / dehors de la ventilation automatique ; sans mesure valable l'automatique ne démarre pas | oui |
 | Modèle exact / lien | lien à trouver — référence exacte : sonde DS18B20 étanche câble 1 m ou 3 m + module adaptateur 3 broches résistance 4,7 kΩ | — |
@@ -412,12 +428,12 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
-| Rôle | répartir le + et le − de la batterie vers l'interrupteur du ventilateur et le convertisseur | pavés aux cotes officielles de la fiche technique WAGO (version du 08.05.2024, [221-413](https://www.wago.com/221-413) / [221-415](https://www.wago.com/221-415)) : 221-413 = 18,8 × 8,4 × 18,8 mm, 221-415 = 30 × 8,4 × 18,8 mm (largeur de la rangée × hauteur × profondeur dans le sens des fils)  |
+| Rôle | répartir le + et le − de la batterie (par la gaine) vers l'interrupteur du ventilateur et le convertisseur | pavés aux cotes officielles de la fiche technique WAGO (version du 08.05.2024, [221-413](https://www.wago.com/221-413) / [221-415](https://www.wago.com/221-415)) : 221-413 = 18,8 × 8,4 × 18,8 mm, 221-415 = 30 × 8,4 × 18,8 mm (largeur de la rangée × hauteur × profondeur dans le sens des fils)  |
 | Modèle | Wago 221-413 (3 entrées) pour le + et 221-415 (5 entrées) pour le − : à levier, tension 12 V, courant ≤ 32 A, sections de 0,2 à 4 mm², fils souples sans embout acceptés | pas de 6 mm (3 × 6 + 0,8 = 18,8 et 5 × 6 = 30, déduit des cotes), **tous les fils du même côté** : face ouest ; chaque fil arrive perpendiculairement à la face, parallèle aux autres, au même niveau (mi-hauteur), sur au moins 12 mm rectilignes |
 | Entrées du + | fusible, interrupteur du ventilateur, convertisseur : une entrée chacun | 3 sur 3 |
 | Entrées du − | batterie, convertisseur, ventilateur, masse de l'interrupteur : une entrée chacun, la 5ᵉ est libre | 4 sur 5 |
 | Courant | nous sommes à environ 1 A | — |
-| Précaution | enfoncer les fils jusqu'au fond ; pour un montage définitif, bornier à vis ou cosses serties | à droite du fusible |
+| Précaution | enfoncer les fils jusqu'au fond ; pour un montage définitif, bornier à vis ou cosses serties | à droite de la sortie de la gaine |
 | Modèle exact / lien | [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413) ; [WAGO 221-415, borne à levier 5 conducteurs](https://www.wago.com/221-415) ; en magasin : [Leroy Merlin, lot de 5 bornes automatiques 5 fils WAGO](https://www.leroymerlin.fr/produits/lot-de-5-bornes-automatiques-5-fils-wago-88899421.html) (fiche non lisible en ligne : vérifier « 32 A, fils souples ET rigides » et la référence 221-415, pas une borne « rigide seulement » 2273-205) | — |
 
 ### Câblage
@@ -466,8 +482,9 @@ Le bouton **Montage** de la barre de la vue (en haut à droite sur ordinateur, e
 - **Étapes** : une étape par pièce ; les pièces strictement identiques (même code de plaque) se posent ensemble dans une seule étape. Une consigne n'est écrite que quand il y a quelque chose de particulier à dire : ordre à respecter, pièce qui se pose avant l'isolant, précaution, finition.
 - **Dans la 3D** : seules les pièces des étapes déjà faites et de l'étape en cours sont affichées ; celles de l'étape en cours sont surlignées en ambre. Les réglages de visibilité de « Pièces » ne changent pas et sont rétablis à la sortie. Pendant les étapes d'électronique, le toit en okoumé est soulevé (caché) ; il est reposé juste avant le panneau solaire.
 - **Navigation** : boutons « ◀ Précédent » / « Suivant ▶ » (grands, en bas de la feuille), balayage horizontal sur la feuille, flèches ← → du clavier, Échap pour quitter, liste de saut rapide par bloc. Sur téléphone, la feuille occupe au plus 40 % de la hauteur, se replie en une barre fine (titre et « 12 / 140 ») et l'écran reste allumé tant que le mode est ouvert. L'étape courante est mémorisée et reprise après un rechargement.
-- **Ordre des blocs** : Aération du corps (huile, séchage et montage à part du module d'aération, les « Conduit d'air 1 à 5 »), Pièces d'hiver, Corps, Entrée, puis trois sous-ensembles montés à part : Zone caméra (les quatre murs du compartiment), Goulotte ventilateur (le siège, trois parois) et Cassette du ventilateur (cassette complète, câble d'origine et conduit de sortie), Toit (qui pose ces sous-ensembles d'un bloc par une étape de texte chacun, isole le toit en une seule étape et colle en dernier les trois planches du cadre, « T-11 »), Habillage, Couvercle, Baguettes de cale, puis l'électronique (carte microSD et essais du Pi sur l'établi, composants et fils, essais avec la batterie) et, en tout dernier, le panneau solaire. Le câblage du ventilateur (rallonge, interrupteur et ses fils) se fait avant les essais, et le toit en okoumé ne se pose qu'après ces essais.
-- **Dans le corps** : la première étape monte le nid, les quatre parois intérieures d'un coup (le nid se monte à part, puis se pose d'un bloc sur « Plancher int ») ; viennent ensuite « Dessous ext » (COR-08), l'isolant sous le plancher (une seule étape pour les quatre pièces), la pose du module d'aération, déjà monté et assemblé à part (une étape de texte : le module est caché des étapes précédentes et apparaît à cet endroit, après l'isolation du bas qu'il traverse), « Plancher int » (COR-09), « Face avant ext » (COR-04), les autres parois extérieures, les nervures et les clavettes, la gaine des fils (passée pendant que tout est accessible), l'isolant autour du nid (une seule étape pour tous les pavés), « Côté gauche ext » (COR-07) et, en toute dernière étape du bloc, les étriers du régulateur.
+- **Ordre des blocs** : Aération du corps (huile, séchage et montage à part du module d'aération, les « Conduit d'air 1 à 5 », une étape par plaque), Nid (montage à part des quatre parois intérieures), Pièces d'hiver, Corps, Entrée, puis trois sous-ensembles montés à part : Zone caméra (les quatre murs du compartiment), Goulotte ventilateur (le siège, trois parois) et Cassette du ventilateur (cassette complète, câble d'origine et conduit de sortie), Toit (qui pose ces sous-ensembles d'un bloc par une étape de texte chacun, isole le toit en une seule étape), Habillage, Couvercle, Baguettes de cale, puis l'électronique (carte microSD et essais du Pi sur l'établi, composants et fils, essais avec la batterie) et, en tout dernier, le panneau solaire. Le câblage du ventilateur (rallonge, interrupteur et ses fils) se fait avant les essais, et le toit en okoumé ne se pose qu'après ces essais.
+- **Nid** : le bloc « Nid » monte les quatre parois intérieures d'un coup, sans les huiler (l'intérieur du nid reste brut) ; le nid monté est seul à l'écran, puis il est caché jusqu'à l'étape qui le pose dans le corps. De même, le module d'aération, la zone caméra, la goulotte et la cassette sont cachés entre la fin de leur bloc et leur étape de pose, visibles pendant leur bloc et après la pose.
+- **Dans le corps** : le corps commence par l'huile et le séchage ; viennent ensuite « Dessous ext » (COR-08), l'isolant sous le plancher (une seule étape pour les quatre pièces), la pose du module d'aération, déjà monté et assemblé à part (une étape de texte : le module est caché des étapes précédentes et apparaît à cet endroit, après l'isolation du bas qu'il traverse), « Plancher int » (COR-09), la pose du nid, déjà monté (une étape de texte : les quatre parois apparaissent en place, surlignées, sur le plancher), « Face avant ext » (COR-04), les autres parois extérieures, les nervures et les clavettes, la gaine des fils (passée pendant que tout est accessible), l'isolant autour du nid (une seule étape pour tous les pavés), « Côté gauche ext » (COR-07), les trois planches du cadre, la plaque de verrouillage de l'isolant (collée à plat sur le haut des parois, l'ouverture à l'avant laissant passer le bloc d'entrée) puis, en dernières étapes du bloc, les étriers du régulateur et ceux de la batterie.
 - **Finition** : l'huile de lin pure est appliquée avant le collage, en masquant dents, fentes et surfaces à coller, avec une semaine de séchage par couche (voir « Finition du bois ») ; les 22 lames de l'habillage sont peintes en blanc avant le collage (2 couches, ruban de peintre sur les surfaces à coller) ; le toit en okoumé est saturé (saturateur teck mat, 2 couches) une fois assemblé.
 - **Le Pi** : préparation de la carte microSD, installation du programme et du service, essais sur l'établi avec l'alimentation 27 W (capteur du nid, sonde de dehors, caméras, LED infrarouges par le module MOSFET, ventilateur et PWM, page web) avant de l'installer dans le nichoir ; puis essais avec la batterie, le fusible et le régulateur avant de brancher le panneau solaire.
 
@@ -479,19 +496,20 @@ Contrôle fait par calcul sur le modèle : recouvrement entre chaque composant e
 | --- | --- |
 | Ventilateur et son siège | cassette (66 × 66 mm, 97 mm de haut) posée dans un siège de 73 mm de large collé sur le plancher du toit, à 1 cm du compartiment de la caméra (le siège va jusqu'à la plaque arrière, le conduit de sortie de 10,6 mm comble l'espace derrière la cassette) : à environ 8 mm de la gaine, à environ 5 mm du Pi, loin de la batterie (plus de 5 cm) ; la poignée de la cassette est à environ 3 mm sous la pente du toit |
 | Régulateur | sous le nichoir, à plat (61 × 137 × 33 mm), sans conflit : le lambris descend de 45 mm pour le protéger |
-| Fusible | passe (9 mm de jeu sous la pente) |
-| Batterie | vraie taille (128 × 70 × 32 mm), montée dans le grenier, dans le coin avant droit, à 1 cm du mur de droite et du mur avant, sur le dessus du toit, calée au montage par des morceaux de baguette de contreplaqué de 3 mm collés tout autour : le toit est relevé à 84 mm devant pour elle, 6 mm de jeu sous la pente ; le compartiment caméra mesure 38 mm pour que ses morceaux de baguette de cale ne soient pas dans le vide |
+| Fusible | sous le nichoir, collé contre le fond, derrière le régulateur (18 mm du régulateur, 5 mm des étriers de la batterie, 6 mm de la gaine) ; il ne tient aucune place dans le grenier |
+| Batterie | vraie taille (128 × 70 × 32 mm), sous le nichoir, à plat, à gauche du régulateur, tenue par quatre étriers ; 5 mm de jeu avec les étriers du régulateur, 9 mm avec le conduit d'air basse, plus de 20 mm avec la jupe de l'habillage ; aucun recouvrement avec le régulateur ni avec une autre pièce |
+| Plaque de verrouillage de l'isolant | posée à plat sur les huit parois (les parois sont 3 mm plus basses), le dessous du toit repose dessus : hauteur du corps inchangée ; le bloc d'entrée n'est pas recouvert (ouverture de 60 mm contre 59 mm de large) |
 | Raspberry Pi | passe (13 mm sous la pente) ; environ 5 mm d'écart avec le siège du ventilateur |
 | Convertisseur 12 → 5 V | à l'avant, taille estimée ; il passe sous la pente avec très peu de jeu |
 | Nappe de la caméra 1 | contourne le siège du ventilateur : elle passe devant lui, au-dessus des fils des LED |
 | Caméra 1, capteur | passent ; le compartiment de la caméra s'étend vers l'est (intérieur 66,25 × 38 mm) pour contenir le capteur |
-| Prise d'air basse | le conduit (35 × 46 mm) traverse l'isolant sous le plancher, le fond intérieur (par un passage découpé) et l'isolant du mur gauche ; libre dessous, loin du régulateur |
+| Prise d'air basse | le conduit (35 × 46 mm) traverse l'isolant sous le plancher, le fond intérieur (par un passage découpé) et l'isolant du mur gauche ; libre dessous, loin du régulateur et de la batterie (9 mm) |
 | Fils et nappes | tous passent sous la pente |
 | Pièces en bois | contrôle de recouvrement par boîtes orientées : les seuls recouvrements restants sont voulus (dents dans leurs fentes, parois du siège et de la cassette qui traversent le dessus du toit par son encoche, conduit d'air dans le passage du fond) |
-| Sonde de température extérieure | dehors, sous le débord gauche du pan, contre son dessous ; le câble passe par un trou de 5 mm (lame d'habillage et plaque gauche du toit), sous la baguette du couvercle, et rejoint le module devant le Pi ; aucun fil ne traverse de bois hors de ce trou |
+| Sonde de température extérieure | dehors, sous le débord gauche du pan, contre son dessous ; le câble passe dans le canal de 8 mm de la plaque crénelée du toit (fermé par la plaque pleine), au-dessus du chant de la baguette gauche du couvercle, et rejoint le module devant le Pi ; aucun fil ne traverse de bois hors de ce canal |
 | Caméra 2 | dehors, nue, sous le pan en okoumé, avec la carte de LED infrarouges 20 mm à sa gauche (même orientation), tournée vers le trou d'envol ; sa nappe et les fils des LED passent par le canal du toit (28 mm, dans la plaque crénelée du pan) |
 
-Contrôle des fils : les fils du ventilateur côté 12 V ne traversent ni nappe ni autre fil ; les quatre fils vers le Pi (PWM, tachymètre, masse commune, commande de l'interrupteur) restent sur le dessus du toit, passent par-dessus la cassette sous la pente (2 mm au moins) et peuvent croiser les nappes et d'autres fils : à reprendre au cas par cas au montage. Limite du contrôle : les formes des pièces sont des boîtes, donc les trous et encoches ne sont pas pris en compte. Les composants sont dessinés à leur vraie taille même quand ils ne tiennent pas : les chevauchements restants (régulateur, batterie) sont à corriger en choisissant d'autres emplacements ou composants.
+Contrôle des fils : les fils du ventilateur côté 12 V ne traversent ni nappe ni autre fil ; les quatre fils vers le Pi (PWM, tachymètre, masse commune, commande de l'interrupteur) restent sur le dessus du toit, passent par-dessus la cassette sous la pente (2 mm au moins) et peuvent croiser les nappes et d'autres fils : à reprendre au cas par cas au montage. Limite du contrôle : les formes des pièces sont des boîtes, donc les trous et encoches ne sont pas pris en compte. Les composants sont dessinés à leur vraie taille même quand ils ne tiennent pas : aucun recouvrement n'est signalé entre le régulateur, la batterie, le fusible et les étriers.
 
 ## Stratégie d'énergie (décision : on commence comme ça)
 
@@ -527,11 +545,11 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 
 | Élément | Poids |
 | --- | --- |
-| Contreplaqué 3 mm (106 pièces, 0,85 m²) | 1,2 kg |
+| Contreplaqué 3 mm (109 pièces, 0,87 m²) | 1,2 kg |
 | Habillage : okoumé extérieur 5 mm peint en blanc (22 pièces, 0,30 m²) | 0,65 kg |
 | Toit en okoumé 2 × 5 mm (2 plaques de 0,082 m²) + 4 baguettes de 3 mm | 0,4 kg |
 | Isolant fibre de bois 39 mm, 50 kg/m³ (murs, fond, toit : 6,95 L) | 0,35 kg |
-| Batterie 4 × 32700 + BMS + support | 0,6 kg |
+| Batterie 4 × 32700 + BMS + support (sous le nichoir, avec le régulateur) | 0,6 kg |
 | Régulateur de charge Genasun | 0,25 kg |
 | Raspberry Pi 5 + carte microSD | 0,05 kg |
 | Caméras, LED, capteurs (nid et dehors), convertisseur, modules, fusible | 0,15 kg |
@@ -540,6 +558,8 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 | Morceaux de baguette de cale, étriers, clavettes | 0,1 kg |
 | **Total accroché à l'arbre** | **≈ 4,1 kg** |
 | Panneau solaire 100 W (au sol, à part) | 8 kg |
+
+**Répartition.** Le total est de 4,1 kg ; la batterie (0,6 kg) et le régulateur (0,25 kg) sont sous le nichoir, ce qui descend le centre de gravité de l'ensemble.
 
 **Tenue de la fixation.** 4,1 kg font 40 N. Ils sont repris par 4 dents de 9 × 32 mm dans du contreplaqué de 3 mm : la pression sur le bois reste sous 1 MPa, pour une résistance d'au moins 20 MPa. Le centre de gravité est à environ 11 cm du dos, ce qui ajoute un couple de 4,5 N·m, soit un effort d'environ 45 N sur la dent du haut : toujours loin de la limite. Les 4 vis Ø 5 dans le tronc (ou une sangle) tiennent cela sans difficulté. Les points à soigner : le collage des 3 plaques de chaque nervure, et des vis inox de 5 × 60 dans du bois sain.
 
@@ -638,9 +658,9 @@ Le ventilateur, sa grille et son interrupteur coûtent environ 22 €. Le poste 
 ## Points à vérifier avant de construire
 
 - **Débit du ventilateur.** L'ouverture du plafond sous le ventilateur fait 56 × 30 mm (le ventilateur est à 1 cm du bloc de la caméra ; le mur du nid limite la profondeur) : le débit réel est à mesurer avec le vrai matériel, et la température du nid à surveiller. Sans joint, un peu d'air rejeté peut revenir à l'aspiration par les jeux de découpe : un ruban de mousse peut être collé à la demande.
-- **Batterie au-dessus du compartiment de la caméra.** La batterie dépasse de 7 mm au-dessus de l'ouverture du compartiment de la caméra (le morceau de baguette de cale arrière ne doit pas passer au-dessus de l'ouverture) : à vérifier au montage.
-- **Taille de la batterie.** Le pack de 4 cellules 32700 (70 × 128 × 32 mm) est dessiné à sa vraie taille et dépasse du mur droit. Choix à faire : pack 2×2 ou batterie hors du toit.
-- **Régulateur sous le nichoir.** Il n'est protégé que par le lambris. Il chauffe de 2 à 5 W, donc ne pas le noyer dans l'isolant. La gaine de Ø 16 mm traverse sept plaques : le fond et le plancher intérieur par des trous de 16 mm, serrés, les trois planches du cadre du toit, le dessous et le dessus du toit par des trous de 18 mm : elle tient serrée dans le corps et passe tranquillement dans le toit. Le nichoir doit être posé assez haut pour que le régulateur (33 mm) ne touche pas le sol.
+- **Batterie sous le nichoir.** Le BMS du pack doit couper la charge sous 0 °C (la batterie est dans l'air extérieur, à l'ombre de la jupe de l'habillage, sans la chaleur du nid) ; ni coffret étanche ni vernis ne sont prévus : la jupe protège de la pluie directe mais pas de l'humidité ni des éclaboussures. Un coffret étanche, s'il est ajouté, n'est pas compté dans les prix. À surveiller en hiver (température du pack) et après les premières pluies.
+- **Fusible sous le fond.** Il est collé contre le dessous du fond, à l'air libre : un porte-fusible étanche est utilisé (voir le tableau des prix) ; contrôler la colle à chaud en été.
+- **Régulateur sous le nichoir.** Il n'est protégé que par le lambris. Il chauffe de 2 à 5 W, donc ne pas le noyer dans l'isolant. La gaine de Ø 16 mm traverse huit plaques : le fond et le plancher intérieur par des trous de 16 mm, serrés, les trois planches du cadre, la plaque de verrouillage de l'isolant, le dessous et le dessus du toit par des trous de 18 mm : elle tient serrée dans le corps et passe tranquillement dans le toit. Le nichoir doit être posé assez haut pour que le régulateur (33 mm) ne touche pas le sol.
 - **Convertisseur 12 → 5 V.** Dessiné avec une taille estimée, à confirmer avec le module acheté.
 - **Pi 5 (forme 3D).** Le dessin 3D du Pi est celui du Pi 4 (mêmes cotes 85 × 56 mm, prises USB et Ethernet au même endroit) ; un STEP du Pi 5, s'il est fourni, donnerait la forme exacte. Les deux connecteurs de 22 broches sont placés d'après le dessin mécanique officiel (dimensions approximatives, non cotées) ; le sens d'entrée des nappes se vérifie sur la carte.
 - **Alimentation du Pi 5.** Convertisseur de 5 A continus au moins ; sans négociation USB-PD, le Pi limite le courant de ses ports USB. Référence à choisir (voir le tableau des prix).

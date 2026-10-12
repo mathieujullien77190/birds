@@ -99,15 +99,15 @@
  },
  "007 Lambris gauche 4": {
   "geo": {
-   "n": 432,
+   "n": 36,
    "idx": 0,
-   "pos": "2351d971d4d8da76",
-   "col": "a84c83bbe5d2edf9"
+   "pos": "aa397920a7ca4b55",
+   "col": "dff38860b9a69b37"
   },
   "edges": {
-   "n": 152,
+   "n": 24,
    "idx": 0,
-   "pos": "303118ed3bdefab2",
+   "pos": "86650ddf47c8dcf5",
    "col": null
   }
  },
@@ -337,15 +337,15 @@
  },
  "024 Baguette couvercle gauche": {
   "geo": {
-   "n": 324,
+   "n": 276,
    "idx": 0,
-   "pos": "fefe133456b4d396",
-   "col": "2e95a0a9e8505128"
+   "pos": "e1ff0f2a146165da",
+   "col": "963c3afb148edf36"
   },
   "edges": {
-   "n": 112,
+   "n": 96,
    "idx": 0,
-   "pos": "25a396e08df1cc5d",
+   "pos": "c605e5d931e0d46c",
    "col": null
   }
  },
@@ -365,15 +365,15 @@
  },
  "026 Toit en okoumé (plaque crénelée)": {
   "geo": {
-   "n": 1380,
+   "n": 1752,
    "idx": 0,
-   "pos": "4a2ddd45efd2e416",
-   "col": "030bb1ddbab9d058"
+   "pos": "b0359e0d137d21a5",
+   "col": "d6c027d7741b6733"
   },
   "edges": {
-   "n": 648,
+   "n": 768,
    "idx": 0,
-   "pos": "11820ebfd4101416",
+   "pos": "e604f5d3cbf91de7",
    "col": null
   }
  },
@@ -727,26 +727,12 @@
    "col": null
   }
  },
- "052 Batterie LiFePO4 12,8 V 6 Ah (4 × 32700, 128 × 70 × 32)": {
+ "052 Fil fusible → Wago + (rouge)": {
   "geo": {
-   "n": 24,
-   "idx": 36,
-   "pos": "de4278a91fe00707",
-   "col": "438e10f236aabe29"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "da69d82735d061fa",
-   "col": null
-  }
- },
- "053 Fil fusible → batterie + (rouge)": {
-  "geo": {
-   "n": 1305,
-   "idx": 6912,
-   "pos": "8a8ec5e29d598f2b",
-   "col": "71758049fa8ab873"
+   "n": 2385,
+   "idx": 12672,
+   "pos": "7b8ad87221bf98c5",
+   "col": "7d67a685316a0783"
   },
   "edges": {
    "n": 0,
@@ -755,12 +741,12 @@
    "col": null
   }
  },
- "054 Fil fusible → Wago + (rouge)": {
+ "053 Fil batterie − → Wago − (noir)": {
   "geo": {
-   "n": 585,
-   "idx": 3072,
-   "pos": "462e00cec03fc7aa",
-   "col": "83db999d4394fa0e"
+   "n": 2601,
+   "idx": 13824,
+   "pos": "00f19a9b09d2e19e",
+   "col": "1248e75dfe6881a9"
   },
   "edges": {
    "n": 0,
@@ -769,21 +755,7 @@
    "col": null
   }
  },
- "055 Fil batterie − → Wago − (noir)": {
-  "geo": {
-   "n": 1521,
-   "idx": 8064,
-   "pos": "c495708aa5f1bdb4",
-   "col": "4cebacff4b6fadee"
-  },
-  "edges": {
-   "n": 0,
-   "idx": 0,
-   "pos": "da39a3ee5e6b4b0d",
-   "col": null
-  }
- },
- "056 Fil rail → convertisseur + (rouge)": {
+ "054 Fil rail → convertisseur + (rouge)": {
   "geo": {
    "n": 2169,
    "idx": 11520,
@@ -797,7 +769,7 @@
    "col": null
   }
  },
- "057 Fil rail → convertisseur − (noir)": {
+ "055 Fil rail → convertisseur − (noir)": {
   "geo": {
    "n": 1953,
    "idx": 10368,
@@ -811,7 +783,7 @@
    "col": null
   }
  },
- "058 Régulateur de charge Genasun GV-10-Li (137 × 61 × 33, sous le nichoir)": {
+ "056 Régulateur de charge Genasun GV-10-Li (137 × 61 × 33, sous le nichoir)": {
   "geo": {
    "n": 24,
    "idx": 36,
@@ -825,12 +797,40 @@
    "col": null
   }
  },
+ "057 Batterie LiFePO4 12,8 V 6 Ah (4 × 32700, 128 × 70 × 32)": {
+  "geo": {
+   "n": 24,
+   "idx": 36,
+   "pos": "a585064d310e6066",
+   "col": "438e10f236aabe29"
+  },
+  "edges": {
+   "n": 24,
+   "idx": 0,
+   "pos": "4f4989ae61eb3252",
+   "col": null
+  }
+ },
+ "058 Fil fusible → batterie + (rouge)": {
+  "geo": {
+   "n": 1089,
+   "idx": 5760,
+   "pos": "d39923bce24b6776",
+   "col": "ea0ddf3a34463e9c"
+  },
+  "edges": {
+   "n": 0,
+   "idx": 0,
+   "pos": "da39a3ee5e6b4b0d",
+   "col": null
+  }
+ },
  "059 Fil régulateur → batterie + (rouge, 2,5 mm²)": {
   "geo": {
-   "n": 2385,
-   "idx": 12672,
-   "pos": "81c4064009cc67b2",
-   "col": "7d67a685316a0783"
+   "n": 873,
+   "idx": 4608,
+   "pos": "b989a368c3f1cc20",
+   "col": "ff264462942275b5"
   },
   "edges": {
    "n": 0,
@@ -841,10 +841,10 @@
  },
  "060 Fil régulateur → batterie − (noir, 2,5 mm²)": {
   "geo": {
-   "n": 3465,
-   "idx": 18432,
-   "pos": "79251727e2f65501",
-   "col": "ef20d19e20f772a5"
+   "n": 1305,
+   "idx": 6912,
+   "pos": "0844906f4b5d9cbc",
+   "col": "cdc98593198e8204"
   },
   "edges": {
    "n": 0,
@@ -967,10 +967,10 @@
  },
  "069 Câble sonde extérieure (DS18B20, 3 conducteurs)": {
   "geo": {
-   "n": 1953,
-   "idx": 10368,
-   "pos": "53d473d99d2536f0",
-   "col": "cbbe48221cdc2278"
+   "n": 2169,
+   "idx": 11520,
+   "pos": "da7c1a0484cd40a2",
+   "col": "0e5f0fd5443a94e9"
   },
   "edges": {
    "n": 0,
@@ -1949,13 +1949,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "9be9bb0a11cb8181",
+   "pos": "901c7209287c4ddb",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "50f4b786911f72d0",
+   "pos": "cc88b0820e13821a",
    "col": null
   }
  },
@@ -1963,13 +1963,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "2d60379707613d7c",
+   "pos": "f2a00591aaeb50dd",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "dd18c511138f50f4",
+   "pos": "6b7c842b522d5f65",
    "col": null
   }
  },
@@ -1977,13 +1977,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "e36ce6e0a031fbba",
+   "pos": "aea9fa4099a17f8e",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "3158aa5b0cb3875c",
+   "pos": "bd251a2f4b1f5cf0",
    "col": null
   }
  },
@@ -1991,13 +1991,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "64e93336129a4043",
+   "pos": "7e8d50d49f787636",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "582f70f76a0220c0",
+   "pos": "1e0afa4ed153ba3f",
    "col": null
   }
  },
@@ -2005,13 +2005,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "bf65ceb09c831b10",
+   "pos": "5b362c356189af90",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "e0d10e48c501ffa8",
+   "pos": "60901496592bf023",
    "col": null
   }
  },
@@ -2019,13 +2019,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "c180ebe258a9ef93",
+   "pos": "e089246c8e363068",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "be976d23a495754a",
+   "pos": "7f688dc71a398559",
    "col": null
   }
  },
@@ -2033,13 +2033,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "039989063f18f8ac",
+   "pos": "41c82557ad1a0ec4",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "61de426413ac95b3",
+   "pos": "58140c1f256f5654",
    "col": null
   }
  },
@@ -2047,13 +2047,13 @@
   "geo": {
    "n": 24,
    "idx": 36,
-   "pos": "039989063f18f8ac",
+   "pos": "41c82557ad1a0ec4",
    "col": "952b3713c1187e61"
   },
   "edges": {
    "n": 24,
    "idx": 0,
-   "pos": "61de426413ac95b3",
+   "pos": "58140c1f256f5654",
    "col": null
   }
  },
@@ -2173,13 +2173,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "cabc1d1c471a5c06",
+   "pos": "ac6b1aa4074ad879",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "447dd15b5e864b8c",
+   "pos": "24b4662cf497e3b3",
    "col": null
   }
  },
@@ -2187,13 +2187,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2201,13 +2201,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2215,13 +2215,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2229,13 +2229,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2243,13 +2243,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2257,13 +2257,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2271,13 +2271,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2285,13 +2285,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2299,13 +2299,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2313,13 +2313,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2327,13 +2327,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2341,13 +2341,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2355,13 +2355,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "bd987bc308864339",
+   "pos": "eb11b54e1627d002",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "9a0ba8c9471952da",
+   "pos": "03a6074a64793f32",
    "col": null
   }
  },
@@ -2369,13 +2369,13 @@
   "geo": {
    "n": 432,
    "idx": 0,
-   "pos": "cabc1d1c471a5c06",
+   "pos": "ac6b1aa4074ad879",
    "col": "e2ef2aeb3305870d"
   },
   "edges": {
    "n": 152,
    "idx": 0,
-   "pos": "447dd15b5e864b8c",
+   "pos": "24b4662cf497e3b3",
    "col": null
   }
  },
@@ -2435,105 +2435,77 @@
    "col": null
   }
  },
- "174 Baguette de cale 5": {
-  "geo": {
-   "n": 36,
-   "idx": 0,
-   "pos": "841c3152deb4eb31",
-   "col": "81ee9ae44ff8baa2"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "945989b3b781df52",
-   "col": null
-  }
- },
- "175 Baguette de cale 6": {
-  "geo": {
-   "n": 36,
-   "idx": 0,
-   "pos": "841c3152deb4eb31",
-   "col": "81ee9ae44ff8baa2"
-  },
-  "edges": {
-   "n": 24,
-   "idx": 0,
-   "pos": "945989b3b781df52",
-   "col": null
-  }
- },
- "176 Face avant ext": {
+ "174 Face avant ext": {
   "geo": {
    "n": 1344,
    "idx": 0,
-   "pos": "1b0ddecca32750bf",
+   "pos": "1f148db54a4aa406",
    "col": "9606644af852543f"
   },
   "edges": {
    "n": 496,
    "idx": 0,
-   "pos": "d16ee42e391fc4a0",
+   "pos": "c93260a936948f9f",
    "col": null
   }
  },
- "177 Face arrière ext": {
+ "175 Face arrière ext": {
   "geo": {
    "n": 1512,
    "idx": 0,
-   "pos": "19effcd50a263199",
+   "pos": "6457d03923e18d45",
    "col": "85dc7b07343e2116"
   },
   "edges": {
    "n": 576,
    "idx": 0,
-   "pos": "6bf85a19e9360970",
+   "pos": "33cf521adedcdaa3",
    "col": null
   }
  },
- "178 Côté droit ext": {
+ "176 Côté droit ext": {
   "geo": {
    "n": 1296,
    "idx": 0,
-   "pos": "f12990f5a3a0edd9",
+   "pos": "859546723546851f",
    "col": "8c3ccc89e47620d1"
   },
   "edges": {
    "n": 480,
    "idx": 0,
-   "pos": "3320cd0c9398c73a",
+   "pos": "5f2b2600f2dca335",
    "col": null
   }
  },
- "179 Côté gauche ext": {
+ "177 Côté gauche ext": {
   "geo": {
    "n": 1296,
    "idx": 0,
-   "pos": "7ba2e98a265d1f2f",
+   "pos": "85eafd36b2404a03",
    "col": "8c3ccc89e47620d1"
   },
   "edges": {
    "n": 480,
    "idx": 0,
-   "pos": "98aff913aac694ae",
+   "pos": "1c7c89a493f82c6b",
    "col": null
   }
  },
- "180 Dessous ext": {
+ "178 Dessous ext": {
   "geo": {
-   "n": 2076,
+   "n": 2508,
    "idx": 0,
-   "pos": "64dcf203a5bfc5e8",
-   "col": "bd8fcd5be0a051a5"
+   "pos": "90a14c895b3d3db7",
+   "col": "b9b54a2c89254e7c"
   },
   "edges": {
-   "n": 744,
+   "n": 936,
    "idx": 0,
-   "pos": "1a665bce66d12d8a",
+   "pos": "4e590be6b14ce854",
    "col": null
   }
  },
- "181 Plancher int": {
+ "179 Plancher int": {
   "geo": {
    "n": 2424,
    "idx": 0,
@@ -2547,63 +2519,133 @@
    "col": null
   }
  },
- "182 Face avant int": {
+ "180 Face avant int": {
   "geo": {
-   "n": 852,
+   "n": 756,
    "idx": 0,
-   "pos": "886d553f00afaba9",
-   "col": "082bb10b76dea303"
+   "pos": "9a816c03844bec52",
+   "col": "a02eaa7176a69fe7"
   },
   "edges": {
-   "n": 288,
+   "n": 256,
    "idx": 0,
-   "pos": "26bf701005dd9fc8",
+   "pos": "232a575951d1786f",
    "col": null
   }
  },
- "183 Face arrière int": {
+ "181 Face arrière int": {
   "geo": {
-   "n": 804,
+   "n": 708,
    "idx": 0,
-   "pos": "34843fbc1b518487",
-   "col": "11372258f0019922"
+   "pos": "9f0dcf2b03693492",
+   "col": "88ef5966a8e3c771"
   },
   "edges": {
-   "n": 272,
+   "n": 240,
    "idx": 0,
-   "pos": "b2b622a0e98eb792",
+   "pos": "37828547d3abf383",
    "col": null
   }
  },
- "184 Côté droit int": {
+ "182 Côté droit int": {
   "geo": {
-   "n": 804,
+   "n": 708,
    "idx": 0,
-   "pos": "9e0aebccd4e9f963",
-   "col": "8f62af1eef67e15f"
+   "pos": "a0d89c53a1e5f1de",
+   "col": "88ef5966a8e3c771"
   },
   "edges": {
-   "n": 272,
+   "n": 240,
    "idx": 0,
-   "pos": "5d0aee5cf796695b",
+   "pos": "2cf29556f7a0b2a2",
    "col": null
   }
  },
- "185 Côté gauche int": {
+ "183 Côté gauche int": {
   "geo": {
-   "n": 1080,
+   "n": 984,
    "idx": 0,
-   "pos": "fccd9675b8519172",
-   "col": "ebdac825f692d810"
+   "pos": "2637ccc9ee4596b7",
+   "col": "a4eb1ebc93ad88b9"
   },
   "edges": {
-   "n": 408,
+   "n": 376,
    "idx": 0,
-   "pos": "a5109d52604d7067",
+   "pos": "3eed47ca08fe36ec",
    "col": null
   }
  },
- "186 Face avant toit": {
+ "184 Étrier batterie 1": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "185 Étrier batterie 2": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "186 Étrier batterie 3": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "187 Étrier batterie 4": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "188 Plaque de verrouillage de l'isolant": {
+  "geo": {
+   "n": 528,
+   "idx": 0,
+   "pos": "c9d35e42f81c1997",
+   "col": "50ac4df646a949b1"
+  },
+  "edges": {
+   "n": 200,
+   "idx": 0,
+   "pos": "f5ae68faa06e41d6",
+   "col": null
+  }
+ },
+ "189 Face avant toit": {
   "geo": {
    "n": 864,
    "idx": 0,
@@ -2617,7 +2659,7 @@
    "col": null
   }
  },
- "187 Face arrière toit": {
+ "190 Face arrière toit": {
   "geo": {
    "n": 1212,
    "idx": 0,
@@ -2631,7 +2673,7 @@
    "col": null
   }
  },
- "188 Côté droit toit": {
+ "191 Côté droit toit": {
   "geo": {
    "n": 912,
    "idx": 0,
@@ -2645,21 +2687,21 @@
    "col": null
   }
  },
- "189 Côté gauche toit": {
+ "192 Côté gauche toit": {
   "geo": {
-   "n": 1308,
+   "n": 912,
    "idx": 0,
-   "pos": "bc1d6b7843d9b6ee",
-   "col": "6ec0b0ec778acead"
+   "pos": "760c492c0e6a7758",
+   "col": "cb4df596ff7708c5"
   },
   "edges": {
-   "n": 480,
+   "n": 352,
    "idx": 0,
-   "pos": "0faf30031e6f2a16",
+   "pos": "c76e1eb4339861b2",
    "col": null
   }
  },
- "190 Dessus toit": {
+ "193 Dessus toit": {
   "geo": {
    "n": 540,
    "idx": 0,
@@ -2673,7 +2715,7 @@
    "col": null
   }
  },
- "191 Dessous toit": {
+ "194 Dessous toit": {
   "geo": {
    "n": 2832,
    "idx": 0,
@@ -2687,7 +2729,7 @@
    "col": null
   }
  },
- "192 Baguette dessus toit gauche": {
+ "195 Baguette dessus toit gauche": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -2701,7 +2743,7 @@
    "col": null
   }
  },
- "193 Baguette dessus toit droite": {
+ "196 Baguette dessus toit droite": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -2715,7 +2757,7 @@
    "col": null
   }
  },
- "194 Baguette dessus toit avant": {
+ "197 Baguette dessus toit avant": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -2729,7 +2771,7 @@
    "col": null
   }
  },
- "195 Baguette dessus toit arrière 1": {
+ "198 Baguette dessus toit arrière 1": {
   "geo": {
    "n": 132,
    "idx": 0,
@@ -2743,7 +2785,7 @@
    "col": null
   }
  },
- "196 Baguette dessus toit arrière 2": {
+ "199 Baguette dessus toit arrière 2": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -2757,7 +2799,7 @@
    "col": null
   }
  },
- "197 Cadre toit haut": {
+ "200 Cadre toit haut": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -2771,7 +2813,7 @@
    "col": null
   }
  },
- "198 Cadre toit milieu": {
+ "201 Cadre toit milieu": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -2785,7 +2827,7 @@
    "col": null
   }
  },
- "199 Cadre toit bas": {
+ "202 Cadre toit bas": {
   "geo": {
    "n": 480,
    "idx": 0,
@@ -2799,7 +2841,7 @@
    "col": null
   }
  },
- "200 Face avant caméra 1": {
+ "203 Face avant caméra 1": {
   "geo": {
    "n": 228,
    "idx": 0,
@@ -2813,7 +2855,7 @@
    "col": null
   }
  },
- "201 Face arrière caméra 1": {
+ "204 Face arrière caméra 1": {
   "geo": {
    "n": 228,
    "idx": 0,
@@ -2827,7 +2869,7 @@
    "col": null
   }
  },
- "202 Côté droit caméra 1": {
+ "205 Côté droit caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2841,7 +2883,7 @@
    "col": null
   }
  },
- "203 Côté gauche caméra 1": {
+ "206 Côté gauche caméra 1": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2855,7 +2897,7 @@
    "col": null
   }
  },
- "204 Caméra": {
+ "207 Caméra": {
   "geo": {
    "n": 648,
    "idx": 0,
@@ -2869,7 +2911,7 @@
    "col": null
   }
  },
- "205 LED infrarouges": {
+ "208 LED infrarouges": {
   "geo": {
    "n": 180,
    "idx": 0,
@@ -2883,7 +2925,7 @@
    "col": null
   }
  },
- "206 Raspberry Pi": {
+ "209 Raspberry Pi": {
   "geo": {
    "n": 4260,
    "idx": 0,
@@ -2897,7 +2939,7 @@
    "col": null
   }
  },
- "207 Nappe caméra": {
+ "210 Nappe caméra": {
   "geo": {
    "n": 242,
    "idx": 720,
@@ -2911,7 +2953,7 @@
    "col": null
   }
  },
- "208 Fil 5 V (rouge)": {
+ "211 Fil 5 V (rouge)": {
   "geo": {
    "n": 1521,
    "idx": 8064,
@@ -2925,7 +2967,7 @@
    "col": null
   }
  },
- "209 Fil masse (noir)": {
+ "212 Fil masse (noir)": {
   "geo": {
    "n": 1305,
    "idx": 6912,
@@ -2939,7 +2981,7 @@
    "col": null
   }
  },
- "211 Baguette couvercle avant (rechange 1)": {
+ "214 Baguette couvercle avant (rechange 1)": {
   "geo": {
    "n": 348,
    "idx": 0,
@@ -2953,7 +2995,7 @@
    "col": null
   }
  },
- "212 Baguette couvercle avant (rechange 2)": {
+ "215 Baguette couvercle avant (rechange 2)": {
   "geo": {
    "n": 348,
    "idx": 0,
@@ -2967,7 +3009,7 @@
    "col": null
   }
  },
- "213 Baguette couvercle avant (rechange 3)": {
+ "216 Baguette couvercle avant (rechange 3)": {
   "geo": {
    "n": 348,
    "idx": 0,
@@ -2981,7 +3023,7 @@
    "col": null
   }
  },
- "214 Baguette couvercle arrière (rechange 1)": {
+ "217 Baguette couvercle arrière (rechange 1)": {
   "geo": {
    "n": 348,
    "idx": 0,
@@ -2995,7 +3037,7 @@
    "col": null
   }
  },
- "215 Baguette couvercle arrière (rechange 2)": {
+ "218 Baguette couvercle arrière (rechange 2)": {
   "geo": {
    "n": 348,
    "idx": 0,
@@ -3009,7 +3051,7 @@
    "col": null
   }
  },
- "216 Baguette couvercle arrière (rechange 3)": {
+ "219 Baguette couvercle arrière (rechange 3)": {
   "geo": {
    "n": 348,
    "idx": 0,
@@ -3023,7 +3065,49 @@
    "col": null
   }
  },
- "217 Baguette couvercle gauche (rechange 1)": {
+ "220 Baguette couvercle gauche (rechange 1)": {
+  "geo": {
+   "n": 276,
+   "idx": 0,
+   "pos": "e1ff0f2a146165da",
+   "col": "963c3afb148edf36"
+  },
+  "edges": {
+   "n": 96,
+   "idx": 0,
+   "pos": "c605e5d931e0d46c",
+   "col": null
+  }
+ },
+ "221 Baguette couvercle gauche (rechange 2)": {
+  "geo": {
+   "n": 276,
+   "idx": 0,
+   "pos": "e1ff0f2a146165da",
+   "col": "963c3afb148edf36"
+  },
+  "edges": {
+   "n": 96,
+   "idx": 0,
+   "pos": "c605e5d931e0d46c",
+   "col": null
+  }
+ },
+ "222 Baguette couvercle gauche (rechange 3)": {
+  "geo": {
+   "n": 276,
+   "idx": 0,
+   "pos": "e1ff0f2a146165da",
+   "col": "963c3afb148edf36"
+  },
+  "edges": {
+   "n": 96,
+   "idx": 0,
+   "pos": "c605e5d931e0d46c",
+   "col": null
+  }
+ },
+ "223 Baguette couvercle droite (rechange 1)": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -3037,7 +3121,7 @@
    "col": null
   }
  },
- "218 Baguette couvercle gauche (rechange 2)": {
+ "224 Baguette couvercle droite (rechange 2)": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -3051,7 +3135,7 @@
    "col": null
   }
  },
- "219 Baguette couvercle gauche (rechange 3)": {
+ "225 Baguette couvercle droite (rechange 3)": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -3065,49 +3149,7 @@
    "col": null
   }
  },
- "220 Baguette couvercle droite (rechange 1)": {
-  "geo": {
-   "n": 324,
-   "idx": 0,
-   "pos": "fefe133456b4d396",
-   "col": "2e95a0a9e8505128"
-  },
-  "edges": {
-   "n": 112,
-   "idx": 0,
-   "pos": "25a396e08df1cc5d",
-   "col": null
-  }
- },
- "221 Baguette couvercle droite (rechange 2)": {
-  "geo": {
-   "n": 324,
-   "idx": 0,
-   "pos": "fefe133456b4d396",
-   "col": "2e95a0a9e8505128"
-  },
-  "edges": {
-   "n": 112,
-   "idx": 0,
-   "pos": "25a396e08df1cc5d",
-   "col": null
-  }
- },
- "222 Baguette couvercle droite (rechange 3)": {
-  "geo": {
-   "n": 324,
-   "idx": 0,
-   "pos": "fefe133456b4d396",
-   "col": "2e95a0a9e8505128"
-  },
-  "edges": {
-   "n": 112,
-   "idx": 0,
-   "pos": "25a396e08df1cc5d",
-   "col": null
-  }
- },
- "223 Étrier régulateur 1 (rechange 1)": {
+ "226 Étrier régulateur 1 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3121,7 +3163,7 @@
    "col": null
   }
  },
- "224 Étrier régulateur 1 (rechange 2)": {
+ "227 Étrier régulateur 1 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3135,7 +3177,7 @@
    "col": null
   }
  },
- "225 Étrier régulateur 1 (rechange 3)": {
+ "228 Étrier régulateur 1 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3149,7 +3191,7 @@
    "col": null
   }
  },
- "226 Étrier régulateur 2 (rechange 1)": {
+ "229 Étrier régulateur 2 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3163,7 +3205,7 @@
    "col": null
   }
  },
- "227 Étrier régulateur 2 (rechange 2)": {
+ "230 Étrier régulateur 2 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3177,7 +3219,7 @@
    "col": null
   }
  },
- "228 Étrier régulateur 2 (rechange 3)": {
+ "231 Étrier régulateur 2 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3191,7 +3233,7 @@
    "col": null
   }
  },
- "229 Étrier régulateur 3 (rechange 1)": {
+ "232 Étrier régulateur 3 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3205,7 +3247,7 @@
    "col": null
   }
  },
- "230 Étrier régulateur 3 (rechange 2)": {
+ "233 Étrier régulateur 3 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3219,7 +3261,7 @@
    "col": null
   }
  },
- "231 Étrier régulateur 3 (rechange 3)": {
+ "234 Étrier régulateur 3 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3233,7 +3275,7 @@
    "col": null
   }
  },
- "232 Étrier régulateur 4 (rechange 1)": {
+ "235 Étrier régulateur 4 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3247,7 +3289,7 @@
    "col": null
   }
  },
- "233 Étrier régulateur 4 (rechange 2)": {
+ "236 Étrier régulateur 4 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3261,7 +3303,7 @@
    "col": null
   }
  },
- "234 Étrier régulateur 4 (rechange 3)": {
+ "237 Étrier régulateur 4 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3275,7 +3317,7 @@
    "col": null
   }
  },
- "235 Clavette fixation 1.1 (rechange 1)": {
+ "238 Clavette fixation 1.1 (rechange 1)": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3289,7 +3331,7 @@
    "col": null
   }
  },
- "236 Clavette fixation 1.1 (rechange 2)": {
+ "239 Clavette fixation 1.1 (rechange 2)": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3303,7 +3345,7 @@
    "col": null
   }
  },
- "237 Clavette fixation 1.1 (rechange 3)": {
+ "240 Clavette fixation 1.1 (rechange 3)": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3317,7 +3359,7 @@
    "col": null
   }
  },
- "238 Clavette fixation 1.2 (rechange 1)": {
+ "241 Clavette fixation 1.2 (rechange 1)": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3331,7 +3373,7 @@
    "col": null
   }
  },
- "239 Clavette fixation 1.2 (rechange 2)": {
+ "242 Clavette fixation 1.2 (rechange 2)": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3345,7 +3387,7 @@
    "col": null
   }
  },
- "240 Clavette fixation 1.2 (rechange 3)": {
+ "243 Clavette fixation 1.2 (rechange 3)": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3359,7 +3401,7 @@
    "col": null
   }
  },
- "241 Clavette fixation 2.1 (rechange 1)": {
+ "244 Clavette fixation 2.1 (rechange 1)": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3373,7 +3415,7 @@
    "col": null
   }
  },
- "242 Clavette fixation 2.1 (rechange 2)": {
+ "245 Clavette fixation 2.1 (rechange 2)": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3387,7 +3429,7 @@
    "col": null
   }
  },
- "243 Clavette fixation 2.1 (rechange 3)": {
+ "246 Clavette fixation 2.1 (rechange 3)": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3401,7 +3443,7 @@
    "col": null
   }
  },
- "244 Clavette fixation 2.2 (rechange 1)": {
+ "247 Clavette fixation 2.2 (rechange 1)": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3415,7 +3457,7 @@
    "col": null
   }
  },
- "245 Clavette fixation 2.2 (rechange 2)": {
+ "248 Clavette fixation 2.2 (rechange 2)": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3429,7 +3471,7 @@
    "col": null
   }
  },
- "246 Clavette fixation 2.2 (rechange 3)": {
+ "249 Clavette fixation 2.2 (rechange 3)": {
   "geo": {
    "n": 36,
    "idx": 0,
@@ -3443,7 +3485,7 @@
    "col": null
   }
  },
- "247 Poignée cassette 1 (rechange 1)": {
+ "250 Poignée cassette 1 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3457,7 +3499,7 @@
    "col": null
   }
  },
- "248 Poignée cassette 1 (rechange 2)": {
+ "251 Poignée cassette 1 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3471,7 +3513,7 @@
    "col": null
   }
  },
- "249 Poignée cassette 1 (rechange 3)": {
+ "252 Poignée cassette 1 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3485,7 +3527,7 @@
    "col": null
   }
  },
- "250 Poignée cassette 2 (rechange 1)": {
+ "253 Poignée cassette 2 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3499,7 +3541,7 @@
    "col": null
   }
  },
- "251 Poignée cassette 2 (rechange 2)": {
+ "254 Poignée cassette 2 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3513,7 +3555,7 @@
    "col": null
   }
  },
- "252 Poignée cassette 2 (rechange 3)": {
+ "255 Poignée cassette 2 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3527,7 +3569,7 @@
    "col": null
   }
  },
- "253 Poignée cassette 3 (rechange 1)": {
+ "256 Poignée cassette 3 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3541,7 +3583,7 @@
    "col": null
   }
  },
- "254 Poignée cassette 3 (rechange 2)": {
+ "257 Poignée cassette 3 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3555,7 +3597,7 @@
    "col": null
   }
  },
- "255 Poignée cassette 3 (rechange 3)": {
+ "258 Poignée cassette 3 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3569,7 +3611,7 @@
    "col": null
   }
  },
- "256 Poignée bloc d'hiver 1 (rechange 1)": {
+ "259 Poignée bloc d'hiver 1 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3583,7 +3625,7 @@
    "col": null
   }
  },
- "257 Poignée bloc d'hiver 1 (rechange 2)": {
+ "260 Poignée bloc d'hiver 1 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3597,7 +3639,7 @@
    "col": null
   }
  },
- "258 Poignée bloc d'hiver 1 (rechange 3)": {
+ "261 Poignée bloc d'hiver 1 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3611,7 +3653,7 @@
    "col": null
   }
  },
- "259 Poignée bloc d'hiver 2 (rechange 1)": {
+ "262 Poignée bloc d'hiver 2 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3625,7 +3667,7 @@
    "col": null
   }
  },
- "260 Poignée bloc d'hiver 2 (rechange 2)": {
+ "263 Poignée bloc d'hiver 2 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3639,7 +3681,7 @@
    "col": null
   }
  },
- "261 Poignée bloc d'hiver 2 (rechange 3)": {
+ "264 Poignée bloc d'hiver 2 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3653,7 +3695,7 @@
    "col": null
   }
  },
- "262 Poignée bloc d'hiver 3 (rechange 1)": {
+ "265 Poignée bloc d'hiver 3 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3667,7 +3709,7 @@
    "col": null
   }
  },
- "263 Poignée bloc d'hiver 3 (rechange 2)": {
+ "266 Poignée bloc d'hiver 3 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3681,7 +3723,7 @@
    "col": null
   }
  },
- "264 Poignée bloc d'hiver 3 (rechange 3)": {
+ "267 Poignée bloc d'hiver 3 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3695,7 +3737,7 @@
    "col": null
   }
  },
- "265 Conduit de sortie 1 (rechange 1)": {
+ "268 Conduit de sortie 1 (rechange 1)": {
   "geo": {
    "n": 204,
    "idx": 0,
@@ -3709,7 +3751,7 @@
    "col": null
   }
  },
- "266 Conduit de sortie 1 (rechange 2)": {
+ "269 Conduit de sortie 1 (rechange 2)": {
   "geo": {
    "n": 204,
    "idx": 0,
@@ -3723,7 +3765,7 @@
    "col": null
   }
  },
- "267 Conduit de sortie 1 (rechange 3)": {
+ "270 Conduit de sortie 1 (rechange 3)": {
   "geo": {
    "n": 204,
    "idx": 0,
@@ -3737,7 +3779,7 @@
    "col": null
   }
  },
- "268 Conduit de sortie 2 (rechange 1)": {
+ "271 Conduit de sortie 2 (rechange 1)": {
   "geo": {
    "n": 204,
    "idx": 0,
@@ -3751,7 +3793,7 @@
    "col": null
   }
  },
- "269 Conduit de sortie 2 (rechange 2)": {
+ "272 Conduit de sortie 2 (rechange 2)": {
   "geo": {
    "n": 204,
    "idx": 0,
@@ -3765,7 +3807,7 @@
    "col": null
   }
  },
- "270 Conduit de sortie 2 (rechange 3)": {
+ "273 Conduit de sortie 2 (rechange 3)": {
   "geo": {
    "n": 204,
    "idx": 0,
@@ -3779,7 +3821,7 @@
    "col": null
   }
  },
- "271 Conduit de sortie 3 (rechange 1)": {
+ "274 Conduit de sortie 3 (rechange 1)": {
   "geo": {
    "n": 228,
    "idx": 0,
@@ -3793,7 +3835,7 @@
    "col": null
   }
  },
- "272 Conduit de sortie 3 (rechange 2)": {
+ "275 Conduit de sortie 3 (rechange 2)": {
   "geo": {
    "n": 228,
    "idx": 0,
@@ -3807,7 +3849,7 @@
    "col": null
   }
  },
- "273 Conduit de sortie 3 (rechange 3)": {
+ "276 Conduit de sortie 3 (rechange 3)": {
   "geo": {
    "n": 228,
    "idx": 0,
@@ -3821,7 +3863,7 @@
    "col": null
   }
  },
- "274 Conduit de sortie 4 (rechange 1)": {
+ "277 Conduit de sortie 4 (rechange 1)": {
   "geo": {
    "n": 228,
    "idx": 0,
@@ -3835,7 +3877,7 @@
    "col": null
   }
  },
- "275 Conduit de sortie 4 (rechange 2)": {
+ "278 Conduit de sortie 4 (rechange 2)": {
   "geo": {
    "n": 228,
    "idx": 0,
@@ -3849,7 +3891,7 @@
    "col": null
   }
  },
- "276 Conduit de sortie 4 (rechange 3)": {
+ "279 Conduit de sortie 4 (rechange 3)": {
   "geo": {
    "n": 228,
    "idx": 0,
@@ -3863,7 +3905,7 @@
    "col": null
   }
  },
- "277 Poignée bouchon prise d'air 1 (rechange 1)": {
+ "280 Poignée bouchon prise d'air 1 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3877,7 +3919,7 @@
    "col": null
   }
  },
- "278 Poignée bouchon prise d'air 1 (rechange 2)": {
+ "281 Poignée bouchon prise d'air 1 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3891,7 +3933,7 @@
    "col": null
   }
  },
- "279 Poignée bouchon prise d'air 1 (rechange 3)": {
+ "282 Poignée bouchon prise d'air 1 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3905,7 +3947,7 @@
    "col": null
   }
  },
- "280 Poignée bouchon prise d'air 2 (rechange 1)": {
+ "283 Poignée bouchon prise d'air 2 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3919,7 +3961,7 @@
    "col": null
   }
  },
- "281 Poignée bouchon prise d'air 2 (rechange 2)": {
+ "284 Poignée bouchon prise d'air 2 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3933,7 +3975,7 @@
    "col": null
   }
  },
- "282 Poignée bouchon prise d'air 2 (rechange 3)": {
+ "285 Poignée bouchon prise d'air 2 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3947,7 +3989,7 @@
    "col": null
   }
  },
- "283 Poignée bouchon prise d'air 3 (rechange 1)": {
+ "286 Poignée bouchon prise d'air 3 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3961,7 +4003,7 @@
    "col": null
   }
  },
- "284 Poignée bouchon prise d'air 3 (rechange 2)": {
+ "287 Poignée bouchon prise d'air 3 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3975,7 +4017,7 @@
    "col": null
   }
  },
- "285 Poignée bouchon prise d'air 3 (rechange 3)": {
+ "288 Poignée bouchon prise d'air 3 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -3989,7 +4031,175 @@
    "col": null
   }
  },
- "286 Baguette dessus toit gauche (rechange 1)": {
+ "289 Étrier batterie 1 (rechange 1)": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "290 Étrier batterie 1 (rechange 2)": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "291 Étrier batterie 1 (rechange 3)": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "292 Étrier batterie 2 (rechange 1)": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "293 Étrier batterie 2 (rechange 2)": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "294 Étrier batterie 2 (rechange 3)": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "295 Étrier batterie 3 (rechange 1)": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "296 Étrier batterie 3 (rechange 2)": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "297 Étrier batterie 3 (rechange 3)": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "298 Étrier batterie 4 (rechange 1)": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "299 Étrier batterie 4 (rechange 2)": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "300 Étrier batterie 4 (rechange 3)": {
+  "geo": {
+   "n": 84,
+   "idx": 0,
+   "pos": "0d85219ddd2cc7a6",
+   "col": "850698afdd6b04da"
+  },
+  "edges": {
+   "n": 48,
+   "idx": 0,
+   "pos": "090e49750df0fa7f",
+   "col": null
+  }
+ },
+ "301 Baguette dessus toit gauche (rechange 1)": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -4003,7 +4213,7 @@
    "col": null
   }
  },
- "287 Baguette dessus toit gauche (rechange 2)": {
+ "302 Baguette dessus toit gauche (rechange 2)": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -4017,7 +4227,7 @@
    "col": null
   }
  },
- "288 Baguette dessus toit gauche (rechange 3)": {
+ "303 Baguette dessus toit gauche (rechange 3)": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -4031,7 +4241,7 @@
    "col": null
   }
  },
- "289 Baguette dessus toit droite (rechange 1)": {
+ "304 Baguette dessus toit droite (rechange 1)": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -4045,7 +4255,7 @@
    "col": null
   }
  },
- "290 Baguette dessus toit droite (rechange 2)": {
+ "305 Baguette dessus toit droite (rechange 2)": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -4059,7 +4269,7 @@
    "col": null
   }
  },
- "291 Baguette dessus toit droite (rechange 3)": {
+ "306 Baguette dessus toit droite (rechange 3)": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -4073,7 +4283,7 @@
    "col": null
   }
  },
- "292 Baguette dessus toit avant (rechange 1)": {
+ "307 Baguette dessus toit avant (rechange 1)": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -4087,7 +4297,7 @@
    "col": null
   }
  },
- "293 Baguette dessus toit avant (rechange 2)": {
+ "308 Baguette dessus toit avant (rechange 2)": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -4101,7 +4311,7 @@
    "col": null
   }
  },
- "294 Baguette dessus toit avant (rechange 3)": {
+ "309 Baguette dessus toit avant (rechange 3)": {
   "geo": {
    "n": 324,
    "idx": 0,
@@ -4115,7 +4325,7 @@
    "col": null
   }
  },
- "295 Baguette dessus toit arrière 1 (rechange 1)": {
+ "310 Baguette dessus toit arrière 1 (rechange 1)": {
   "geo": {
    "n": 132,
    "idx": 0,
@@ -4129,7 +4339,7 @@
    "col": null
   }
  },
- "296 Baguette dessus toit arrière 1 (rechange 2)": {
+ "311 Baguette dessus toit arrière 1 (rechange 2)": {
   "geo": {
    "n": 132,
    "idx": 0,
@@ -4143,7 +4353,7 @@
    "col": null
   }
  },
- "297 Baguette dessus toit arrière 1 (rechange 3)": {
+ "312 Baguette dessus toit arrière 1 (rechange 3)": {
   "geo": {
    "n": 132,
    "idx": 0,
@@ -4157,7 +4367,7 @@
    "col": null
   }
  },
- "298 Baguette dessus toit arrière 2 (rechange 1)": {
+ "313 Baguette dessus toit arrière 2 (rechange 1)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -4171,7 +4381,7 @@
    "col": null
   }
  },
- "299 Baguette dessus toit arrière 2 (rechange 2)": {
+ "314 Baguette dessus toit arrière 2 (rechange 2)": {
   "geo": {
    "n": 84,
    "idx": 0,
@@ -4185,7 +4395,7 @@
    "col": null
   }
  },
- "300 Baguette dessus toit arrière 2 (rechange 3)": {
+ "315 Baguette dessus toit arrière 2 (rechange 3)": {
   "geo": {
    "n": 84,
    "idx": 0,

@@ -71,7 +71,7 @@ describe('toit en okoumé : deux plaques de 5 mm (crénelée dessous, pleine des
         for (const b of bag.slice(0, 2)) expect(b.w).toBeCloseTo(W - 2 * t, 1);
       });
       if (over.cam2 !== false) it('canal : un seul grand trou oblong dans la plaque crénelée, de l\'à-plomb de la caméra 2 jusque dans le caisson ; plus de fente dans la plaque avant ni de fenêtre dans le lambris', () => {
-        const chan = A.holes.filter((h) => h.r !== undefined);
+        const chan = A.holes.filter((h) => h.r !== undefined && (h.sh ?? 0) > 20); // le canal de la caméra 2 (celui du câble de la sonde fait 8 mm de large)
         expect(chan).toHaveLength(1);
         expect(chan[0].size).toBeGreaterThanOrEqual(24); expect(chan[0].size).toBeLessThanOrEqual(30);
         const cam = sc.planks.find((p) => p.name === 'Caméra 2')!, front = sc.planks.find((p) => p.name === 'Face avant toit')!;

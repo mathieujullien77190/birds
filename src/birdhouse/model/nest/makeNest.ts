@@ -58,15 +58,16 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const roofH = 2 * t + n.ins;
   const bodyH = n.floorToHole + n.hole + n.above + 2 * t + 2 * e - roofH; // les murs s'arrêtent là ; le toit se pose dessus
   const holeZ = e + t + n.floorToHole + n.hole / 2; // centre du trou d'envol, en z monde depuis le dessous du corps
-  const outerBox = makeBox(W, D, bodyH, t, fit, start);
-  const innerBox = makeBox(n.l + 2 * t, n.L + 2 * t, bodyH - e, t, fit, start);
+  const WALL_DROP = t; // les huit parois du corps s'arrêtent 3 mm sous bodyH : la plaque de verrouillage de l'isolant (en C) occupe ces 3 mm et se pose sur leur chant
+  const outerBox = makeBox(W, D, bodyH - WALL_DROP, t, fit, start);
+  const innerBox = makeBox(n.l + 2 * t, n.L + 2 * t, bodyH - WALL_DROP - e, t, fit, start);
   const roofBox = makeBox(W, D, roofH, t, fit, start);
   const group = outerBox.group, roofGroup = roofBox.group;
   const noTop = (p: Plank): Plank => { const cast = { ...(p.cast ?? {}) }; delete cast.top; return recastAll({ ...p, cast, notches: p.notches.filter((x) => x.edge !== 'top') }, t, fit); }; // mur sans crans en haut (le toit se pose dessus)
   const isWall = (p: Plank) => /^(Face|Côté)/.test(p.name);
   const OPEN = n.hole + 15; // ouverture carrée dans les deux murs avant : 1,5 cm de plus que le trou d'envol
   // l'ouverture des murs avant est une encoche ouverte vers le HAUT (largeur OPEN + 1 mm de jeu, du bas du carré jusqu'au haut du mur) : toit retiré, on pose le bloc d'entrée par le dessus
-  const hole = (p: Plank): Plank => ({ ...p, notches: [...p.notches, { id: uid(), edge: 'top', pos: r2(p.w / 2), width: OPEN + 1, depth: r2(bodyH - (holeZ - OPEN / 2)) }] }); // 0,5 mm de jeu de chaque côté : le bloc coulisse à la verticale dans l'encoche, il s'arrête sur le fond
+  const hole = (p: Plank): Plank => ({ ...p, notches: [...p.notches, { id: uid(), edge: 'top', pos: r2(p.w / 2), width: OPEN + 1, depth: r2(bodyH - WALL_DROP - (holeZ - OPEN / 2)) }] }); // 0,5 mm de jeu de chaque côté : le bloc coulisse à la verticale dans l'encoche, il s'arrête sur le fond
   const floorEdge = (len: number) => ({ n: teethFor(len), phase: 0 as const }); // phase 0 : coins creux, dents au milieu
   const floor: Plank = recastAll({ id: uid(), name: 'Plancher int', w: W, h: D, pos: [0, 0, e + t / 2], rot: [0, 0, 0], notches: [], holes: [], group, cast: { top: floorEdge(W), bottom: floorEdge(W), left: floorEdge(D), right: floorEdge(D) } }, t, fit);
   // FIXATION À L'ARBRE : deux nervures verticales en x = ± W/4, chacune = 3 PLAQUES COLLÉES (9 mm), 30 mm de profondeur, du bas du corps jusqu'au bas du toit ;
@@ -80,8 +81,11 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const cam2X = -W / 2 + 33, cam2Y = -D / 2 - 23; // caméra 2 : toujours DEHORS, 23 mm devant la façade, à 33 mm du bord gauche, quelle que soit la taille du nichoir
   // quatre ÉTRIERS en U de contreplaqué qui tiennent le régulateur sous le plancher : plaque de 78 × 51 debout en travers, encoche de 62 × 42 ouverte vers le haut (le régulateur 61 × 33 + 1 de jeu),
   // bras de 8 dont les 3 mm du haut (= t) sont des tenons qui traversent le fond par des fentes 8 × 3 et AFFLEURENT son dessus : rien ne dépasse dans l'isolant
-  const U_W = 78, U_ARM = 8, U_H = 46, U_TEN = t, U_YS = [-55, -22, 15, 52].map((d) => RGY + d); // gaine dans le coin arrière droit : à 1 cm du mur arrière, PILE sur le joint entre l'isolant du mur droit et celui du mur arrière (x = l/2 + t), à gauche de la barre du toit (x = 77,5…87,5) // régulateur de charge SOUS le nichoir (à plat, protégé par le lambris qui descend) ; les fils montent dans l'isolant du côté droit, dans une gaine (gaine électrique ICTA Ø 16)
-  const outerParts = outerBox.planks.filter((p) => !/^Dessus/.test(p.name)).map((p) => { let q = isWall(p) ? noTop(p) : p; if (n.solar && /^Dessous/.test(p.name)) q = { ...q, holes: [...q.holes, ...U_YS.flatMap((y) => [RGX - U_W / 2 + U_ARM / 2, RGX + U_W / 2 - U_ARM / 2].map((x) => fitHole(q, { id: uid(), shape: 'square' as const, x: r2(x), y: r2(y), size: U_ARM, sh: t })))] };/* fentes des tenons des étriers du régulateur */ if (/^Face arrière/.test(p.name)) q = { ...q, holes: [...q.holes, ...RIB_XS.flatMap((x) => RIB_TEETH_Z.slice(0, 2).map(([za, zb]) => fitHole(q, { id: uid(), shape: 'square' as const, x, y: r2((za + zb) / 2 - q.pos[2]), size: RIB_T + 0.5, sh: zb - za })))] }; /* fentes 9,5 × 32 des deux dents basses des nervures de fixation */ return /^Face avant/.test(p.name) ? hole(q) : q; });
+  const U_W = 78, U_ARM = 8, U_H = 46, U_TEN = t, U_YS = [-55, -22, 15, 52].map((d) => RGY + d);
+  // BATTERIE sous le nichoir, à gauche du régulateur : 70 (x) × 128 (y) × 32, à plat, tenue par quatre étriers en U comme ceux du régulateur (encoche de 71 + bras de 8) ;
+  // elle laisse 9 mm devant (conduit d'air et sa sous-boîte), ses bornes regardent le régulateur (face est), entre les deux étriers du milieu
+  const U_WB = 87, U_HB = 45, BAT_X = -19, BAT_Y = RGY + 50, BAT_Z = -16, BAT_YS = [-20, 13, 37, 58].map((d) => BAT_Y + d); // U_HB : encoche de 36 (batterie 32 + 1 de jeu + 3 de tenon) + 9 de fond ; plaques à y = 0, 33, 57, 78 : jamais en face d'un étrier du régulateur (≥ 8 mm) ni du conduit d'air (≥ 7 mm)
+  const outerParts = outerBox.planks.filter((p) => !/^Dessus/.test(p.name)).map((p) => { let q = isWall(p) ? noTop(p) : p; if (n.solar && /^Dessous/.test(p.name)) q = { ...q, holes: [...q.holes, ...U_YS.flatMap((y) => [RGX - U_W / 2 + U_ARM / 2, RGX + U_W / 2 - U_ARM / 2].map((x) => fitHole(q, { id: uid(), shape: 'square' as const, x: r2(x), y: r2(y), size: U_ARM, sh: t }))), ...BAT_YS.flatMap((y) => [BAT_X - U_WB / 2 + U_ARM / 2, BAT_X + U_WB / 2 - U_ARM / 2].map((x) => fitHole(q, { id: uid(), shape: 'square' as const, x: r2(x), y: r2(y), size: U_ARM, sh: t })))] };/* fentes des tenons des étriers du régulateur et de la batterie */ if (/^Face arrière/.test(p.name)) q = { ...q, holes: [...q.holes, ...RIB_XS.flatMap((x) => RIB_TEETH_Z.slice(0, 2).map(([za, zb]) => fitHole(q, { id: uid(), shape: 'square' as const, x, y: r2((za + zb) / 2 - q.pos[2]), size: RIB_T + 0.5, sh: zb - za })))] }; /* fentes 9,5 × 32 des deux dents basses des nervures de fixation */ return /^Face avant/.test(p.name) ? hole(q) : q; });
   const AIR_CY = r2(-n.L / 2 + 25), AIR_ZS = Math.round((e + t + bodyH) / 2), AIR_SH = 30, AIR_SW = 34; // centre en y, hauteur de la fente (mi-hauteur du nid), taille de la fente
   const DRAIN_Z = e + t, DRAIN_H = 6; // évacuation de l'eau : ouverture rectangulaire (AIR_SW de large, DRAIN_H de haut), dont le bas est au dessus du plancher intérieur, dans « Côté gauche int » et « Conduit d'air 2 » : l'eau coule du plancher dans le conduit, ouvert en bas
   // évacuation de l'eau dans le mur intérieur gauche : une ENCOCHE dans son bord bas, centrée près du conduit d'air, jusqu'à DRAIN_H au-dessus du plancher (bas à fleur du plancher : pas de seuil) ;
@@ -122,7 +126,10 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const pw = (lx: number, ly: number): [number, number] => [r2(piX - ly), r2(piY + lx)]; // repère de la carte (x vers sa droite, y vers son haut) → repère du nichoir
   const yFrontPi = piY - 42.5; // bord de la carte le plus proche de l'avant
   // le grenier peut être BAS : le boîtier n'est plus à l'avant, il est sous la partie haute du pan ; Hf est juste calculé pour que le pan passe 4 mm au-dessus de lui
-  const Hf = Math.max(Math.ceil(roofH + 7 + 17 + 4 - (yFrontPi + D / 2) * Math.tan((PENTE * Math.PI) / 180)), Math.ceil(roofH + 3 + 32 + 4 - (-100 + D / 2) * Math.tan((PENTE * Math.PI) / 180))), Hb = Hf + Math.round(D * Math.tan((PENTE * Math.PI) / 180));
+  const SLOPE_D = Math.round(D * Math.tan((PENTE * Math.PI) / 180)); // dénivelé avant → arrière
+  const HF_PI = Math.max(Math.ceil(roofH + 7 + 17 + 4 - (yFrontPi + D / 2) * Math.tan((PENTE * Math.PI) / 180)), Math.ceil(roofH + 7 + 20 + 4 - (piY - 12 + D / 2) * Math.tan((PENTE * Math.PI) / 180))); // pan à 4 mm au-dessus des prises du Pi (17) et de l'Active Cooler du Pi 5 (20 au-dessus de la carte, au droit de la puce)
+  const HB_FAN = 114; // plaque arrière : la fenêtre de sortie de la cassette du ventilateur (60 × 40) en dépend (VENT_H = Hb − 22 − 49 − 7,5) ; en dessous elle devient trop basse
+  const Hb = Math.max(HF_PI + SLOPE_D, HB_FAN), Hf = Hb - SLOPE_D;
   // deuxième caméra, DEHORS : NUE (caméra + carte de 4 LED infrarouges, sans boîte), accrochée sous le débord du toit en okoumé, à l'avant gauche ; inclinée vers le bas et tournée
   // pour que son objectif regarde le trou d'entrée ; la caméra est debout, connecteur en haut
   const lamT = n.lambris ? OKOUME_T : 0;
@@ -259,6 +266,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     return transformPlanks({ t, fit, planks: all }, ids, [cam2X, cam2Y, cam2Cz], cam2Q, [0, 0, 0]).planks;
   })() : [];
   const brackets: Plank[] = n.solar ? U_YS.map((y, k): Plank => ({ id: uid(), name: `Étrier régulateur ${k + 1}`, w: U_W, h: U_H, pos: [RGX, r2(y), r2(U_TEN - U_H / 2)] as Vec3, rot: rotFromBasis([1, 0, 0], [0, 0, 1]), notches: [{ id: uid(), edge: 'top' as const, pos: U_W / 2, width: U_W - 2 * U_ARM, depth: U_H - 9 }], holes: [], group })) : []; // les tenons (3 mm du haut des bras) affleurent le dessus du fond (z = +3), le fond de l'encoche est 1 mm sous le régulateur
+  const batBrackets: Plank[] = BAT_YS.map((y, k): Plank => ({ id: uid(), name: `Étrier batterie ${k + 1}`, w: U_WB, h: U_HB, pos: [BAT_X, r2(y), r2(U_TEN - U_HB / 2)] as Vec3, rot: rotFromBasis([1, 0, 0], [0, 0, 1]), notches: [{ id: uid(), edge: 'top' as const, pos: U_WB / 2, width: U_WB - 2 * U_ARM, depth: U_HB - 9 }], holes: [], group }));
   const LAM_T = OKOUME_T, LAM_W = 46, LAM_DOWN = n.solar ? 45 : 10, LAM_FRONT_GAP = 1.5; // habillage en contreplaqué okoumé extérieur de 5 mm, peint en blanc, découpé au laser : lames de ~46 (largeur exacte (W + 2·LAM_T) / k), toutes de la même largeur ; LAM_FRONT_GAP = jeu (mm) sous le pan en okoumé devant
   // les nervures : RIB_N plaques de t collées côte à côte, chacune avec le même contour ; bord côté nichoir crénelé aux trois dents seulement
   const RIB_Y0 = D / 2 - t - RIB_OUT, RIB_Y1 = D / 2 + (n.lambris ? LAM_T : 0) + RIB_D; // du bout des dents (6 mm dans l'isolant) au bout de la nervure
@@ -282,7 +290,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   ] : [];
   // cadre sous le toit, en trois planches collées (le toit n'est plus verrouillé par des barres : il tient avec l'habillage collé au corps) ;
   // en descendant dans l'isolant entre murs extérieur et intérieur, le cadre cale en plus le toit sur le corps
-  const ring = (name: string, k: number, holes: Hole[]): Plank => ({ id: uid(), name, w: W - 2 * t, h: D - 2 * t, pos: [0, 0, bodyH - (2 * k + 1) * t / 2], rot: [0, 0, 0], notches: [], holes, group: roofGroup });
+  const ring = (name: string, k: number, holes: Hole[]): Plank => ({ id: uid(), name, w: W - 2 * t, h: D - 2 * t, pos: [0, 0, bodyH - WALL_DROP - (2 * k + 1) * t / 2], rot: [0, 0, 0], notches: [], holes, group });
   // le cadre est en U : son ouverture centrale (l'extérieur de la boîte intérieure) est ouverte vers l'avant par une encoche qui va jusqu'au bord avant, de sorte
   // que le bloc d'entrée (plaques de 55 dans l'isolant) peut monter à fleur du haut du mur, toit retiré ou posé
   const uNotch = (): Notch => ({ id: uid(), edge: 'bottom', pos: r2((W - 2 * t) / 2), width: n.l + 2 * t, depth: r2((D / 2 - t) + (n.L / 2 + t)) });
@@ -293,6 +301,11 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   ];
   // le Raspberry Pi sur le toit, à l'arrière (pas au-dessus de l'ouverture), calé par six petits bouts de bois collés sur le toit
   const roofTop = bodyH + roofH;
+  // PLAQUE DE VERROUILLAGE DE L'ISOLANT : plaque de contreplaqué de t en forme de C, posée à plat sur le chant des huit parois (murs extérieurs, murs intérieurs) et sur les trois planches du cadre, de bodyH − t à bodyH ;
+  // elle recouvre toute la couronne d'isolant ; son trou = l'intérieur du nid (ouvert vers le haut) ; elle est ouverte à l'avant sur la largeur du plus large carré du bloc d'entrée (+ 1 mm) : le bloc se retire par le haut
+  const lockA = W / 2, lockB = D / 2, lockHx = n.l / 2, lockHy = n.L / 2, lockG = r2((OPEN + 12) / 2 + 0.5);
+  const lockPlate: Plank = { id: uid(), name: "Plaque de verrouillage de l'isolant", w: W, h: D, pos: [0, 0, r2(bodyH - t / 2)] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group,
+    poly: [[-lockA, -lockB], [-lockG, -lockB], [-lockG, -lockHy], [-lockHx, -lockHy], [-lockHx, lockHy], [lockHx, lockHy], [lockHx, -lockHy], [lockG, -lockHy], [lockG, -lockB], [lockA, -lockB], [lockA, lockB], [-lockA, lockB]] as Pt[] };
   const OAK = n.chene ? 18 : 0, topZ = roofTop + OAK; // dessus de la planche de chêne : tout ce qui est « sur le toit » (Pi, boîtier, toit en pente) se pose dessus
   const piZ = topZ + 7; // centre de la carte : sur des entretoises de 6 mm au-dessus du dessus du toit (les composants du dessous dépassent de 2,9)
   const wedgeNeed: number[] = []; // longueurs (mm) des cales de bois d'autrefois, une par côté de composant : le besoin que les baguettes de cale (3 × ce besoin) doivent couvrir
@@ -355,7 +368,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const outFace = -D / 2, inFace = -n.L / 2; // faces extérieure du mur extérieur et intérieure du mur intérieur
   const K = Math.ceil((inFace - outFace) / t); // plaques dans l'épaisseur des murs (16 : le dernier carré affleure la face intérieure)
   // les plaques sont des RECTANGLES : elles montent toutes jusqu'en haut du mur (à fleur, elles comblent l'encoche), dans l'isolant aussi (le cadre du toit est en U, ouvert vers l'avant)
-  const wallTop = bodyH;
+  const wallTop = bodyH - WALL_DROP;
   const plate = (name: string, w: number, bottom: number, top: number, y: number): Plank => {
     const h = r2(top - bottom), zc = r2((top + bottom) / 2);
     return { id: uid(), name, w, h, pos: [0, y, zc] as Vec3, rot: frontRot, notches: [], holes: [fitHole({ w, h } as Plank, { id: uid(), shape: 'round', x: 0, y: r2(holeZ - zc), size: n.hole })], group: entryGroup };
@@ -371,7 +384,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // l'isolant : uniquement des pavés (boîtes pleines), en orange, dans un groupe à part ; pas de découpe, pas de bois
   const xo = W / 2 - t, yo = D / 2 - t, xi = n.l / 2 + t, yi = n.L / 2 + t; // faces intérieures du mur extérieur, faces extérieures du mur intérieur
   const wide = (OPEN + 12) / 2; // demi-largeur des plaques du bloc d'entrée dans l'isolant
-  const z0 = e + t, z1 = bodyH - 3 * t; // au-dessus du plancher intérieur, jusque sous le cadre du toit
+  const z0 = e + t, z1 = bodyH - WALL_DROP - 3 * t; // au-dessus du plancher intérieur, jusque sous le cadre (les trois planches, sous la plaque de verrouillage)
   const block = (name: string, x0: number, x1: number, y0: number, y1: number, za: number, zb: number): Plank[] => (x1 - x0 > 0.01 && y1 - y0 > 0.01 && zb - za > 0.01
     ? [{ id: uid(), name, w: r2(x1 - x0), h: r2(y1 - y0), depth: r2(zb - za), pos: [r2((x0 + x1) / 2), r2((y0 + y1) / 2), r2((za + zb) / 2)] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: isoGroup, special: 'block' as const, color: '#f59e0b', transparent: true }]
     : []);
@@ -394,39 +407,34 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     ({ id: uid(), name, w, h, depth, pos: [x, y, z] as Vec3, rot, notches: [], holes: [], group: elecGroup, special, color });
   const wire = (name: string, color: string, path: Vec3[], d = 1.2): Plank => ({ id: uid(), name, w: d, h: d, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'wire' as const, color, path });
   const CVX = -(W / 2 - t) + 10 + 18, CVY = -(D / 2 - t) + 10 + 30; // convertisseur : coin avant gauche, 1 cm des murs
-  const BX = W / 2 - t - 10 - 64, BY = -(D / 2 - t) + 10 + 35; // batterie : coin avant droit, 1 cm des murs
+  const FUX = r2(BAT_X + 58.5), FUY = r2(BAT_Y + 46), FAX = r2(FUX - 6), FBX = r2(FUX + 5), BT_Y = r2(BAT_Y + 64), BTP_X = r2(BAT_X + 28), BTM_X = r2(BAT_X + 16), BT_Z = -12, RT_Y = r2(RGY + 68.5), RTP_X = RGX - 8, RTM_X = RGX + 8, RT_Z = RGZ + 6, G1X = r2(CND_X - 2.5), G1Y = r2(CND_Y - 2.5), G2X = r2(CND_X + 2.5), G2Y = r2(CND_Y + 2.5); // fusible sous le fond derrière le régulateur (lame A : régulateur + batterie, lame B : rail) ; bornes de la batterie (face nord) et du régulateur (bout nord) ; positions des deux fils dans la gaine
   const WGX = W / 2 - t - 2 - 10; // les deux Wago du rail 12 V : à droite du fusible, contre le mur droit
-  const FX = CND_X + 3, FY = CND_Y - 24; // fusible, près de la sortie de la gaine // centre du convertisseur : milieu de la place libre entre le tasseau gauche, la cale gauche de la batterie, le tasseau avant et la cale avant du Pi
+  const FY = CND_Y - 24; // repère des Wago, près de la sortie de la gaine // centre du convertisseur : milieu de la place libre entre le tasseau gauche, la cale gauche de la batterie, le tasseau avant et la cale avant du Pi
   // Wago 221-413 (+, 3 entrées) et 221-415 (−, 5 entrées) : simples PAVÉS aux cotes officielles WAGO (fiche 08.05.2024 : 221-413 = 18,8 × 8,4 × 18,8 mm, 221-415 = 30 × 8,4 × 18,8 mm : largeur dans le sens de la rangée, hauteur, profondeur dans le sens des fils) ;
   // TOUS les fils entrent par la MÊME face (ouest, x = WGF), au pas de 6 mm (3 × 6 + 0,8 = 18,8 ; 5 × 6 = 30), à mi-hauteur : WG_Z
   const WG_W = 18.8, WG_H = 8.4, WG_PITCH = 6, WG_L3 = 18.8, WG_L5 = 30;
-  const WGF = r2(WGX + 10 - WG_W), WGBX = r2(WGF + WG_W / 2), FUY = r2(FY - 1.5), WGP_Y = FUY, WGM_Y = r2(WGP_Y - WG_L3 / 2 - 1.5 - WG_L5 / 2), WG_Z = r2(topZ + 3 + WG_H / 2); // le fusible est dans l'axe de l'entrée du milieu du Wago +
+  const WGF = r2(WGX + 10 - WG_W), WGBX = r2(WGF + WG_W / 2), WGP_Y = r2(FY - 1.5), WGM_Y = r2(WGP_Y - WG_L3 / 2 - 1.5 - WG_L5 / 2), WG_Z = r2(topZ + 3 + WG_H / 2); // le fusible est dans l'axe de l'entrée du milieu du Wago +
   const wgPort = (cy: number, n: number, i: number) => r2(cy + WG_PITCH * ((n - 1) / 2 - i)); // y de l'entrée i (0 = au nord) d'un Wago de n entrées centré en cy
   const wgEnd = (y: number, from: [number, number, number][]): Vec3[] => [...from, [r2(WGF + 2.5), y, WG_Z]] as Vec3[]; // les ≥ 12 derniers mm sont rectilignes, perpendiculaires à la face, au niveau des orifices ; 2,5 mm dans l'orifice
-  { // besoin en cales du convertisseur (66 + 66 + 36 + 36) et de la batterie (côtés 76 + 76, avant 128, arrière 128 ou deux morceaux autour de l'ouverture du compartiment caméra) : plus de pièces, seulement des longueurs
-    wedgeNeed.push(66, 66, 36, 36, 76, 76, 128);
-    const y = BY + 35 + 1.5, cutBack = y > CAM_Y - cc - t && y < CAM_Y + cc + t;
-    const segs: [number, number][] = cutBack ? ([[BX - 64, CAMX0 - 2 * t], [CAMX1 + 2 * t, BX + 64]] as [number, number][]).filter(([a0, b0]) => b0 - a0 > 2) : [[BX - 64, BX + 64]];
-    for (const [a0, b0] of segs) wedgeNeed.push(r2(b0 - a0));
-  }
+  wedgeNeed.push(66, 66, 36, 36); // besoin en cales du convertisseur (66 + 66 + 36 + 36) : plus de pièces, seulement des longueurs
   // alimentation : toujours présente (le Pi en a besoin) — batterie 4 × 32700, fusible, deux Wago du rail 12 V, convertisseur 12 → 5 V, leurs cales et leurs fils
   const power: Plank[] = [
     part('Convertisseur 12 V → 5 V 5 A USB-C (taille à confirmer, ≈ 60 × 36 × 16)', 36, 60, 16, CVX, CVY, topZ + 3 + 8, 'block', '#0e7490'), // centré dans la place libre de l'avant gauche, calé
-    part('Fusible lame 15 A (19 × 18 × 5, posé à plat)', 19, 18.5, 5, FX, FUY, topZ + 2.5, 'block', '#dc2626'), // près de la sortie de la gaine
+    part('Fusible lame 15 A (19 × 18 × 5, posé à plat)', 19, 18.5, 5, FUX, FUY, -2.5, 'block', '#dc2626'), // sous le fond, dans le couloir entre la batterie et le régulateur, collé contre le dessous du nichoir, au plus près du + de la batterie
     part('Wago 221-413 (3 entrées) rail 12 V +', WG_W, WG_L3, WG_H, WGBX, WGP_Y, WG_Z, 'block', '#f97316'), // bornier du rail 12 V : le fusible, l'interrupteur du ventilateur, le convertisseur
     part('Wago 221-415 (5 entrées) rail 12 V −', WG_W, WG_L5, WG_H, WGBX, WGM_Y, WG_Z, 'block', '#9ca3af'), // batterie −, convertisseur −, ventilateur −, masse de l'interrupteur (+ 1 entrée libre) ; taille à vérifier sur la fiche WAGO
-    part('Batterie LiFePO4 12,8 V 6 Ah (4 × 32700, 128 × 70 × 32)', 128, 70, 32, BX, BY, topZ + 3 + 16, 'block', '#047857'), // dans le grenier, coin avant droit, à 1 cm du mur de droite et du mur avant
-    wire('Fil fusible → batterie + (rouge)', '#dc2626', [[FX - 7.5, FUY, topZ + 5], [FX - 8, FUY - 7, topZ + 14], [(FX + BX) / 2, (FUY + BY) / 2, topZ + 34], [BX - 8, BY + 46, topZ + 22], [BX - 8, BY + 38, topZ + 19], [BX - 8, BY + 31, topZ + 19]] as Vec3[], 3.6),
-    wire('Fil fusible → Wago + (rouge)', '#dc2626', wgEnd(wgPort(WGP_Y, 3, 1), [[FX + 3, FUY, WG_Z]]), 3.6), // le + sort du fusible, droit dans l'axe de l'entrée du milieu du Wago +
-    wire('Fil batterie − → Wago − (noir)', '#111827', wgEnd(wgPort(WGM_Y, 5, 3), [[BX + 12, BY + 31, topZ + 19], [BX + 12, BY + 38, topZ + 19], [BX + 12, BY + 46, topZ + 22], [BX + 34, -6, topZ + 36], [r2(WGF - 25.2), r2(WGM_Y - 24.6), topZ + 20], [r2(WGF - 25.2), wgPort(WGM_Y, 5, 3), WG_Z]]), 3.6), // le − de la batterie arrive du sud et entre dans la 4ᵉ entrée du Wago −
+    wire('Fil fusible → Wago + (rouge)', '#dc2626', [[FBX, FUY, -2.5], [FBX, FUY, -8], [r2(FBX + 6), r2(FUY + 2), -8], [G1X, r2(G1Y - 12), -8], [G1X, G1Y, -4], [G1X, G1Y, topZ + 10], [G1X, r2(WGP_Y + 19.5), topZ + 18], [r2(WGF - 22.2), r2(WGP_Y + 9.5), topZ + 17], [r2(WGF - 22.2), r2(WGP_Y + 3.5), topZ + 12], ...wgEnd(wgPort(WGP_Y, 3, 1), [[r2(WGF - 22.2), wgPort(WGP_Y, 3, 1), WG_Z]])] as Vec3[], 3.6), // le + sort de la lame B du fusible (sous le fond), monte par la gaine et entre dans l'entrée du milieu du Wago +
+    wire('Fil batterie − → Wago − (noir)', '#111827', [[BTM_X, BT_Y, BT_Z], [BTM_X, r2(BT_Y + 11), -14], [r2(CND_X - 20), r2(CND_Y + 12), -14], [G2X, r2(G2Y + 8), -12], [G2X, G2Y, -4], [G2X, G2Y, topZ + 14], [r2(FANX + FO / 2 + 11.5), CND_Y - 6, topZ + 30], [r2(FANX + FO / 2 + 6.5), CND_Y - 16, topZ + 30], [r2(FANX + FO / 2 + 6.5), 40, topZ + 30], ...wgEnd(wgPort(WGM_Y, 5, 3), [[r2(FANX + FO / 2 + 6.5), 33, topZ + 24], [r2(WGF - 25.2), wgPort(WGM_Y, 5, 3), WG_Z]])] as Vec3[], 3.6), // le − de la batterie (sous le fond) monte par la gaine, passe au-dessus du siège du ventilateur et entre dans la 4ᵉ entrée du Wago −
     wire('Fil rail → convertisseur + (rouge)', '#dc2626', [...wgEnd(wgPort(WGP_Y, 3, 2), [[r2(WGF - 27.2), r2(WGP_Y - 18.5), topZ + 26], [r2(WGF - 27.2), r2(wgPort(WGP_Y, 3, 2) - 4), topZ + 26], [r2(WGF - 27.2), wgPort(WGP_Y, 3, 2), WG_Z]]).reverse(), [r2(WGF - 27.2), 2, topZ + 26], [58, 2, topZ + 24], [MX + 10, MY, topZ + 20], [MX - 10, MY - 4, topZ + 20], [CVX + 7, CVY + 36, topZ + 14], [CVX + 7, CVY + 30, topZ + 11]] as Vec3[], 3.6), // départ 2 du Wago +
     wire('Fil rail → convertisseur − (noir)', '#111827', [...wgEnd(wgPort(WGM_Y, 5, 2), [[r2(WGF - 31.2), r2(WGM_Y - 12.6), topZ + 28], [r2(WGF - 31.2), wgPort(WGM_Y, 5, 2), WG_Z]]).reverse(), [r2(WGF - 31.2), r2(FY0 - 8), topZ + 28], [50, -4, topZ + 28], [MX + 8, MY + 6, topZ + 24], [MX - 20, MY - 4, topZ + 22], [CVX - 7, CVY + 40, topZ + 13], [CVX - 7, CVY + 30, topZ + 11]] as Vec3[], 3.6), // départ 2 du Wago −
   ];
   // avec le panneau solaire : le régulateur sous le nichoir, ses deux fils vers la batterie et la gaine qui les porte
   const solarElec: Plank[] = n.solar ? [
     part('Régulateur de charge Genasun GV-10-Li (137 × 61 × 33, sous le nichoir)', 61, 137, 33, RGX, RGY, RGZ, 'block', '#1d4ed8'), // à plat sous le plancher, le lambris descend autour pour le protéger
-    wire('Fil régulateur → batterie + (rouge, 2,5 mm²)', '#dc2626', [[RGX - 30.5, RGY - 8, RGZ + 6], [RGX - 37, RGY - 11, RGZ + 6], [RGX - 45, RGY - 14, RGZ + 5], [RGX - 45, RGY + 50, RGZ + 5], [RGX - 41, CND_Y - 26, RGZ + 5], [RGX - 26, CND_Y - 9, RGZ + 6], [CND_X - 13, CND_Y - 4, RGZ + 8], [CND_X - 2.5, CND_Y - 2.5, -4], [CND_X - 2.5, CND_Y - 2.5, topZ + 10], [FX - 7.5, FY + 9, topZ + 13], [FX - 7.5, FY, topZ + 5]] as Vec3[], 3.6),
-    wire('Fil régulateur → batterie − (noir, 2,5 mm²)', '#111827', [[RGX - 30.5, RGY + 8, RGZ + 6], [RGX - 37, RGY + 6, RGZ + 4], [RGX - 49, RGY, RGZ + 2], [RGX - 49, RGY + 90, RGZ + 2], [RGX - 40, CND_Y + 2, RGZ + 3], [CND_X - 21, CND_Y + 7, RGZ + 5], [CND_X + 2.5, CND_Y + 2.5, -4], [CND_X + 2.5, CND_Y + 2.5, topZ + 14], [FANX + FO / 2 + 11.5, CND_Y - 6, topZ + 30], [FANX + FO / 2 + 6.5, CND_Y - 16, topZ + 30], [FANX + FO / 2 + 6.5, FY0 - 4, topZ + 30], [FANX + FO / 2 + 2.5, FY0 - 14, topZ + 28], [BX + 12, BY + 57, topZ + 24], [BX + 12, BY + 46, topZ + 19], [BX + 12, BY + 38, topZ + 19], [BX + 12, BY + 31, topZ + 19]] as Vec3[], 3.6),
+    part('Batterie LiFePO4 12,8 V 6 Ah (4 × 32700, 128 × 70 × 32)', 70, 128, 32, BAT_X, BAT_Y, BAT_Z, 'block', '#047857'), // sous le nichoir, à plat, à gauche du régulateur, tenue par quatre étriers ; bornes côté régulateur
+    wire('Fil fusible → batterie + (rouge)', '#dc2626', [[BTP_X, BT_Y, BT_Z], [r2(BTP_X + 3), r2(BT_Y + 4), -10], [r2(BAT_X + 45), r2(BT_Y + 2), -8], [FAX, r2(FUY + 10), -4], [FAX, FUY, -2.5]] as Vec3[], 3.6), // borne + de la batterie (face nord) → lame A du fusible : une vingtaine de centimètres sous le fond
+    wire('Fil régulateur → batterie + (rouge, 2,5 mm²)', '#dc2626', [[RTP_X, RT_Y, RT_Z], [RTP_X - 4, r2(RT_Y + 8), -9], [FAX, r2(FUY - 14), -6], [FAX, FUY, -2.5]] as Vec3[], 3.6), // sortie + du régulateur (bout nord) → lame A du fusible (la charge ne passe pas par la lame B)
+    wire('Fil régulateur → batterie − (noir, 2,5 mm²)', '#111827', [[RTM_X, RT_Y, RT_Z], [RTM_X - 2, r2(RT_Y + 8), -18], [r2(BAT_X + 55), r2(BT_Y - 4), -18], [r2(BAT_X + 33), r2(BT_Y + 3), -18], [BTM_X, r2(BT_Y + 5), -15], [BTM_X, BT_Y, BT_Z]] as Vec3[], 3.6), // sortie − du régulateur → borne − de la batterie, par-dessous le fusible
     { id: uid(), name: 'Gaine des fils (ICTA Ø 16, dans l’isolant)', w: CND_D, h: CND_D, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'conduit' as const, color: '#1c1917', path: [[CND_X, CND_Y, -8], [CND_X, CND_Y, topZ + 6]] as Vec3[] }, // gaine annelée noire (ICTA)
   ] : [];
   // CAPTEUR température / humidité (BME280) : toujours présent, incrusté à fleur du plafond du nid (puce vers le bas), quatre fils vers le GPIO du Pi (par une fente du dessus du toit, dans l'isolant)
@@ -438,20 +446,22 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     }),
   ];
   // SONDE DE TEMPÉRATURE EXTÉRIEURE : DS18B20 étanche (tube inox Ø 6 × 50) collée contre le DESSOUS du pan en okoumé, sous le débord de 30 mm du côté gauche, à l'ombre, à y ≈ +40 (milieu de la lame d'habillage qui porte son passage) :
-  // loin de la caméra 2 (avant gauche), du ventilateur (arrière droit) et du régulateur (sous le nichoir, à droite). Son câble (3 conducteurs) entre dans le grenier par un petit passage rond Ø 5 percé dans la lame d'habillage gauche
+  // loin de la caméra 2 (avant gauche), du ventilateur (arrière droit) et du régulateur (sous le nichoir, à droite). Son câble (3 conducteurs) entre dans le toit par un canal oblong de 8 mm de large percé dans la plaque crénelée du pan (fermé par la plaque pleine, comme celui de la caméra 2)
   // et dans la plaque gauche du toit (le pan n'est pas percé : un trou y donnerait sur le dessus du toit), sous la baguette du couvercle ; il rejoint un petit module 3 broches (résistance de rappel 4,7 kΩ) près du Pi.
   // Trois cordons Dupont vont du module au Pi : 3,3 V broche 17, GPIO4 (1-Wire) broche 7, masse broche 20.
-  const SONDE_LEN = 50, SONDE_D = 6, SONDE_HOLE = 5;
+  const SONDE_LEN = 50, SONDE_D = 6;
   const lamSy = D / Math.max(1, Math.round(D / LAM_W)), SONDE_Y = r2(-D / 2 + (Math.floor((40 + D / 2) / lamSy) + 0.5) * lamSy); // centre de la lame d'habillage gauche qui contient y = +40
-  const sondeX = r2(-W / 2 - lamT - 4 - SONDE_D / 2), sondeCx = r2(-W / 2 - 24), sondeZh = r2(panZl(SONDE_Y) - 15); // sonde 4 mm devant l'habillage ; câble à 24 mm du mur ; passage sous le corps de la baguette (10 mm sous le pan) avec 5 mm de bois au-dessus
+  const sondeX = r2(-W / 2 - lamT - 4 - SONDE_D / 2); // sonde 4 mm devant l'habillage
   const sondeS = (SONDE_Y - PAN_YMID) / PAN_COS, sondeC = panPt(sondeX, sondeS, -SONDE_D / 2), sondeBack = panPt(sondeX, sondeS + SONDE_LEN / 2, -SONDE_D / 2); // centre et bout arrière (sortie du câble) de la sonde, collée sous le pan
+  const SONDE_CH_W = 8, SONDE_SC = r2(sondeS + SONDE_LEN / 2 + 6), SONDE_XA = r2(sondeX - SONDE_CH_W / 2), SONDE_XB = r2(-(W / 2 - 6) + 15); // canal du câble dans la plaque crénelée du toit : largeur 8, centré à 6 mm derrière le bout de la sonde (SONDE_SC, le long de la pente), de l'à-plomb de la sonde (XA) jusque 15 mm derrière la face intérieure de la baguette gauche (XB)
   const DSX = r2(-(W / 2 - t) + 12), DSY = r2(piY - 42.5 - 10), DSZ = topZ + 3 + 3; // module 3 broches : 16 × 10 × 6, sur le dessus du toit, devant le Pi, contre le mur gauche
+  const sondeCanalY = panPt(r2(-(W / 2 - 6) + 12), r2(SONDE_SC + 3), -9)[1]; // ordonnée (monde) où le câble ressort du canal
   const probeSet: Plank[] = [
     part('Sonde de température extérieure DS18B20 (étanche, tube inox Ø 6 × 50, câble 1 à 3 m)', SONDE_D, SONDE_LEN, SONDE_D, sondeC[0], sondeC[1], sondeC[2], 'block', '#9ca3af', [r2((PAN_ANG * 180) / Math.PI), 0, 0]),
     part('Module DS18B20 (résistance 4,7 kΩ, 3 broches)', 16, 10, 6, DSX, DSY, DSZ, 'block', '#065f46'),
     wire('Câble sonde extérieure (DS18B20, 3 conducteurs)', '#1c1917', [
-      sondeBack, [sondeX, r2(sondeBack[1] + 14), r2(sondeBack[2] - 1)], [sondeCx, r2(sondeBack[1] + 14), r2(sondeBack[2] - 12)], [sondeCx, SONDE_Y, sondeZh],
-      [r2(-W / 2 + t + 12), SONDE_Y, sondeZh], [r2(-W / 2 + t + 12), r2(SONDE_Y - 30), sondeZh], [r2(-W / 2 + t + 12), r2(DSY + 8), sondeZh - 4], [DSX - 5, r2(DSY + 2), r2(DSZ + 14)], [DSX - 5, DSY, r2(DSZ + 3.5)],
+      sondeBack, panPt(sondeX, r2(sondeS + SONDE_LEN / 2 + 3), -1.5), panPt(r2(sondeX + 3), SONDE_SC, 2.5), panPt(r2(-(W / 2 - 6) - 3), SONDE_SC, 2.5), panPt(r2(-(W / 2 - 6) + 11), SONDE_SC, 2.5), // il monte dans le canal du toit (entre les deux plaques d'okoumé), passe au-dessus du chant de la baguette gauche et ressort dans le caisson
+      panPt(r2(-(W / 2 - 6) + 12), r2(SONDE_SC + 3), -9), [r2(SONDE_XB - 3), r2(sondeCanalY - 22), r2(panZl(sondeCanalY - 22) - 12)], [r2(SONDE_XB - 3), r2(DSY + 14), r2(panZl(DSY + 14) - 12)], [DSX - 5, r2(DSY + 2), r2(DSZ + 14)], [DSX - 5, DSY, r2(DSZ + 3.5)],
     ] as Vec3[], 2.9),
     ...([['Fil sonde 3,3 V (rouge)', '#dc2626', 8, 0, 34, 1], ['Fil sonde DATA (jaune)', '#eab308', 3, 0, 38, 0], ['Fil sonde masse (noir)', '#111827', 9, 1, 42, -1]] as const).map(([nm, color, pinIdx, row, lvl, dx]): Plank => {
       const [xp, yp] = pw(PI_PIN_X0 + pinIdx * 2.54, PI_PIN_Y - 2.54 * (1 - row)), hh = topZ + lvl; // broches 17 et 7 : rangée intérieure (impaires) ; broche 20 : rangée extérieure
@@ -699,10 +709,10 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       const hMid = (BG_TOOTH - BG_BODY) / 2;
       const slots: Hole[] = [];
       const chanX0 = cam2SX - CHAN_W / 2 - 3, chanX1 = cam2SX + CHAN_W / 2 + 3; // zone du canal + 3 mm de ligament : aucune dent de la baguette avant dedans
-      const strip = (name: string, len: number, teethAt: 0 | 1, skipChan: boolean, rot: Vec3, centre: Vec3, slot: (i: number, seg: number, nSeg: number) => Hole): void => {
+      const strip = (name: string, len: number, teethAt: 0 | 1, skip: [number, number] | null, rot: Vec3, centre: Vec3, slot: (i: number, seg: number, nSeg: number) => Hole): void => {
         const nSeg = teethFor(len), seg = len / nSeg, xs = (i: number) => -len / 2 + i * seg, top = BG_TOOTH - hMid, bottom = -BG_BODY - hMid, shoulder = -hMid; // contour dans le repère de la plaque (y vers le pan)
         const poly: [number, number][] = [[-len / 2, bottom], [len / 2, bottom], [len / 2, shoulder]];
-        for (let i = nSeg - 1; i >= 0; i--) { const tooth = i % 2 === teethAt && !(skipChan && xs(i + 1) > chanX0 && xs(i) < chanX1); if (tooth) { poly.push([xs(i + 1), shoulder], [xs(i + 1), top], [xs(i), top], [xs(i), shoulder]); slots.push(slot(i, seg, nSeg)); } }
+        for (let i = nSeg - 1; i >= 0; i--) { const tooth = i % 2 === teethAt && !(skip && xs(i + 1) > skip[0] && xs(i) < skip[1]); if (tooth) { poly.push([xs(i + 1), shoulder], [xs(i + 1), top], [xs(i), top], [xs(i), shoulder]); slots.push(slot(i, seg, nSeg)); } }
         poly.push([-len / 2, shoulder]);
         // points doublons (bout de baguette en dent) et colinéaires retirés : contour propre
         const dedup = poly.filter((p, k) => k === 0 || p[0] !== poly[k - 1][0] || p[1] !== poly[k - 1][1]), clean = dedup.filter((p, k) => { const q = dedup[k - 1], r = dedup[k + 1]; return !(q && r && p[1] === q[1] && p[1] === r[1]); }).map(([x, y]) => [r2(x), r2(y)] as [number, number]);
@@ -713,13 +723,14 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       const rotFB = rotFromBasis([1, 0, 0], nU), rotLR = rotFromBasis(uU, nU);
       const slotFB = (sC: number) => (i: number, seg: number): Hole => ({ id: uid(), shape: 'square', x: r2(-RW / 2 + (i + 0.5) * seg), y: r2(sC), size: r2(seg + fit), sh: r2(t + fit) }); // fente du pan : repère du pan (x monde, y le long de la pente depuis son milieu)
       const slotLR = (xC: number) => (i: number, seg: number): Hole => ({ id: uid(), shape: 'square', x: r2(xC), y: r2(s0 + t + (i + 0.5) * seg), size: r2(t + fit), sh: r2(seg + fit) });
-      strip('Baguette couvercle avant', RW, 0, n.cam2, rotFB, under(0, sF, hMid), slotFB(sF));
-      strip('Baguette couvercle arrière', RW, 0, false, rotFB, under(0, sB, hMid), slotFB(sB));
-      strip('Baguette couvercle gauche', lenSide, 1, false, rotLR, under(-xSide, sMid, hMid), slotLR(-xSide));
-      strip('Baguette couvercle droite', lenSide, 1, false, rotLR, under(xSide, sMid, hMid), slotLR(xSide));
+      strip('Baguette couvercle avant', RW, 0, n.cam2 ? [chanX0, chanX1] : null, rotFB, under(0, sF, hMid), slotFB(sF));
+      strip('Baguette couvercle arrière', RW, 0, null, rotFB, under(0, sB, hMid), slotFB(sB));
+      strip('Baguette couvercle gauche', lenSide, 1, [SONDE_SC - SONDE_CH_W / 2 - 3 - sMid, SONDE_SC + SONDE_CH_W / 2 + 3 - sMid], rotLR, under(-xSide, sMid, hMid), slotLR(-xSide));
+      strip('Baguette couvercle droite', lenSide, 1, null, rotLR, under(xSide, sMid, hMid), slotLR(xSide));
       const chan: Hole[] = n.cam2 ? [{ id: uid(), shape: 'square', x: cam2SX, y: r2((PAN_SA + PAN_SB) / 2), size: CHAN_W, sh: r2(PAN_SB - PAN_SA + 2 * CHAN_END), r: 8 }] : []; // canal oblong : de l'à-plomb de la caméra 2 jusque dans le caisson
       const pan = (name: string, h: number, holes: Hole[]): Plank => ({ id: uid(), name, w: r2(W + 2 * OVS), h: r2((D + OVF + OVB) / cosA), depth: OKOUME_T, material: 'okoume' as const, color: OKOUME_NATURAL, pos: [0, r2(yMid - sinA * h), r2(zl(yMid) + cosA * h)] as Vec3, rot: rotA, notches: [], holes, group: coverGroup }); // h = hauteur du milieu de la plaque au-dessus du dessous du pan
-      out.push(pan('Toit en okoumé (plaque crénelée)', OKOUME_T / 2, [...slots, ...chan]), pan('Toit en okoumé (plaque pleine)', OKOUME_T * 1.5, []));
+      const chanSonde: Hole = { id: uid(), shape: 'square', x: r2((SONDE_XA + SONDE_XB) / 2), y: SONDE_SC, size: r2(SONDE_XB - SONDE_XA), sh: SONDE_CH_W, r: SONDE_CH_W / 2 }; // canal oblong du câble de la sonde (bouts ronds), de l'à-plomb de la sonde jusque dans le caisson
+      out.push(pan('Toit en okoumé (plaque crénelée)', OKOUME_T / 2, [...slots, ...chan, chanSonde]), pan('Toit en okoumé (plaque pleine)', OKOUME_T * 1.5, []));
     }
     return out;
   })() : [];
@@ -761,15 +772,12 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     ...slotted.map((p) => ({ ...p, group, name: p.name.replace(/ (\d+)$/, ' ext $1') })),
     { ...floorSlotted, group },
     ...innerParts.map((p) => ({ ...p, name: p.name.replace(/ (\d+)$/, ' int $1') })),
+    ...batBrackets, lockPlate,
     ...roofParts, ...frames, ...camParts, ...camera, ...pi, ...cable, ...wires,
     { id: uid(), name: 'Schéma électronique', w: 1, h: 1, pos: [0, 0, -30] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: docGroupId, special: 'doc' as const }, // document (pas une pièce physique) : un clic dans « Pièces » l'ouvre
   ];
-  for (const p of planks) { // passage du câble de la sonde extérieure : trou Ø 5 dans la plaque gauche du toit et dans la lame d'habillage gauche qui porte la sonde
-    if (/^Côté gauche toit/.test(p.name)) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: r2(SONDE_Y - p.pos[1]), y: r2(sondeZh - p.pos[2]), size: SONDE_HOLE })];
-    if (/^Lambris gauche/.test(p.name) && Math.abs(p.pos[1] - SONDE_Y) < 0.01) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: 0, y: r2(sondeZh - p.pos[2]), size: SONDE_HOLE })];
-  }
   if (n.solar) { // la gaine traverse le fond, le plancher intérieur, le cadre du toit et le plancher / dessus du toit, dans l'isolant du côté droit
-    for (const p of planks) if (/^(Dessous ext|Plancher int|Cadre toit (bas|milieu|haut)|Dessous toit|Dessus toit)/.test(p.name)) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: r2(CND_X - p.pos[0]), y: r2(CND_Y - p.pos[1]), size: /^(Dessous ext|Plancher int)/.test(p.name) ? CND_D : CND_HOLE_ROOF })]; // fond et plancher du corps : pile le diamètre de la gaine (serrée) ; zone du toit (trois planches du cadre, dessous et dessus du toit) : Ø 18, la gaine passe sans effort
+    for (const p of planks) if (/^(Dessous ext|Plancher int|Cadre toit (bas|milieu|haut)|Plaque de verrouillage|Dessous toit|Dessus toit)/.test(p.name)) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: r2(CND_X - p.pos[0]), y: r2(CND_Y - p.pos[1]), size: /^(Dessous ext|Plancher int)/.test(p.name) ? CND_D : CND_HOLE_ROOF })]; // fond et plancher du corps : pile le diamètre de la gaine (serrée) ; zone du toit (trois planches du cadre, dessous et dessus du toit) : Ø 18, la gaine passe sans effort
   }
   for (const p of planks) { // prise d'air basse : l'ouverture du dessous, le passage du conduit dans le fond intérieur et la fente de la paroi intérieure gauche
     if (/^Dessous ext/.test(p.name)) p.holes = [...p.holes, { id: uid(), shape: 'square' as const, x: AIR_CX, y: AIR_CY, size: r2(AIR_LX - 2 * t), sh: r2(AIR_LY - 2 * t) }]; // ouverture du conduit : son intérieur, rectangle simple (les parois reposent sur le fond autour)
