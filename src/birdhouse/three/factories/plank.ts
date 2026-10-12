@@ -10,6 +10,12 @@ import { type PartGeometry } from './geometry';
 /** Dessus (face +z de la plaque) clair, dessous un peu plus foncé, tranche (épaisseur) marron foncé : on voit tout de suite le sens et l'épaisseur. */
 const TOP = new Color(PALETTE.plywoodTop), BOTTOM = new Color(PALETTE.plywoodBottom), SIDE = new Color(PALETTE.plywoodSide);
 
+/** Contreplaqué huilé (tout sauf le nid) : plus chaud, pastel. */
+const OIL_TOP = new Color(PALETTE.oiledTop), OIL_BOTTOM = new Color(PALETTE.oiledBottom), OIL_SIDE = new Color(PALETTE.oiledSide);
+
+/** Bois BRUT (non huilé) : l'intérieur du nid (parois intérieures, plancher intérieur, bloc d'entrée). Tout le reste du contreplaqué est huilé. */
+export const isRawWood = (p: Plank): boolean => !p.special && /^((Face avant|Face arrière|Côté droit|Côté gauche) int|Plancher int|Entrée \d+)$/.test(p.name);
+
 const MDF_TOP = new Color(PALETTE.mdfTop), MDF_BOTTOM = new Color(PALETTE.mdfBottom), MDF_SIDE = new Color(PALETTE.mdfSide);
 export function plankGeometry(p: Plank, scene_t: number): PartGeometry {
   if (p.special) return partGeometry(p, scene_t);
@@ -20,9 +26,9 @@ export function plankGeometry(p: Plank, scene_t: number): PartGeometry {
   const geo = new ExtrudeGeometry(shape, { depth: t, bevelEnabled: false });
   geo.translate(0, 0, -t / 2);
   // couleur par face d'après la normale : dessus, dessous, tranche
-  const paint = new Color(p.color ?? PALETTE.white), nrm = geo.attributes.normal, col = new Float32Array(nrm.count * 3);
+  const raw = isRawWood(p), paint = new Color(p.color ?? PALETTE.white), nrm = geo.attributes.normal, col = new Float32Array(nrm.count * 3);
   for (let i = 0; i < nrm.count; i++) {
-    const z = nrm.getZ(i), mdf = p.material === 'mdf', c = p.material === 'okoume' ? paint : z > 0.5 ? (mdf ? MDF_TOP : TOP) : z < -0.5 ? (mdf ? MDF_BOTTOM : BOTTOM) : mdf ? MDF_SIDE : SIDE;
+    const z = nrm.getZ(i), mdf = p.material === 'mdf', c = p.material === 'okoume' ? paint : z > 0.5 ? (mdf ? MDF_TOP : raw ? TOP : OIL_TOP) : z < -0.5 ? (mdf ? MDF_BOTTOM : raw ? BOTTOM : OIL_BOTTOM) : mdf ? MDF_SIDE : raw ? SIDE : OIL_SIDE;
     col[3 * i] = c.r; col[3 * i + 1] = c.g; col[3 * i + 2] = c.b;
   }
   geo.setAttribute('color', new Float32BufferAttribute(col, 3));
@@ -39,9 +45,10 @@ export function plankGeometry(p: Plank, scene_t: number): PartGeometry {
  * Tout ce qui change la forme ou la couleur d'une plaque : dimensions, crans, trous, épaisseur, chemin, profondeur, couleur, contour libre, haut incliné, type spécial,
  * et la présence du modèle 3D du Pi. Clé de cache de la géométrie d'une `PlankMesh`.
  */
-export const plankShapeKey = (p: Plank, t: number): string => JSON.stringify([p.w, p.h, p.notches, p.holes, t, p.path, p.depth, p.wood, p.color, p.poly, p.special, p.special === 'pi' && !!piModel, p.material]);
+export const plankShapeKey = (p: Plank, t: number): string => JSON.stringify([p.w, p.h, p.notches, p.holes, t, p.path, p.depth, p.wood, p.color, p.poly, p.special, isRawWood(p), p.special === 'pi' && !!piModel, p.material]);
 
-const PLANK_ROUGHNESS = 0.85;
+const PLANK_ROUGHNESS = 0.85; // pièces spéciales (composants)
+const RAW_ROUGHNESS = 0.62, OILED_ROUGHNESS = 0.42; // plaques : brut légèrement brillant, huilé plus brillant
 
 /** La mesh d'une plaque : sa surface, ses arêtes (matériau partagé du registre) et son identifiant, typés (plus de `userData`). */
 export class PlankMesh extends Mesh<BufferGeometry, MeshStandardMaterial> {
@@ -107,6 +114,7 @@ export class PlankMesh extends Mesh<BufferGeometry, MeshStandardMaterial> {
     this.edges.geometry.dispose();
     this.edges.geometry = edges;
     this.setRotor(rotor);
+    this.material.roughness = p.special ? PLANK_ROUGHNESS : isRawWood(p) ? RAW_ROUGHNESS : OILED_ROUGHNESS;
     this.shapeKey = key;
   }
 }

@@ -9,6 +9,8 @@ export interface ClickDeps {
   pickRef: MutableRefObject<(id: string | null, ctrl: boolean) => void>;
   setCtx: (c: { x: number; y: number; plankId: string } | null) => void;
   setSelectedId: (id: string | null) => void;
+  /** Vrai quand un autre outil (le mètre) prend les clics : ni sélection ni menu. */
+  blocked?: () => boolean;
 }
 
 /** Seuil (pixels) au-delà duquel un appui suivi d'un relâchement est un glissé, pas un clic. */
@@ -18,13 +20,14 @@ const CLICK_SLOP = 4;
  * Un clic (sans glissé) choisit une plaque, dans le vide désélectionne ; Ctrl / Cmd = sélection multiple ;
  * un clic droit sur une plaque ouvre le menu contextuel avec le point touché en coordonnées de la plaque. Renvoie la désinscription.
  */
-export function attachClick({ view: v, picker, pickRef, setCtx, setSelectedId }: ClickDeps): () => void {
+export function attachClick({ view: v, picker, pickRef, setCtx, setSelectedId, blocked }: ClickDeps): () => void {
   const el = v.renderer.domElement;
   let down: { x: number; y: number } | null = null;
   const onDown = (e: PointerEvent) => { down = { x: e.clientX, y: e.clientY }; };
   const onUp = (e: PointerEvent) => {
     if (!down || v.dragging || Math.hypot(e.clientX - down.x, e.clientY - down.y) > CLICK_SLOP || (e.button !== 0 && e.button !== 2)) { down = null; return; }
     down = null;
+    if (blocked?.()) return;
     const r = el.getBoundingClientRect();
     picker.rayAt(e);
     const first = picker.firstPlank();

@@ -8,8 +8,9 @@ import { SchemaPanel } from '@/features/schema';
 import { makeNest, moveWithGroup, setAirPlug, setCassetteMode, nextCassette, winterState, extents, forgetHistory, saveScene, loadScene, type Plank, type PlankScene, type Vec3 } from '@/birdhouse/model';
 import { PiSimulator } from '@/birdhouse/PiSimulator';
 import { loadPiModel, piModel } from '@/birdhouse/three/piModel';
+import type { MeterControl, MeterReading } from '@/birdhouse/three/interactions/meter';
 import type { View } from '@/birdhouse/three/types';
-import { AssemblyPanel, hiddenFor, ContextMenu, CutPanel, LeftPanel, MobileBar, PartsSheet, PiecesList, PullBar, RightPanel, SelectionBar, ViewModeToggle, ViewToolbar, WireSheet, wireSheetFor } from '../components';
+import { AssemblyPanel, hiddenFor, ContextMenu, CutPanel, LeftPanel, MobileBar, PartsSheet, MeterBar, PiecesList, PullBar, RightPanel, SelectionBar, ViewModeToggle, ViewToolbar, WireSheet, wireSheetFor } from '../components';
 import { HIDDEN_AT_CREATION, STORAGE } from '../constants';
 import { useCutPlane, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useAssembly, useThreeView, useFanSpeed, useIrBeams } from '../hooks';
 import type { ContextMenuState, Hover, PullState } from '../types';
@@ -28,6 +29,11 @@ export default function Planks() {
   const [hover, setHover] = useState<Hover | null>(null); // survol dans le volet « Pièces » : surbrillance dans la 3D
   const { cutCfg, setCutCfg, cutView, setCutView, sheets, preview, machine } = useLaser(sc);
   const [pull, setPull] = useState<PullState | null>(null); // face double-cliquée, à tirer
+  const [meterOn, setMeterOn] = useState(false); // mètre ruban : deux clics sur les pièces = une distance
+  const [meter, setMeter] = useState<MeterReading | null>(null);
+  const meterRef = useRef<MeterControl>({ on: false, reset: () => {} });
+  meterRef.current.on = meterOn;
+  useEffect(() => { if (!meterOn) meterRef.current.reset(); }, [meterOn]);
   const pullRef = useRef(pull);
   pullRef.current = pull;
   const [leftOpen, setLeftOpen] = usePersistentFlag(STORAGE.leftOpen); // panneau de gauche replié ou non
@@ -95,10 +101,10 @@ export default function Planks() {
   moveRef.current = moveWithGroup;
   useKeyboardShortcuts({ back: backRef, commit: commitRef, selectedId: selRef, groupSel: groupSelRef }, {
     clearSelection: () => { setSelectedId(null); setGroupSel(null); },
-    escape: () => { setCtx(null); setWireClosed(selRef.current); setExtra(new Set()); setPull(null); },
+    escape: () => { setMeterOn(false); setCtx(null); setWireClosed(selRef.current); setExtra(new Set()); setPull(null); },
   });
 
-  useThreeView({ host, view, scRef, cutRef, pullRef, pickRef, setSc, setCut, setCtx, setSelectedId, setHover, pushEntry });
+  useThreeView({ host, view, scRef, cutRef, pullRef, pickRef, setSc, setCut, setCtx, setSelectedId, setHover, pushEntry, meterRef, setMeter });
   useDayNight(view, night); // après useThreeView : la vue existe au montage
   const [fanPct, setFanPct] = useState(0); // vitesse du ventilateur lue dans le simulateur du Pi (le rotor de la 3D tourne)
   useFanSpeed(view, fanPct);
@@ -202,10 +208,11 @@ export default function Planks() {
         <div ref={host} className="h-full w-full" />
         {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
         <ViewModeToggle sheets={cutView} onChange={setCutView} />
-        <ViewToolbar assemblyOn={asm.on} onToggleAssembly={() => asm.setOn(!asm.on)} winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={openPi} onOpenDoc={() => setDocOpen('schema')} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
+        <ViewToolbar assemblyOn={asm.on} onToggleAssembly={() => asm.setOn(!asm.on)} winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} meterOn={meterOn} onToggleMeter={() => setMeterOn((v) => !v)} onOpenPi={openPi} onOpenDoc={() => setDocOpen('schema')} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
         {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
         {wireSheetEl}
         {asm.on && <AssemblyPanel steps={asm.steps} index={asm.index} setIndex={asm.setIndex} onClose={() => asm.setOn(false)} mobile={false} />}
+        {meterOn && <MeterBar reading={meter} onDone={() => setMeterOn(false)} />}
         {pull && <PullBar cutOn={cut.on} onDone={() => setPull(null)} />}
         {extra.size > 0 && <SelectionBar count={extra.size + (selectedId ? 1 : 0)} onLink={linkSelection} onUnlink={unlinkSelection} onCancel={() => setExtra(new Set())} />}
 

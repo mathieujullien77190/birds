@@ -2,6 +2,7 @@ export * from './ContextMenu';
 export * from './CutPanel';
 export * from './LeftPanel';
 export * from './PiecesList';
+export * from './MeterBar';
 export * from './PullBar';
 export * from './RightPanel';
 export * from './SelectionBar';

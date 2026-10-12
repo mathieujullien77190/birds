@@ -2,10 +2,10 @@ import { FloatingPanel, ToolbarButton } from '@/ui';
 import type { WinterState } from '@/birdhouse/model';
 
 /** Barre flottante en haut à droite de la vue : montage, cassette, schéma électrique et dossier du nichoir, simulateur du Pi, plan de coupe. */
-export function ViewToolbar({ assemblyOn, onToggleAssembly, schemaOn, onToggleSchema, onOpenPi, onOpenDoc, cutOn, onToggleCut, winter, onToggleCassette, onTogglePlug }: {
+export function ViewToolbar({ assemblyOn, onToggleAssembly, schemaOn, onToggleSchema, meterOn, onToggleMeter, onOpenPi, onOpenDoc, cutOn, onToggleCut, winter, onToggleCassette, onTogglePlug }: {
   assemblyOn: boolean; onToggleAssembly: () => void;
   winter: WinterState; onToggleCassette: () => void; onTogglePlug: () => void;
-  schemaOn: boolean; onToggleSchema: () => void; onOpenPi: () => void; onOpenDoc?: () => void; cutOn: boolean; onToggleCut: () => void;
+  schemaOn: boolean; onToggleSchema: () => void; meterOn: boolean; onToggleMeter: () => void; onOpenPi: () => void; onOpenDoc?: () => void; cutOn: boolean; onToggleCut: () => void;
 }) {
   return (
     <FloatingPanel className="absolute top-3 right-3 flex items-center gap-1.5 p-1">
@@ -17,6 +17,7 @@ export function ViewToolbar({ assemblyOn, onToggleAssembly, schemaOn, onToggleSc
         {onOpenDoc && <ToolbarButton dense muted tone="emerald" icon="📖" onClick={onOpenDoc} title="Dossier du nichoir : schéma électrique détaillé, branchements, paramètres de chaque composant, poids, prix, montage">Dossier</ToolbarButton>}
       </span>
       <ToolbarButton muted icon="🐍" onClick={onOpenPi} title="Page web du Pi simulée : le vrai programme Python tourne dans le navigateur">Pi</ToolbarButton>
+      <ToolbarButton muted icon="📏" active={meterOn} aria-pressed={meterOn} onClick={onToggleMeter} title="Mètre ruban : clique un premier point sur une pièce (il s'aimante aux coins), puis un second : la distance s'affiche en haut. Un troisième clic recommence, Échap quitte">Mètre</ToolbarButton>
       <ToolbarButton icon="✂" active={cutOn} aria-pressed={cutOn} onClick={onToggleCut} title="Plan de coupe : l'espace est coupé en deux, un côté devient invisible">Coupe</ToolbarButton>
     </FloatingPanel>
   );

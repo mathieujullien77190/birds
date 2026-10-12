@@ -12,7 +12,7 @@ import { simplePiGeometry, piGeometry } from '@/birdhouse/three/factories/part/p
 import { solarGeometry } from '@/birdhouse/three/factories/part/solar';
 import { cameraBoardGeometry } from '@/birdhouse/three/factories/part/camera';
 import { partGeometry } from '@/birdhouse/three/factories/part';
-import { createPlankMesh, plankGeometry, plankShapeKey } from '@/birdhouse/three/factories/plank';
+import { createPlankMesh, isRawWood, plankGeometry, plankShapeKey } from '@/birdhouse/three/factories/plank';
 
 const P = (over: Partial<Plank>): Plank => ({ id: 'p', name: 'p', w: 10, h: 20, pos: [0, 0, 0], rot: [0, 0, 0], notches: [], holes: [], ...over });
 /** Dimensions (x, y, z) de la boîte englobante. */
@@ -185,8 +185,16 @@ describe('partGeometry : aiguillage par type', () => {
 describe('plankGeometry / PlankMesh', () => {
   it("MDF : dessus, dessous et tranche aux couleurs MDF, distinctes du contreplaqué", () => {
     const ply = plankGeometry(P({ w: 20, h: 20 }), 3).geo, mdf = plankGeometry(P({ w: 20, h: 20, material: 'mdf' }), 3).geo;
-    for (const [hex, g] of [[PALETTE.plywoodTop, ply], [PALETTE.plywoodBottom, ply], [PALETTE.plywoodSide, ply], [PALETTE.mdfTop, mdf], [PALETTE.mdfBottom, mdf], [PALETTE.mdfSide, mdf]] as const) expect(hasColor(g, hex)).toBe(true);
-    expect(hasColor(mdf, PALETTE.plywoodTop)).toBe(false);
+    for (const [hex, g] of [[PALETTE.oiledTop, ply], [PALETTE.oiledBottom, ply], [PALETTE.oiledSide, ply], [PALETTE.mdfTop, mdf], [PALETTE.mdfBottom, mdf], [PALETTE.mdfSide, mdf]] as const) expect(hasColor(g, hex)).toBe(true);
+    expect(hasColor(mdf, PALETTE.oiledTop)).toBe(false);
+  });
+  it("huilé / brut : seul l'intérieur du nid (parois intérieures, plancher intérieur, bloc d'entrée) est brut, tout le reste du contreplaqué est huilé", () => {
+    const raw = plankGeometry(P({ w: 20, h: 20, name: 'Plancher int' }), 3).geo, oiled = plankGeometry(P({ w: 20, h: 20, name: 'Dessous ext' }), 3).geo;
+    for (const hex of [PALETTE.plywoodTop, PALETTE.plywoodBottom, PALETTE.plywoodSide]) { expect(hasColor(raw, hex)).toBe(true); expect(hasColor(oiled, hex)).toBe(false); }
+    for (const hex of [PALETTE.oiledTop, PALETTE.oiledBottom, PALETTE.oiledSide]) { expect(hasColor(oiled, hex)).toBe(true); expect(hasColor(raw, hex)).toBe(false); }
+    for (const n of ['Face avant int', 'Côté gauche int', 'Entrée 3']) expect(isRawWood(P({ name: n })), n).toBe(true);
+    for (const n of ['Face avant ext', 'Plancher', 'Entrée']) expect(isRawWood(P({ name: n })), n).toBe(false);
+    expect(isRawWood(P({ name: 'Plancher int', special: 'block' }))).toBe(false);
   });
   it("les trous ajoutent des arêtes ; les trous ronds n'ont pas de verticales (seuls les contours à angles en ont)", () => {
     const plain = plankGeometry(P({ w: 20, h: 20 }), 3).edges.attributes.position.count;

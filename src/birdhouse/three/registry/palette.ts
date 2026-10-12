@@ -6,9 +6,14 @@ export const PALETTE = {
   mdfTop: '#a47c55',
   mdfBottom: '#8f6a46',
   mdfSide: '#5c3f24',
-  plywoodTop: '#e2c79a',
-  plywoodBottom: '#c9a874',
+  plywoodTop: '#e8cfa3', // brut (intérieur du nid)
+  plywoodBottom: '#cfae7b',
   plywoodSide: '#6f4a22',
+  meterLine: '#dc2626', // mètre ruban : trait et points posés
+  meterHover: '#0ea5e9', // mètre ruban : point visé
+  oiledTop: '#e2bb8a', // huilé (tout le reste) : plus chaud, pastel
+  oiledBottom: '#cfa575',
+  oiledSide: '#6b4b2a',
   plywoodEdge: '#4a3014',
   woodBlock: '#c8995a',
   woodBar: '#a16207',

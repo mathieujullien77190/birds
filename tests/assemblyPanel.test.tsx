@@ -15,7 +15,7 @@ const st = (id: string, block: string, pieceIds: string[], over: Partial<Assembl
 const steps: AssemblyStep[] = [
   st('a', 'aeration', ['p1']),
   st('b', 'aeration', ['p2'], { text: 'Une consigne\n- puce 1\n- puce 2\nFin' }),
-  st('c', 'corps', ['p3'], { focusIds: ['p9'], kind: 'huiler' }),
+  st('c', 'corps', ['p3'], { focusIds: ['p9'], kind: 'coller' }),
   st('d', 'corps', ['p4'], { hideIds: ['p1'] }),
 ];
 
@@ -138,12 +138,12 @@ describe('boutons « Montage »', () => {
   const w = { cassette: 'summer', plug: 'open' } as never;
   it('ViewToolbar : le bouton bascule le mode', () => {
     const f = vi.fn();
-    render(<ViewToolbar assemblyOn={false} onToggleAssembly={f} winter={w} onToggleCassette={() => undefined} onTogglePlug={() => undefined} schemaOn={false} onToggleSchema={() => undefined} onOpenPi={() => undefined} cutOn={false} onToggleCut={() => undefined} />);
+    render(<ViewToolbar assemblyOn={false} onToggleAssembly={f} winter={w} onToggleCassette={() => undefined} onTogglePlug={() => undefined} schemaOn={false} onToggleSchema={() => undefined} meterOn={false} onToggleMeter={() => undefined} onOpenPi={() => undefined} cutOn={false} onToggleCut={() => undefined} />);
     fireEvent.click(screen.getByText('Montage')); expect(f).toHaveBeenCalled();
   });
   it('ViewToolbar : le bouton « Dossier » est collé au bouton « Schéma »', () => {
     const f = vi.fn();
-    render(<ViewToolbar assemblyOn={false} onToggleAssembly={() => undefined} winter={w} onToggleCassette={() => undefined} onTogglePlug={() => undefined} schemaOn={false} onToggleSchema={() => undefined} onOpenPi={() => undefined} onOpenDoc={f} cutOn={false} onToggleCut={() => undefined} />);
+    render(<ViewToolbar assemblyOn={false} onToggleAssembly={() => undefined} winter={w} onToggleCassette={() => undefined} onTogglePlug={() => undefined} schemaOn={false} onToggleSchema={() => undefined} meterOn={false} onToggleMeter={() => undefined} onOpenPi={() => undefined} onOpenDoc={f} cutOn={false} onToggleCut={() => undefined} />);
     const b = screen.getByText('Dossier').closest('button')!, schema = screen.getByText('Schéma').closest('button')!;
     expect(b.parentElement).toBe(schema.parentElement); fireEvent.click(b); expect(f).toHaveBeenCalled();
   });
