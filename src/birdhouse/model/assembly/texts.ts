@@ -3,9 +3,9 @@
  * fiches des composants), `docs/logiciel.md` et `pi/README.md` : rien n'est inventé ici.
  */
 
-/** Procédure d'huilage complète (première étape d'huile) : section « Finition du bois (huile de lin) ». */
+/** Procédure d'huilage complète (première étape d'huile) : section « Finition du bois (huile de lin, saturateur, peinture) ». */
 export const OIL_FULL = [
-  "Huile de lin cuite (ou avec siccatif) sur le contreplaqué de peuplier ; jamais à l'intérieur du nid.",
+  "Huile de lin pure (non cuite, Mieuxa) sur le contreplaqué de peuplier ; jamais à l'intérieur du nid. Option : mélange 50 % huile de lin et 50 % essence de térébenthine pour la première couche des chants, 1 % de siccatif pour accélérer le séchage.",
   '- Brosser et poncer la suie de découpe (papier de verre grain 120, puis grain 180).',
   "- Masquer au ruban de peintre les dents, les fentes et toutes les surfaces à coller : l'huile empêche la colle d'accrocher.",
   '- Passer une première couche fine au pinceau ou au chiffon ; les chants en reçoivent deux, car ils boivent.',
@@ -21,9 +21,40 @@ export const OIL_SHORT = [
 
 /** Séchage entre les couches et avant le collage. */
 export const DRY_TEXT = [
-  '- Laisser sécher 24 à 72 heures par couche (durée indicative : elle dépend de la température et de l\'humidité), puis passer la seconde couche.',
+  '- Laisser sécher environ une semaine par couche (durée indicative : elle dépend de la température et de l\'humidité), puis passer la seconde couche.',
   '- Enlever le ruban, puis coller (colle à bois de classe D3 ou D4).',
-  "- Aérer plusieurs jours avant d'installer le nichoir : l'odeur ne doit pas rester dans le nid.",
+  "- Aérer 2 à 4 semaines avant le montage (le nichoir est mis en service au printemps) : l'odeur ne doit pas rester dans le nid.",
+].join('\n');
+
+/** Saturateur du toit en okoumé : section « Finition du bois (huile de lin, saturateur, peinture) ». */
+export const SAT_TEXT = [
+  "Saturateur à l'eau Luxens teck mat sur les deux plaques d'okoumé du toit, à la place de l'huile de lin. Essai sur une chute avant de traiter : c'est un gel anti-glisse conçu pour les terrasses.",
+  "- Appliquer uniquement sur les pièces du toit, à l'extérieur, jamais sur ce qui touche le nid.",
+  '- Masquer au ruban de peintre les surfaces à coller (face de dessus de la plaque crénelée, dents, fentes).',
+  '- 2 couches, chants compris.',
+  "Étiquette : « dangereux : respecter les précautions d'emploi ».",
+].join('\n');
+
+/** Séchage du saturateur. */
+export const SAT_DRY = [
+  "- Séchage au toucher : 1 h (selon l'étiquette) ; laisser sécher entre les deux couches.",
+  '- Enlever le ruban avant de coller.',
+].join('\n');
+
+/** Peinture blanche de l'habillage. */
+export const PAINT_TEXT = [
+  'Peinture extérieure bois / MDF / OSB « Conditions extrêmes » Luxens, blanc satiné (RAL 9016), sans sous-couche sur bois neuf. Peindre les 22 lames avant de les coller.',
+  '- 2 faces et les chants, 2 couches.',
+  '- Masquer au ruban de peintre les surfaces à coller.',
+  "- Nettoyer les outils à l'eau.",
+  "Étiquette : « dangereux : respecter les précautions d'emploi ». L'habillage est peint, pas huilé : la peinture ne tient pas sur une surface huilée.",
+].join('\n');
+
+/** Séchage de la peinture de l'habillage. */
+export const PAINT_DRY = [
+  "- Au toucher : 12 h (selon l'étiquette).",
+  "- Entre deux couches : 6 h (selon l'étiquette).",
+  "- Sec complètement : 12 h (selon l'étiquette), puis enlever le ruban et coller les lames.",
 ].join('\n');
 
 export const PI_SD = [

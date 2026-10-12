@@ -1,5 +1,5 @@
 import type { AssemblyBlock, AssemblyKind } from './types';
-import { BENCH_CAMERAS, BENCH_FAN, BENCH_PAGE, BENCH_SENSORS, DRY_TEXT, OIL_FULL, OIL_SHORT, PI_PROGRAM, PI_SD, TEST_BATTERY, TEST_MULTIMETER } from './texts';
+import { BENCH_CAMERAS, BENCH_FAN, BENCH_PAGE, BENCH_SENSORS, DRY_TEXT, OIL_FULL, OIL_SHORT, PAINT_DRY, PAINT_TEXT, PI_PROGRAM, PI_SD, SAT_DRY, SAT_TEXT, TEST_BATTERY, TEST_MULTIMETER } from './texts';
 
 /** Blocs du montage, dans l'ordre. */
 export const ASSEMBLY_BLOCKS: AssemblyBlock[] = [
@@ -46,14 +46,10 @@ export const LID_BACK = 'elec-pose-toit';
 export const SEQ: Rule[] = [
   // ---- a. Aération du corps : le module (conduit de la prise d'air basse), monté en sous-ensemble ----
   N('aer-huile', 'aeration', 'huiler', "Huiler le conduit d'air", [
-    "Le conduit d'air est en zone mouillée en permanence : huile de lin, puis vernis ou lasure à l'eau (étiquette jouets EN 71-3).",
+    "Le conduit d'air est huilé comme les autres pièces cachées en peuplier : huile de lin pure, 2 couches, chants en deux couches.",
     OIL_FULL,
   ].join('\n'), [/^Conduit d'air/]),
   N('aer-sechage', 'aeration', 'attendre', 'Séchage du conduit d\'air', DRY_TEXT, [/^Conduit d'air/]),
-  P('aer-2', 'aeration', 'placer', /^Conduit d'air 2$/, { text: (r) => `Côté nid : sa fente de 34 × 30 mm se place en face de la grille de ${r(/^Côté gauche int$/)}.` }),
-  P('aer-34', 'aeration', 'emboiter', /^Conduit d'air [34]$/),
-  P('aer-1', 'aeration', 'emboiter', /^Conduit d'air 1$/),
-  P('aer-5', 'aeration', 'emboiter', /^Conduit d'air 5/),
 
   // ---- b. Pièces d'hiver (rechange) ----
   N('hiv-huile', 'hiver', 'huiler', "Huiler les pièces d'hiver", `${OIL_SHORT}\nLes parois de la sous-boîte passent pile (jeu 0) dans le conduit d'air : couche très fine, bien essuyée.`, [/^(Bloc isolant d'hiver|Poignée bloc d'hiver|Bouchon-boîte|Poignée bouchon)/]),
@@ -75,37 +71,38 @@ export const SEQ: Rule[] = [
   N('corps-huile', 'corps', 'huiler', 'Huiler les pièces du corps', (r) => [
     OIL_SHORT,
     `Huiler les parois extérieures, le dessous, les étriers, les nervures et les clavettes. Ne jamais huiler ${r(/^Plancher int$/)} ni les quatre parois intérieures (le nid reste brut, poncé, sans suie de découpe).`,
-    `Le dessous du nichoir (${r(/^Dessous ext$/)}) est en zone mouillée en permanence : huile, plus vernis ou lasure à l'eau (étiquette jouets EN 71-3).`,
+    `Le dessous du nichoir (${r(/^Dessous ext$/)}) reçoit seulement l'huile de lin, comme les autres pièces : 2 couches, chants en deux couches.`,
   ].join('\n'), [/^(Dessous ext|Face (avant|arrière) ext|Côté (droit|gauche) ext|Étrier régulateur|Fixation arbre|Clavette fixation)/]),
   N('corps-sechage', 'corps', 'attendre', 'Séchage des pièces du corps', DRY_TEXT, [/^(Dessous ext|Face (avant|arrière) ext|Côté (droit|gauche) ext|Étrier régulateur|Fixation arbre|Clavette fixation)/]),
+  P('corps-nid', 'corps', 'emboiter', /^(Face avant|Face arrière|Côté droit|Côté gauche) int$/, { all: true, title: 'Monter le nid : les 4 parois intérieures', text: (r) => [
+    `Le nid se monte à part, sur l'établi : les quatre parois intérieures (une boîte ouverte en haut et en bas) s'emboîtent entre elles, puis il se pose d'un bloc dans le corps, sur ${r(/^Plancher int$/)} dont les fentes reçoivent les dents du bas.`,
+    `La grille de ${r(/^Côté gauche int$/)} (six fentes de 4 mm) est tournée vers le nid ; le module d'aération se colle contre sa face extérieure.`,
+  ].join('\n') }),
   P('corps-dessous', 'corps', 'placer', /^Dessous ext$/, { text: "À plat. Son ouverture rectangulaire laisse passer plus tard le module d'aération." }),
-  P('corps-etriers', 'corps', 'coller', /^Étrier régulateur/, { text: 'Les tenons des bras traversent le fond par des fentes de 8 × 3 mm et affleurent son dessus : ils tiendront le régulateur sous le nichoir.' }),
+  P('corps-iso-bas', 'corps', 'isoler', /^Isolant sous le plancher/, { all: true, text: "L'isolation du bas se met AVANT le module d'aération, qui la traverse : les quatre pièces se posent ensemble sous le fond." }),
+  P('aer-2', 'corps', 'placer', /^Conduit d'air 2$/, { text: (r) => `Côté nid : sa fente de 34 × 30 mm se place en face de la grille de ${r(/^Côté gauche int$/)}.` }),
+  P('aer-34', 'corps', 'emboiter', /^Conduit d'air [34]$/),
+  P('aer-1', 'corps', 'emboiter', /^Conduit d'air 1$/),
+  P('aer-5', 'corps', 'emboiter', /^Conduit d'air 5/),
+  P('corps-plancher', 'corps', 'emboiter', /^Plancher int$/, { text: "Ses dents traversent les fentes des murs extérieurs. Il n'a que le passage du conduit d'air." }),
   P('corps-avant-ext', 'corps', 'emboiter', /^Face avant ext$/, { text: (r) => `Ne pas monter ${r(/^Côté gauche ext$/)} maintenant : c'est la dernière paroi du corps, après le module d'aération et l'isolation.` }),
   P('corps-arriere-ext', 'corps', 'emboiter', /^Face arrière ext$/),
   P('corps-droit-ext', 'corps', 'emboiter', /^Côté droit ext$/),
   P('corps-nervures', 'corps', 'coller', /^Fixation arbre/, { text: 'Chaque nervure est faite de trois plaques collées face à face. Les dents traversent les fentes du mur arrière extérieur et ressortent de 6 mm dans l\'isolant, avec un trou de 3 × 20 mm pour la clavette. Soigner le collage.' }),
   P('corps-clavettes', 'corps', 'coller', /^Clavette fixation/, { text: 'Chaque clavette traverse les trois plaques de sa nervure par le trou de 3 × 20 mm et les verrouille contre la face intérieure du mur, sans espace.' }),
-  P('corps-iso-bas', 'corps', 'isoler', /^Isolant sous le plancher/, { text: "L'isolation du bas se met AVANT le module d'aération : il la traverse." }),
-  P('corps-plancher', 'corps', 'emboiter', /^Plancher int$/, { text: "Ses dents traversent les fentes des murs extérieurs. Il n'a que le passage du conduit d'air." }),
-  P('corps-avant-int', 'corps', 'emboiter', /^Face avant int$/),
-  P('corps-arriere-int', 'corps', 'emboiter', /^Face arrière int$/),
-  P('corps-droit-int', 'corps', 'emboiter', /^Côté droit int$/),
-  P('corps-gauche-int', 'corps', 'emboiter', /^Côté gauche int$/, { text: "Sa grille (six fentes de 4 mm) est tournée vers le nid. Le module d'aération se colle contre sa face extérieure." }),
   P('corps-gaine', 'corps', 'installer', /^Gaine des fils/, { text: [
     "À passer maintenant, pendant que tout est accessible. Elle monte dans le coin arrière droit, à 1 cm du mur arrière, et traverse des trous de Ø 16 mm, serrés : le fond, le plancher intérieur, puis plus tard les trois planches du cadre du toit, le dessous et le dessus du toit.",
     "L'isolant n'est pas découpé autour : on pousse la gaine dans la laine.",
   ].join('\n') }),
   N('corps-module-air', 'corps', 'installer', "Installer le module d'aération", (r) => [
-    `Le monter AVANT de fixer ${r(/^Côté gauche ext$/)}, et après l'isolation du bas.`,
+    `Le module est déjà en place (posé après l'isolation du bas, avant ${r(/^Plancher int$/)}). Le terminer AVANT de fixer ${r(/^Côté gauche ext$/)}.`,
     "- Il traverse l'ouverture de « Dessous ext » et l'isolation du bas, passe par le passage du plancher intérieur.",
     `- Il se colle contre la face extérieure de ${r(/^Côté gauche int$/)}, sa fente de 34 × 30 mm en face de la grille.`,
     'Le côté gauche est encore ouvert : on y accède.',
   ].join('\n'), [/^Conduit d'air/]),
-  P('corps-iso-gauche', 'corps', 'isoler', /^Isolant gauche \d/, { text: "L'isolant du mur gauche se met APRÈS le module d'aération et AVANT la paroi extérieure gauche." }),
-  P('corps-iso-gauche-conduit', 'corps', 'isoler', /^Isolant gauche dessus conduit/),
-  P('corps-iso-droite', 'corps', 'isoler', /^Isolant droite$/),
-  P('corps-iso-arriere', 'corps', 'isoler', /^Isolant arrière$/),
+  P('corps-iso-nid', 'corps', 'isoler', /^Isolant (gauche|droite$|arrière$)/, { all: true, title: 'Isolant autour du nid', text: "Tous les isolants qui entourent le nid se posent d'un coup, APRÈS le module d'aération et la gaine des fils (ils passent déjà dans ces isolants) et AVANT la paroi extérieure gauche." }),
   P('corps-gauche-ext', 'corps', 'emboiter', /^Côté gauche ext$/, { text: "Dernière paroi du corps : le module d'aération et l'isolation sont en place." }),
+  P('corps-etriers', 'corps', 'coller', /^Étrier régulateur/, { text: 'Les tenons des bras traversent le fond par des fentes de 8 × 3 mm et affleurent son dessus : ils tiendront le régulateur sous le nichoir. Dernière pièce du corps : le régulateur se fixe dessous après le montage du corps.' }),
 
   // ---- d. Entrée et isolant restant ----
   N('ent-huile', 'entree', 'huiler', "Huiler le bloc d'entrée", `${OIL_SHORT}\nLe côté nid du bloc et la face intérieure du tunnel (le trou) restent bruts.`, [/^Entrée \d+$/]),
@@ -153,8 +150,8 @@ export const SEQ: Rule[] = [
   N('cass-pose', 'toit', 'installer', 'Poser la cassette dans le siège', 'La cassette se pose par gravité, ajustée pile au siège (sans joint) ; on la retire à la main par le haut, après avoir débranché la prise 4 broches.', [/^Cassette ventilateur/]),
 
   // ---- f. Le reste : habillage, couvercle, baguettes de cale ----
-  N('hab-peinture', 'habillage', 'peindre', "Peindre l'habillage en blanc", "L'habillage en okoumé est peint en blanc, pas huilé : la peinture ne tient pas sur une surface huilée.", [/^Lambris/]),
-  N('hab-sechage', 'habillage', 'attendre', "Séchage de la peinture de l'habillage", "Laisser sécher la peinture avant de coller les lames.", [/^Lambris/]),
+  N('hab-peinture', 'habillage', 'peindre', "Peindre l'habillage en blanc", PAINT_TEXT, [/^Lambris/]),
+  N('hab-sechage', 'habillage', 'attendre', "Séchage de la peinture de l'habillage", PAINT_DRY, [/^Lambris/]),
   P('hab-cotes', 'habillage', 'coller', /^Lambris (droite|gauche)/, { text: "Les lames des côtés se collent d'abord : la façade et l'arrière recouvrent leurs bouts." }),
   P('hab-avant', 'habillage', 'coller', /^Lambris avant/),
   P('hab-arriere', 'habillage', 'coller', /^Lambris arrière/),
@@ -163,8 +160,8 @@ export const SEQ: Rule[] = [
   P('couv-bag-arriere', 'couvercle', 'coller', /^Baguette couvercle arrière$/),
   P('couv-bag-cotes', 'couvercle', 'coller', /^Baguette couvercle (gauche|droite)$/),
   P('couv-pleine', 'couvercle', 'coller', /^Toit en okoumé \(plaque pleine\)/, { text: 'Collée à plat par-dessus : elle cache toutes les fentes et ferme le canal de la caméra 2, qui devient un conduit dans le toit.' }),
-  N('couv-huile', 'couvercle', 'huiler', 'Huiler le toit en okoumé', `${OIL_SHORT}\nLe toit est exposé à la pluie : huile de lin cuite, 2 couches, sur l'ensemble (faces, chants, dessous), avant la pose.`, [LID_RE]),
-  N('couv-sechage', 'couvercle', 'attendre', 'Séchage du toit en okoumé', DRY_TEXT, [LID_RE]),
+  N('couv-saturateur', 'couvercle', 'peindre', 'Saturer le toit en okoumé', SAT_TEXT, [LID_RE]),
+  N('couv-sechage', 'couvercle', 'attendre', 'Séchage du saturateur du toit', SAT_DRY, [LID_RE]),
   P('bag-cale', 'baguettes', 'placer', /^Baguette de cale/, { all: true, title: 'Couper les baguettes de cale à la demande', text: 'Baguettes de contreplaqué de 3 mm, 5 mm de large, trois fois plus qu\'il n\'en faut : au montage, couper un morceau à la longueur voulue et le coller contre le composant (Pi, convertisseur, batterie, interrupteur du ventilateur), une fois celui-ci posé à sa place.' }),
 
   // ---- g. Électronique : Pi, essais sur l'établi ----

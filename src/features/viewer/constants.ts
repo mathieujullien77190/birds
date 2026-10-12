@@ -7,6 +7,7 @@ export const STORAGE = {
   cut: 'plaques-coupe', // axe et côté du plan de coupe
   hidden: 'plaques-caches', // pièces cachées dans la 3D
   nest: 'plaques-nichoir-3', // réglages du nichoir
+  docSection: 'plaques-doc-section', // section affichée de chaque document (sommaire)
   assembly: 'plaques-montage', // identifiant de l'étape de montage en cours (reprise après un rechargement)
 } as const;
 

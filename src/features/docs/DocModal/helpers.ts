@@ -78,3 +78,73 @@ export function renderDoc(md: string): string {
   r.link = ((...a: unknown[]) => link(...a).replace(/^<a /, '<a target="_blank" rel="noopener noreferrer" ')) as typeof r.link; // les liens s'ouvrent dans un nouvel onglet
   return marked.parse(md, { renderer: r, async: false }) as string;
 }
+
+/** Une section d'un document : le chapeau avant le premier `##` (`intro`) ou un `##` avec son contenu jusqu'au `##` suivant. */
+export interface DocSection { id: string; title: string; md: string; intro?: boolean }
+
+/** Valeur de « section affichée » pour montrer le document entier. */
+export const ALL_SECTIONS = '*';
+/** Nombre minimal de sections `##` pour que la fenêtre propose un sommaire. */
+export const MIN_TOC_SECTIONS = 4;
+
+/** Titre → identifiant d'ancre : minuscules, sans accents, tirets (« Prix (ordre de grandeur, 2026) » → « prix-ordre-de-grandeur-2026 »). */
+export function slugify(title: string): string {
+  return title.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'section';
+}
+
+/** Découpe un document Markdown en sections selon ses titres `##` (les `##` dans un bloc de code ne comptent pas ; `###` reste dans sa section). Le chapeau avant le premier `##` est la section `intro` (absente s'il est vide). */
+export function splitSections(md: string, introTitle = 'Introduction'): DocSection[] {
+  const parts: { title: string; intro: boolean; lines: string[] }[] = [{ title: introTitle, intro: true, lines: [] }];
+  let fence: string | null = null;
+  for (const line of md.split(/\r?\n/)) {
+    const f = /^\s{0,3}(`{3,}|~{3,})/.exec(line);
+    if (f) { if (!fence) fence = f[1][0]; else if (f[1][0] === fence) fence = null; }
+    const h = !fence && !f ? /^##\s+(.+?)\s*$/.exec(line) : null;
+    if (h) parts.push({ title: h[1].replace(/[`*]/g, ''), intro: false, lines: [line] }); else parts[parts.length - 1].lines.push(line);
+  }
+  const seen = new Map<string, number>();
+  return parts.filter((p) => !p.intro || p.lines.join('').trim() !== '').map((p) => {
+    const base = slugify(p.title), n = (seen.get(base) ?? 0) + 1;
+    seen.set(base, n);
+    return { id: n === 1 ? base : `${base}-${n}`, title: p.title, md: p.lines.join('\n'), ...(p.intro ? { intro: true as const } : {}) };
+  });
+}
+
+/** Le document a-t-il assez de sections `##` pour un sommaire ? */
+export const hasToc = (sections: DocSection[]): boolean => sections.filter((s) => !s.intro).length >= MIN_TOC_SECTIONS;
+
+/** Section à afficher : « tout » si demandé, la section mémorisée si elle existe encore, sinon la première. */
+export function resolveSection(sections: DocSection[], saved: string | undefined): string {
+  if (saved === ALL_SECTIONS) return ALL_SECTIONS;
+  return sections.some((s) => s.id === saved) ? saved! : sections[0]?.id ?? ALL_SECTIONS;
+}
+
+/** Section voisine (`dir` = −1 précédente, +1 suivante) ; `null` aux bornes ou si la section courante est inconnue. */
+export function stepSection(sections: DocSection[], id: string, dir: -1 | 1): string | null {
+  const i = sections.findIndex((s) => s.id === id);
+  return i < 0 ? null : sections[i + dir]?.id ?? null;
+}
+
+/** Section visée par un lien interne `#ancre` (identifiant de section, ou titre slugifié) ; `null` si aucune. */
+export function sectionForHash(sections: DocSection[], hash: string): string | null {
+  const raw = hash.replace(/^#/, '');
+  let key = raw; try { key = decodeURIComponent(raw); } catch { /* ancre telle quelle */ }
+  const slug = slugify(key);
+  return sections.find((s) => s.id === key || s.id === slug)?.id ?? null;
+}
+
+/** Vrai si la cible d'une touche est un champ de saisie (les flèches du clavier y déplacent le curseur). */
+export function isTypingTarget(t: EventTarget | null): boolean {
+  const el = t as HTMLElement | null;
+  if (!el || typeof el.tagName !== 'string') return false;
+  return /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable === true || el.getAttribute('contenteditable') === 'true';
+}
+
+/** Section mémorisée par document (JSON `{ idDuDocument: idDeSection }`) ; un texte invalide donne `{}`. */
+export function parseSavedSections(raw: string | null): Record<string, string> {
+  try {
+    const o = JSON.parse(raw ?? '{}');
+    if (!o || typeof o !== 'object' || Array.isArray(o)) return {};
+    return Object.fromEntries(Object.entries(o).filter(([, v]) => typeof v === 'string')) as Record<string, string>;
+  } catch { return {}; }
+}

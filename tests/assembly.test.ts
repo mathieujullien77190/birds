@@ -82,17 +82,44 @@ describe('assemblySteps : les ordres imposés', () => {
     // les blocs sont contigus
     for (const b of order) { const l = steps0.map((s, i) => (s.block === b ? i : -1)).filter((i) => i >= 0); expect(l[l.length - 1] - l[0] + 1, b).toBe(l.length); }
   });
-  it('dans le corps : isolation du bas < module d\'aération < paroi extérieure gauche ; la gaine avant la fermeture du corps', () => {
+  it('dans le corps : Dessous ext (COR-08) < isolant du bas (une seule étape) < aération < Plancher int (COR-09) < Face avant ext (COR-04) < reste ; module d’aération < paroi extérieure gauche ; la gaine avant la fermeture du corps', () => {
     const cote = idx(/^Côté gauche ext$/), module = stepIdx('corps-module-air'), gaine = idx(/^Gaine des fils/);
+    const dessous = idx(/^Dessous ext$/), plancher = idx(/^Plancher int$/), avant = idx(/^Face avant ext$/);
     const bas = [1, 2, 3, 4].map((k) => idx(new RegExp(`^Isolant sous le plancher ${k}$`)));
-    for (const b of bas) expect(b).toBeLessThan(module);
+    expect(new Set(bas).size).toBe(1); // une seule étape pour les quatre pièces
+    expect(steps0[bas[0]].pieceIds).toHaveLength(4);
+    const conduit = sc0.planks.filter((q) => /^Conduit d'air/.test(q.name)).map((q) => stepOf(steps0, q.id));
+    expect(plankCodes(sc0).get(byName(sc0, /^Dessous ext$/).id)).toBe('COR-08');
+    expect(plankCodes(sc0).get(byName(sc0, /^Plancher int$/).id)).toBe('COR-09');
+    expect(plankCodes(sc0).get(byName(sc0, /^Face avant ext$/).id)).toBe('COR-04');
+    const nid = ['Face avant int', 'Face arrière int', 'Côté droit int', 'Côté gauche int'].map((n) => idx(new RegExp(`^${n}$`)));
+    expect(new Set(nid).size).toBe(1); // les 4 parois intérieures : une seule étape, la première du bloc Corps après l'huile et le séchage
+    expect(steps0[nid[0]].pieceIds).toHaveLength(4);
+    expect(nid[0]).toBe(stepIdx('corps-sechage') + 1);
+    expect(nid[0]).toBeLessThan(dessous);
+    expect(dessous).toBeLessThan(bas[0]);
+    const autour = [/^Isolant gauche 1$/, /^Isolant gauche 2$/, /^Isolant gauche 3$/, /^Isolant gauche dessus conduit/, /^Isolant droite$/, /^Isolant arrière$/].map((re) => idx(re));
+    expect(new Set(autour).size).toBe(1); // l'isolant autour du nid : une seule étape, après l'aération et la gaine, avant « Côté gauche ext »
+    expect(steps0[autour[0]].pieceIds).toHaveLength(6);
+    expect(autour[0]).toBeGreaterThan(gaine); expect(autour[0]).toBeGreaterThan(Math.max(...conduit)); expect(autour[0]).toBeLessThan(cote);
+    expect(steps0[stepIdx('corps-etriers')].pieceIds).toHaveLength(4);
+    for (const c of conduit) { expect(c).toBeGreaterThan(bas[0]); expect(c).toBeLessThan(plancher); expect(steps0[c].block).toBe('corps'); expect(c).toBeLessThan(cote); }
+    expect(plancher).toBeLessThan(avant);
+    for (const re of [/^Face arrière ext$/, /^Côté droit ext$/, /^Fixation arbre 1\.1$/, /^Gaine des fils/]) expect(idx(re), String(re)).toBeGreaterThan(avant);
+    expect(bas[0]).toBeLessThan(module);
     expect(module).toBeLessThan(cote);
     expect(gaine).toBeLessThan(cote);
     for (const re of [/^Isolant gauche 1$/, /^Isolant gauche dessus conduit/, /^Isolant droite$/, /^Isolant arrière$/]) { const i = idx(re); expect(i, String(re)).toBeGreaterThan(module); expect(i, String(re)).toBeLessThan(cote); }
-    // le module d'aération (pièces du groupe « Aération du corps ») est posé avant, et le texte le dit
-    for (const p of sc0.planks.filter((q) => /^Conduit d'air/.test(q.name))) expect(stepOf(steps0, p.id)).toBeLessThan(blockFirst('corps'));
+    // le module d'aération (pièces du groupe « Aération du corps ») est posé plus haut dans le Corps, et le texte le dit
     expect(steps0[module].focusIds).toEqual(sc0.planks.filter((q) => /^Conduit d'air/.test(q.name)).map((q) => q.id));
     expect(steps0[module].text).toContain('« Côté gauche ext » (COR-07)');
+  });
+  it('les étriers du régulateur sont la toute dernière étape du bloc Corps, après « Côté gauche ext »', () => {
+    const last = steps0.map((s, i) => (s.block === 'corps' ? i : -1)).filter((i) => i >= 0).pop()!;
+    expect(stepIdx('corps-etriers')).toBe(last);
+    expect(stepIdx('corps-etriers')).toBeGreaterThan(idx(/^Côté gauche ext$/));
+    expect(steps0[last].pieceIds).toEqual(sc0.planks.filter((p) => /^Étrier régulateur/.test(p.name)).map((p) => p.id));
+    expect(steps0[last + 1].block).toBe('entree');
   });
   it('« Côté gauche ext » porte le code COR-07 de la scène par défaut', () => {
     expect(plankCodes(sc0).get(byName(sc0, /^Côté gauche ext$/).id)).toBe('COR-07');
@@ -122,21 +149,22 @@ describe('assemblySteps : les ordres imposés', () => {
     expect(steps0[stepIdx('banc-capteurs')].text).toContain('8080');
     expect(steps0[stepIdx('banc-ventilateur')].text).toContain('PWM');
   });
-  it('la finition est au bon moment : huile avant la pose des pièces, peinture avant le collage de l\'habillage, toit en okoumé huilé', () => {
+  it('la finition est au bon moment : huile avant la pose des pièces, peinture avant le collage de l\'habillage, toit en okoumé saturé', () => {
     expect(stepIdx('aer-huile')).toBeLessThan(idx(/^Conduit d'air 2$/));
     expect(stepIdx('corps-huile')).toBeLessThan(idx(/^Dessous ext$/));
     expect(stepIdx('toit-huile')).toBeLessThan(idx(/^Cadre toit haut$/));
     expect(stepIdx('hab-peinture')).toBeLessThan(stepIdx('hab-cotes.lambris-droite-1'));
     expect(stepIdx('hab-sechage')).toBeLessThan(stepIdx('hab-cotes.lambris-droite-1'));
-    expect(stepIdx('couv-huile')).toBeGreaterThan(idx(/^Toit en okoumé \(plaque pleine\)/));
-    expect(steps0[stepIdx('aer-huile')].text).toMatch(/24 à 72|couche fine/);
-    for (const id of ['aer-huile', 'corps-huile', 'toit-huile', 'couv-huile', 'ent-huile', 'hiv-huile']) expect(steps0[stepIdx(id)].kind).toBe('huiler');
+    expect(stepIdx('couv-saturateur')).toBeGreaterThan(idx(/^Toit en okoumé \(plaque pleine\)/));
+    expect(steps0[stepIdx('aer-huile')].text).toMatch(/pure|couche fine/);
+    for (const id of ['aer-huile', 'corps-huile', 'toit-huile', 'ent-huile', 'hiv-huile']) expect(steps0[stepIdx(id)].kind).toBe('huiler');
     const all = steps0.filter((s) => s.kind === 'huiler').map((s) => s.text).join('\n');
     expect(all).toContain('chiffon'); expect(all).toContain('ruban de peintre'); expect(all).toContain('chants'); expect(all).toContain('15 à 30 minutes');
-    expect(steps0[stepIdx('aer-sechage')].text).toContain('24 à 72 heures');
+    expect(steps0[stepIdx('aer-sechage')].text).toContain('une semaine par couche'); expect(steps0[stepIdx('aer-sechage')].text).toContain('2 à 4 semaines');
+    expect(steps0[stepIdx('couv-saturateur')].text).toContain('Luxens'); expect(steps0[stepIdx('couv-saturateur')].kind).not.toBe('huiler'); expect(steps0[stepIdx('hab-sechage')].text).toContain("selon l'étiquette");
     expect(steps0[stepIdx('hab-peinture')].text).toContain('blanc');
     expect(steps0[stepIdx('corps-huile')].text).toContain('Plancher int');
-    expect(steps0[stepIdx('corps-huile')].text).toContain('EN 71-3');
+    expect(steps0[stepIdx('corps-huile')].text).not.toMatch(/vernis|EN 71-3/); expect(steps0[stepIdx('corps-huile')].text).toContain('seulement l\'huile de lin');
     const interior = ['Plancher int', 'Face avant int', 'Face arrière int', 'Côté droit int', 'Côté gauche int'].map((n) => sc0.planks.find((p) => p.name === n)!.id);
     for (const id of interior) expect(steps0[stepIdx('corps-huile')].focusIds).not.toContain(id); // l'intérieur du nid n'est jamais huilé
   });
@@ -170,11 +198,11 @@ describe('assemblySteps : scènes particulières', () => {
     expect(assemblyBlocks([])).toEqual([]);
   });
   it('une pièce inconnue va dans le bloc « Autres pièces » ; des pièces de même nom ont des identifiants d\'étape distincts', () => {
-    const steps = assemblySteps(scene([mk('Pièce mystère'), mk('Isolant gauche 1', { special: 'block' }), mk('Isolant gauche 1', { special: 'block' }), mk('Truc', { spareOf: 'x' }), mk('Ignoré (rechange 2)'), mk('Doc', { special: 'doc' })]));
+    const steps = assemblySteps(scene([mk('Pièce mystère'), mk('Face avant ext'), mk('Face avant ext', { w: 20 }), mk('Truc', { spareOf: 'x' }), mk('Ignoré (rechange 2)'), mk('Doc', { special: 'doc' })]));
     expect(steps.find((s) => s.block === 'divers')!.title).toBe('Pièce mystère (X-01)');
     const ids = steps.map((s) => s.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(steps.filter((s) => s.block === 'corps')).toHaveLength(2);
+    expect(steps.filter((s) => s.block === 'corps' && s.pieceIds.length)).toHaveLength(2); // deux pièces de même nom mais de tailles différentes : deux étapes aux identifiants distincts
     const placed = steps.filter((s) => s.pieceIds.length); // les étapes d'installation du Pi n'ont pas de pièce
     expect(placed).toHaveLength(3);
     expect(assemblyBlocks(placed).map((b) => [b.id, b.first, b.count])).toEqual([['corps', 0, 2], ['divers', 2, 1]]);

@@ -127,7 +127,7 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 - Le panneau de 100 W est déporté à environ 70 cm du nichoir, incliné de 35° vers l'avant, son bord bas près du sol.
 - Son câble 12 V longe le sol et arrive sous le nichoir, où est le régulateur de charge, posé à plat sous le plancher.
 - Le lambris descend de 45 mm sous le nichoir pour protéger le régulateur de la pluie ; le câble du panneau passe sous l'habillage, sans le percer.
-- Deux fils montent dans l'isolant du coin arrière droit, dans une gaine de Ø 16 mm (tuyau multicouche ou gaine électrique ICTA de diamètre minimal), jusqu'au dessus du toit.
+- Deux fils montent dans l'isolant du coin arrière droit, dans une gaine électrique ICTA de Ø 16 mm, jusqu'au dessus du toit.
 
 **Stockage.**
 
@@ -199,12 +199,12 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 
 **Couvercle.** Le groupe « Couvercle » réunit le toit en okoumé et quatre baguettes.
 
-- **Toit** : deux plaques de contreplaqué okoumé de 5 mm collées l'une sur l'autre (**10 mm** en tout), NON peintes : on les huile ou on les sature soi-même pour l'extérieur.
-- **Emprise** : 270 × 303 mm ; il déborde de 60 mm devant et de 30 mm sur les côtés et derrière ; pente de 8°. Il se découpe au laser sur « Planche okoumé 5 mm » avec les lames de l'habillage.
+- **Toit** : deux plaques de contreplaqué okoumé de 5 mm collées l'une sur l'autre (**10 mm** en tout), non peintes, saturées au saturateur teck mat (voir « Finition du bois »).
+- **Emprise** : 270 × 303 mm ; il déborde de 60 mm devant et de 30 mm sur les côtés et derrière ; pente de 8°. Il se découpe au laser sur « Planche okoumé 5 mm » avec les lames de l'habillage : les 22 lames et les 2 plaques (0,47 m² de pièces) tiennent sur 4 carreaux de 400 × 400 mm si la marge de bord de la découpe est réglée à 4 mm ; les lames les plus longues mesurent 386 mm, donc avec la marge de 8 mm par défaut un carreau de 400 mm ne suffit pas (la planche de 410 × 400 mm convient).
 - **Plaque du dessous** (« Toit en okoumé (plaque crénelée) ») : elle reçoit les quatre baguettes de contreplaqué 3 mm (« Baguette couvercle avant / arrière / gauche / droite »), une par côté de l'ouverture du caisson, collées sous le pan. Elles entrent exactement dans le caisson (longueur = intérieur du caisson, mesurée dans le plan incliné, jeu 0) : le couvercle se centre tout seul.
 - **Baguettes** : corps de 10 mm sous le pan et **dents de 5 mm**, d'environ 16 mm de large, qui s'enfoncent dans des fentes de la plaque crénelée (dent + 0 de jeu) et affleurent son dessus.
 - **Plaque du dessus** (« Toit en okoumé (plaque pleine) », sans trou ni fente) : elle se colle à plat par-dessus, cache toutes les fentes et rend le toit étanche.
-- **Montage** : enfiler les dents dans les fentes, coller les baguettes, puis coller la plaque pleine ; huiler ou saturer l'ensemble (faces, chants, dessous) avant la pose.
+- **Montage** : enfiler les dents dans les fentes, coller les baguettes, puis coller la plaque pleine ; saturer l'ensemble assemblé (2 couches : faces visibles, chants, dessous ; les surfaces collées ne sont pas atteintes) avant la pose.
 - **Canal de la caméra 2** : un seul grand trou oblong (28 mm de large, bouts arrondis) dans la plaque crénelée ; la plaque pleine le ferme, c'est un conduit DANS le toit. La baguette avant n'a pas de dents à cet endroit (3 mm de bois de chaque côté).
 - **Découpe** : les baguettes sont découpées sur le contreplaqué 3 mm (déjà compté), le pan sur l'okoumé ; tout est caché par défaut dans « Pièces ».
 - **Fils du ventilateur** : « commande interrupteur » et « masse commune » longent le mur arrière à 2 mm sous la pente ; celui de la commande est à 6,5 mm de la plaque arrière pour ne pas toucher la baguette arrière, qui descend de 10 mm sous le pan.
@@ -466,9 +466,9 @@ Le bouton **Montage** de la barre de la vue (en haut à droite sur ordinateur, e
 - **Étapes** : une étape par pièce ; les pièces strictement identiques (même code de plaque) se posent ensemble dans une seule étape. Une consigne n'est écrite que quand il y a quelque chose de particulier à dire : ordre à respecter, pièce qui se pose avant l'isolant, précaution, finition.
 - **Dans la 3D** : seules les pièces des étapes déjà faites et de l'étape en cours sont affichées ; celles de l'étape en cours sont surlignées en ambre. Les réglages de visibilité de « Pièces » ne changent pas et sont rétablis à la sortie. Pendant les étapes d'électronique, le toit en okoumé est soulevé (caché) ; il est reposé juste avant le panneau solaire.
 - **Navigation** : boutons « ◀ Précédent » / « Suivant ▶ » (grands, en bas de la feuille), balayage horizontal sur la feuille, flèches ← → du clavier, Échap pour quitter, liste de saut rapide par bloc. Sur téléphone, la feuille occupe au plus 40 % de la hauteur, se replie en une barre fine (titre et « 12 / 140 ») et l'écran reste allumé tant que le mode est ouvert. L'étape courante est mémorisée et reprise après un rechargement.
-- **Ordre des blocs** : Aération du corps (le module de la prise d'air basse), Pièces d'hiver, Corps, Entrée, Toit (dont la cassette du ventilateur), Habillage, Couvercle, Baguettes de cale, puis l'électronique (carte microSD et essais du Pi sur l'établi, composants et fils, essais avec la batterie) et, en tout dernier, le panneau solaire.
-- **Dans le corps** : l'isolation du bas se met avant le module d'aération, la gaine des fils est passée pendant que tout est accessible, le module d'aération est monté avant la paroi extérieure « Côté gauche ext », puis l'isolation des murs, puis cette paroi.
-- **Finition** : l'huile de lin est appliquée avant le collage, en masquant dents, fentes et surfaces à coller (voir « Finition du bois ») ; l'habillage est peint en blanc ; le toit en okoumé est huilé une fois assemblé.
+- **Ordre des blocs** : Aération du corps (huile et séchage du conduit d'air), Pièces d'hiver, Corps, Entrée, Toit (dont la cassette du ventilateur), Habillage, Couvercle, Baguettes de cale, puis l'électronique (carte microSD et essais du Pi sur l'établi, composants et fils, essais avec la batterie) et, en tout dernier, le panneau solaire.
+- **Dans le corps** : la première étape monte le nid, les quatre parois intérieures d'un coup (le nid se monte à part, puis se pose d'un bloc sur « Plancher int ») ; viennent ensuite « Dessous ext » (COR-08), l'isolant sous le plancher (une seule étape pour les quatre pièces), le module d'aération (« Conduit d'air 1 à 5 », posé après l'isolation du bas qu'il traverse), « Plancher int » (COR-09), « Face avant ext » (COR-04), les autres parois extérieures, les nervures et les clavettes, la gaine des fils (passée pendant que tout est accessible), l'isolant autour du nid (une seule étape pour tous les pavés), « Côté gauche ext » (COR-07) et, en toute dernière étape du bloc, les étriers du régulateur.
+- **Finition** : l'huile de lin pure est appliquée avant le collage, en masquant dents, fentes et surfaces à coller, avec une semaine de séchage par couche (voir « Finition du bois ») ; les 22 lames de l'habillage sont peintes en blanc avant le collage (2 couches, ruban de peintre sur les surfaces à coller) ; le toit en okoumé est saturé (saturateur teck mat, 2 couches) une fois assemblé.
 - **Le Pi** : préparation de la carte microSD, installation du programme et du service, essais sur l'établi avec l'alimentation 27 W (capteur du nid, sonde de dehors, caméras, LED infrarouges par le module MOSFET, ventilateur et PWM, page web) avant de l'installer dans le nichoir ; puis essais avec la batterie, le fusible et le régulateur avant de brancher le panneau solaire.
 
 ## Vérification que rien ne coince
@@ -523,14 +523,14 @@ Le ventilateur ajoute au plus 0,6 W, directement sur le 12 V, seulement quand il
 
 ## Poids (estimation)
 
-Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm ≈ 1,4 kg/m², contreplaqué okoumé extérieur 5 mm ≈ 2,9 kg/m², laine de bois ≈ 50 kg/m³) et d'après les fiches des composants. À ± 15 %.
+Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm ≈ 1,4 kg/m², contreplaqué okoumé extérieur 5 mm ≈ 2,15 kg/m² soit 430 kg/m³ × 5 mm, fibre de bois ≈ 50 kg/m³) et d'après les fiches des composants. L'isolant est le volume des pavés du modèle (6,95 L, hors bloc d'hiver) × 50 kg/m³ = 0,35 kg ; l'okoumé est l'aire des pièces découpées (0,468 m² : 0,304 m² d'habillage et 0,164 m² de toit) × 5 mm × 430 kg/m³. À ± 15 %.
 
 | Élément | Poids |
 | --- | --- |
 | Contreplaqué 3 mm (106 pièces, 0,85 m²) | 1,2 kg |
-| Habillage : okoumé extérieur 5 mm peint en blanc (22 pièces, 0,31 m²) | 0,9 kg |
-| Toit en okoumé 2 × 5 mm (2 plaques de 0,082 m²) + 4 baguettes de 3 mm | 0,5 kg |
-| Isolant laine de bois 39 mm (murs, fond, toit) | 0,55 kg |
+| Habillage : okoumé extérieur 5 mm peint en blanc (22 pièces, 0,30 m²) | 0,65 kg |
+| Toit en okoumé 2 × 5 mm (2 plaques de 0,082 m²) + 4 baguettes de 3 mm | 0,4 kg |
+| Isolant fibre de bois 39 mm, 50 kg/m³ (murs, fond, toit : 6,95 L) | 0,35 kg |
 | Batterie 4 × 32700 + BMS + support | 0,6 kg |
 | Régulateur de charge Genasun | 0,25 kg |
 | Raspberry Pi 5 + carte microSD | 0,05 kg |
@@ -538,23 +538,24 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 | Ventilateur, prise et rallonge, interrupteur, plots, mousse, bloc d'hiver | 0,15 kg |
 | Câbles, gaine, nappes | 0,15 kg |
 | Morceaux de baguette de cale, étriers, clavettes | 0,1 kg |
-| **Total accroché à l'arbre** | **≈ 4,6 kg** |
+| **Total accroché à l'arbre** | **≈ 4,1 kg** |
 | Panneau solaire 100 W (au sol, à part) | 8 kg |
 
-**Tenue de la fixation.** 4,6 kg font 45 N. Ils sont repris par 4 dents de 9 × 32 mm dans du contreplaqué de 3 mm : la pression sur le bois reste sous 1 MPa, pour une résistance d'au moins 20 MPa. Le centre de gravité est à environ 11 cm du dos, ce qui ajoute un couple de 6 N·m, soit un effort d'environ 60 N sur la dent du haut : toujours loin de la limite. Les 4 vis Ø 5 dans le tronc (ou une sangle) tiennent cela sans difficulté. Les points à soigner : le collage des 3 plaques de chaque nervure, et des vis inox de 5 × 60 dans du bois sain.
+**Tenue de la fixation.** 4,1 kg font 40 N. Ils sont repris par 4 dents de 9 × 32 mm dans du contreplaqué de 3 mm : la pression sur le bois reste sous 1 MPa, pour une résistance d'au moins 20 MPa. Le centre de gravité est à environ 11 cm du dos, ce qui ajoute un couple de 4,5 N·m, soit un effort d'environ 45 N sur la dent du haut : toujours loin de la limite. Les 4 vis Ø 5 dans le tronc (ou une sangle) tiennent cela sans difficulté. Les points à soigner : le collage des 3 plaques de chaque nervure, et des vis inox de 5 × 60 dans du bois sain.
 
-## Finition du bois (huile de lin)
+## Finition du bois (huile de lin, saturateur, peinture)
 
-**Règle.** Toutes les pièces en contreplaqué de peuplier de 3 mm et l'okoumé de 5 mm du toit sont huilées à l'huile de lin cuite (ou avec siccatif), sauf tout ce qui touche l'espace des oiseaux : les parois, le plancher intérieur, le bloc d'entrée côté nid et la face intérieure du tunnel (« Face avant int », « Côté … int », « Plancher int ») restent bruts, poncés, sans suie de découpe. L'habillage d'okoumé est peint en blanc (pas d'huile).
+**Règle.** Chaque zone a sa finition. Le contreplaqué de peuplier de 3 mm est huilé à l'huile de lin pure (non cuite). Les deux plaques d'okoumé du toit reçoivent un saturateur teck mat à l'eau. Les 22 lames d'okoumé de l'habillage sont peintes en blanc. Tout ce qui touche l'espace des oiseaux (les parois, le plancher intérieur, le bloc d'entrée côté nid et la face intérieure du tunnel : « Face avant int », « Côté … int », « Plancher int ») reste brut, poncé, sans suie de découpe. Le nichoir est mis en service au printemps : le séchage et l'aération se font pendant l'automne et l'hiver.
 
 | Zone | Finition | Pourquoi |
 | --- | --- | --- |
 | Nid (parois intérieures, plancher intérieur, bloc d'entrée côté nid, face intérieure du tunnel) | brut, poncé (grains 120 puis 180), sans suie de découpe | l'huile et son odeur ne doivent pas rester là où vivent les oiseaux |
-| Pièces cachées en peuplier (parois extérieures, toit, cadres, baguettes, étriers, clavettes, nervures) | huile de lin cuite, 2 couches | protège le bois de l'humidité de l'isolant et de la condensation |
-| Chants (tranches découpées) | 2 couches d'huile | les chants boivent l'huile et l'eau par les fibres |
-| Toit en okoumé de 5 mm (deux plaques) | huile de lin cuite, 2 couches | bois exposé à la pluie, non peint |
-| Habillage en okoumé | peinture blanche, pas d'huile | la peinture ne tient pas sur une surface huilée |
-| Dessous du nichoir et conduit d'air (zones mouillées en permanence) | huile de lin, plus vernis ou lasure à l'eau (étiquette jouets EN 71-3) | l'huile seule ne suffit pas à un bois toujours humide |
+| Pièces cachées en peuplier (parois extérieures, « Dessous ext », conduit d'air, toit, cadres, baguettes, étriers, clavettes, nervures) | huile de lin pure, 2 couches | protège le bois de l'humidité de l'isolant et de la condensation |
+| Chants (tranches découpées) du peuplier | 2 couches d'huile ; la première peut être diluée à 50 % d'essence de térébenthine | les chants boivent l'huile et l'eau par les fibres |
+| Toit en okoumé de 5 mm (deux plaques) | saturateur teck mat à l'eau Luxens, 2 couches, chants compris, pas sur les surfaces à coller (face de dessus de la plaque crénelée, dents, fentes) ; pas d'huile de lin sur cette zone | teinté teck, résiste aux UV et aux intempéries ; seulement sur les pièces du toit, à l'extérieur, jamais sur ce qui touche le nid |
+| Habillage en okoumé (22 lames « Lambris … ») | peinture extérieure blanche satinée Luxens « Conditions extrêmes », sans sous-couche, 2 couches, 2 faces et chants, pas d'huile | microporeuse, protection UV et intempéries ; la peinture ne tient pas sur une surface huilée |
+
+**Huile de lin (Mieuxa, 1 L).** L'huile est pure, non cuite. Étiquette : protège des intempéries, du gel et de l'humidité les bois ; à employer pure ou mélangée à de l'essence de térébenthine Mieuxa ; préparation : 50 % d'huile de lin et 50 % d'essence de térébenthine ; pour accélérer le séchage, ajouter 1 % de siccatif Mieuxa ; risque d'auto-inflammation sur matériaux poreux (chiffons, papiers) : les faire tremper dans l'eau avant de les jeter. Le mélange 50 / 50 (première couche des chants) et le siccatif à 1 % sont des options : l'essence de térébenthine et le siccatif ne figurent pas dans le tableau des prix.
 
 **Procédure d'huilage.**
 
@@ -562,10 +563,24 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 2. Repérer et masquer au ruban de peintre les dents, les fentes et toutes les surfaces à coller : l'huile empêche la colle d'accrocher.
 3. Appliquer une première couche fine au pinceau ou au chiffon ; les chants en reçoivent deux, car ils boivent.
 4. Essuyer l'excès après 15 à 30 minutes.
-5. Laisser sécher 24 à 72 heures par couche (temps indicatif, il dépend de la température et de l'humidité), puis passer la seconde couche.
+5. Laisser sécher environ une semaine par couche (temps indicatif, il dépend de la température et de l'humidité), puis passer la seconde couche.
 6. Enlever le ruban, puis coller (colle à bois de classe D3 ou D4).
-7. Aérer plusieurs jours avant d'installer le nichoir : l'odeur ne doit pas rester dans le nid.
-8. Zones mouillées en permanence (dessous du nichoir, conduit d'air) : ajouter, ou mettre à la place, un vernis ou une lasure à l'eau (étiquette jouets EN 71-3).
+7. Aérer 2 à 4 semaines avant le montage : l'odeur ne doit pas rester dans le nid.
+
+**Saturateur du toit (Luxens teck mat, 1 L).** Produit à l'eau, teinté teck, qui résiste aux UV et aux intempéries ; séchage au toucher : 1 h. L'étiquette porte « dangereux : respecter les précautions d'emploi ». C'est un gel anti-glisse conçu pour les terrasses : un essai sur une chute d'okoumé précède le traitement du toit. Il s'applique uniquement sur les deux plaques d'okoumé du toit, à l'extérieur, jamais sur ce qui touche le nid.
+
+1. Poncer (grain 120, puis 180) et dépoussiérer les deux plaques.
+2. Masquer au ruban de peintre les surfaces à coller : face de dessus de la plaque crénelée, dents, fentes.
+3. Appliquer une première couche, chants compris, au pinceau ; laisser sécher selon l'étiquette.
+4. Passer la seconde couche (2 couches en tout).
+5. Enlever le ruban, puis coller.
+
+**Peinture de l'habillage (Luxens, extérieure bois / MDF / OSB « Conditions extrêmes », blanc satiné 2,5 L, RAL 9016).** Sans sous-couche sur bois neuf, microporeuse, protection UV et intempéries 10 ans. Séchage : 12 h au toucher, 6 h entre deux couches, 12 h complet (selon l'étiquette) ; rendement 12 m² / L ; COV 4 g / L ; nettoyage des outils à l'eau. L'étiquette porte « dangereux : respecter les précautions d'emploi ».
+
+1. Poncer légèrement les 22 lames et dépoussiérer.
+2. Masquer au ruban de peintre les surfaces à coller.
+3. Peindre 2 faces et les chants, 2 couches, avec 6 h entre les deux (selon l'étiquette).
+4. Laisser sécher 12 h au moins, enlever le ruban, puis coller.
 
 **Sécurité.** Un chiffon imbibé d'huile de lin peut s'enflammer tout seul en séchant en tas : on l'étale à plat dehors, ou on le noie dans l'eau avant de le jeter.
 
@@ -605,18 +620,18 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Solaire | Panneau solaire 100 W | 90 € | [Panneau 100 Wc monocristallin AST100-17M, 970 × 585 × 30 mm (Wattuneed)](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html) | [ ] |
 | Solaire | Régulateur de charge Genasun GV-10-Li | 120 € | [Genasun GV-10-Li-14.2V (4S LiFePO4, 10,5 A)](https://sunforgellc.com/product/gv-10/) ; revendeur : [DigiKey GV-10-Li-14.2V-OEM](https://www.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948) | [ ] |
 | Corps | Contreplaqué peuplier 3 mm (9 planches de 41 × 40 cm, baguettes de cale et pièces fines de rechange comprises : elles se rangent dans les creux des planches) | 22 € | lien à trouver — référence exacte : contreplaqué peuplier 3 mm, planches de 41 × 40 cm | [ ] |
-| Corps | Laine de bois 40 mm, panneaux Soprema 122 × 60 cm, lot de 10 (7,3 m² : il en faut environ 0,3 m², le reste sert de réserve) | 50 € | [Leroy Merlin, 10 panneaux isolants en fibre de bois Soprema 122 × 60 cm, ép. 4 cm, R 1,05 (réf. 80145323)](https://www.leroymerlin.fr/produits/10-panneaux-isolants-en-fibre-de-bois-soprema-122x60cm-ep-4-cm-r-1-05-80145323.html) : panneau de 40 mm comprimé à 39 mm dans la double paroi (jeu nul voulu : le panneau se tasse et tient seul) ; prix estimé (page non lisible en ligne, autre marque à titre de repère : Isover Flex 40, 5,20 € le m²), à confirmer | [ ] |
+| Corps | Panneau isolant en fibre de bois Soprema 122 × 60 cm, 40 mm (1 panneau ; vendu en lot de 10 sur la page, un seul suffit : ≈ 0,73 m² pour ≈ 0,18 m² utiles) | 2,80 € | [Leroy Merlin, 10 panneaux isolants en fibre de bois Soprema 122 × 60 cm, ép. 4 cm, R 1,05 (réf. 80145323)](https://www.leroymerlin.fr/produits/10-panneaux-isolants-en-fibre-de-bois-soprema-122x60cm-ep-4-cm-r-1-05-80145323.html) : le lot de 10 (7,32 m², 19 kg, 3,82 € le m²) est la seule référence de la page, le magasin peut le vendre à l'unité ; λ 0,038 W/mK, R 1,05 pour 40 mm, densité 50 kg/m³, fabrication française ; panneau semi-rigide de 40 mm pour une cavité de 39 mm : on le comprime de 1 mm ou on le ponce ; prix d'un panneau = 0,732 m² × 3,82 € | [ ] |
 | Corps | Colle à bois D3 / D4 (résistante à l'eau), vis inox | 8 € | lien à trouver — référence exacte : colle à bois vinylique D3 ou D4 (résistante à l'eau), vis inox A2 | [ ] |
 | Corps | Bloc isolant d'hiver (mousse de 35 mm + cadre de contreplaqué) | 6 € | fabriqué : mousse de 35 mm + contreplaqué | [ ] |
 | Corps | Prise d'air basse (contreplaqué du conduit) | 1 € | fabriquée : contreplaqué | [ ] |
 | Corps | Sous-boîte isolante de la prise d'air (contreplaqué + laine de bois) | 1 € | fabriquée : contreplaqué + laine de bois | [ ] |
-| Habillage | Contreplaqué okoumé extérieur 5 mm (4 planches de 41 × 40 cm, soit 0,48 m² de pièces : l'habillage et le toit en deux plaques), découpé au laser ; l'habillage est peint en blanc, le toit reste au naturel | 24 € | lien à trouver — référence exacte : contreplaqué okoumé extérieur (CTBX) 5 mm, feuille d'au moins 410 × 400 mm (prix estimé, à confirmer) | [ ] |
-| Habillage | Peinture blanche (habillage) | 7 € | lien à trouver — référence exacte : peinture blanche extérieure pour bois | [ ] |
-| Finition | Huile de lin, 1 L (Mieuxa) : vérifier sur l'étiquette qu'elle est cuite ou avec siccatif | 7,59 € | [Leroy Merlin, huile de lin Mieuxa 1 L](https://www.leroymerlin.fr/produits/huile-de-lin-mieuxa-1l-53154213.html) | [ ] |
+| Habillage | 2 panneaux de contreplaqué okoumé extérieur 5 mm de 800 × 600 mm (15,90 € pièce) pour l'habillage (22 lames, peint en blanc) et le toit (2 plaques, au naturel) ; chaque panneau est recoupé en deux carreaux de 400 × 400 mm et deux bandes de 400 × 200 mm pour la laser (4 carreaux, marge de bord de 4 mm) | 31,80 € | [Leroy Merlin, prédécoupe contreplaqué okoumé extérieur ép. 5 mm, 80 × 60 cm](https://www.leroymerlin.fr/produits/predecoupe-contreplaque-okoume-exterieur-ep-5-mm-l-80-x-l-60-cm-70753963.html) : nautique / extérieur plein air, densité 430 kg/m³, 1,032 kg la pièce, PEFC, fabrication française | [ ] |
+| Finition | Peinture extérieure bois / MDF / OSB « Conditions extrêmes » Luxens, blanc satiné 2,5 L (RAL 9016), pour les 22 lames de l'habillage | 34,90 € | [Leroy Merlin, peinture extérieure bois, MDF, OSB Luxens « Conditions extrêmes », blanc satiné 2,5 L](https://www.leroymerlin.fr/produits/peinture-exterieure-bois-mdf-osb-conditions-extremes-luxens-blanc-satine-2-5l-82396898.html) : sans sous-couche sur bois neuf, microporeuse, protection UV et intempéries 10 ans, séchage 12 h au toucher, 6 h entre deux couches, rendement 12 m² / L, COV 4 g / L, nettoyage à l'eau | [ ] |
+| Finition | Huile de lin pure (non cuite) Mieuxa, 1 L | 7,59 € | [Leroy Merlin, huile de lin Mieuxa 1 L](https://www.leroymerlin.fr/produits/huile-de-lin-mieuxa-1l-53154213.html) : à employer pure ; options non comptées : essence de térébenthine Mieuxa (50 / 50 pour la première couche des chants) et siccatif Mieuxa (1 %) | [ ] |
+| Finition | Saturateur pour bois extérieur Luxens teck mat, 1 L, pour les deux plaques d'okoumé du toit | 21,90 € | [Leroy Merlin, saturateur pour bois extérieur Luxens teck mat 1 L](https://www.leroymerlin.fr/produits/saturateur-pour-bois-exterieur-luxens-teck-mat-1-l-88692969.html) : à l'eau, teinté teck, résiste aux UV et aux intempéries, séchage au toucher 1 h ; gel anti-glisse conçu pour terrasses : essai sur une chute avant de traiter ; étiquette « dangereux : respecter les précautions d'emploi » | [ ] |
 | Finition | Pinceau et chiffons : prix estimé, à confirmer | 5 € | lien à trouver — référence exacte : pinceau plat de 30 à 50 mm et chiffons de coton non pelucheux | [ ] |
 | Finition | Ruban de peintre : prix estimé, à confirmer | 4 € | lien à trouver — référence exacte : ruban de peintre (masquage) de 25 à 30 mm | [ ] |
 | Finition | Papier de verre grains 120 et 180 : prix estimé, à confirmer | 4 € | lien à trouver — référence exacte : papier de verre grain 120 et grain 180, feuilles pour ponçage à la main | [ ] |
-| Finition | Vernis ou lasure à l'eau, 0,5 L (étiquette jouets EN 71-3) : prix estimé, à confirmer | 12 € | lien à trouver — référence exacte : vernis ou lasure à l'eau pour bois, 0,5 L, conforme jouets EN 71-3 | [ ] |
 
 Le ventilateur, sa grille et son interrupteur coûtent environ 22 €. Le poste le plus cher est le régulateur Genasun (120 €) : un régulateur PWM LiFePO4 à 20 € ferait le travail avec un rendement moindre, et enlèverait 100 € au total. La découpe laser n'est pas comptée.
 
