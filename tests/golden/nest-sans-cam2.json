@@ -6679,6 +6679,27 @@
      "pos": 72,
      "width": 16,
      "depth": 3
+    },
+    {
+     "id": "id350",
+     "edge": "left",
+     "pos": 19.71,
+     "width": 13.14,
+     "depth": 3
+    },
+    {
+     "id": "id351",
+     "edge": "left",
+     "pos": 46,
+     "width": 13.14,
+     "depth": 3
+    },
+    {
+     "id": "id352",
+     "edge": "left",
+     "pos": 72.29,
+     "width": 13.14,
+     "depth": 3
     }
    ],
    "holes": [],
@@ -6687,11 +6708,15 @@
     "bottom": {
      "n": 5,
      "phase": 0
+    },
+    "left": {
+     "n": 7,
+     "phase": 1
     }
    }
   },
   {
-   "id": "id350",
+   "id": "id353",
    "name": "Goulotte ventilateur droite",
    "w": 80,
    "h": 92,
@@ -6707,24 +6732,45 @@
    ],
    "notches": [
     {
-     "id": "id351",
+     "id": "id354",
      "edge": "bottom",
      "pos": 8,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id352",
+     "id": "id355",
      "edge": "bottom",
      "pos": 40,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id353",
+     "id": "id356",
      "edge": "bottom",
      "pos": 72,
      "width": 16,
+     "depth": 3
+    },
+    {
+     "id": "id357",
+     "edge": "left",
+     "pos": 19.71,
+     "width": 13.14,
+     "depth": 3
+    },
+    {
+     "id": "id358",
+     "edge": "left",
+     "pos": 46,
+     "width": 13.14,
+     "depth": 3
+    },
+    {
+     "id": "id359",
+     "edge": "left",
+     "pos": 72.29,
+     "width": 13.14,
      "depth": 3
     }
    ],
@@ -6734,13 +6780,17 @@
     "bottom": {
      "n": 5,
      "phase": 0
+    },
+    "left": {
+     "n": 7,
+     "phase": 1
     }
    }
   },
   {
-   "id": "id354",
+   "id": "id360",
    "name": "Goulotte ventilateur avant",
-   "w": 66.4,
+   "w": 72.4,
    "h": 92,
    "pos": [
     10.8,
@@ -6754,24 +6804,80 @@
    ],
    "notches": [
     {
-     "id": "id355",
+     "id": "id361",
      "edge": "bottom",
-     "pos": 6.64,
-     "width": 13.28,
+     "pos": 7.24,
+     "width": 14.48,
      "depth": 3
     },
     {
-     "id": "id356",
+     "id": "id362",
      "edge": "bottom",
-     "pos": 33.2,
-     "width": 13.28,
+     "pos": 36.2,
+     "width": 14.48,
      "depth": 3
     },
     {
-     "id": "id357",
+     "id": "id363",
      "edge": "bottom",
-     "pos": 59.76,
-     "width": 13.28,
+     "pos": 65.16,
+     "width": 14.48,
+     "depth": 3
+    },
+    {
+     "id": "id364",
+     "edge": "left",
+     "pos": 6.57,
+     "width": 13.14,
+     "depth": 3
+    },
+    {
+     "id": "id365",
+     "edge": "left",
+     "pos": 32.86,
+     "width": 13.14,
+     "depth": 3
+    },
+    {
+     "id": "id366",
+     "edge": "left",
+     "pos": 59.14,
+     "width": 13.14,
+     "depth": 3
+    },
+    {
+     "id": "id367",
+     "edge": "left",
+     "pos": 85.43,
+     "width": 13.14,
+     "depth": 3
+    },
+    {
+     "id": "id368",
+     "edge": "right",
+     "pos": 6.57,
+     "width": 13.14,
+     "depth": 3
+    },
+    {
+     "id": "id369",
+     "edge": "right",
+     "pos": 32.86,
+     "width": 13.14,
+     "depth": 3
+    },
+    {
+     "id": "id370",
+     "edge": "right",
+     "pos": 59.14,
+     "width": 13.14,
+     "depth": 3
+    },
+    {
+     "id": "id371",
+     "edge": "right",
+     "pos": 85.43,
+     "width": 13.14,
      "depth": 3
     }
    ],
@@ -6781,11 +6887,19 @@
     "bottom": {
      "n": 5,
      "phase": 0
+    },
+    "left": {
+     "n": 7,
+     "phase": 0
+    },
+    "right": {
+     "n": 7,
+     "phase": 0
     }
    }
   },
   {
-   "id": "id358",
+   "id": "id372",
    "name": "Conduit de sortie 1",
    "w": 10.6,
    "h": 41.5,
@@ -6801,28 +6915,28 @@
    ],
    "notches": [
     {
-     "id": "id359",
+     "id": "id373",
      "edge": "top",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id360",
+     "id": "id374",
      "edge": "top",
      "pos": 8.83,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id361",
+     "id": "id375",
      "edge": "bottom",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id362",
+     "id": "id376",
      "edge": "bottom",
      "pos": 8.83,
      "width": 3.53,
@@ -6925,7 +7039,7 @@
    ]
   },
   {
-   "id": "id363",
+   "id": "id377",
    "name": "Conduit de sortie 2",
    "w": 10.6,
    "h": 41.5,
@@ -6941,28 +7055,28 @@
    ],
    "notches": [
     {
-     "id": "id364",
+     "id": "id378",
      "edge": "top",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id365",
+     "id": "id379",
      "edge": "top",
      "pos": 8.83,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id366",
+     "id": "id380",
      "edge": "bottom",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id367",
+     "id": "id381",
      "edge": "bottom",
      "pos": 8.83,
      "width": 3.53,
@@ -7065,7 +7179,7 @@
    ]
   },
   {
-   "id": "id368",
+   "id": "id382",
    "name": "Conduit de sortie 3",
    "w": 51.4,
    "h": 10.6,
@@ -7081,14 +7195,14 @@
    ],
    "notches": [
     {
-     "id": "id369",
+     "id": "id383",
      "edge": "left",
      "pos": 5.3,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id370",
+     "id": "id384",
      "edge": "right",
      "pos": 5.3,
      "width": 3.53,
@@ -7191,7 +7305,7 @@
    ]
   },
   {
-   "id": "id371",
+   "id": "id385",
    "name": "Conduit de sortie 4",
    "w": 51.4,
    "h": 10.6,
@@ -7207,14 +7321,14 @@
    ],
    "notches": [
     {
-     "id": "id372",
+     "id": "id386",
      "edge": "left",
      "pos": 5.3,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id373",
+     "id": "id387",
      "edge": "right",
      "pos": 5.3,
      "width": 3.53,
@@ -7317,7 +7431,7 @@
    ]
   },
   {
-   "id": "id374",
+   "id": "id388",
    "name": "Conduit d'air 3",
    "w": 34.3,
    "h": 156,
@@ -7333,98 +7447,98 @@
    ],
    "notches": [
     {
-     "id": "id375",
+     "id": "id389",
      "edge": "top",
      "pos": 5.72,
      "width": 11.43,
      "depth": 3
     },
     {
-     "id": "id376",
+     "id": "id390",
      "edge": "top",
      "pos": 28.58,
      "width": 11.43,
      "depth": 3
     },
     {
-     "id": "id377",
+     "id": "id391",
      "edge": "left",
      "pos": 7.09,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id378",
+     "id": "id392",
      "edge": "left",
      "pos": 35.45,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id379",
+     "id": "id393",
      "edge": "left",
      "pos": 63.82,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id380",
+     "id": "id394",
      "edge": "left",
      "pos": 92.18,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id381",
+     "id": "id395",
      "edge": "left",
      "pos": 120.55,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id382",
+     "id": "id396",
      "edge": "left",
      "pos": 148.91,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id383",
+     "id": "id397",
      "edge": "right",
      "pos": 7.09,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id384",
+     "id": "id398",
      "edge": "right",
      "pos": 35.45,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id385",
+     "id": "id399",
      "edge": "right",
      "pos": 63.82,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id386",
+     "id": "id400",
      "edge": "right",
      "pos": 92.18,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id387",
+     "id": "id401",
      "edge": "right",
      "pos": 120.55,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id388",
+     "id": "id402",
      "edge": "right",
      "pos": 148.91,
      "width": 14.18,
@@ -7449,7 +7563,7 @@
    "group": "id12"
   },
   {
-   "id": "id389",
+   "id": "id403",
    "name": "Conduit d'air 4",
    "w": 34.3,
    "h": 156,
@@ -7465,98 +7579,98 @@
    ],
    "notches": [
     {
-     "id": "id390",
+     "id": "id404",
      "edge": "top",
      "pos": 5.72,
      "width": 11.43,
      "depth": 3
     },
     {
-     "id": "id391",
+     "id": "id405",
      "edge": "top",
      "pos": 28.58,
      "width": 11.43,
      "depth": 3
     },
     {
-     "id": "id392",
+     "id": "id406",
      "edge": "left",
      "pos": 7.09,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id393",
+     "id": "id407",
      "edge": "left",
      "pos": 35.45,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id394",
+     "id": "id408",
      "edge": "left",
      "pos": 63.82,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id395",
+     "id": "id409",
      "edge": "left",
      "pos": 92.18,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id396",
+     "id": "id410",
      "edge": "left",
      "pos": 120.55,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id397",
+     "id": "id411",
      "edge": "left",
      "pos": 148.91,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id398",
+     "id": "id412",
      "edge": "right",
      "pos": 7.09,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id399",
+     "id": "id413",
      "edge": "right",
      "pos": 35.45,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id400",
+     "id": "id414",
      "edge": "right",
      "pos": 63.82,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id401",
+     "id": "id415",
      "edge": "right",
      "pos": 92.18,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id402",
+     "id": "id416",
      "edge": "right",
      "pos": 120.55,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id403",
+     "id": "id417",
      "edge": "right",
      "pos": 148.91,
      "width": 14.18,
@@ -7581,7 +7695,7 @@
    "group": "id12"
   },
   {
-   "id": "id404",
+   "id": "id418",
    "name": "Conduit d'air 2",
    "w": 52,
    "h": 156,
@@ -7597,84 +7711,84 @@
    ],
    "notches": [
     {
-     "id": "id405",
+     "id": "id419",
      "edge": "top",
      "pos": 8.67,
      "width": 17.33,
      "depth": 3
     },
     {
-     "id": "id406",
+     "id": "id420",
      "edge": "top",
      "pos": 43.33,
      "width": 17.33,
      "depth": 3
     },
     {
-     "id": "id407",
+     "id": "id421",
      "edge": "left",
      "pos": 21.27,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id408",
+     "id": "id422",
      "edge": "left",
      "pos": 49.64,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id409",
+     "id": "id423",
      "edge": "left",
      "pos": 78,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id410",
+     "id": "id424",
      "edge": "left",
      "pos": 106.36,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id411",
+     "id": "id425",
      "edge": "left",
      "pos": 134.73,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id412",
+     "id": "id426",
      "edge": "right",
      "pos": 21.27,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id413",
+     "id": "id427",
      "edge": "right",
      "pos": 49.64,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id414",
+     "id": "id428",
      "edge": "right",
      "pos": 78,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id415",
+     "id": "id429",
      "edge": "right",
      "pos": 106.36,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id416",
+     "id": "id430",
      "edge": "right",
      "pos": 134.73,
      "width": 14.18,
@@ -7683,7 +7797,7 @@
    ],
    "holes": [
     {
-     "id": "id417",
+     "id": "id431",
      "shape": "square",
      "x": 0,
      "y": 55,
@@ -7692,7 +7806,7 @@
      "r": 0
     },
     {
-     "id": "id418",
+     "id": "id432",
      "shape": "square",
      "x": 0,
      "y": -33,
@@ -7718,7 +7832,7 @@
    "group": "id12"
   },
   {
-   "id": "id419",
+   "id": "id433",
    "name": "Conduit d'air 1",
    "w": 52,
    "h": 156,
@@ -7734,84 +7848,84 @@
    ],
    "notches": [
     {
-     "id": "id420",
+     "id": "id434",
      "edge": "top",
      "pos": 8.67,
      "width": 17.33,
      "depth": 3
     },
     {
-     "id": "id421",
+     "id": "id435",
      "edge": "top",
      "pos": 43.33,
      "width": 17.33,
      "depth": 3
     },
     {
-     "id": "id422",
+     "id": "id436",
      "edge": "left",
      "pos": 21.27,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id423",
+     "id": "id437",
      "edge": "left",
      "pos": 49.64,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id424",
+     "id": "id438",
      "edge": "left",
      "pos": 78,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id425",
+     "id": "id439",
      "edge": "left",
      "pos": 106.36,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id426",
+     "id": "id440",
      "edge": "left",
      "pos": 134.73,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id427",
+     "id": "id441",
      "edge": "right",
      "pos": 21.27,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id428",
+     "id": "id442",
      "edge": "right",
      "pos": 49.64,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id429",
+     "id": "id443",
      "edge": "right",
      "pos": 78,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id430",
+     "id": "id444",
      "edge": "right",
      "pos": 106.36,
      "width": 14.18,
      "depth": 3
     },
     {
-     "id": "id431",
+     "id": "id445",
      "edge": "right",
      "pos": 134.73,
      "width": 14.18,
@@ -7836,7 +7950,7 @@
    "group": "id12"
   },
   {
-   "id": "id432",
+   "id": "id446",
    "name": "Conduit d'air 5 (couvercle)",
    "w": 34.3,
    "h": 52,
@@ -7852,28 +7966,28 @@
    ],
    "notches": [
     {
-     "id": "id433",
+     "id": "id447",
      "edge": "top",
      "pos": 17.15,
      "width": 11.43,
      "depth": 3
     },
     {
-     "id": "id434",
+     "id": "id448",
      "edge": "bottom",
      "pos": 17.15,
      "width": 11.43,
      "depth": 3
     },
     {
-     "id": "id435",
+     "id": "id449",
      "edge": "left",
      "pos": 26,
      "width": 17.33,
      "depth": 3
     },
     {
-     "id": "id436",
+     "id": "id450",
      "edge": "right",
      "pos": 26,
      "width": 17.33,
@@ -7902,7 +8016,7 @@
    "group": "id12"
   },
   {
-   "id": "id437",
+   "id": "id451",
    "name": "Bouchon-boîte prise d'air 3",
    "w": 28.299999999999997,
    "h": 155.2,
@@ -7918,112 +8032,112 @@
    ],
    "notches": [
     {
-     "id": "id438",
+     "id": "id452",
      "edge": "top",
      "pos": 4.72,
      "width": 9.43,
      "depth": 3
     },
     {
-     "id": "id439",
+     "id": "id453",
      "edge": "top",
      "pos": 23.58,
      "width": 9.43,
      "depth": 3
     },
     {
-     "id": "id440",
+     "id": "id454",
      "edge": "bottom",
      "pos": 4.72,
      "width": 9.43,
      "depth": 3
     },
     {
-     "id": "id441",
+     "id": "id455",
      "edge": "bottom",
      "pos": 23.58,
      "width": 9.43,
      "depth": 3
     },
     {
-     "id": "id442",
+     "id": "id456",
      "edge": "left",
      "pos": 7.05,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id443",
+     "id": "id457",
      "edge": "left",
      "pos": 35.27,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id444",
+     "id": "id458",
      "edge": "left",
      "pos": 63.49,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id445",
+     "id": "id459",
      "edge": "left",
      "pos": 91.71,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id446",
+     "id": "id460",
      "edge": "left",
      "pos": 119.93,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id447",
+     "id": "id461",
      "edge": "left",
      "pos": 148.15,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id448",
+     "id": "id462",
      "edge": "right",
      "pos": 7.05,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id449",
+     "id": "id463",
      "edge": "right",
      "pos": 35.27,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id450",
+     "id": "id464",
      "edge": "right",
      "pos": 63.49,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id451",
+     "id": "id465",
      "edge": "right",
      "pos": 91.71,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id452",
+     "id": "id466",
      "edge": "right",
      "pos": 119.93,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id453",
+     "id": "id467",
      "edge": "right",
      "pos": 148.15,
      "width": 14.11,
@@ -8052,7 +8166,7 @@
    "group": "id8"
   },
   {
-   "id": "id454",
+   "id": "id468",
    "name": "Bouchon-boîte prise d'air 4",
    "w": 28.299999999999997,
    "h": 155.2,
@@ -8068,112 +8182,112 @@
    ],
    "notches": [
     {
-     "id": "id455",
+     "id": "id469",
      "edge": "top",
      "pos": 4.72,
      "width": 9.43,
      "depth": 3
     },
     {
-     "id": "id456",
+     "id": "id470",
      "edge": "top",
      "pos": 23.58,
      "width": 9.43,
      "depth": 3
     },
     {
-     "id": "id457",
+     "id": "id471",
      "edge": "bottom",
      "pos": 4.72,
      "width": 9.43,
      "depth": 3
     },
     {
-     "id": "id458",
+     "id": "id472",
      "edge": "bottom",
      "pos": 23.58,
      "width": 9.43,
      "depth": 3
     },
     {
-     "id": "id459",
+     "id": "id473",
      "edge": "left",
      "pos": 7.05,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id460",
+     "id": "id474",
      "edge": "left",
      "pos": 35.27,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id461",
+     "id": "id475",
      "edge": "left",
      "pos": 63.49,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id462",
+     "id": "id476",
      "edge": "left",
      "pos": 91.71,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id463",
+     "id": "id477",
      "edge": "left",
      "pos": 119.93,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id464",
+     "id": "id478",
      "edge": "left",
      "pos": 148.15,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id465",
+     "id": "id479",
      "edge": "right",
      "pos": 7.05,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id466",
+     "id": "id480",
      "edge": "right",
      "pos": 35.27,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id467",
+     "id": "id481",
      "edge": "right",
      "pos": 63.49,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id468",
+     "id": "id482",
      "edge": "right",
      "pos": 91.71,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id469",
+     "id": "id483",
      "edge": "right",
      "pos": 119.93,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id470",
+     "id": "id484",
      "edge": "right",
      "pos": 148.15,
      "width": 14.11,
@@ -8202,7 +8316,7 @@
    "group": "id8"
   },
   {
-   "id": "id471",
+   "id": "id485",
    "name": "Bouchon-boîte prise d'air 2",
    "w": 46,
    "h": 155.2,
@@ -8218,98 +8332,98 @@
    ],
    "notches": [
     {
-     "id": "id472",
+     "id": "id486",
      "edge": "top",
      "pos": 7.67,
      "width": 15.33,
      "depth": 3
     },
     {
-     "id": "id473",
+     "id": "id487",
      "edge": "top",
      "pos": 38.33,
      "width": 15.33,
      "depth": 3
     },
     {
-     "id": "id474",
+     "id": "id488",
      "edge": "bottom",
      "pos": 7.67,
      "width": 15.33,
      "depth": 3
     },
     {
-     "id": "id475",
+     "id": "id489",
      "edge": "bottom",
      "pos": 38.33,
      "width": 15.33,
      "depth": 3
     },
     {
-     "id": "id476",
+     "id": "id490",
      "edge": "left",
      "pos": 21.16,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id477",
+     "id": "id491",
      "edge": "left",
      "pos": 49.38,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id478",
+     "id": "id492",
      "edge": "left",
      "pos": 77.6,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id479",
+     "id": "id493",
      "edge": "left",
      "pos": 105.82,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id480",
+     "id": "id494",
      "edge": "left",
      "pos": 134.04,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id481",
+     "id": "id495",
      "edge": "right",
      "pos": 21.16,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id482",
+     "id": "id496",
      "edge": "right",
      "pos": 49.38,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id483",
+     "id": "id497",
      "edge": "right",
      "pos": 77.6,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id484",
+     "id": "id498",
      "edge": "right",
      "pos": 105.82,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id485",
+     "id": "id499",
      "edge": "right",
      "pos": 134.04,
      "width": 14.11,
@@ -8338,7 +8452,7 @@
    "group": "id8"
   },
   {
-   "id": "id486",
+   "id": "id500",
    "name": "Bouchon-boîte prise d'air 1",
    "w": 46,
    "h": 155.2,
@@ -8354,98 +8468,98 @@
    ],
    "notches": [
     {
-     "id": "id487",
+     "id": "id501",
      "edge": "top",
      "pos": 7.67,
      "width": 15.33,
      "depth": 3
     },
     {
-     "id": "id488",
+     "id": "id502",
      "edge": "top",
      "pos": 38.33,
      "width": 15.33,
      "depth": 3
     },
     {
-     "id": "id489",
+     "id": "id503",
      "edge": "bottom",
      "pos": 7.67,
      "width": 15.33,
      "depth": 3
     },
     {
-     "id": "id490",
+     "id": "id504",
      "edge": "bottom",
      "pos": 38.33,
      "width": 15.33,
      "depth": 3
     },
     {
-     "id": "id491",
+     "id": "id505",
      "edge": "left",
      "pos": 21.16,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id492",
+     "id": "id506",
      "edge": "left",
      "pos": 49.38,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id493",
+     "id": "id507",
      "edge": "left",
      "pos": 77.6,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id494",
+     "id": "id508",
      "edge": "left",
      "pos": 105.82,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id495",
+     "id": "id509",
      "edge": "left",
      "pos": 134.04,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id496",
+     "id": "id510",
      "edge": "right",
      "pos": 21.16,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id497",
+     "id": "id511",
      "edge": "right",
      "pos": 49.38,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id498",
+     "id": "id512",
      "edge": "right",
      "pos": 77.6,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id499",
+     "id": "id513",
      "edge": "right",
      "pos": 105.82,
      "width": 14.11,
      "depth": 3
     },
     {
-     "id": "id500",
+     "id": "id514",
      "edge": "right",
      "pos": 134.04,
      "width": 14.11,
@@ -8474,7 +8588,7 @@
    "group": "id8"
   },
   {
-   "id": "id501",
+   "id": "id515",
    "name": "Bouchon-boîte prise d'air couvercle",
    "w": 28.299999999999997,
    "h": 46,
@@ -8490,28 +8604,28 @@
    ],
    "notches": [
     {
-     "id": "id502",
+     "id": "id516",
      "edge": "top",
      "pos": 14.15,
      "width": 9.43,
      "depth": 3
     },
     {
-     "id": "id503",
+     "id": "id517",
      "edge": "bottom",
      "pos": 14.15,
      "width": 9.43,
      "depth": 3
     },
     {
-     "id": "id504",
+     "id": "id518",
      "edge": "left",
      "pos": 23,
      "width": 15.33,
      "depth": 3
     },
     {
-     "id": "id505",
+     "id": "id519",
      "edge": "right",
      "pos": 23,
      "width": 15.33,
@@ -8540,7 +8654,7 @@
    "group": "id8"
   },
   {
-   "id": "id506",
+   "id": "id520",
    "name": "Bouchon-boîte prise d'air fond",
    "w": 28.299999999999997,
    "h": 46,
@@ -8556,28 +8670,28 @@
    ],
    "notches": [
     {
-     "id": "id507",
+     "id": "id521",
      "edge": "top",
      "pos": 14.15,
      "width": 9.43,
      "depth": 3
     },
     {
-     "id": "id508",
+     "id": "id522",
      "edge": "bottom",
      "pos": 14.15,
      "width": 9.43,
      "depth": 3
     },
     {
-     "id": "id509",
+     "id": "id523",
      "edge": "left",
      "pos": 23,
      "width": 15.33,
      "depth": 3
     },
     {
-     "id": "id510",
+     "id": "id524",
      "edge": "right",
      "pos": 23,
      "width": 15.33,
@@ -8586,7 +8700,7 @@
    ],
    "holes": [
     {
-     "id": "id511",
+     "id": "id525",
      "shape": "square",
      "x": 0,
      "y": -13.5,
@@ -8594,7 +8708,7 @@
      "sh": 3
     },
     {
-     "id": "id512",
+     "id": "id526",
      "shape": "square",
      "x": 0,
      "y": 13.5,
@@ -8623,7 +8737,7 @@
    "group": "id8"
   },
   {
-   "id": "id513",
+   "id": "id527",
    "name": "Poignée bouchon prise d'air 1",
    "w": 30,
    "h": 18,
@@ -8676,7 +8790,7 @@
    ]
   },
   {
-   "id": "id514",
+   "id": "id528",
    "name": "Poignée bouchon prise d'air 2",
    "w": 30,
    "h": 18,
@@ -8729,7 +8843,7 @@
    ]
   },
   {
-   "id": "id515",
+   "id": "id529",
    "name": "Poignée bouchon prise d'air 3",
    "w": 30,
    "h": 18,
@@ -8782,7 +8896,7 @@
    ]
   },
   {
-   "id": "id516",
+   "id": "id530",
    "name": "Laine bouchon prise d'air",
    "w": 22.3,
    "h": 40,
@@ -8805,7 +8919,7 @@
    "transparent": true
   },
   {
-   "id": "id517",
+   "id": "id531",
    "name": "Isolant sous le plancher 1",
    "w": 4.7,
    "h": 204,
@@ -8828,7 +8942,7 @@
    "transparent": true
   },
   {
-   "id": "id518",
+   "id": "id532",
    "name": "Isolant sous le plancher 2",
    "w": 34.3,
    "h": 41,
@@ -8851,7 +8965,7 @@
    "transparent": true
   },
   {
-   "id": "id519",
+   "id": "id533",
    "name": "Isolant sous le plancher 3",
    "w": 34.3,
    "h": 111,
@@ -8874,7 +8988,7 @@
    "transparent": true
   },
   {
-   "id": "id520",
+   "id": "id534",
    "name": "Isolant sous le plancher 4",
    "w": 165,
    "h": 204,
@@ -8897,7 +9011,7 @@
    "transparent": true
   },
   {
-   "id": "id521",
+   "id": "id535",
    "name": "Isolant gauche 1",
    "w": 4.7,
    "h": 204,
@@ -8920,7 +9034,7 @@
    "transparent": true
   },
   {
-   "id": "id522",
+   "id": "id536",
    "name": "Isolant gauche 2",
    "w": 34.3,
    "h": 41,
@@ -8943,7 +9057,7 @@
    "transparent": true
   },
   {
-   "id": "id523",
+   "id": "id537",
    "name": "Isolant gauche 3",
    "w": 34.3,
    "h": 111,
@@ -8966,7 +9080,7 @@
    "transparent": true
   },
   {
-   "id": "id524",
+   "id": "id538",
    "name": "Isolant gauche dessus conduit",
    "w": 34.3,
    "h": 52,
@@ -8989,7 +9103,7 @@
    "transparent": true
   },
   {
-   "id": "id525",
+   "id": "id539",
    "name": "Isolant droite",
    "w": 39,
    "h": 204,
@@ -9012,7 +9126,7 @@
    "transparent": true
   },
   {
-   "id": "id526",
+   "id": "id540",
    "name": "Isolant arrière",
    "w": 126,
    "h": 39,
@@ -9035,7 +9149,7 @@
    "transparent": true
   },
   {
-   "id": "id527",
+   "id": "id541",
    "name": "Isolant avant gauche",
    "w": 33.5,
    "h": 39,
@@ -9058,7 +9172,7 @@
    "transparent": true
   },
   {
-   "id": "id528",
+   "id": "id542",
    "name": "Isolant avant droite",
    "w": 33.5,
    "h": 39,
@@ -9081,7 +9195,7 @@
    "transparent": true
   },
   {
-   "id": "id529",
+   "id": "id543",
    "name": "Isolant sous le bloc d'entrée",
    "w": 59,
    "h": 39,
@@ -9104,7 +9218,7 @@
    "transparent": true
   },
   {
-   "id": "id530",
+   "id": "id544",
    "name": "Isolant toit 1",
    "w": 76.6,
    "h": 204,
@@ -9127,7 +9241,7 @@
    "transparent": true
   },
   {
-   "id": "id531",
+   "id": "id545",
    "name": "Isolant toit 2",
    "w": 3.4,
    "h": 124,
@@ -9150,7 +9264,7 @@
    "transparent": true
   },
   {
-   "id": "id532",
+   "id": "id546",
    "name": "Isolant toit 3",
    "w": 69,
    "h": 70,
@@ -9173,7 +9287,7 @@
    "transparent": true
   },
   {
-   "id": "id533",
+   "id": "id547",
    "name": "Isolant toit 4",
    "w": 69,
    "h": 10,
@@ -9196,7 +9310,7 @@
    "transparent": true
   },
   {
-   "id": "id534",
+   "id": "id548",
    "name": "Isolant toit 5",
    "w": 3.25,
    "h": 70,
@@ -9219,7 +9333,7 @@
    "transparent": true
   },
   {
-   "id": "id535",
+   "id": "id549",
    "name": "Isolant toit 6",
    "w": 3.25,
    "h": 90,
@@ -9242,7 +9356,7 @@
    "transparent": true
   },
   {
-   "id": "id536",
+   "id": "id550",
    "name": "Isolant toit 7",
    "w": 51.75,
    "h": 204,
@@ -9265,7 +9379,7 @@
    "transparent": true
   },
   {
-   "id": "id537",
+   "id": "id551",
    "name": "Entrée 1",
    "w": 47,
    "h": 59.5,
@@ -9282,7 +9396,7 @@
    "notches": [],
    "holes": [
     {
-     "id": "id538",
+     "id": "id552",
      "shape": "round",
      "x": 0,
      "y": -6.25,
@@ -9292,202 +9406,13 @@
    "group": "id6"
   },
   {
-   "id": "id539",
+   "id": "id553",
    "name": "Entrée 2",
    "w": 59,
    "h": 65.5,
    "pos": [
     0,
     -100.5,
-    194.25
-   ],
-   "rot": [
-    90,
-    0,
-    0
-   ],
-   "notches": [],
-   "holes": [
-    {
-     "id": "id540",
-     "shape": "round",
-     "x": 0,
-     "y": -3.25,
-     "size": 32
-    }
-   ],
-   "group": "id6"
-  },
-  {
-   "id": "id541",
-   "name": "Entrée 3",
-   "w": 59,
-   "h": 65.5,
-   "pos": [
-    0,
-    -97.5,
-    194.25
-   ],
-   "rot": [
-    90,
-    0,
-    0
-   ],
-   "notches": [],
-   "holes": [
-    {
-     "id": "id542",
-     "shape": "round",
-     "x": 0,
-     "y": -3.25,
-     "size": 32
-    }
-   ],
-   "group": "id6"
-  },
-  {
-   "id": "id543",
-   "name": "Entrée 4",
-   "w": 59,
-   "h": 65.5,
-   "pos": [
-    0,
-    -94.5,
-    194.25
-   ],
-   "rot": [
-    90,
-    0,
-    0
-   ],
-   "notches": [],
-   "holes": [
-    {
-     "id": "id544",
-     "shape": "round",
-     "x": 0,
-     "y": -3.25,
-     "size": 32
-    }
-   ],
-   "group": "id6"
-  },
-  {
-   "id": "id545",
-   "name": "Entrée 5",
-   "w": 59,
-   "h": 65.5,
-   "pos": [
-    0,
-    -91.5,
-    194.25
-   ],
-   "rot": [
-    90,
-    0,
-    0
-   ],
-   "notches": [],
-   "holes": [
-    {
-     "id": "id546",
-     "shape": "round",
-     "x": 0,
-     "y": -3.25,
-     "size": 32
-    }
-   ],
-   "group": "id6"
-  },
-  {
-   "id": "id547",
-   "name": "Entrée 6",
-   "w": 59,
-   "h": 65.5,
-   "pos": [
-    0,
-    -88.5,
-    194.25
-   ],
-   "rot": [
-    90,
-    0,
-    0
-   ],
-   "notches": [],
-   "holes": [
-    {
-     "id": "id548",
-     "shape": "round",
-     "x": 0,
-     "y": -3.25,
-     "size": 32
-    }
-   ],
-   "group": "id6"
-  },
-  {
-   "id": "id549",
-   "name": "Entrée 7",
-   "w": 59,
-   "h": 65.5,
-   "pos": [
-    0,
-    -85.5,
-    194.25
-   ],
-   "rot": [
-    90,
-    0,
-    0
-   ],
-   "notches": [],
-   "holes": [
-    {
-     "id": "id550",
-     "shape": "round",
-     "x": 0,
-     "y": -3.25,
-     "size": 32
-    }
-   ],
-   "group": "id6"
-  },
-  {
-   "id": "id551",
-   "name": "Entrée 8",
-   "w": 59,
-   "h": 65.5,
-   "pos": [
-    0,
-    -82.5,
-    194.25
-   ],
-   "rot": [
-    90,
-    0,
-    0
-   ],
-   "notches": [],
-   "holes": [
-    {
-     "id": "id552",
-     "shape": "round",
-     "x": 0,
-     "y": -3.25,
-     "size": 32
-    }
-   ],
-   "group": "id6"
-  },
-  {
-   "id": "id553",
-   "name": "Entrée 9",
-   "w": 59,
-   "h": 65.5,
-   "pos": [
-    0,
-    -79.5,
     194.25
    ],
    "rot": [
@@ -9509,12 +9434,12 @@
   },
   {
    "id": "id555",
-   "name": "Entrée 10",
+   "name": "Entrée 3",
    "w": 59,
    "h": 65.5,
    "pos": [
     0,
-    -76.5,
+    -97.5,
     194.25
    ],
    "rot": [
@@ -9536,12 +9461,12 @@
   },
   {
    "id": "id557",
-   "name": "Entrée 11",
+   "name": "Entrée 4",
    "w": 59,
    "h": 65.5,
    "pos": [
     0,
-    -73.5,
+    -94.5,
     194.25
    ],
    "rot": [
@@ -9563,12 +9488,12 @@
   },
   {
    "id": "id559",
-   "name": "Entrée 12",
+   "name": "Entrée 5",
    "w": 59,
    "h": 65.5,
    "pos": [
     0,
-    -70.5,
+    -91.5,
     194.25
    ],
    "rot": [
@@ -9590,12 +9515,12 @@
   },
   {
    "id": "id561",
-   "name": "Entrée 13",
+   "name": "Entrée 6",
    "w": 59,
    "h": 65.5,
    "pos": [
     0,
-    -67.5,
+    -88.5,
     194.25
    ],
    "rot": [
@@ -9617,12 +9542,12 @@
   },
   {
    "id": "id563",
-   "name": "Entrée 14",
+   "name": "Entrée 7",
    "w": 59,
    "h": 65.5,
    "pos": [
     0,
-    -64.5,
+    -85.5,
     194.25
    ],
    "rot": [
@@ -9644,6 +9569,195 @@
   },
   {
    "id": "id565",
+   "name": "Entrée 8",
+   "w": 59,
+   "h": 65.5,
+   "pos": [
+    0,
+    -82.5,
+    194.25
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "notches": [],
+   "holes": [
+    {
+     "id": "id566",
+     "shape": "round",
+     "x": 0,
+     "y": -3.25,
+     "size": 32
+    }
+   ],
+   "group": "id6"
+  },
+  {
+   "id": "id567",
+   "name": "Entrée 9",
+   "w": 59,
+   "h": 65.5,
+   "pos": [
+    0,
+    -79.5,
+    194.25
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "notches": [],
+   "holes": [
+    {
+     "id": "id568",
+     "shape": "round",
+     "x": 0,
+     "y": -3.25,
+     "size": 32
+    }
+   ],
+   "group": "id6"
+  },
+  {
+   "id": "id569",
+   "name": "Entrée 10",
+   "w": 59,
+   "h": 65.5,
+   "pos": [
+    0,
+    -76.5,
+    194.25
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "notches": [],
+   "holes": [
+    {
+     "id": "id570",
+     "shape": "round",
+     "x": 0,
+     "y": -3.25,
+     "size": 32
+    }
+   ],
+   "group": "id6"
+  },
+  {
+   "id": "id571",
+   "name": "Entrée 11",
+   "w": 59,
+   "h": 65.5,
+   "pos": [
+    0,
+    -73.5,
+    194.25
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "notches": [],
+   "holes": [
+    {
+     "id": "id572",
+     "shape": "round",
+     "x": 0,
+     "y": -3.25,
+     "size": 32
+    }
+   ],
+   "group": "id6"
+  },
+  {
+   "id": "id573",
+   "name": "Entrée 12",
+   "w": 59,
+   "h": 65.5,
+   "pos": [
+    0,
+    -70.5,
+    194.25
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "notches": [],
+   "holes": [
+    {
+     "id": "id574",
+     "shape": "round",
+     "x": 0,
+     "y": -3.25,
+     "size": 32
+    }
+   ],
+   "group": "id6"
+  },
+  {
+   "id": "id575",
+   "name": "Entrée 13",
+   "w": 59,
+   "h": 65.5,
+   "pos": [
+    0,
+    -67.5,
+    194.25
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "notches": [],
+   "holes": [
+    {
+     "id": "id576",
+     "shape": "round",
+     "x": 0,
+     "y": -3.25,
+     "size": 32
+    }
+   ],
+   "group": "id6"
+  },
+  {
+   "id": "id577",
+   "name": "Entrée 14",
+   "w": 59,
+   "h": 65.5,
+   "pos": [
+    0,
+    -64.5,
+    194.25
+   ],
+   "rot": [
+    90,
+    0,
+    0
+   ],
+   "notches": [],
+   "holes": [
+    {
+     "id": "id578",
+     "shape": "round",
+     "x": 0,
+     "y": -3.25,
+     "size": 32
+    }
+   ],
+   "group": "id6"
+  },
+  {
+   "id": "id579",
    "name": "Entrée 15",
    "w": 47,
    "h": 59.5,
@@ -9660,7 +9774,7 @@
    "notches": [],
    "holes": [
     {
-     "id": "id566",
+     "id": "id580",
      "shape": "round",
      "x": 0,
      "y": -6.25,
@@ -9670,7 +9784,7 @@
    "group": "id6"
   },
   {
-   "id": "id567",
+   "id": "id581",
    "name": "Baguette de cale 1",
    "w": 394,
    "h": 5,
@@ -9689,7 +9803,7 @@
    "group": "id9"
   },
   {
-   "id": "id568",
+   "id": "id582",
    "name": "Baguette de cale 2",
    "w": 394,
    "h": 5,
@@ -9708,7 +9822,7 @@
    "group": "id9"
   },
   {
-   "id": "id569",
+   "id": "id583",
    "name": "Baguette de cale 3",
    "w": 394,
    "h": 5,
@@ -9727,7 +9841,7 @@
    "group": "id9"
   },
   {
-   "id": "id570",
+   "id": "id584",
    "name": "Baguette de cale 4",
    "w": 394,
    "h": 5,
@@ -9746,7 +9860,7 @@
    "group": "id9"
   },
   {
-   "id": "id571",
+   "id": "id585",
    "name": "Baguette de cale 5",
    "w": 394,
    "h": 5,
@@ -9765,7 +9879,7 @@
    "group": "id9"
   },
   {
-   "id": "id572",
+   "id": "id586",
    "name": "Baguette de cale 6",
    "w": 394,
    "h": 5,
@@ -9784,7 +9898,7 @@
    "group": "id9"
   },
   {
-   "id": "id573",
+   "id": "id587",
    "name": "Face avant ext",
    "w": 210,
    "h": 227,
@@ -9800,168 +9914,168 @@
    ],
    "notches": [
     {
-     "id": "id574",
+     "id": "id588",
      "edge": "bottom",
      "pos": 8.08,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id575",
+     "id": "id589",
      "edge": "bottom",
      "pos": 40.38,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id576",
+     "id": "id590",
      "edge": "bottom",
      "pos": 72.69,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id577",
+     "id": "id591",
      "edge": "bottom",
      "pos": 105,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id578",
+     "id": "id592",
      "edge": "bottom",
      "pos": 137.31,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id579",
+     "id": "id593",
      "edge": "bottom",
      "pos": 169.62,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id580",
+     "id": "id594",
      "edge": "bottom",
      "pos": 201.92,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id581",
-     "edge": "left",
-     "pos": 7.57,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id582",
-     "edge": "left",
-     "pos": 37.83,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id583",
-     "edge": "left",
-     "pos": 68.1,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id584",
-     "edge": "left",
-     "pos": 98.37,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id585",
-     "edge": "left",
-     "pos": 128.63,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id586",
-     "edge": "left",
-     "pos": 158.9,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id587",
-     "edge": "left",
-     "pos": 189.17,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id588",
-     "edge": "left",
-     "pos": 219.43,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id589",
-     "edge": "right",
-     "pos": 7.57,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id590",
-     "edge": "right",
-     "pos": 37.83,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id591",
-     "edge": "right",
-     "pos": 68.1,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id592",
-     "edge": "right",
-     "pos": 98.37,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id593",
-     "edge": "right",
-     "pos": 128.63,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
-     "id": "id594",
-     "edge": "right",
-     "pos": 158.9,
-     "width": 15.13,
-     "depth": 3
-    },
-    {
      "id": "id595",
-     "edge": "right",
-     "pos": 189.17,
+     "edge": "left",
+     "pos": 7.57,
      "width": 15.13,
      "depth": 3
     },
     {
      "id": "id596",
+     "edge": "left",
+     "pos": 37.83,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id597",
+     "edge": "left",
+     "pos": 68.1,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id598",
+     "edge": "left",
+     "pos": 98.37,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id599",
+     "edge": "left",
+     "pos": 128.63,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id600",
+     "edge": "left",
+     "pos": 158.9,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id601",
+     "edge": "left",
+     "pos": 189.17,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id602",
+     "edge": "left",
+     "pos": 219.43,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id603",
+     "edge": "right",
+     "pos": 7.57,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id604",
+     "edge": "right",
+     "pos": 37.83,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id605",
+     "edge": "right",
+     "pos": 68.1,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id606",
+     "edge": "right",
+     "pos": 98.37,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id607",
+     "edge": "right",
+     "pos": 128.63,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id608",
+     "edge": "right",
+     "pos": 158.9,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id609",
+     "edge": "right",
+     "pos": 189.17,
+     "width": 15.13,
+     "depth": 3
+    },
+    {
+     "id": "id610",
      "edge": "right",
      "pos": 219.43,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id597",
+     "id": "id611",
      "edge": "top",
      "pos": 105,
      "width": 48,
@@ -9970,7 +10084,7 @@
    ],
    "holes": [
     {
-     "id": "id598",
+     "id": "id612",
      "shape": "square",
      "x": -80.77,
      "y": -70,
@@ -9979,7 +10093,7 @@
      "r": 0
     },
     {
-     "id": "id599",
+     "id": "id613",
      "shape": "square",
      "x": -48.46,
      "y": -70,
@@ -9988,7 +10102,7 @@
      "r": 0
     },
     {
-     "id": "id600",
+     "id": "id614",
      "shape": "square",
      "x": -16.15,
      "y": -70,
@@ -9997,7 +10111,7 @@
      "r": 0
     },
     {
-     "id": "id601",
+     "id": "id615",
      "shape": "square",
      "x": 16.16,
      "y": -70,
@@ -10006,7 +10120,7 @@
      "r": 0
     },
     {
-     "id": "id602",
+     "id": "id616",
      "shape": "square",
      "x": 48.47,
      "y": -70,
@@ -10015,7 +10129,7 @@
      "r": 0
     },
     {
-     "id": "id603",
+     "id": "id617",
      "shape": "square",
      "x": 80.77,
      "y": -70,
@@ -10041,7 +10155,7 @@
    "group": "id1"
   },
   {
-   "id": "id604",
+   "id": "id618",
    "name": "Face arrière ext",
    "w": 210,
    "h": 227,
@@ -10057,161 +10171,161 @@
    ],
    "notches": [
     {
-     "id": "id605",
+     "id": "id619",
      "edge": "bottom",
      "pos": 8.08,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id606",
+     "id": "id620",
      "edge": "bottom",
      "pos": 40.38,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id607",
+     "id": "id621",
      "edge": "bottom",
      "pos": 72.69,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id608",
+     "id": "id622",
      "edge": "bottom",
      "pos": 105,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id609",
+     "id": "id623",
      "edge": "bottom",
      "pos": 137.31,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id610",
+     "id": "id624",
      "edge": "bottom",
      "pos": 169.62,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id611",
+     "id": "id625",
      "edge": "bottom",
      "pos": 201.92,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id612",
+     "id": "id626",
      "edge": "left",
      "pos": 7.57,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id613",
+     "id": "id627",
      "edge": "left",
      "pos": 37.83,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id614",
+     "id": "id628",
      "edge": "left",
      "pos": 68.1,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id615",
+     "id": "id629",
      "edge": "left",
      "pos": 98.37,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id616",
+     "id": "id630",
      "edge": "left",
      "pos": 128.63,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id617",
+     "id": "id631",
      "edge": "left",
      "pos": 158.9,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id618",
+     "id": "id632",
      "edge": "left",
      "pos": 189.17,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id619",
+     "id": "id633",
      "edge": "left",
      "pos": 219.43,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id620",
+     "id": "id634",
      "edge": "right",
      "pos": 7.57,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id621",
+     "id": "id635",
      "edge": "right",
      "pos": 37.83,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id622",
+     "id": "id636",
      "edge": "right",
      "pos": 68.1,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id623",
+     "id": "id637",
      "edge": "right",
      "pos": 98.37,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id624",
+     "id": "id638",
      "edge": "right",
      "pos": 128.63,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id625",
+     "id": "id639",
      "edge": "right",
      "pos": 158.9,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id626",
+     "id": "id640",
      "edge": "right",
      "pos": 189.17,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id627",
+     "id": "id641",
      "edge": "right",
      "pos": 219.43,
      "width": 15.13,
@@ -10220,7 +10334,7 @@
    ],
    "holes": [
     {
-     "id": "id628",
+     "id": "id642",
      "shape": "square",
      "x": -52.5,
      "y": -42.5,
@@ -10229,7 +10343,7 @@
      "r": 0
     },
     {
-     "id": "id629",
+     "id": "id643",
      "shape": "square",
      "x": -52.5,
      "y": 87.5,
@@ -10238,7 +10352,7 @@
      "r": 0
     },
     {
-     "id": "id630",
+     "id": "id644",
      "shape": "square",
      "x": 52.5,
      "y": -42.5,
@@ -10247,7 +10361,7 @@
      "r": 0
     },
     {
-     "id": "id631",
+     "id": "id645",
      "shape": "square",
      "x": 52.5,
      "y": 87.5,
@@ -10256,7 +10370,7 @@
      "r": 0
     },
     {
-     "id": "id632",
+     "id": "id646",
      "shape": "square",
      "x": -80.77,
      "y": -70,
@@ -10265,7 +10379,7 @@
      "r": 0
     },
     {
-     "id": "id633",
+     "id": "id647",
      "shape": "square",
      "x": -48.46,
      "y": -70,
@@ -10274,7 +10388,7 @@
      "r": 0
     },
     {
-     "id": "id634",
+     "id": "id648",
      "shape": "square",
      "x": -16.16,
      "y": -70,
@@ -10283,7 +10397,7 @@
      "r": 0
     },
     {
-     "id": "id635",
+     "id": "id649",
      "shape": "square",
      "x": 16.16,
      "y": -70,
@@ -10292,7 +10406,7 @@
      "r": 0
     },
     {
-     "id": "id636",
+     "id": "id650",
      "shape": "square",
      "x": 48.47,
      "y": -70,
@@ -10301,7 +10415,7 @@
      "r": 0
     },
     {
-     "id": "id637",
+     "id": "id651",
      "shape": "square",
      "x": 80.77,
      "y": -70,
@@ -10327,7 +10441,7 @@
    "group": "id1"
   },
   {
-   "id": "id638",
+   "id": "id652",
    "name": "Côté droit ext",
    "w": 210,
    "h": 227,
@@ -10343,147 +10457,147 @@
    ],
    "notches": [
     {
-     "id": "id639",
+     "id": "id653",
      "edge": "bottom",
      "pos": 8.08,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id640",
+     "id": "id654",
      "edge": "bottom",
      "pos": 40.38,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id641",
+     "id": "id655",
      "edge": "bottom",
      "pos": 72.69,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id642",
+     "id": "id656",
      "edge": "bottom",
      "pos": 105,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id643",
+     "id": "id657",
      "edge": "bottom",
      "pos": 137.31,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id644",
+     "id": "id658",
      "edge": "bottom",
      "pos": 169.62,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id645",
+     "id": "id659",
      "edge": "bottom",
      "pos": 201.92,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id646",
+     "id": "id660",
      "edge": "left",
      "pos": 22.7,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id647",
+     "id": "id661",
      "edge": "left",
      "pos": 52.97,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id648",
+     "id": "id662",
      "edge": "left",
      "pos": 83.23,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id649",
+     "id": "id663",
      "edge": "left",
      "pos": 113.5,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id650",
+     "id": "id664",
      "edge": "left",
      "pos": 143.77,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id651",
+     "id": "id665",
      "edge": "left",
      "pos": 174.03,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id652",
+     "id": "id666",
      "edge": "left",
      "pos": 204.3,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id653",
+     "id": "id667",
      "edge": "right",
      "pos": 22.7,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id654",
+     "id": "id668",
      "edge": "right",
      "pos": 52.97,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id655",
+     "id": "id669",
      "edge": "right",
      "pos": 83.23,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id656",
+     "id": "id670",
      "edge": "right",
      "pos": 113.5,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id657",
+     "id": "id671",
      "edge": "right",
      "pos": 143.77,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id658",
+     "id": "id672",
      "edge": "right",
      "pos": 174.03,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id659",
+     "id": "id673",
      "edge": "right",
      "pos": 204.3,
      "width": 15.13,
@@ -10492,7 +10606,7 @@
    ],
    "holes": [
     {
-     "id": "id660",
+     "id": "id674",
      "shape": "square",
      "x": -80.77,
      "y": -70,
@@ -10501,7 +10615,7 @@
      "r": 0
     },
     {
-     "id": "id661",
+     "id": "id675",
      "shape": "square",
      "x": -48.46,
      "y": -70,
@@ -10510,7 +10624,7 @@
      "r": 0
     },
     {
-     "id": "id662",
+     "id": "id676",
      "shape": "square",
      "x": -16.15,
      "y": -70,
@@ -10519,7 +10633,7 @@
      "r": 0
     },
     {
-     "id": "id663",
+     "id": "id677",
      "shape": "square",
      "x": 16.16,
      "y": -70,
@@ -10528,7 +10642,7 @@
      "r": 0
     },
     {
-     "id": "id664",
+     "id": "id678",
      "shape": "square",
      "x": 48.47,
      "y": -70,
@@ -10537,7 +10651,7 @@
      "r": 0
     },
     {
-     "id": "id665",
+     "id": "id679",
      "shape": "square",
      "x": 80.77,
      "y": -70,
@@ -10563,7 +10677,7 @@
    "group": "id1"
   },
   {
-   "id": "id666",
+   "id": "id680",
    "name": "Côté gauche ext",
    "w": 210,
    "h": 227,
@@ -10579,147 +10693,147 @@
    ],
    "notches": [
     {
-     "id": "id667",
+     "id": "id681",
      "edge": "bottom",
      "pos": 8.08,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id668",
+     "id": "id682",
      "edge": "bottom",
      "pos": 40.38,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id669",
+     "id": "id683",
      "edge": "bottom",
      "pos": 72.69,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id670",
+     "id": "id684",
      "edge": "bottom",
      "pos": 105,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id671",
+     "id": "id685",
      "edge": "bottom",
      "pos": 137.31,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id672",
+     "id": "id686",
      "edge": "bottom",
      "pos": 169.62,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id673",
+     "id": "id687",
      "edge": "bottom",
      "pos": 201.92,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id674",
+     "id": "id688",
      "edge": "left",
      "pos": 22.7,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id675",
+     "id": "id689",
      "edge": "left",
      "pos": 52.97,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id676",
+     "id": "id690",
      "edge": "left",
      "pos": 83.23,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id677",
+     "id": "id691",
      "edge": "left",
      "pos": 113.5,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id678",
+     "id": "id692",
      "edge": "left",
      "pos": 143.77,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id679",
+     "id": "id693",
      "edge": "left",
      "pos": 174.03,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id680",
+     "id": "id694",
      "edge": "left",
      "pos": 204.3,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id681",
+     "id": "id695",
      "edge": "right",
      "pos": 22.7,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id682",
+     "id": "id696",
      "edge": "right",
      "pos": 52.97,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id683",
+     "id": "id697",
      "edge": "right",
      "pos": 83.23,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id684",
+     "id": "id698",
      "edge": "right",
      "pos": 113.5,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id685",
+     "id": "id699",
      "edge": "right",
      "pos": 143.77,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id686",
+     "id": "id700",
      "edge": "right",
      "pos": 174.03,
      "width": 15.13,
      "depth": 3
     },
     {
-     "id": "id687",
+     "id": "id701",
      "edge": "right",
      "pos": 204.3,
      "width": 15.13,
@@ -10728,7 +10842,7 @@
    ],
    "holes": [
     {
-     "id": "id688",
+     "id": "id702",
      "shape": "square",
      "x": -80.77,
      "y": -70,
@@ -10737,7 +10851,7 @@
      "r": 0
     },
     {
-     "id": "id689",
+     "id": "id703",
      "shape": "square",
      "x": -48.46,
      "y": -70,
@@ -10746,7 +10860,7 @@
      "r": 0
     },
     {
-     "id": "id690",
+     "id": "id704",
      "shape": "square",
      "x": -16.15,
      "y": -70,
@@ -10755,7 +10869,7 @@
      "r": 0
     },
     {
-     "id": "id691",
+     "id": "id705",
      "shape": "square",
      "x": 16.16,
      "y": -70,
@@ -10764,7 +10878,7 @@
      "r": 0
     },
     {
-     "id": "id692",
+     "id": "id706",
      "shape": "square",
      "x": 48.47,
      "y": -70,
@@ -10773,7 +10887,7 @@
      "r": 0
     },
     {
-     "id": "id693",
+     "id": "id707",
      "shape": "square",
      "x": 80.77,
      "y": -70,
@@ -10799,7 +10913,7 @@
    "group": "id1"
   },
   {
-   "id": "id694",
+   "id": "id708",
    "name": "Dessous ext",
    "w": 210,
    "h": 210,
@@ -10815,168 +10929,168 @@
    ],
    "notches": [
     {
-     "id": "id695",
-     "edge": "top",
-     "pos": 24.23,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id696",
-     "edge": "top",
-     "pos": 56.54,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id697",
-     "edge": "top",
-     "pos": 88.85,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id698",
-     "edge": "top",
-     "pos": 121.15,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id699",
-     "edge": "top",
-     "pos": 153.46,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id700",
-     "edge": "top",
-     "pos": 185.77,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id701",
-     "edge": "bottom",
-     "pos": 24.23,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id702",
-     "edge": "bottom",
-     "pos": 56.54,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id703",
-     "edge": "bottom",
-     "pos": 88.85,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id704",
-     "edge": "bottom",
-     "pos": 121.15,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id705",
-     "edge": "bottom",
-     "pos": 153.46,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id706",
-     "edge": "bottom",
-     "pos": 185.77,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id707",
-     "edge": "left",
-     "pos": 24.23,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id708",
-     "edge": "left",
-     "pos": 56.54,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
      "id": "id709",
-     "edge": "left",
-     "pos": 88.85,
+     "edge": "top",
+     "pos": 24.23,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id710",
+     "edge": "top",
+     "pos": 56.54,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id711",
+     "edge": "top",
+     "pos": 88.85,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id712",
+     "edge": "top",
+     "pos": 121.15,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id713",
+     "edge": "top",
+     "pos": 153.46,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id714",
+     "edge": "top",
+     "pos": 185.77,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id715",
+     "edge": "bottom",
+     "pos": 24.23,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id716",
+     "edge": "bottom",
+     "pos": 56.54,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id717",
+     "edge": "bottom",
+     "pos": 88.85,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id718",
+     "edge": "bottom",
+     "pos": 121.15,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id719",
+     "edge": "bottom",
+     "pos": 153.46,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id720",
+     "edge": "bottom",
+     "pos": 185.77,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id721",
+     "edge": "left",
+     "pos": 24.23,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id722",
+     "edge": "left",
+     "pos": 56.54,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id723",
+     "edge": "left",
+     "pos": 88.85,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id724",
      "edge": "left",
      "pos": 121.15,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id711",
+     "id": "id725",
      "edge": "left",
      "pos": 153.46,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id712",
+     "id": "id726",
      "edge": "left",
      "pos": 185.77,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id713",
+     "id": "id727",
      "edge": "right",
      "pos": 24.23,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id714",
+     "id": "id728",
      "edge": "right",
      "pos": 56.54,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id715",
+     "id": "id729",
      "edge": "right",
      "pos": 88.85,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id716",
+     "id": "id730",
      "edge": "right",
      "pos": 121.15,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id717",
+     "id": "id731",
      "edge": "right",
      "pos": 153.46,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id718",
+     "id": "id732",
      "edge": "right",
      "pos": 185.77,
      "width": 16.15,
@@ -10985,7 +11099,7 @@
    ],
    "holes": [
     {
-     "id": "id719",
+     "id": "id733",
      "shape": "square",
      "x": 25,
      "y": -85,
@@ -10994,7 +11108,7 @@
      "r": 0
     },
     {
-     "id": "id720",
+     "id": "id734",
      "shape": "square",
      "x": 95,
      "y": -85,
@@ -11003,7 +11117,7 @@
      "r": 0
     },
     {
-     "id": "id721",
+     "id": "id735",
      "shape": "square",
      "x": 25,
      "y": -52,
@@ -11012,7 +11126,7 @@
      "r": 0
     },
     {
-     "id": "id722",
+     "id": "id736",
      "shape": "square",
      "x": 95,
      "y": -52,
@@ -11021,7 +11135,7 @@
      "r": 0
     },
     {
-     "id": "id723",
+     "id": "id737",
      "shape": "square",
      "x": 25,
      "y": -15,
@@ -11030,7 +11144,7 @@
      "r": 0
     },
     {
-     "id": "id724",
+     "id": "id738",
      "shape": "square",
      "x": 95,
      "y": -15,
@@ -11039,7 +11153,7 @@
      "r": 0
     },
     {
-     "id": "id725",
+     "id": "id739",
      "shape": "square",
      "x": 25,
      "y": 22,
@@ -11048,7 +11162,7 @@
      "r": 0
     },
     {
-     "id": "id726",
+     "id": "id740",
      "shape": "square",
      "x": 95,
      "y": 22,
@@ -11057,14 +11171,14 @@
      "r": 0
     },
     {
-     "id": "id727",
+     "id": "id741",
      "shape": "round",
      "x": 63,
      "y": 84,
      "size": 16
     },
     {
-     "id": "id728",
+     "id": "id742",
      "shape": "square",
      "x": -80.15,
      "y": -35,
@@ -11093,7 +11207,7 @@
    "group": "id1"
   },
   {
-   "id": "id729",
+   "id": "id743",
    "name": "Plancher int",
    "w": 210,
    "h": 210,
@@ -11109,196 +11223,196 @@
    ],
    "notches": [
     {
-     "id": "id730",
-     "edge": "top",
-     "pos": 8.08,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id731",
-     "edge": "top",
-     "pos": 40.38,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id732",
-     "edge": "top",
-     "pos": 72.69,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id733",
-     "edge": "top",
-     "pos": 105,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id734",
-     "edge": "top",
-     "pos": 137.31,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id735",
-     "edge": "top",
-     "pos": 169.62,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id736",
-     "edge": "top",
-     "pos": 201.92,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id737",
-     "edge": "bottom",
-     "pos": 8.08,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id738",
-     "edge": "bottom",
-     "pos": 40.38,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id739",
-     "edge": "bottom",
-     "pos": 72.69,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id740",
-     "edge": "bottom",
-     "pos": 105,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id741",
-     "edge": "bottom",
-     "pos": 137.31,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id742",
-     "edge": "bottom",
-     "pos": 169.62,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id743",
-     "edge": "bottom",
-     "pos": 201.92,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
      "id": "id744",
-     "edge": "left",
+     "edge": "top",
      "pos": 8.08,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id745",
-     "edge": "left",
+     "edge": "top",
      "pos": 40.38,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id746",
-     "edge": "left",
+     "edge": "top",
      "pos": 72.69,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id747",
-     "edge": "left",
+     "edge": "top",
      "pos": 105,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id748",
-     "edge": "left",
+     "edge": "top",
      "pos": 137.31,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id749",
-     "edge": "left",
+     "edge": "top",
      "pos": 169.62,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id750",
-     "edge": "left",
+     "edge": "top",
      "pos": 201.92,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id751",
-     "edge": "right",
+     "edge": "bottom",
      "pos": 8.08,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id752",
-     "edge": "right",
+     "edge": "bottom",
      "pos": 40.38,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id753",
-     "edge": "right",
+     "edge": "bottom",
      "pos": 72.69,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id754",
-     "edge": "right",
+     "edge": "bottom",
      "pos": 105,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id755",
-     "edge": "right",
+     "edge": "bottom",
      "pos": 137.31,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id756",
-     "edge": "right",
+     "edge": "bottom",
      "pos": 169.62,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id757",
+     "edge": "bottom",
+     "pos": 201.92,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id758",
+     "edge": "left",
+     "pos": 8.08,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id759",
+     "edge": "left",
+     "pos": 40.38,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id760",
+     "edge": "left",
+     "pos": 72.69,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id761",
+     "edge": "left",
+     "pos": 105,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id762",
+     "edge": "left",
+     "pos": 137.31,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id763",
+     "edge": "left",
+     "pos": 169.62,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id764",
+     "edge": "left",
+     "pos": 201.92,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id765",
+     "edge": "right",
+     "pos": 8.08,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id766",
+     "edge": "right",
+     "pos": 40.38,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id767",
+     "edge": "right",
+     "pos": 72.69,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id768",
+     "edge": "right",
+     "pos": 105,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id769",
+     "edge": "right",
+     "pos": 137.31,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id770",
+     "edge": "right",
+     "pos": 169.62,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id771",
      "edge": "right",
      "pos": 201.92,
      "width": 16.15,
@@ -11307,7 +11421,7 @@
    ],
    "holes": [
     {
-     "id": "id758",
+     "id": "id772",
      "shape": "square",
      "x": 42,
      "y": -61.5,
@@ -11316,7 +11430,7 @@
      "r": 0
     },
     {
-     "id": "id759",
+     "id": "id773",
      "shape": "square",
      "x": 14,
      "y": -61.5,
@@ -11325,7 +11439,7 @@
      "r": 0
     },
     {
-     "id": "id760",
+     "id": "id774",
      "shape": "square",
      "x": -14,
      "y": -61.5,
@@ -11334,7 +11448,7 @@
      "r": 0
     },
     {
-     "id": "id761",
+     "id": "id775",
      "shape": "square",
      "x": -42,
      "y": -61.5,
@@ -11343,7 +11457,7 @@
      "r": 0
     },
     {
-     "id": "id762",
+     "id": "id776",
      "shape": "square",
      "x": 42,
      "y": 61.5,
@@ -11352,7 +11466,7 @@
      "r": 0
     },
     {
-     "id": "id763",
+     "id": "id777",
      "shape": "square",
      "x": 14,
      "y": 61.5,
@@ -11361,7 +11475,7 @@
      "r": 0
     },
     {
-     "id": "id764",
+     "id": "id778",
      "shape": "square",
      "x": -14,
      "y": 61.5,
@@ -11370,7 +11484,7 @@
      "r": 0
     },
     {
-     "id": "id765",
+     "id": "id779",
      "shape": "square",
      "x": -42,
      "y": 61.5,
@@ -11379,7 +11493,7 @@
      "r": 0
     },
     {
-     "id": "id766",
+     "id": "id780",
      "shape": "square",
      "x": 61.5,
      "y": 42,
@@ -11388,7 +11502,7 @@
      "r": 0
     },
     {
-     "id": "id767",
+     "id": "id781",
      "shape": "square",
      "x": 61.5,
      "y": 14,
@@ -11397,7 +11511,7 @@
      "r": 0
     },
     {
-     "id": "id768",
+     "id": "id782",
      "shape": "square",
      "x": 61.5,
      "y": -14,
@@ -11406,7 +11520,7 @@
      "r": 0
     },
     {
-     "id": "id769",
+     "id": "id783",
      "shape": "square",
      "x": 61.5,
      "y": -42,
@@ -11415,7 +11529,7 @@
      "r": 0
     },
     {
-     "id": "id770",
+     "id": "id784",
      "shape": "square",
      "x": -61.5,
      "y": 42,
@@ -11424,7 +11538,7 @@
      "r": 0
     },
     {
-     "id": "id771",
+     "id": "id785",
      "shape": "square",
      "x": -61.5,
      "y": 14,
@@ -11433,14 +11547,14 @@
      "r": 0
     },
     {
-     "id": "id772",
+     "id": "id786",
      "shape": "round",
      "x": 63,
      "y": 84,
      "size": 16
     },
     {
-     "id": "id773",
+     "id": "id787",
      "shape": "square",
      "x": -80.15,
      "y": -35,
@@ -11503,7 +11617,7 @@
    }
   },
   {
-   "id": "id774",
+   "id": "id788",
    "name": "Face avant int",
    "w": 126,
    "h": 185,
@@ -11519,140 +11633,140 @@
    ],
    "notches": [
     {
-     "id": "id775",
+     "id": "id789",
      "edge": "bottom",
      "pos": 7,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id776",
+     "id": "id790",
      "edge": "bottom",
      "pos": 35,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id777",
+     "id": "id791",
      "edge": "bottom",
      "pos": 63,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id778",
+     "id": "id792",
      "edge": "bottom",
      "pos": 91,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id779",
+     "id": "id793",
      "edge": "bottom",
      "pos": 119,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id780",
-     "edge": "left",
-     "pos": 7.12,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id781",
-     "edge": "left",
-     "pos": 35.58,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id782",
-     "edge": "left",
-     "pos": 64.04,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id783",
-     "edge": "left",
-     "pos": 92.5,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id784",
-     "edge": "left",
-     "pos": 120.96,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id785",
-     "edge": "left",
-     "pos": 149.42,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id786",
-     "edge": "left",
-     "pos": 177.88,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id787",
-     "edge": "right",
-     "pos": 7.12,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id788",
-     "edge": "right",
-     "pos": 35.58,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id789",
-     "edge": "right",
-     "pos": 64.04,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id790",
-     "edge": "right",
-     "pos": 92.5,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id791",
-     "edge": "right",
-     "pos": 120.96,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id792",
-     "edge": "right",
-     "pos": 149.42,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
-     "id": "id793",
-     "edge": "right",
-     "pos": 177.88,
-     "width": 14.23,
-     "depth": 3
-    },
-    {
      "id": "id794",
+     "edge": "left",
+     "pos": 7.12,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id795",
+     "edge": "left",
+     "pos": 35.58,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id796",
+     "edge": "left",
+     "pos": 64.04,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id797",
+     "edge": "left",
+     "pos": 92.5,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id798",
+     "edge": "left",
+     "pos": 120.96,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id799",
+     "edge": "left",
+     "pos": 149.42,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id800",
+     "edge": "left",
+     "pos": 177.88,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id801",
+     "edge": "right",
+     "pos": 7.12,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id802",
+     "edge": "right",
+     "pos": 35.58,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id803",
+     "edge": "right",
+     "pos": 64.04,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id804",
+     "edge": "right",
+     "pos": 92.5,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id805",
+     "edge": "right",
+     "pos": 120.96,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id806",
+     "edge": "right",
+     "pos": 149.42,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id807",
+     "edge": "right",
+     "pos": 177.88,
+     "width": 14.23,
+     "depth": 3
+    },
+    {
+     "id": "id808",
      "edge": "top",
      "pos": 63,
      "width": 48,
@@ -11677,7 +11791,7 @@
    "group": "id1"
   },
   {
-   "id": "id795",
+   "id": "id809",
    "name": "Face arrière int",
    "w": 126,
    "h": 185,
@@ -11693,133 +11807,133 @@
    ],
    "notches": [
     {
-     "id": "id796",
+     "id": "id810",
      "edge": "bottom",
      "pos": 7,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id797",
+     "id": "id811",
      "edge": "bottom",
      "pos": 35,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id798",
+     "id": "id812",
      "edge": "bottom",
      "pos": 63,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id799",
+     "id": "id813",
      "edge": "bottom",
      "pos": 91,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id800",
+     "id": "id814",
      "edge": "bottom",
      "pos": 119,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id801",
+     "id": "id815",
      "edge": "left",
      "pos": 7.12,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id802",
+     "id": "id816",
      "edge": "left",
      "pos": 35.58,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id803",
+     "id": "id817",
      "edge": "left",
      "pos": 64.04,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id804",
+     "id": "id818",
      "edge": "left",
      "pos": 92.5,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id805",
+     "id": "id819",
      "edge": "left",
      "pos": 120.96,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id806",
+     "id": "id820",
      "edge": "left",
      "pos": 149.42,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id807",
+     "id": "id821",
      "edge": "left",
      "pos": 177.88,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id808",
+     "id": "id822",
      "edge": "right",
      "pos": 7.12,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id809",
+     "id": "id823",
      "edge": "right",
      "pos": 35.58,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id810",
+     "id": "id824",
      "edge": "right",
      "pos": 64.04,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id811",
+     "id": "id825",
      "edge": "right",
      "pos": 92.5,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id812",
+     "id": "id826",
      "edge": "right",
      "pos": 120.96,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id813",
+     "id": "id827",
      "edge": "right",
      "pos": 149.42,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id814",
+     "id": "id828",
      "edge": "right",
      "pos": 177.88,
      "width": 14.23,
@@ -11844,7 +11958,7 @@
    "group": "id1"
   },
   {
-   "id": "id815",
+   "id": "id829",
    "name": "Côté droit int",
    "w": 126,
    "h": 185,
@@ -11860,119 +11974,119 @@
    ],
    "notches": [
     {
-     "id": "id816",
+     "id": "id830",
      "edge": "bottom",
      "pos": 7,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id817",
+     "id": "id831",
      "edge": "bottom",
      "pos": 35,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id818",
+     "id": "id832",
      "edge": "bottom",
      "pos": 63,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id819",
+     "id": "id833",
      "edge": "bottom",
      "pos": 91,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id820",
+     "id": "id834",
      "edge": "bottom",
      "pos": 119,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id821",
+     "id": "id835",
      "edge": "left",
      "pos": 21.35,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id822",
+     "id": "id836",
      "edge": "left",
      "pos": 49.81,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id823",
+     "id": "id837",
      "edge": "left",
      "pos": 78.27,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id824",
+     "id": "id838",
      "edge": "left",
      "pos": 106.73,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id825",
+     "id": "id839",
      "edge": "left",
      "pos": 135.19,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id826",
+     "id": "id840",
      "edge": "left",
      "pos": 163.65,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id827",
+     "id": "id841",
      "edge": "right",
      "pos": 21.35,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id828",
+     "id": "id842",
      "edge": "right",
      "pos": 49.81,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id829",
+     "id": "id843",
      "edge": "right",
      "pos": 78.27,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id830",
+     "id": "id844",
      "edge": "right",
      "pos": 106.73,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id831",
+     "id": "id845",
      "edge": "right",
      "pos": 135.19,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id832",
+     "id": "id846",
      "edge": "right",
      "pos": 163.65,
      "width": 14.23,
@@ -11997,7 +12111,7 @@
    "group": "id1"
   },
   {
-   "id": "id833",
+   "id": "id847",
    "name": "Côté gauche int",
    "w": 126,
    "h": 185,
@@ -12013,119 +12127,119 @@
    ],
    "notches": [
     {
-     "id": "id834",
+     "id": "id848",
      "edge": "left",
      "pos": 21.35,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id835",
+     "id": "id849",
      "edge": "left",
      "pos": 49.81,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id836",
+     "id": "id850",
      "edge": "left",
      "pos": 78.27,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id837",
+     "id": "id851",
      "edge": "left",
      "pos": 106.73,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id838",
+     "id": "id852",
      "edge": "left",
      "pos": 135.19,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id839",
+     "id": "id853",
      "edge": "left",
      "pos": 163.65,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id840",
+     "id": "id854",
      "edge": "right",
      "pos": 21.35,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id841",
+     "id": "id855",
      "edge": "right",
      "pos": 49.81,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id842",
+     "id": "id856",
      "edge": "right",
      "pos": 78.27,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id843",
+     "id": "id857",
      "edge": "right",
      "pos": 106.73,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id844",
+     "id": "id858",
      "edge": "right",
      "pos": 135.19,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id845",
+     "id": "id859",
      "edge": "right",
      "pos": 163.65,
      "width": 14.23,
      "depth": 3
     },
     {
-     "id": "id846",
+     "id": "id860",
      "edge": "bottom",
      "pos": 7,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id847",
+     "id": "id861",
      "edge": "bottom",
      "pos": 63,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id848",
+     "id": "id862",
      "edge": "bottom",
      "pos": 91,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id849",
+     "id": "id863",
      "edge": "bottom",
      "pos": 119,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id850",
+     "id": "id864",
      "edge": "bottom",
      "pos": 28,
      "width": 28,
@@ -12134,7 +12248,7 @@
    ],
    "holes": [
     {
-     "id": "id851",
+     "id": "id865",
      "shape": "square",
      "x": -50,
      "y": 1.5,
@@ -12143,7 +12257,7 @@
      "r": 0
     },
     {
-     "id": "id852",
+     "id": "id866",
      "shape": "square",
      "x": -44,
      "y": 1.5,
@@ -12152,7 +12266,7 @@
      "r": 0
     },
     {
-     "id": "id853",
+     "id": "id867",
      "shape": "square",
      "x": -38,
      "y": 1.5,
@@ -12161,7 +12275,7 @@
      "r": 0
     },
     {
-     "id": "id854",
+     "id": "id868",
      "shape": "square",
      "x": -32,
      "y": 1.5,
@@ -12170,7 +12284,7 @@
      "r": 0
     },
     {
-     "id": "id855",
+     "id": "id869",
      "shape": "square",
      "x": -26,
      "y": 1.5,
@@ -12179,7 +12293,7 @@
      "r": 0
     },
     {
-     "id": "id856",
+     "id": "id870",
      "shape": "square",
      "x": -20,
      "y": 1.5,
@@ -12205,7 +12319,7 @@
    "group": "id1"
   },
   {
-   "id": "id857",
+   "id": "id871",
    "name": "Face avant toit",
    "w": 210,
    "h": 84,
@@ -12221,91 +12335,91 @@
    ],
    "notches": [
     {
-     "id": "id858",
+     "id": "id872",
      "edge": "bottom",
      "pos": 8.08,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id859",
+     "id": "id873",
      "edge": "bottom",
      "pos": 40.38,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id860",
+     "id": "id874",
      "edge": "bottom",
      "pos": 72.69,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id861",
+     "id": "id875",
      "edge": "bottom",
      "pos": 105,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id862",
+     "id": "id876",
      "edge": "bottom",
      "pos": 137.31,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id863",
+     "id": "id877",
      "edge": "bottom",
      "pos": 169.62,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id864",
+     "id": "id878",
      "edge": "bottom",
      "pos": 201.92,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id865",
+     "id": "id879",
      "edge": "left",
      "pos": 8,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id866",
+     "id": "id880",
      "edge": "left",
      "pos": 40,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id867",
+     "id": "id881",
      "edge": "left",
      "pos": 72,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id868",
+     "id": "id882",
      "edge": "right",
      "pos": 8,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id869",
+     "id": "id883",
      "edge": "right",
      "pos": 40,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id870",
+     "id": "id884",
      "edge": "right",
      "pos": 72,
      "width": 16,
@@ -12314,7 +12428,7 @@
    ],
    "holes": [
     {
-     "id": "id871",
+     "id": "id885",
      "shape": "square",
      "x": -74.62,
      "y": -1.5,
@@ -12323,7 +12437,7 @@
      "r": 0
     },
     {
-     "id": "id872",
+     "id": "id886",
      "shape": "square",
      "x": -44.77,
      "y": -1.5,
@@ -12332,7 +12446,7 @@
      "r": 0
     },
     {
-     "id": "id873",
+     "id": "id887",
      "shape": "square",
      "x": -14.92,
      "y": -1.5,
@@ -12341,7 +12455,7 @@
      "r": 0
     },
     {
-     "id": "id874",
+     "id": "id888",
      "shape": "square",
      "x": 14.92,
      "y": -1.5,
@@ -12350,7 +12464,7 @@
      "r": 0
     },
     {
-     "id": "id875",
+     "id": "id889",
      "shape": "square",
      "x": 44.77,
      "y": -1.5,
@@ -12359,7 +12473,7 @@
      "r": 0
     },
     {
-     "id": "id876",
+     "id": "id890",
      "shape": "square",
      "x": 74.61,
      "y": -1.5,
@@ -12371,7 +12485,7 @@
    "group": "id2"
   },
   {
-   "id": "id877",
+   "id": "id891",
    "name": "Face arrière toit",
    "w": 210,
    "h": 114,
@@ -12387,105 +12501,105 @@
    ],
    "notches": [
     {
-     "id": "id878",
+     "id": "id892",
      "edge": "bottom",
      "pos": 8.08,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id879",
+     "id": "id893",
      "edge": "bottom",
      "pos": 40.38,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id880",
+     "id": "id894",
      "edge": "bottom",
      "pos": 72.69,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id881",
+     "id": "id895",
      "edge": "bottom",
      "pos": 105,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id882",
+     "id": "id896",
      "edge": "bottom",
      "pos": 137.31,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id883",
+     "id": "id897",
      "edge": "bottom",
      "pos": 169.62,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id884",
+     "id": "id898",
      "edge": "bottom",
      "pos": 201.92,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id885",
+     "id": "id899",
      "edge": "left",
      "pos": 8,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id886",
+     "id": "id900",
      "edge": "left",
      "pos": 40,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id887",
+     "id": "id901",
      "edge": "left",
      "pos": 72,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id888",
+     "id": "id902",
      "edge": "left",
      "pos": 104,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id889",
+     "id": "id903",
      "edge": "right",
      "pos": 8,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id890",
+     "id": "id904",
      "edge": "right",
      "pos": 40,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id891",
+     "id": "id905",
      "edge": "right",
      "pos": 72,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id892",
+     "id": "id906",
      "edge": "right",
      "pos": 104,
      "width": 16,
@@ -12494,7 +12608,7 @@
    ],
    "holes": [
     {
-     "id": "id893",
+     "id": "id907",
      "shape": "square",
      "x": -63,
      "y": 3,
@@ -12503,7 +12617,7 @@
      "r": 0
     },
     {
-     "id": "id894",
+     "id": "id908",
      "shape": "square",
      "x": -7.2,
      "y": 9.75,
@@ -12512,7 +12626,7 @@
      "r": 0
     },
     {
-     "id": "id895",
+     "id": "id909",
      "shape": "square",
      "x": -1.2,
      "y": 9.75,
@@ -12521,7 +12635,7 @@
      "r": 0
     },
     {
-     "id": "id896",
+     "id": "id910",
      "shape": "square",
      "x": 4.8,
      "y": 9.75,
@@ -12530,7 +12644,7 @@
      "r": 0
     },
     {
-     "id": "id897",
+     "id": "id911",
      "shape": "square",
      "x": 10.8,
      "y": 9.75,
@@ -12539,7 +12653,7 @@
      "r": 0
     },
     {
-     "id": "id898",
+     "id": "id912",
      "shape": "square",
      "x": 16.8,
      "y": 9.75,
@@ -12548,7 +12662,7 @@
      "r": 0
     },
     {
-     "id": "id899",
+     "id": "id913",
      "shape": "square",
      "x": 22.8,
      "y": 9.75,
@@ -12557,7 +12671,7 @@
      "r": 0
     },
     {
-     "id": "id900",
+     "id": "id914",
      "shape": "square",
      "x": 28.8,
      "y": 9.75,
@@ -12566,7 +12680,7 @@
      "r": 0
     },
     {
-     "id": "id901",
+     "id": "id915",
      "shape": "square",
      "x": -75.67,
      "y": -16.5,
@@ -12575,7 +12689,7 @@
      "r": 0
     },
     {
-     "id": "id902",
+     "id": "id916",
      "shape": "square",
      "x": -47.23,
      "y": -16.5,
@@ -12584,7 +12698,7 @@
      "r": 0
     },
     {
-     "id": "id903",
+     "id": "id917",
      "shape": "square",
      "x": 72.25,
      "y": -16.5,
@@ -12596,7 +12710,7 @@
    "group": "id2"
   },
   {
-   "id": "id904",
+   "id": "id918",
    "name": "Côté droit toit",
    "w": 210,
    "h": 114,
@@ -12612,105 +12726,105 @@
    ],
    "notches": [
     {
-     "id": "id905",
+     "id": "id919",
      "edge": "bottom",
      "pos": 8.08,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id906",
+     "id": "id920",
      "edge": "bottom",
      "pos": 40.38,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id907",
+     "id": "id921",
      "edge": "bottom",
      "pos": 72.69,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id908",
+     "id": "id922",
      "edge": "bottom",
      "pos": 105,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id909",
+     "id": "id923",
      "edge": "bottom",
      "pos": 137.31,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id910",
+     "id": "id924",
      "edge": "bottom",
      "pos": 169.62,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id911",
+     "id": "id925",
      "edge": "bottom",
      "pos": 201.92,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id912",
+     "id": "id926",
      "edge": "left",
      "pos": 24,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id913",
+     "id": "id927",
      "edge": "left",
      "pos": 56,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id914",
+     "id": "id928",
      "edge": "left",
      "pos": 88,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id915",
+     "id": "id929",
      "edge": "left",
      "pos": 113,
      "width": 2,
      "depth": 3
     },
     {
-     "id": "id916",
+     "id": "id930",
      "edge": "right",
      "pos": 24,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id917",
+     "id": "id931",
      "edge": "right",
      "pos": 56,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id918",
+     "id": "id932",
      "edge": "right",
      "pos": 88,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id919",
+     "id": "id933",
      "edge": "right",
      "pos": 113,
      "width": 2,
@@ -12719,7 +12833,7 @@
    ],
    "holes": [
     {
-     "id": "id920",
+     "id": "id934",
      "shape": "square",
      "x": -78.46,
      "y": -16.5,
@@ -12728,7 +12842,7 @@
      "r": 0
     },
     {
-     "id": "id921",
+     "id": "id935",
      "shape": "square",
      "x": -47.07,
      "y": -16.5,
@@ -12737,7 +12851,7 @@
      "r": 0
     },
     {
-     "id": "id922",
+     "id": "id936",
      "shape": "square",
      "x": -15.69,
      "y": -16.5,
@@ -12746,7 +12860,7 @@
      "r": 0
     },
     {
-     "id": "id923",
+     "id": "id937",
      "shape": "square",
      "x": 15.69,
      "y": -16.5,
@@ -12755,7 +12869,7 @@
      "r": 0
     },
     {
-     "id": "id924",
+     "id": "id938",
      "shape": "square",
      "x": 47.08,
      "y": -16.5,
@@ -12764,7 +12878,7 @@
      "r": 0
     },
     {
-     "id": "id925",
+     "id": "id939",
      "shape": "square",
      "x": 78.46,
      "y": -16.5,
@@ -12986,7 +13100,7 @@
    ]
   },
   {
-   "id": "id926",
+   "id": "id940",
    "name": "Côté gauche toit",
    "w": 210,
    "h": 114,
@@ -13002,105 +13116,105 @@
    ],
    "notches": [
     {
-     "id": "id927",
+     "id": "id941",
      "edge": "bottom",
      "pos": 8.08,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id928",
+     "id": "id942",
      "edge": "bottom",
      "pos": 40.38,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id929",
+     "id": "id943",
      "edge": "bottom",
      "pos": 72.69,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id930",
+     "id": "id944",
      "edge": "bottom",
      "pos": 105,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id931",
+     "id": "id945",
      "edge": "bottom",
      "pos": 137.31,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id932",
+     "id": "id946",
      "edge": "bottom",
      "pos": 169.62,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id933",
+     "id": "id947",
      "edge": "bottom",
      "pos": 201.92,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id934",
+     "id": "id948",
      "edge": "left",
      "pos": 24,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id935",
+     "id": "id949",
      "edge": "left",
      "pos": 56,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id936",
+     "id": "id950",
      "edge": "left",
      "pos": 88,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id937",
+     "id": "id951",
      "edge": "left",
      "pos": 113,
      "width": 2,
      "depth": 3
     },
     {
-     "id": "id938",
+     "id": "id952",
      "edge": "right",
      "pos": 24,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id939",
+     "id": "id953",
      "edge": "right",
      "pos": 56,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id940",
+     "id": "id954",
      "edge": "right",
      "pos": 88,
      "width": 16,
      "depth": 3
     },
     {
-     "id": "id941",
+     "id": "id955",
      "edge": "right",
      "pos": 113,
      "width": 2,
@@ -13109,7 +13223,7 @@
    ],
    "holes": [
     {
-     "id": "id942",
+     "id": "id956",
      "shape": "square",
      "x": -78.46,
      "y": -16.5,
@@ -13118,7 +13232,7 @@
      "r": 0
     },
     {
-     "id": "id943",
+     "id": "id957",
      "shape": "square",
      "x": -47.07,
      "y": -16.5,
@@ -13127,7 +13241,7 @@
      "r": 0
     },
     {
-     "id": "id944",
+     "id": "id958",
      "shape": "square",
      "x": -15.69,
      "y": -16.5,
@@ -13136,7 +13250,7 @@
      "r": 0
     },
     {
-     "id": "id945",
+     "id": "id959",
      "shape": "square",
      "x": 15.69,
      "y": -16.5,
@@ -13145,7 +13259,7 @@
      "r": 0
     },
     {
-     "id": "id946",
+     "id": "id960",
      "shape": "square",
      "x": 47.08,
      "y": -16.5,
@@ -13154,7 +13268,7 @@
      "r": 0
     },
     {
-     "id": "id947",
+     "id": "id961",
      "shape": "square",
      "x": 78.46,
      "y": -16.5,
@@ -13163,7 +13277,7 @@
      "r": 0
     },
     {
-     "id": "id948",
+     "id": "id962",
      "shape": "round",
      "x": 42,
      "y": 33,
@@ -13383,7 +13497,7 @@
    ]
   },
   {
-   "id": "id949",
+   "id": "id963",
    "name": "Dessus toit",
    "w": 203.5,
    "h": 203.5,
@@ -13399,7 +13513,7 @@
    ],
    "notches": [
     {
-     "id": "id950",
+     "id": "id964",
      "edge": "top",
      "pos": 112.55,
      "width": 73.2,
@@ -13408,7 +13522,7 @@
    ],
    "holes": [
     {
-     "id": "id951",
+     "id": "id965",
      "shape": "square",
      "x": 14.13,
      "y": -10,
@@ -13417,17 +13531,17 @@
      "r": 0
     },
     {
-     "id": "id952",
+     "id": "id966",
      "shape": "round",
      "x": 63,
      "y": 84,
-     "size": 16
+     "size": 18
     }
    ],
    "group": "id2"
   },
   {
-   "id": "id953",
+   "id": "id967",
    "name": "Dessous toit",
    "w": 210,
    "h": 210,
@@ -13443,168 +13557,168 @@
    ],
    "notches": [
     {
-     "id": "id954",
-     "edge": "top",
-     "pos": 24.23,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id955",
-     "edge": "top",
-     "pos": 56.54,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id956",
-     "edge": "top",
-     "pos": 88.85,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id957",
-     "edge": "top",
-     "pos": 121.15,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id958",
-     "edge": "top",
-     "pos": 153.46,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id959",
-     "edge": "top",
-     "pos": 185.77,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id960",
-     "edge": "bottom",
-     "pos": 24.23,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id961",
-     "edge": "bottom",
-     "pos": 56.54,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id962",
-     "edge": "bottom",
-     "pos": 88.85,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id963",
-     "edge": "bottom",
-     "pos": 121.15,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id964",
-     "edge": "bottom",
-     "pos": 153.46,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id965",
-     "edge": "bottom",
-     "pos": 185.77,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id966",
-     "edge": "left",
-     "pos": 24.23,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
-     "id": "id967",
-     "edge": "left",
-     "pos": 56.54,
-     "width": 16.15,
-     "depth": 3
-    },
-    {
      "id": "id968",
-     "edge": "left",
-     "pos": 88.85,
+     "edge": "top",
+     "pos": 24.23,
      "width": 16.15,
      "depth": 3
     },
     {
      "id": "id969",
+     "edge": "top",
+     "pos": 56.54,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id970",
+     "edge": "top",
+     "pos": 88.85,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id971",
+     "edge": "top",
+     "pos": 121.15,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id972",
+     "edge": "top",
+     "pos": 153.46,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id973",
+     "edge": "top",
+     "pos": 185.77,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id974",
+     "edge": "bottom",
+     "pos": 24.23,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id975",
+     "edge": "bottom",
+     "pos": 56.54,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id976",
+     "edge": "bottom",
+     "pos": 88.85,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id977",
+     "edge": "bottom",
+     "pos": 121.15,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id978",
+     "edge": "bottom",
+     "pos": 153.46,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id979",
+     "edge": "bottom",
+     "pos": 185.77,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id980",
+     "edge": "left",
+     "pos": 24.23,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id981",
+     "edge": "left",
+     "pos": 56.54,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id982",
+     "edge": "left",
+     "pos": 88.85,
+     "width": 16.15,
+     "depth": 3
+    },
+    {
+     "id": "id983",
      "edge": "left",
      "pos": 121.15,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id970",
+     "id": "id984",
      "edge": "left",
      "pos": 153.46,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id971",
+     "id": "id985",
      "edge": "left",
      "pos": 185.77,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id972",
+     "id": "id986",
      "edge": "right",
      "pos": 24.23,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id973",
+     "id": "id987",
      "edge": "right",
      "pos": 56.54,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id974",
+     "id": "id988",
      "edge": "right",
      "pos": 88.85,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id975",
+     "id": "id989",
      "edge": "right",
      "pos": 121.15,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id976",
+     "id": "id990",
      "edge": "right",
      "pos": 153.46,
      "width": 16.15,
      "depth": 3
     },
     {
-     "id": "id977",
+     "id": "id991",
      "edge": "right",
      "pos": 185.77,
      "width": 16.15,
@@ -13613,7 +13727,7 @@
    ],
    "holes": [
     {
-     "id": "id978",
+     "id": "id992",
      "shape": "square",
      "x": 31.5,
      "y": -14,
@@ -13622,7 +13736,7 @@
      "r": 0
     },
     {
-     "id": "id979",
+     "id": "id993",
      "shape": "square",
      "x": 10.8,
      "y": 43,
@@ -13631,14 +13745,14 @@
      "r": 0
     },
     {
-     "id": "id980",
+     "id": "id994",
      "shape": "round",
      "x": -6,
      "y": -10,
      "size": 10
     },
     {
-     "id": "id981",
+     "id": "id995",
      "shape": "square",
      "x": 12.5,
      "y": -10,
@@ -13647,14 +13761,14 @@
      "r": 0
     },
     {
-     "id": "id982",
+     "id": "id996",
      "shape": "round",
      "x": 63,
      "y": 84,
-     "size": 16
+     "size": 18
     },
     {
-     "id": "id983",
+     "id": "id997",
      "shape": "square",
      "x": -23.9,
      "y": 78,
@@ -13663,7 +13777,7 @@
      "r": 0
     },
     {
-     "id": "id984",
+     "id": "id998",
      "shape": "square",
      "x": -23.9,
      "y": 46,
@@ -13672,7 +13786,7 @@
      "r": 0
     },
     {
-     "id": "id985",
+     "id": "id999",
      "shape": "square",
      "x": 45.5,
      "y": 78,
@@ -13681,7 +13795,7 @@
      "r": 0
     },
     {
-     "id": "id986",
+     "id": "id1000",
      "shape": "square",
      "x": 45.5,
      "y": 46,
@@ -13690,25 +13804,25 @@
      "r": 0
     },
     {
-     "id": "id987",
+     "id": "id1001",
      "shape": "square",
-     "x": 24.08,
+     "x": 25.28,
      "y": 23.5,
-     "size": 13.28,
+     "size": 14.48,
      "sh": 3,
      "r": 0
     },
     {
-     "id": "id988",
+     "id": "id1002",
      "shape": "square",
-     "x": -2.48,
+     "x": -3.68,
      "y": 23.5,
-     "size": 13.28,
+     "size": 14.48,
      "sh": 3,
      "r": 0
     },
     {
-     "id": "id989",
+     "id": "id1003",
      "shape": "square",
      "x": 28.58,
      "y": -30.5,
@@ -13717,7 +13831,7 @@
      "r": 0
     },
     {
-     "id": "id990",
+     "id": "id1004",
      "shape": "square",
      "x": -0.32,
      "y": -30.5,
@@ -13726,7 +13840,7 @@
      "r": 0
     },
     {
-     "id": "id991",
+     "id": "id1005",
      "shape": "square",
      "x": 28.58,
      "y": 10.5,
@@ -13735,7 +13849,7 @@
      "r": 0
     },
     {
-     "id": "id992",
+     "id": "id1006",
      "shape": "square",
      "x": -0.32,
      "y": 10.5,
@@ -13744,7 +13858,7 @@
      "r": 0
     },
     {
-     "id": "id993",
+     "id": "id1007",
      "shape": "square",
      "x": 48.76,
      "y": -10,
@@ -13753,7 +13867,7 @@
      "r": 0
     },
     {
-     "id": "id994",
+     "id": "id1008",
      "shape": "square",
      "x": -20.49,
      "y": -10,
@@ -13783,7 +13897,7 @@
    "group": "id2"
   },
   {
-   "id": "id995",
+   "id": "id1009",
    "name": "Baguette dessus toit gauche",
    "w": 204,
    "h": 8,
@@ -13799,49 +13913,49 @@
    ],
    "notches": [
     {
-     "id": "id996",
+     "id": "id1010",
      "edge": "top",
      "pos": 7.85,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id997",
+     "id": "id1011",
      "edge": "top",
      "pos": 39.23,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id998",
+     "id": "id1012",
      "edge": "top",
      "pos": 70.62,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id999",
+     "id": "id1013",
      "edge": "top",
      "pos": 102,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1000",
+     "id": "id1014",
      "edge": "top",
      "pos": 133.38,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1001",
+     "id": "id1015",
      "edge": "top",
      "pos": 164.77,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1002",
+     "id": "id1016",
      "edge": "top",
      "pos": 196.15,
      "width": 15.69,
@@ -13858,7 +13972,7 @@
    }
   },
   {
-   "id": "id1003",
+   "id": "id1017",
    "name": "Baguette dessus toit droite",
    "w": 204,
    "h": 8,
@@ -13874,49 +13988,49 @@
    ],
    "notches": [
     {
-     "id": "id1004",
+     "id": "id1018",
      "edge": "top",
      "pos": 7.85,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1005",
+     "id": "id1019",
      "edge": "top",
      "pos": 39.23,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1006",
+     "id": "id1020",
      "edge": "top",
      "pos": 70.62,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1007",
+     "id": "id1021",
      "edge": "top",
      "pos": 102,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1008",
+     "id": "id1022",
      "edge": "top",
      "pos": 133.38,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1009",
+     "id": "id1023",
      "edge": "top",
      "pos": 164.77,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1010",
+     "id": "id1024",
      "edge": "top",
      "pos": 196.15,
      "width": 15.69,
@@ -13933,7 +14047,7 @@
    }
   },
   {
-   "id": "id1011",
+   "id": "id1025",
    "name": "Baguette dessus toit avant",
    "w": 194,
    "h": 8,
@@ -13949,49 +14063,49 @@
    ],
    "notches": [
     {
-     "id": "id1012",
+     "id": "id1026",
      "edge": "top",
      "pos": 7.46,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1013",
+     "id": "id1027",
      "edge": "top",
      "pos": 37.31,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1014",
+     "id": "id1028",
      "edge": "top",
      "pos": 67.15,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1015",
+     "id": "id1029",
      "edge": "top",
      "pos": 97,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1016",
+     "id": "id1030",
      "edge": "top",
      "pos": 126.85,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1017",
+     "id": "id1031",
      "edge": "top",
      "pos": 156.69,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1018",
+     "id": "id1032",
      "edge": "top",
      "pos": 186.54,
      "width": 14.92,
@@ -14008,7 +14122,7 @@
    }
   },
   {
-   "id": "id1019",
+   "id": "id1033",
    "name": "Baguette dessus toit arrière 1",
    "w": 71.1,
    "h": 8,
@@ -14024,21 +14138,21 @@
    ],
    "notches": [
     {
-     "id": "id1020",
+     "id": "id1034",
      "edge": "top",
      "pos": 7.11,
      "width": 14.22,
      "depth": 3
     },
     {
-     "id": "id1021",
+     "id": "id1035",
      "edge": "top",
      "pos": 35.55,
      "width": 14.22,
      "depth": 3
     },
     {
-     "id": "id1022",
+     "id": "id1036",
      "edge": "top",
      "pos": 63.99,
      "width": 14.22,
@@ -14055,7 +14169,7 @@
    }
   },
   {
-   "id": "id1023",
+   "id": "id1037",
    "name": "Baguette dessus toit arrière 2",
    "w": 49.5,
    "h": 8,
@@ -14071,14 +14185,14 @@
    ],
    "notches": [
     {
-     "id": "id1024",
+     "id": "id1038",
      "edge": "top",
      "pos": 8.25,
      "width": 16.5,
      "depth": 3
     },
     {
-     "id": "id1025",
+     "id": "id1039",
      "edge": "top",
      "pos": 41.25,
      "width": 16.5,
@@ -14095,7 +14209,7 @@
    }
   },
   {
-   "id": "id1026",
+   "id": "id1040",
    "name": "Cadre toit haut",
    "w": 204,
    "h": 204,
@@ -14111,7 +14225,7 @@
    ],
    "notches": [
     {
-     "id": "id1027",
+     "id": "id1041",
      "edge": "bottom",
      "pos": 102,
      "width": 126,
@@ -14120,17 +14234,17 @@
    ],
    "holes": [
     {
-     "id": "id1028",
+     "id": "id1042",
      "shape": "round",
      "x": 63,
      "y": 84,
-     "size": 16
+     "size": 18
     }
    ],
    "group": "id2"
   },
   {
-   "id": "id1029",
+   "id": "id1043",
    "name": "Cadre toit milieu",
    "w": 204,
    "h": 204,
@@ -14146,7 +14260,7 @@
    ],
    "notches": [
     {
-     "id": "id1030",
+     "id": "id1044",
      "edge": "bottom",
      "pos": 102,
      "width": 126,
@@ -14155,17 +14269,17 @@
    ],
    "holes": [
     {
-     "id": "id1031",
+     "id": "id1045",
      "shape": "round",
      "x": 63,
      "y": 84,
-     "size": 16
+     "size": 18
     }
    ],
    "group": "id2"
   },
   {
-   "id": "id1032",
+   "id": "id1046",
    "name": "Cadre toit bas",
    "w": 204,
    "h": 204,
@@ -14181,7 +14295,7 @@
    ],
    "notches": [
     {
-     "id": "id1033",
+     "id": "id1047",
      "edge": "bottom",
      "pos": 102,
      "width": 126,
@@ -14190,17 +14304,17 @@
    ],
    "holes": [
     {
-     "id": "id1034",
+     "id": "id1048",
      "shape": "round",
      "x": 63,
      "y": 84,
-     "size": 16
+     "size": 18
     }
    ],
    "group": "id2"
   },
   {
-   "id": "id1035",
+   "id": "id1049",
    "name": "Face avant caméra 1",
    "w": 72.25,
    "h": 42,
@@ -14216,49 +14330,49 @@
    ],
    "notches": [
     {
-     "id": "id1036",
+     "id": "id1050",
      "edge": "bottom",
      "pos": 7.22,
      "width": 14.45,
      "depth": 3
     },
     {
-     "id": "id1037",
+     "id": "id1051",
      "edge": "bottom",
      "pos": 36.13,
      "width": 14.45,
      "depth": 3
     },
     {
-     "id": "id1038",
+     "id": "id1052",
      "edge": "bottom",
      "pos": 65.02,
      "width": 14.45,
      "depth": 3
     },
     {
-     "id": "id1039",
+     "id": "id1053",
      "edge": "left",
      "pos": 7,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id1040",
+     "id": "id1054",
      "edge": "left",
      "pos": 35,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id1041",
+     "id": "id1055",
      "edge": "right",
      "pos": 7,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id1042",
+     "id": "id1056",
      "edge": "right",
      "pos": 35,
      "width": 14,
@@ -14283,7 +14397,7 @@
    "group": "id2"
   },
   {
-   "id": "id1043",
+   "id": "id1057",
    "name": "Face arrière caméra 1",
    "w": 72.25,
    "h": 42,
@@ -14299,49 +14413,49 @@
    ],
    "notches": [
     {
-     "id": "id1044",
+     "id": "id1058",
      "edge": "bottom",
      "pos": 7.22,
      "width": 14.45,
      "depth": 3
     },
     {
-     "id": "id1045",
+     "id": "id1059",
      "edge": "bottom",
      "pos": 36.13,
      "width": 14.45,
      "depth": 3
     },
     {
-     "id": "id1046",
+     "id": "id1060",
      "edge": "bottom",
      "pos": 65.02,
      "width": 14.45,
      "depth": 3
     },
     {
-     "id": "id1047",
+     "id": "id1061",
      "edge": "left",
      "pos": 7,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id1048",
+     "id": "id1062",
      "edge": "left",
      "pos": 35,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id1049",
+     "id": "id1063",
      "edge": "right",
      "pos": 7,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id1050",
+     "id": "id1064",
      "edge": "right",
      "pos": 35,
      "width": 14,
@@ -14366,7 +14480,7 @@
    "group": "id2"
   },
   {
-   "id": "id1051",
+   "id": "id1065",
    "name": "Côté droit caméra 1",
    "w": 44,
    "h": 42,
@@ -14382,28 +14496,28 @@
    ],
    "notches": [
     {
-     "id": "id1052",
+     "id": "id1066",
      "edge": "bottom",
      "pos": 7.33,
      "width": 14.67,
      "depth": 3
     },
     {
-     "id": "id1053",
+     "id": "id1067",
      "edge": "bottom",
      "pos": 36.67,
      "width": 14.67,
      "depth": 3
     },
     {
-     "id": "id1054",
+     "id": "id1068",
      "edge": "left",
      "pos": 21,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id1055",
+     "id": "id1069",
      "edge": "right",
      "pos": 21,
      "width": 14,
@@ -14428,7 +14542,7 @@
    "group": "id2"
   },
   {
-   "id": "id1056",
+   "id": "id1070",
    "name": "Côté gauche caméra 1",
    "w": 44,
    "h": 42,
@@ -14444,28 +14558,28 @@
    ],
    "notches": [
     {
-     "id": "id1057",
+     "id": "id1071",
      "edge": "bottom",
      "pos": 7.33,
      "width": 14.67,
      "depth": 3
     },
     {
-     "id": "id1058",
+     "id": "id1072",
      "edge": "bottom",
      "pos": 36.67,
      "width": 14.67,
      "depth": 3
     },
     {
-     "id": "id1059",
+     "id": "id1073",
      "edge": "left",
      "pos": 21,
      "width": 14,
      "depth": 3
     },
     {
-     "id": "id1060",
+     "id": "id1074",
      "edge": "right",
      "pos": 21,
      "width": 14,
@@ -14490,7 +14604,7 @@
    "group": "id2"
   },
   {
-   "id": "id1061",
+   "id": "id1075",
    "name": "Caméra",
    "w": 25,
    "h": 24,
@@ -14512,7 +14626,7 @@
    "url": "https://www.amazon.fr/dp/B0BRY3L9H7"
   },
   {
-   "id": "id1062",
+   "id": "id1076",
    "name": "LED infrarouges",
    "w": 12,
    "h": 24,
@@ -14533,7 +14647,7 @@
    "wood": 3
   },
   {
-   "id": "id1063",
+   "id": "id1077",
    "name": "Raspberry Pi",
    "w": 85,
    "h": 56,
@@ -14554,7 +14668,7 @@
    "url": "https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html#/ram-2_gb"
   },
   {
-   "id": "id1064",
+   "id": "id1078",
    "name": "Nappe caméra",
    "w": 16,
    "h": 0.3,
@@ -14631,7 +14745,7 @@
    ]
   },
   {
-   "id": "id1065",
+   "id": "id1079",
    "name": "Fil 5 V (rouge)",
    "w": 1.2,
    "h": 1.2,
@@ -14689,7 +14803,7 @@
    ]
   },
   {
-   "id": "id1066",
+   "id": "id1080",
    "name": "Fil masse (noir)",
    "w": 1.2,
    "h": 1.2,
@@ -14742,7 +14856,7 @@
    ]
   },
   {
-   "id": "id1067",
+   "id": "id1081",
    "name": "Schéma électronique",
    "w": 1,
    "h": 1,
@@ -14762,7 +14876,7 @@
    "special": "doc"
   },
   {
-   "id": "id1068",
+   "id": "id1082",
    "name": "Baguette couvercle avant (rechange 1)",
    "w": 204,
    "h": 15,
@@ -14904,7 +15018,7 @@
    "spareOf": "id40"
   },
   {
-   "id": "id1069",
+   "id": "id1083",
    "name": "Baguette couvercle avant (rechange 2)",
    "w": 204,
    "h": 15,
@@ -15046,7 +15160,7 @@
    "spareOf": "id40"
   },
   {
-   "id": "id1070",
+   "id": "id1084",
    "name": "Baguette couvercle avant (rechange 3)",
    "w": 204,
    "h": 15,
@@ -15188,7 +15302,7 @@
    "spareOf": "id40"
   },
   {
-   "id": "id1071",
+   "id": "id1085",
    "name": "Baguette couvercle arrière (rechange 1)",
    "w": 204,
    "h": 15,
@@ -15330,7 +15444,7 @@
    "spareOf": "id41"
   },
   {
-   "id": "id1072",
+   "id": "id1086",
    "name": "Baguette couvercle arrière (rechange 2)",
    "w": 204,
    "h": 15,
@@ -15472,7 +15586,7 @@
    "spareOf": "id41"
   },
   {
-   "id": "id1073",
+   "id": "id1087",
    "name": "Baguette couvercle arrière (rechange 3)",
    "w": 204,
    "h": 15,
@@ -15614,7 +15728,7 @@
    "spareOf": "id41"
   },
   {
-   "id": "id1074",
+   "id": "id1088",
    "name": "Baguette couvercle gauche (rechange 1)",
    "w": 198.64,
    "h": 15,
@@ -15748,7 +15862,7 @@
    "spareOf": "id42"
   },
   {
-   "id": "id1075",
+   "id": "id1089",
    "name": "Baguette couvercle gauche (rechange 2)",
    "w": 198.64,
    "h": 15,
@@ -15882,7 +15996,7 @@
    "spareOf": "id42"
   },
   {
-   "id": "id1076",
+   "id": "id1090",
    "name": "Baguette couvercle gauche (rechange 3)",
    "w": 198.64,
    "h": 15,
@@ -16016,7 +16130,7 @@
    "spareOf": "id42"
   },
   {
-   "id": "id1077",
+   "id": "id1091",
    "name": "Baguette couvercle droite (rechange 1)",
    "w": 198.64,
    "h": 15,
@@ -16150,7 +16264,7 @@
    "spareOf": "id43"
   },
   {
-   "id": "id1078",
+   "id": "id1092",
    "name": "Baguette couvercle droite (rechange 2)",
    "w": 198.64,
    "h": 15,
@@ -16284,7 +16398,7 @@
    "spareOf": "id43"
   },
   {
-   "id": "id1079",
+   "id": "id1093",
    "name": "Baguette couvercle droite (rechange 3)",
    "w": 198.64,
    "h": 15,
@@ -16418,209 +16532,13 @@
    "spareOf": "id43"
   },
   {
-   "id": "id1080",
+   "id": "id1094",
    "name": "Étrier régulateur 1 (rechange 1)",
    "w": 78,
    "h": 46,
    "pos": [
     -498.64,
     609,
-    1.5
-   ],
-   "rot": [
-    0,
-    0,
-    0
-   ],
-   "notches": [
-    {
-     "id": "id1081",
-     "edge": "top",
-     "pos": 39,
-     "width": 62,
-     "depth": 37
-    }
-   ],
-   "holes": [],
-   "group": "id10",
-   "spareOf": "id74"
-  },
-  {
-   "id": "id1082",
-   "name": "Étrier régulateur 1 (rechange 2)",
-   "w": 78,
-   "h": 46,
-   "pos": [
-    -582.64,
-    609,
-    1.5
-   ],
-   "rot": [
-    0,
-    0,
-    0
-   ],
-   "notches": [
-    {
-     "id": "id1083",
-     "edge": "top",
-     "pos": 39,
-     "width": 62,
-     "depth": 37
-    }
-   ],
-   "holes": [],
-   "group": "id10",
-   "spareOf": "id74"
-  },
-  {
-   "id": "id1084",
-   "name": "Étrier régulateur 1 (rechange 3)",
-   "w": 78,
-   "h": 46,
-   "pos": [
-    -294,
-    661,
-    1.5
-   ],
-   "rot": [
-    0,
-    0,
-    0
-   ],
-   "notches": [
-    {
-     "id": "id1085",
-     "edge": "top",
-     "pos": 39,
-     "width": 62,
-     "depth": 37
-    }
-   ],
-   "holes": [],
-   "group": "id10",
-   "spareOf": "id74"
-  },
-  {
-   "id": "id1086",
-   "name": "Étrier régulateur 2 (rechange 1)",
-   "w": 78,
-   "h": 46,
-   "pos": [
-    -378,
-    661,
-    1.5
-   ],
-   "rot": [
-    0,
-    0,
-    0
-   ],
-   "notches": [
-    {
-     "id": "id1087",
-     "edge": "top",
-     "pos": 39,
-     "width": 62,
-     "depth": 37
-    }
-   ],
-   "holes": [],
-   "group": "id10",
-   "spareOf": "id76"
-  },
-  {
-   "id": "id1088",
-   "name": "Étrier régulateur 2 (rechange 2)",
-   "w": 78,
-   "h": 46,
-   "pos": [
-    -462,
-    661,
-    1.5
-   ],
-   "rot": [
-    0,
-    0,
-    0
-   ],
-   "notches": [
-    {
-     "id": "id1089",
-     "edge": "top",
-     "pos": 39,
-     "width": 62,
-     "depth": 37
-    }
-   ],
-   "holes": [],
-   "group": "id10",
-   "spareOf": "id76"
-  },
-  {
-   "id": "id1090",
-   "name": "Étrier régulateur 2 (rechange 3)",
-   "w": 78,
-   "h": 46,
-   "pos": [
-    -546,
-    661,
-    1.5
-   ],
-   "rot": [
-    0,
-    0,
-    0
-   ],
-   "notches": [
-    {
-     "id": "id1091",
-     "edge": "top",
-     "pos": 39,
-     "width": 62,
-     "depth": 37
-    }
-   ],
-   "holes": [],
-   "group": "id10",
-   "spareOf": "id76"
-  },
-  {
-   "id": "id1092",
-   "name": "Étrier régulateur 3 (rechange 1)",
-   "w": 78,
-   "h": 46,
-   "pos": [
-    -294,
-    713,
-    1.5
-   ],
-   "rot": [
-    0,
-    0,
-    0
-   ],
-   "notches": [
-    {
-     "id": "id1093",
-     "edge": "top",
-     "pos": 39,
-     "width": 62,
-     "depth": 37
-    }
-   ],
-   "holes": [],
-   "group": "id10",
-   "spareOf": "id78"
-  },
-  {
-   "id": "id1094",
-   "name": "Étrier régulateur 3 (rechange 2)",
-   "w": 78,
-   "h": 46,
-   "pos": [
-    -378,
-    713,
     1.5
    ],
    "rot": [
@@ -16639,16 +16557,16 @@
    ],
    "holes": [],
    "group": "id10",
-   "spareOf": "id78"
+   "spareOf": "id74"
   },
   {
    "id": "id1096",
-   "name": "Étrier régulateur 3 (rechange 3)",
+   "name": "Étrier régulateur 1 (rechange 2)",
    "w": 78,
    "h": 46,
    "pos": [
-    -462,
-    713,
+    -582.64,
+    609,
     1.5
    ],
    "rot": [
@@ -16667,16 +16585,16 @@
    ],
    "holes": [],
    "group": "id10",
-   "spareOf": "id78"
+   "spareOf": "id74"
   },
   {
    "id": "id1098",
-   "name": "Étrier régulateur 4 (rechange 1)",
+   "name": "Étrier régulateur 1 (rechange 3)",
    "w": 78,
    "h": 46,
    "pos": [
-    -546,
-    713,
+    -294,
+    661,
     1.5
    ],
    "rot": [
@@ -16695,16 +16613,16 @@
    ],
    "holes": [],
    "group": "id10",
-   "spareOf": "id80"
+   "spareOf": "id74"
   },
   {
    "id": "id1100",
-   "name": "Étrier régulateur 4 (rechange 2)",
+   "name": "Étrier régulateur 2 (rechange 1)",
    "w": 78,
    "h": 46,
    "pos": [
-    -294,
-    765,
+    -378,
+    661,
     1.5
    ],
    "rot": [
@@ -16723,16 +16641,16 @@
    ],
    "holes": [],
    "group": "id10",
-   "spareOf": "id80"
+   "spareOf": "id76"
   },
   {
    "id": "id1102",
-   "name": "Étrier régulateur 4 (rechange 3)",
+   "name": "Étrier régulateur 2 (rechange 2)",
    "w": 78,
    "h": 46,
    "pos": [
-    -378,
-    765,
+    -462,
+    661,
     1.5
    ],
    "rot": [
@@ -16751,10 +16669,206 @@
    ],
    "holes": [],
    "group": "id10",
-   "spareOf": "id80"
+   "spareOf": "id76"
   },
   {
    "id": "id1104",
+   "name": "Étrier régulateur 2 (rechange 3)",
+   "w": 78,
+   "h": 46,
+   "pos": [
+    -546,
+    661,
+    1.5
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "notches": [
+    {
+     "id": "id1105",
+     "edge": "top",
+     "pos": 39,
+     "width": 62,
+     "depth": 37
+    }
+   ],
+   "holes": [],
+   "group": "id10",
+   "spareOf": "id76"
+  },
+  {
+   "id": "id1106",
+   "name": "Étrier régulateur 3 (rechange 1)",
+   "w": 78,
+   "h": 46,
+   "pos": [
+    -294,
+    713,
+    1.5
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "notches": [
+    {
+     "id": "id1107",
+     "edge": "top",
+     "pos": 39,
+     "width": 62,
+     "depth": 37
+    }
+   ],
+   "holes": [],
+   "group": "id10",
+   "spareOf": "id78"
+  },
+  {
+   "id": "id1108",
+   "name": "Étrier régulateur 3 (rechange 2)",
+   "w": 78,
+   "h": 46,
+   "pos": [
+    -378,
+    713,
+    1.5
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "notches": [
+    {
+     "id": "id1109",
+     "edge": "top",
+     "pos": 39,
+     "width": 62,
+     "depth": 37
+    }
+   ],
+   "holes": [],
+   "group": "id10",
+   "spareOf": "id78"
+  },
+  {
+   "id": "id1110",
+   "name": "Étrier régulateur 3 (rechange 3)",
+   "w": 78,
+   "h": 46,
+   "pos": [
+    -462,
+    713,
+    1.5
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "notches": [
+    {
+     "id": "id1111",
+     "edge": "top",
+     "pos": 39,
+     "width": 62,
+     "depth": 37
+    }
+   ],
+   "holes": [],
+   "group": "id10",
+   "spareOf": "id78"
+  },
+  {
+   "id": "id1112",
+   "name": "Étrier régulateur 4 (rechange 1)",
+   "w": 78,
+   "h": 46,
+   "pos": [
+    -546,
+    713,
+    1.5
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "notches": [
+    {
+     "id": "id1113",
+     "edge": "top",
+     "pos": 39,
+     "width": 62,
+     "depth": 37
+    }
+   ],
+   "holes": [],
+   "group": "id10",
+   "spareOf": "id80"
+  },
+  {
+   "id": "id1114",
+   "name": "Étrier régulateur 4 (rechange 2)",
+   "w": 78,
+   "h": 46,
+   "pos": [
+    -294,
+    765,
+    1.5
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "notches": [
+    {
+     "id": "id1115",
+     "edge": "top",
+     "pos": 39,
+     "width": 62,
+     "depth": 37
+    }
+   ],
+   "holes": [],
+   "group": "id10",
+   "spareOf": "id80"
+  },
+  {
+   "id": "id1116",
+   "name": "Étrier régulateur 4 (rechange 3)",
+   "w": 78,
+   "h": 46,
+   "pos": [
+    -378,
+    765,
+    1.5
+   ],
+   "rot": [
+    0,
+    0,
+    0
+   ],
+   "notches": [
+    {
+     "id": "id1117",
+     "edge": "top",
+     "pos": 39,
+     "width": 62,
+     "depth": 37
+    }
+   ],
+   "holes": [],
+   "group": "id10",
+   "spareOf": "id80"
+  },
+  {
+   "id": "id1118",
    "name": "Clavette fixation 1.1 (rechange 1)",
    "w": 15,
    "h": 19.5,
@@ -16774,7 +16888,7 @@
    "spareOf": "id130"
   },
   {
-   "id": "id1105",
+   "id": "id1119",
    "name": "Clavette fixation 1.1 (rechange 2)",
    "w": 15,
    "h": 19.5,
@@ -16794,7 +16908,7 @@
    "spareOf": "id130"
   },
   {
-   "id": "id1106",
+   "id": "id1120",
    "name": "Clavette fixation 1.1 (rechange 3)",
    "w": 15,
    "h": 19.5,
@@ -16814,7 +16928,7 @@
    "spareOf": "id130"
   },
   {
-   "id": "id1107",
+   "id": "id1121",
    "name": "Clavette fixation 1.2 (rechange 1)",
    "w": 15,
    "h": 19.5,
@@ -16834,7 +16948,7 @@
    "spareOf": "id131"
   },
   {
-   "id": "id1108",
+   "id": "id1122",
    "name": "Clavette fixation 1.2 (rechange 2)",
    "w": 15,
    "h": 19.5,
@@ -16854,7 +16968,7 @@
    "spareOf": "id131"
   },
   {
-   "id": "id1109",
+   "id": "id1123",
    "name": "Clavette fixation 1.2 (rechange 3)",
    "w": 15,
    "h": 19.5,
@@ -16874,7 +16988,7 @@
    "spareOf": "id131"
   },
   {
-   "id": "id1110",
+   "id": "id1124",
    "name": "Clavette fixation 2.1 (rechange 1)",
    "w": 15,
    "h": 19.5,
@@ -16894,7 +17008,7 @@
    "spareOf": "id132"
   },
   {
-   "id": "id1111",
+   "id": "id1125",
    "name": "Clavette fixation 2.1 (rechange 2)",
    "w": 15,
    "h": 19.5,
@@ -16914,7 +17028,7 @@
    "spareOf": "id132"
   },
   {
-   "id": "id1112",
+   "id": "id1126",
    "name": "Clavette fixation 2.1 (rechange 3)",
    "w": 15,
    "h": 19.5,
@@ -16934,7 +17048,7 @@
    "spareOf": "id132"
   },
   {
-   "id": "id1113",
+   "id": "id1127",
    "name": "Clavette fixation 2.2 (rechange 1)",
    "w": 15,
    "h": 19.5,
@@ -16954,7 +17068,7 @@
    "spareOf": "id133"
   },
   {
-   "id": "id1114",
+   "id": "id1128",
    "name": "Clavette fixation 2.2 (rechange 2)",
    "w": 15,
    "h": 19.5,
@@ -16974,7 +17088,7 @@
    "spareOf": "id133"
   },
   {
-   "id": "id1115",
+   "id": "id1129",
    "name": "Clavette fixation 2.2 (rechange 3)",
    "w": 15,
    "h": 19.5,
@@ -16994,7 +17108,7 @@
    "spareOf": "id133"
   },
   {
-   "id": "id1116",
+   "id": "id1130",
    "name": "Poignée cassette 1 (rechange 1)",
    "w": 30,
    "h": 12,
@@ -17048,7 +17162,7 @@
    "spareOf": "id262"
   },
   {
-   "id": "id1117",
+   "id": "id1131",
    "name": "Poignée cassette 1 (rechange 2)",
    "w": 30,
    "h": 12,
@@ -17102,7 +17216,7 @@
    "spareOf": "id262"
   },
   {
-   "id": "id1118",
+   "id": "id1132",
    "name": "Poignée cassette 1 (rechange 3)",
    "w": 30,
    "h": 12,
@@ -17156,7 +17270,7 @@
    "spareOf": "id262"
   },
   {
-   "id": "id1119",
+   "id": "id1133",
    "name": "Poignée cassette 2 (rechange 1)",
    "w": 30,
    "h": 12,
@@ -17210,7 +17324,7 @@
    "spareOf": "id263"
   },
   {
-   "id": "id1120",
+   "id": "id1134",
    "name": "Poignée cassette 2 (rechange 2)",
    "w": 30,
    "h": 12,
@@ -17264,7 +17378,7 @@
    "spareOf": "id263"
   },
   {
-   "id": "id1121",
+   "id": "id1135",
    "name": "Poignée cassette 2 (rechange 3)",
    "w": 30,
    "h": 12,
@@ -17318,7 +17432,7 @@
    "spareOf": "id263"
   },
   {
-   "id": "id1122",
+   "id": "id1136",
    "name": "Poignée cassette 3 (rechange 1)",
    "w": 30,
    "h": 12,
@@ -17372,7 +17486,7 @@
    "spareOf": "id264"
   },
   {
-   "id": "id1123",
+   "id": "id1137",
    "name": "Poignée cassette 3 (rechange 2)",
    "w": 30,
    "h": 12,
@@ -17426,7 +17540,7 @@
    "spareOf": "id264"
   },
   {
-   "id": "id1124",
+   "id": "id1138",
    "name": "Poignée cassette 3 (rechange 3)",
    "w": 30,
    "h": 12,
@@ -17480,7 +17594,7 @@
    "spareOf": "id264"
   },
   {
-   "id": "id1125",
+   "id": "id1139",
    "name": "Poignée bloc d'hiver 1 (rechange 1)",
    "w": 30,
    "h": 12,
@@ -17534,7 +17648,7 @@
    "spareOf": "id343"
   },
   {
-   "id": "id1126",
+   "id": "id1140",
    "name": "Poignée bloc d'hiver 1 (rechange 2)",
    "w": 30,
    "h": 12,
@@ -17588,7 +17702,7 @@
    "spareOf": "id343"
   },
   {
-   "id": "id1127",
+   "id": "id1141",
    "name": "Poignée bloc d'hiver 1 (rechange 3)",
    "w": 30,
    "h": 12,
@@ -17642,7 +17756,7 @@
    "spareOf": "id343"
   },
   {
-   "id": "id1128",
+   "id": "id1142",
    "name": "Poignée bloc d'hiver 2 (rechange 1)",
    "w": 30,
    "h": 12,
@@ -17696,7 +17810,7 @@
    "spareOf": "id344"
   },
   {
-   "id": "id1129",
+   "id": "id1143",
    "name": "Poignée bloc d'hiver 2 (rechange 2)",
    "w": 30,
    "h": 12,
@@ -17750,7 +17864,7 @@
    "spareOf": "id344"
   },
   {
-   "id": "id1130",
+   "id": "id1144",
    "name": "Poignée bloc d'hiver 2 (rechange 3)",
    "w": 30,
    "h": 12,
@@ -17804,7 +17918,7 @@
    "spareOf": "id344"
   },
   {
-   "id": "id1131",
+   "id": "id1145",
    "name": "Poignée bloc d'hiver 3 (rechange 1)",
    "w": 30,
    "h": 12,
@@ -17858,7 +17972,7 @@
    "spareOf": "id345"
   },
   {
-   "id": "id1132",
+   "id": "id1146",
    "name": "Poignée bloc d'hiver 3 (rechange 2)",
    "w": 30,
    "h": 12,
@@ -17912,7 +18026,7 @@
    "spareOf": "id345"
   },
   {
-   "id": "id1133",
+   "id": "id1147",
    "name": "Poignée bloc d'hiver 3 (rechange 3)",
    "w": 30,
    "h": 12,
@@ -17966,7 +18080,7 @@
    "spareOf": "id345"
   },
   {
-   "id": "id1134",
+   "id": "id1148",
    "name": "Conduit de sortie 1 (rechange 1)",
    "w": 10.6,
    "h": 41.5,
@@ -17982,28 +18096,28 @@
    ],
    "notches": [
     {
-     "id": "id1135",
+     "id": "id1149",
      "edge": "top",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1136",
+     "id": "id1150",
      "edge": "top",
      "pos": 8.83,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1137",
+     "id": "id1151",
      "edge": "bottom",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1138",
+     "id": "id1152",
      "edge": "bottom",
      "pos": 8.83,
      "width": 3.53,
@@ -18104,10 +18218,10 @@
      -20.75
     ]
    ],
-   "spareOf": "id358"
+   "spareOf": "id372"
   },
   {
-   "id": "id1139",
+   "id": "id1153",
    "name": "Conduit de sortie 1 (rechange 2)",
    "w": 10.6,
    "h": 41.5,
@@ -18123,28 +18237,28 @@
    ],
    "notches": [
     {
-     "id": "id1140",
+     "id": "id1154",
      "edge": "top",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1141",
+     "id": "id1155",
      "edge": "top",
      "pos": 8.83,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1142",
+     "id": "id1156",
      "edge": "bottom",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1143",
+     "id": "id1157",
      "edge": "bottom",
      "pos": 8.83,
      "width": 3.53,
@@ -18245,10 +18359,10 @@
      -20.75
     ]
    ],
-   "spareOf": "id358"
+   "spareOf": "id372"
   },
   {
-   "id": "id1144",
+   "id": "id1158",
    "name": "Conduit de sortie 1 (rechange 3)",
    "w": 10.6,
    "h": 41.5,
@@ -18264,28 +18378,28 @@
    ],
    "notches": [
     {
-     "id": "id1145",
+     "id": "id1159",
      "edge": "top",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1146",
+     "id": "id1160",
      "edge": "top",
      "pos": 8.83,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1147",
+     "id": "id1161",
      "edge": "bottom",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1148",
+     "id": "id1162",
      "edge": "bottom",
      "pos": 8.83,
      "width": 3.53,
@@ -18386,10 +18500,10 @@
      -20.75
     ]
    ],
-   "spareOf": "id358"
+   "spareOf": "id372"
   },
   {
-   "id": "id1149",
+   "id": "id1163",
    "name": "Conduit de sortie 2 (rechange 1)",
    "w": 10.6,
    "h": 41.5,
@@ -18405,28 +18519,28 @@
    ],
    "notches": [
     {
-     "id": "id1150",
+     "id": "id1164",
      "edge": "top",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1151",
+     "id": "id1165",
      "edge": "top",
      "pos": 8.83,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1152",
+     "id": "id1166",
      "edge": "bottom",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1153",
+     "id": "id1167",
      "edge": "bottom",
      "pos": 8.83,
      "width": 3.53,
@@ -18527,10 +18641,10 @@
      -20.75
     ]
    ],
-   "spareOf": "id363"
+   "spareOf": "id377"
   },
   {
-   "id": "id1154",
+   "id": "id1168",
    "name": "Conduit de sortie 2 (rechange 2)",
    "w": 10.6,
    "h": 41.5,
@@ -18546,28 +18660,28 @@
    ],
    "notches": [
     {
-     "id": "id1155",
+     "id": "id1169",
      "edge": "top",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1156",
+     "id": "id1170",
      "edge": "top",
      "pos": 8.83,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1157",
+     "id": "id1171",
      "edge": "bottom",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1158",
+     "id": "id1172",
      "edge": "bottom",
      "pos": 8.83,
      "width": 3.53,
@@ -18668,10 +18782,10 @@
      -20.75
     ]
    ],
-   "spareOf": "id363"
+   "spareOf": "id377"
   },
   {
-   "id": "id1159",
+   "id": "id1173",
    "name": "Conduit de sortie 2 (rechange 3)",
    "w": 10.6,
    "h": 41.5,
@@ -18687,28 +18801,28 @@
    ],
    "notches": [
     {
-     "id": "id1160",
+     "id": "id1174",
      "edge": "top",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1161",
+     "id": "id1175",
      "edge": "top",
      "pos": 8.83,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1162",
+     "id": "id1176",
      "edge": "bottom",
      "pos": 1.77,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1163",
+     "id": "id1177",
      "edge": "bottom",
      "pos": 8.83,
      "width": 3.53,
@@ -18809,10 +18923,10 @@
      -20.75
     ]
    ],
-   "spareOf": "id363"
+   "spareOf": "id377"
   },
   {
-   "id": "id1164",
+   "id": "id1178",
    "name": "Conduit de sortie 3 (rechange 1)",
    "w": 51.4,
    "h": 10.6,
@@ -18828,14 +18942,14 @@
    ],
    "notches": [
     {
-     "id": "id1165",
+     "id": "id1179",
      "edge": "left",
      "pos": 5.3,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1166",
+     "id": "id1180",
      "edge": "right",
      "pos": 5.3,
      "width": 3.53,
@@ -18936,10 +19050,10 @@
      -1.76
     ]
    ],
-   "spareOf": "id368"
+   "spareOf": "id382"
   },
   {
-   "id": "id1167",
+   "id": "id1181",
    "name": "Conduit de sortie 3 (rechange 2)",
    "w": 51.4,
    "h": 10.6,
@@ -18955,14 +19069,14 @@
    ],
    "notches": [
     {
-     "id": "id1168",
+     "id": "id1182",
      "edge": "left",
      "pos": 5.3,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1169",
+     "id": "id1183",
      "edge": "right",
      "pos": 5.3,
      "width": 3.53,
@@ -19063,10 +19177,10 @@
      -1.76
     ]
    ],
-   "spareOf": "id368"
+   "spareOf": "id382"
   },
   {
-   "id": "id1170",
+   "id": "id1184",
    "name": "Conduit de sortie 3 (rechange 3)",
    "w": 51.4,
    "h": 10.6,
@@ -19082,14 +19196,14 @@
    ],
    "notches": [
     {
-     "id": "id1171",
+     "id": "id1185",
      "edge": "left",
      "pos": 5.3,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1172",
+     "id": "id1186",
      "edge": "right",
      "pos": 5.3,
      "width": 3.53,
@@ -19190,10 +19304,10 @@
      -1.76
     ]
    ],
-   "spareOf": "id368"
+   "spareOf": "id382"
   },
   {
-   "id": "id1173",
+   "id": "id1187",
    "name": "Conduit de sortie 4 (rechange 1)",
    "w": 51.4,
    "h": 10.6,
@@ -19209,14 +19323,14 @@
    ],
    "notches": [
     {
-     "id": "id1174",
+     "id": "id1188",
      "edge": "left",
      "pos": 5.3,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1175",
+     "id": "id1189",
      "edge": "right",
      "pos": 5.3,
      "width": 3.53,
@@ -19317,10 +19431,10 @@
      -1.76
     ]
    ],
-   "spareOf": "id371"
+   "spareOf": "id385"
   },
   {
-   "id": "id1176",
+   "id": "id1190",
    "name": "Conduit de sortie 4 (rechange 2)",
    "w": 51.4,
    "h": 10.6,
@@ -19336,14 +19450,14 @@
    ],
    "notches": [
     {
-     "id": "id1177",
+     "id": "id1191",
      "edge": "left",
      "pos": 5.3,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1178",
+     "id": "id1192",
      "edge": "right",
      "pos": 5.3,
      "width": 3.53,
@@ -19444,10 +19558,10 @@
      -1.76
     ]
    ],
-   "spareOf": "id371"
+   "spareOf": "id385"
   },
   {
-   "id": "id1179",
+   "id": "id1193",
    "name": "Conduit de sortie 4 (rechange 3)",
    "w": 51.4,
    "h": 10.6,
@@ -19463,14 +19577,14 @@
    ],
    "notches": [
     {
-     "id": "id1180",
+     "id": "id1194",
      "edge": "left",
      "pos": 5.3,
      "width": 3.53,
      "depth": 3
     },
     {
-     "id": "id1181",
+     "id": "id1195",
      "edge": "right",
      "pos": 5.3,
      "width": 3.53,
@@ -19571,10 +19685,10 @@
      -1.76
     ]
    ],
-   "spareOf": "id371"
+   "spareOf": "id385"
   },
   {
-   "id": "id1182",
+   "id": "id1196",
    "name": "Poignée bouchon prise d'air 1 (rechange 1)",
    "w": 30,
    "h": 18,
@@ -19625,10 +19739,10 @@
      9
     ]
    ],
-   "spareOf": "id513"
+   "spareOf": "id527"
   },
   {
-   "id": "id1183",
+   "id": "id1197",
    "name": "Poignée bouchon prise d'air 1 (rechange 2)",
    "w": 30,
    "h": 18,
@@ -19679,10 +19793,10 @@
      9
     ]
    ],
-   "spareOf": "id513"
+   "spareOf": "id527"
   },
   {
-   "id": "id1184",
+   "id": "id1198",
    "name": "Poignée bouchon prise d'air 1 (rechange 3)",
    "w": 30,
    "h": 18,
@@ -19733,10 +19847,10 @@
      9
     ]
    ],
-   "spareOf": "id513"
+   "spareOf": "id527"
   },
   {
-   "id": "id1185",
+   "id": "id1199",
    "name": "Poignée bouchon prise d'air 2 (rechange 1)",
    "w": 30,
    "h": 18,
@@ -19787,10 +19901,10 @@
      9
     ]
    ],
-   "spareOf": "id514"
+   "spareOf": "id528"
   },
   {
-   "id": "id1186",
+   "id": "id1200",
    "name": "Poignée bouchon prise d'air 2 (rechange 2)",
    "w": 30,
    "h": 18,
@@ -19841,10 +19955,10 @@
      9
     ]
    ],
-   "spareOf": "id514"
+   "spareOf": "id528"
   },
   {
-   "id": "id1187",
+   "id": "id1201",
    "name": "Poignée bouchon prise d'air 2 (rechange 3)",
    "w": 30,
    "h": 18,
@@ -19895,10 +20009,10 @@
      9
     ]
    ],
-   "spareOf": "id514"
+   "spareOf": "id528"
   },
   {
-   "id": "id1188",
+   "id": "id1202",
    "name": "Poignée bouchon prise d'air 3 (rechange 1)",
    "w": 30,
    "h": 18,
@@ -19949,10 +20063,10 @@
      9
     ]
    ],
-   "spareOf": "id515"
+   "spareOf": "id529"
   },
   {
-   "id": "id1189",
+   "id": "id1203",
    "name": "Poignée bouchon prise d'air 3 (rechange 2)",
    "w": 30,
    "h": 18,
@@ -20003,10 +20117,10 @@
      9
     ]
    ],
-   "spareOf": "id515"
+   "spareOf": "id529"
   },
   {
-   "id": "id1190",
+   "id": "id1204",
    "name": "Poignée bouchon prise d'air 3 (rechange 3)",
    "w": 30,
    "h": 18,
@@ -20057,10 +20171,10 @@
      9
     ]
    ],
-   "spareOf": "id515"
+   "spareOf": "id529"
   },
   {
-   "id": "id1191",
+   "id": "id1205",
    "name": "Baguette dessus toit gauche (rechange 1)",
    "w": 204,
    "h": 8,
@@ -20076,49 +20190,49 @@
    ],
    "notches": [
     {
-     "id": "id1192",
+     "id": "id1206",
      "edge": "top",
      "pos": 7.85,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1193",
+     "id": "id1207",
      "edge": "top",
      "pos": 39.23,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1194",
+     "id": "id1208",
      "edge": "top",
      "pos": 70.62,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1195",
+     "id": "id1209",
      "edge": "top",
      "pos": 102,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1196",
+     "id": "id1210",
      "edge": "top",
      "pos": 133.38,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1197",
+     "id": "id1211",
      "edge": "top",
      "pos": 164.77,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1198",
+     "id": "id1212",
      "edge": "top",
      "pos": 196.15,
      "width": 15.69,
@@ -20133,10 +20247,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id995"
+   "spareOf": "id1009"
   },
   {
-   "id": "id1199",
+   "id": "id1213",
    "name": "Baguette dessus toit gauche (rechange 2)",
    "w": 204,
    "h": 8,
@@ -20152,49 +20266,49 @@
    ],
    "notches": [
     {
-     "id": "id1200",
+     "id": "id1214",
      "edge": "top",
      "pos": 7.85,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1201",
+     "id": "id1215",
      "edge": "top",
      "pos": 39.23,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1202",
+     "id": "id1216",
      "edge": "top",
      "pos": 70.62,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1203",
+     "id": "id1217",
      "edge": "top",
      "pos": 102,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1204",
+     "id": "id1218",
      "edge": "top",
      "pos": 133.38,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1205",
+     "id": "id1219",
      "edge": "top",
      "pos": 164.77,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1206",
+     "id": "id1220",
      "edge": "top",
      "pos": 196.15,
      "width": 15.69,
@@ -20209,10 +20323,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id995"
+   "spareOf": "id1009"
   },
   {
-   "id": "id1207",
+   "id": "id1221",
    "name": "Baguette dessus toit gauche (rechange 3)",
    "w": 204,
    "h": 8,
@@ -20228,49 +20342,49 @@
    ],
    "notches": [
     {
-     "id": "id1208",
+     "id": "id1222",
      "edge": "top",
      "pos": 7.85,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1209",
+     "id": "id1223",
      "edge": "top",
      "pos": 39.23,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1210",
+     "id": "id1224",
      "edge": "top",
      "pos": 70.62,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1211",
+     "id": "id1225",
      "edge": "top",
      "pos": 102,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1212",
+     "id": "id1226",
      "edge": "top",
      "pos": 133.38,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1213",
+     "id": "id1227",
      "edge": "top",
      "pos": 164.77,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1214",
+     "id": "id1228",
      "edge": "top",
      "pos": 196.15,
      "width": 15.69,
@@ -20285,10 +20399,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id995"
+   "spareOf": "id1009"
   },
   {
-   "id": "id1215",
+   "id": "id1229",
    "name": "Baguette dessus toit droite (rechange 1)",
    "w": 204,
    "h": 8,
@@ -20304,49 +20418,49 @@
    ],
    "notches": [
     {
-     "id": "id1216",
+     "id": "id1230",
      "edge": "top",
      "pos": 7.85,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1217",
+     "id": "id1231",
      "edge": "top",
      "pos": 39.23,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1218",
+     "id": "id1232",
      "edge": "top",
      "pos": 70.62,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1219",
+     "id": "id1233",
      "edge": "top",
      "pos": 102,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1220",
+     "id": "id1234",
      "edge": "top",
      "pos": 133.38,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1221",
+     "id": "id1235",
      "edge": "top",
      "pos": 164.77,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1222",
+     "id": "id1236",
      "edge": "top",
      "pos": 196.15,
      "width": 15.69,
@@ -20361,10 +20475,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id1003"
+   "spareOf": "id1017"
   },
   {
-   "id": "id1223",
+   "id": "id1237",
    "name": "Baguette dessus toit droite (rechange 2)",
    "w": 204,
    "h": 8,
@@ -20380,49 +20494,49 @@
    ],
    "notches": [
     {
-     "id": "id1224",
+     "id": "id1238",
      "edge": "top",
      "pos": 7.85,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1225",
+     "id": "id1239",
      "edge": "top",
      "pos": 39.23,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1226",
+     "id": "id1240",
      "edge": "top",
      "pos": 70.62,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1227",
+     "id": "id1241",
      "edge": "top",
      "pos": 102,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1228",
+     "id": "id1242",
      "edge": "top",
      "pos": 133.38,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1229",
+     "id": "id1243",
      "edge": "top",
      "pos": 164.77,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1230",
+     "id": "id1244",
      "edge": "top",
      "pos": 196.15,
      "width": 15.69,
@@ -20437,10 +20551,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id1003"
+   "spareOf": "id1017"
   },
   {
-   "id": "id1231",
+   "id": "id1245",
    "name": "Baguette dessus toit droite (rechange 3)",
    "w": 204,
    "h": 8,
@@ -20456,49 +20570,49 @@
    ],
    "notches": [
     {
-     "id": "id1232",
+     "id": "id1246",
      "edge": "top",
      "pos": 7.85,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1233",
+     "id": "id1247",
      "edge": "top",
      "pos": 39.23,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1234",
+     "id": "id1248",
      "edge": "top",
      "pos": 70.62,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1235",
+     "id": "id1249",
      "edge": "top",
      "pos": 102,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1236",
+     "id": "id1250",
      "edge": "top",
      "pos": 133.38,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1237",
+     "id": "id1251",
      "edge": "top",
      "pos": 164.77,
      "width": 15.69,
      "depth": 3
     },
     {
-     "id": "id1238",
+     "id": "id1252",
      "edge": "top",
      "pos": 196.15,
      "width": 15.69,
@@ -20513,10 +20627,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id1003"
+   "spareOf": "id1017"
   },
   {
-   "id": "id1239",
+   "id": "id1253",
    "name": "Baguette dessus toit avant (rechange 1)",
    "w": 194,
    "h": 8,
@@ -20532,49 +20646,49 @@
    ],
    "notches": [
     {
-     "id": "id1240",
+     "id": "id1254",
      "edge": "top",
      "pos": 7.46,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1241",
+     "id": "id1255",
      "edge": "top",
      "pos": 37.31,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1242",
+     "id": "id1256",
      "edge": "top",
      "pos": 67.15,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1243",
+     "id": "id1257",
      "edge": "top",
      "pos": 97,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1244",
+     "id": "id1258",
      "edge": "top",
      "pos": 126.85,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1245",
+     "id": "id1259",
      "edge": "top",
      "pos": 156.69,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1246",
+     "id": "id1260",
      "edge": "top",
      "pos": 186.54,
      "width": 14.92,
@@ -20589,10 +20703,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id1011"
+   "spareOf": "id1025"
   },
   {
-   "id": "id1247",
+   "id": "id1261",
    "name": "Baguette dessus toit avant (rechange 2)",
    "w": 194,
    "h": 8,
@@ -20608,49 +20722,49 @@
    ],
    "notches": [
     {
-     "id": "id1248",
+     "id": "id1262",
      "edge": "top",
      "pos": 7.46,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1249",
+     "id": "id1263",
      "edge": "top",
      "pos": 37.31,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1250",
+     "id": "id1264",
      "edge": "top",
      "pos": 67.15,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1251",
+     "id": "id1265",
      "edge": "top",
      "pos": 97,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1252",
+     "id": "id1266",
      "edge": "top",
      "pos": 126.85,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1253",
+     "id": "id1267",
      "edge": "top",
      "pos": 156.69,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1254",
+     "id": "id1268",
      "edge": "top",
      "pos": 186.54,
      "width": 14.92,
@@ -20665,10 +20779,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id1011"
+   "spareOf": "id1025"
   },
   {
-   "id": "id1255",
+   "id": "id1269",
    "name": "Baguette dessus toit avant (rechange 3)",
    "w": 194,
    "h": 8,
@@ -20684,49 +20798,49 @@
    ],
    "notches": [
     {
-     "id": "id1256",
+     "id": "id1270",
      "edge": "top",
      "pos": 7.46,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1257",
+     "id": "id1271",
      "edge": "top",
      "pos": 37.31,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1258",
+     "id": "id1272",
      "edge": "top",
      "pos": 67.15,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1259",
+     "id": "id1273",
      "edge": "top",
      "pos": 97,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1260",
+     "id": "id1274",
      "edge": "top",
      "pos": 126.85,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1261",
+     "id": "id1275",
      "edge": "top",
      "pos": 156.69,
      "width": 14.92,
      "depth": 3
     },
     {
-     "id": "id1262",
+     "id": "id1276",
      "edge": "top",
      "pos": 186.54,
      "width": 14.92,
@@ -20741,10 +20855,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id1011"
+   "spareOf": "id1025"
   },
   {
-   "id": "id1263",
+   "id": "id1277",
    "name": "Baguette dessus toit arrière 1 (rechange 1)",
    "w": 71.1,
    "h": 8,
@@ -20760,21 +20874,21 @@
    ],
    "notches": [
     {
-     "id": "id1264",
+     "id": "id1278",
      "edge": "top",
      "pos": 7.11,
      "width": 14.22,
      "depth": 3
     },
     {
-     "id": "id1265",
+     "id": "id1279",
      "edge": "top",
      "pos": 35.55,
      "width": 14.22,
      "depth": 3
     },
     {
-     "id": "id1266",
+     "id": "id1280",
      "edge": "top",
      "pos": 63.99,
      "width": 14.22,
@@ -20789,10 +20903,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id1019"
+   "spareOf": "id1033"
   },
   {
-   "id": "id1267",
+   "id": "id1281",
    "name": "Baguette dessus toit arrière 1 (rechange 2)",
    "w": 71.1,
    "h": 8,
@@ -20808,21 +20922,21 @@
    ],
    "notches": [
     {
-     "id": "id1268",
+     "id": "id1282",
      "edge": "top",
      "pos": 7.11,
      "width": 14.22,
      "depth": 3
     },
     {
-     "id": "id1269",
+     "id": "id1283",
      "edge": "top",
      "pos": 35.55,
      "width": 14.22,
      "depth": 3
     },
     {
-     "id": "id1270",
+     "id": "id1284",
      "edge": "top",
      "pos": 63.99,
      "width": 14.22,
@@ -20837,10 +20951,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id1019"
+   "spareOf": "id1033"
   },
   {
-   "id": "id1271",
+   "id": "id1285",
    "name": "Baguette dessus toit arrière 1 (rechange 3)",
    "w": 71.1,
    "h": 8,
@@ -20856,21 +20970,21 @@
    ],
    "notches": [
     {
-     "id": "id1272",
+     "id": "id1286",
      "edge": "top",
      "pos": 7.11,
      "width": 14.22,
      "depth": 3
     },
     {
-     "id": "id1273",
+     "id": "id1287",
      "edge": "top",
      "pos": 35.55,
      "width": 14.22,
      "depth": 3
     },
     {
-     "id": "id1274",
+     "id": "id1288",
      "edge": "top",
      "pos": 63.99,
      "width": 14.22,
@@ -20885,10 +20999,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id1019"
+   "spareOf": "id1033"
   },
   {
-   "id": "id1275",
+   "id": "id1289",
    "name": "Baguette dessus toit arrière 2 (rechange 1)",
    "w": 49.5,
    "h": 8,
@@ -20904,14 +21018,14 @@
    ],
    "notches": [
     {
-     "id": "id1276",
+     "id": "id1290",
      "edge": "top",
      "pos": 8.25,
      "width": 16.5,
      "depth": 3
     },
     {
-     "id": "id1277",
+     "id": "id1291",
      "edge": "top",
      "pos": 41.25,
      "width": 16.5,
@@ -20926,10 +21040,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id1023"
+   "spareOf": "id1037"
   },
   {
-   "id": "id1278",
+   "id": "id1292",
    "name": "Baguette dessus toit arrière 2 (rechange 2)",
    "w": 49.5,
    "h": 8,
@@ -20945,14 +21059,14 @@
    ],
    "notches": [
     {
-     "id": "id1279",
+     "id": "id1293",
      "edge": "top",
      "pos": 8.25,
      "width": 16.5,
      "depth": 3
     },
     {
-     "id": "id1280",
+     "id": "id1294",
      "edge": "top",
      "pos": 41.25,
      "width": 16.5,
@@ -20967,10 +21081,10 @@
      "phase": 0
     }
    },
-   "spareOf": "id1023"
+   "spareOf": "id1037"
   },
   {
-   "id": "id1281",
+   "id": "id1295",
    "name": "Baguette dessus toit arrière 2 (rechange 3)",
    "w": 49.5,
    "h": 8,
@@ -20986,14 +21100,14 @@
    ],
    "notches": [
     {
-     "id": "id1282",
+     "id": "id1296",
      "edge": "top",
      "pos": 8.25,
      "width": 16.5,
      "depth": 3
     },
     {
-     "id": "id1283",
+     "id": "id1297",
      "edge": "top",
      "pos": 41.25,
      "width": 16.5,
@@ -21008,7 +21122,7 @@
      "phase": 0
     }
    },
-   "spareOf": "id1023"
+   "spareOf": "id1037"
   }
  ],
  "groupNames": {

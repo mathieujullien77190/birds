@@ -1,7 +1,7 @@
 import type { Plank, PlankScene } from '../types';
 import { SPARE_RE } from '../nest/spares';
 import { plankCodes } from '../sheets/partCodes';
-import { ASSEMBLY_BLOCKS, LID_BACK, LID_RE, SEQ, type PieceRule, type Ref, type Text } from './data';
+import { ASSEMBLY_BLOCKS, LID_BACK, LID_RE, SEQ, SUBASSEMBLIES, type PieceRule, type Ref, type Text } from './data';
 import type { AssemblyBlock, AssemblyStep } from './types';
 
 /**
@@ -79,6 +79,12 @@ export function assemblySteps(s: PlankScene): AssemblyStep[] {
   const back = out.findIndex((st) => st.id === LID_BACK);
   const from = out.findIndex((st) => st.block === 'banc');
   if (lid.length && back > from && from >= 0) for (let k = from; k < back; k++) out[k].hideIds = lid;
+  // sous-ensembles montés à part (module d'aération, zone caméra, goulotte) : cachés des étapes qui suivent leur bloc jusqu'à leur pose
+  for (const sub of SUBASSEMBLIES) {
+    const ids = pieces.filter((i) => sub.re.test(i.p.name)).map((i) => i.p.id);
+    const start = out.findIndex((st) => st.block === sub.block), first = out.findIndex((st, k) => k > start && st.block !== sub.block), put = out.findIndex((st) => st.id === sub.put);
+    if (ids.length && put > first) for (let k = first; k < put; k++) out[k].hideIds = [...(out[k].hideIds ?? []), ...ids];
+  }
   return out;
 }
 

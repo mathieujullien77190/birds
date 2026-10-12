@@ -76,7 +76,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const RIB_TEETH_Z: [number, number][] = [[RIB_Z0 + 45, RIB_Z0 + 45 + RIB_TOOTH], [bodyH - 10 - RIB_TOOTH, bodyH - 10]]; // z des deux dents : une en bas (au-dessus du plancher intérieur), une en haut du corps ; plus de dent dans le toit (retirée à la demande de l'utilisateur)
   const RIB_OUT = 6, RIB_KEY = 3; // les dents ressortent de 6 mm dans l'isolant et sont percées d'un trou rectangulaire de 3 × 20 : une clavette (cale) les verrouille
   const RIB_Z1 = bodyH + 36; // haut de la nervure : elle monte le long du toit (jusqu'à 1 mm sous le tasseau arrière) pour mieux tenir, mais sans dent dans le toit : elle touche juste la face extérieure de sa plaque arrière = haut de la dent du toit (1 cm plus bas qu'avant, demande de l'utilisateur)
-  const RGX = W / 2 - 45, RGY = -D / 2 + 75, RGZ = -16.5, CND_X = n.l / 2 + t, CND_D = 16, CND_Y = D / 2 - t - 10 - CND_D / 2; // régulateur sous le plancher, côté droit ; gaine à 1 cm du mur arrière
+  const RGX = W / 2 - 45, RGY = -D / 2 + 75, RGZ = -16.5, CND_X = n.l / 2 + t, CND_D = 16, CND_HOLE_ROOF = 18, CND_Y = D / 2 - t - 10 - CND_D / 2; // régulateur sous le plancher, côté droit ; gaine à 1 cm du mur arrière
   const cam2X = -W / 2 + 33, cam2Y = -D / 2 - 23; // caméra 2 : toujours DEHORS, 23 mm devant la façade, à 33 mm du bord gauche, quelle que soit la taille du nichoir
   // quatre ÉTRIERS en U de contreplaqué qui tiennent le régulateur sous le plancher : plaque de 78 × 51 debout en travers, encoche de 62 × 42 ouverte vers le haut (le régulateur 61 × 33 + 1 de jeu),
   // bras de 8 dont les 3 mm du haut (= t) sont des tenons qui traversent le fond par des fentes 8 × 3 et AFFLEURENT son dessus : rien ne dépasse dans l'isolant
@@ -464,11 +464,13 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const blk = (name: string, w: number, h: number, depth: number, pos: Vec3, grp: string | undefined, color: string, extra: Partial<Plank> = {}): Plank => ({ id: uid(), name, w: r2(w), h: r2(h), depth: r2(depth), pos: [r2(pos[0]), r2(pos[1]), r2(pos[2])] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: grp, special: 'block' as const, color, ...extra });
   // le SIÈGE fixe (goulotte) : trois parois collées sur le plancher du toit (dents dans des fentes), la plaque arrière du toit fait la quatrième ; il traverse le dessus du toit par son encoche arrière
   const seatH = DUCT_Z1 - bodyH, seatLen = YREAR - FY0, seatC = (FY0 + YREAR) / 2;
-  const seatWall = (name: string, w: number, pos: Vec3, rot: Vec3): Plank => recastAll({ ...wood(name, w, seatH, pos, rot, roofGroup), cast: { bottom: { n: teethFor(w), phase: 0 } } }, t, fit);
+  // comme les parois d'une boîte (`makeBox`) : la paroi avant (largeur FO, tout le siège) et les deux côtés s'emboîtent par leurs arêtes verticales (dents alternées : avant phase 0, côtés phase 1, nombre impair par hauteur) en un U d'un seul bloc ; AUCUN crénelage à l'arrière (la plaque arrière du toit fait la quatrième paroi) ni en haut ; l'intérieur (SI) ne change pas
+  const nSeatH = teethFor(seatH);
+  const seatWall = (name: string, w: number, pos: Vec3, rot: Vec3, cast: Plank['cast']): Plank => recastAll({ ...wood(name, w, seatH, pos, rot, roofGroup), cast }, t, fit);
   const seat: Plank[] = [
-    seatWall('Goulotte ventilateur gauche', seatLen, [FANX - FO / 2 + t / 2, seatC, bodyH + seatH / 2], sideRot),
-    seatWall('Goulotte ventilateur droite', seatLen, [FANX + FO / 2 - t / 2, seatC, bodyH + seatH / 2], sideRot),
-    seatWall('Goulotte ventilateur avant', SI, [FANX, FY0 + t / 2, bodyH + seatH / 2], faceRot),
+    seatWall('Goulotte ventilateur gauche', seatLen, [FANX - FO / 2 + t / 2, seatC, bodyH + seatH / 2], sideRot, { bottom: { n: teethFor(seatLen), phase: 0 }, left: { n: nSeatH, phase: 1 } }),
+    seatWall('Goulotte ventilateur droite', seatLen, [FANX + FO / 2 - t / 2, seatC, bodyH + seatH / 2], sideRot, { bottom: { n: teethFor(seatLen), phase: 0 }, left: { n: nSeatH, phase: 1 } }),
+    seatWall('Goulotte ventilateur avant', FO, [FANX, FY0 + t / 2, bodyH + seatH / 2], faceRot, { bottom: { n: teethFor(FO), phase: 0 }, left: { n: nSeatH, phase: 0 }, right: { n: nSeatH, phase: 0 } }),
   ];
   // la CASSETTE amovible : cadre du bas (ouvert au-dessus de l'ouverture du plafond), quatre parois dont l'arrière a la fenêtre de sortie, couvercle à poignée ; le ventilateur est posé sur quatre plots sur le cadre
   // POIGNÉE en U (pontet) de bois, CENTRÉE sur le couvercle, incrustée par deux tenons traversants dans deux fentes du couvercle (comme les dents des murs) : barre de t + deux pieds de t, ouverture de 24 mm de large ;
@@ -767,7 +769,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     if (/^Lambris gauche/.test(p.name) && Math.abs(p.pos[1] - SONDE_Y) < 0.01) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: 0, y: r2(sondeZh - p.pos[2]), size: SONDE_HOLE })];
   }
   if (n.solar) { // la gaine traverse le fond, le plancher intérieur, le cadre du toit et le plancher / dessus du toit, dans l'isolant du côté droit
-    for (const p of planks) if (/^(Dessous ext|Plancher int|Cadre toit (bas|milieu|haut)|Dessous toit|Dessus toit)/.test(p.name)) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: r2(CND_X - p.pos[0]), y: r2(CND_Y - p.pos[1]), size: CND_D })]; // pile le diamètre de la gaine, serrée (plus de jeu : elle nageait)
+    for (const p of planks) if (/^(Dessous ext|Plancher int|Cadre toit (bas|milieu|haut)|Dessous toit|Dessus toit)/.test(p.name)) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: r2(CND_X - p.pos[0]), y: r2(CND_Y - p.pos[1]), size: /^(Dessous ext|Plancher int)/.test(p.name) ? CND_D : CND_HOLE_ROOF })]; // fond et plancher du corps : pile le diamètre de la gaine (serrée) ; zone du toit (trois planches du cadre, dessous et dessus du toit) : Ø 18, la gaine passe sans effort
   }
   for (const p of planks) { // prise d'air basse : l'ouverture du dessous, le passage du conduit dans le fond intérieur et la fente de la paroi intérieure gauche
     if (/^Dessous ext/.test(p.name)) p.holes = [...p.holes, { id: uid(), shape: 'square' as const, x: AIR_CX, y: AIR_CY, size: r2(AIR_LX - 2 * t), sh: r2(AIR_LY - 2 * t) }]; // ouverture du conduit : son intérieur, rectangle simple (les parois reposent sur le fond autour)

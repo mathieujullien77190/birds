@@ -7,6 +7,9 @@ export const ASSEMBLY_BLOCKS: AssemblyBlock[] = [
   { id: 'hiver', title: "Pièces d'hiver" },
   { id: 'corps', title: 'Corps' },
   { id: 'entree', title: 'Entrée' },
+  { id: 'zonecam', title: 'Zone caméra' },
+  { id: 'goulotte', title: 'Goulotte ventilateur' },
+  { id: 'cassette', title: 'Cassette du ventilateur' },
   { id: 'toit', title: 'Toit' },
   { id: 'habillage', title: 'Habillage' },
   { id: 'couvercle', title: 'Couvercle' },
@@ -43,6 +46,14 @@ export const LID_RE = /^(Toit en okoumé|Baguette couvercle)/;
 /** Étape après laquelle le toit en okoumé est de nouveau posé. */
 export const LID_BACK = 'elec-pose-toit';
 
+/** Sous-ensembles montés à part dans leur propre bloc, puis posés d'un bloc par une étape de texte : pièces, bloc de montage, étape de pose. */
+export const SUBASSEMBLIES: { re: RegExp; block: string; put: string }[] = [
+  { re: /^Conduit d'air/, block: 'aeration', put: 'corps-module-air' },
+  { re: /^(Face (avant|arrière)|Côté (droit|gauche)) caméra 1$/, block: 'zonecam', put: 'toit-zone-camera' },
+  { re: /^Goulotte ventilateur (gauche|droite|avant)$/, block: 'goulotte', put: 'toit-goulotte' },
+  { re: /^(Cassette ventilateur|Grille de protection ventilateur|Plot caoutchouc ventilateur|Ventilateur Noctua|Poignée cassette|Prise 4 broches du ventilateur|Fil cassette|Conduit de sortie)/, block: 'cassette', put: 'toit-cassette' },
+];
+
 export const SEQ: Rule[] = [
   // ---- a. Aération du corps : le module (conduit de la prise d'air basse), monté en sous-ensemble ----
   N('aer-huile', 'aeration', 'huiler', "Huiler le conduit d'air", [
@@ -50,6 +61,10 @@ export const SEQ: Rule[] = [
     OIL_FULL,
   ].join('\n'), [/^Conduit d'air/]),
   N('aer-sechage', 'aeration', 'attendre', 'Séchage du conduit d\'air', DRY_TEXT, [/^Conduit d'air/]),
+  P('aer-2', 'aeration', 'placer', /^Conduit d'air 2$/, { text: (r) => `Côté nid : sa fente de 34 × 30 mm se place en face de la grille de ${r(/^Côté gauche int$/)}.` }),
+  P('aer-34', 'aeration', 'emboiter', /^Conduit d'air [34]$/),
+  P('aer-1', 'aeration', 'emboiter', /^Conduit d'air 1$/),
+  P('aer-5', 'aeration', 'emboiter', /^Conduit d'air 5/),
 
   // ---- b. Pièces d'hiver (rechange) ----
   N('hiv-huile', 'hiver', 'huiler', "Huiler les pièces d'hiver", `${OIL_SHORT}\nLes parois de la sous-boîte passent pile (jeu 0) dans le conduit d'air : couche très fine, bien essuyée.`, [/^(Bloc isolant d'hiver|Poignée bloc d'hiver|Bouchon-boîte|Poignée bouchon)/]),
@@ -80,10 +95,7 @@ export const SEQ: Rule[] = [
   ].join('\n') }),
   P('corps-dessous', 'corps', 'placer', /^Dessous ext$/, { text: "À plat. Son ouverture rectangulaire laisse passer plus tard le module d'aération." }),
   P('corps-iso-bas', 'corps', 'isoler', /^Isolant sous le plancher/, { all: true, text: "L'isolation du bas se met AVANT le module d'aération, qui la traverse : les quatre pièces se posent ensemble sous le fond." }),
-  P('aer-2', 'corps', 'placer', /^Conduit d'air 2$/, { text: (r) => `Côté nid : sa fente de 34 × 30 mm se place en face de la grille de ${r(/^Côté gauche int$/)}.` }),
-  P('aer-34', 'corps', 'emboiter', /^Conduit d'air [34]$/),
-  P('aer-1', 'corps', 'emboiter', /^Conduit d'air 1$/),
-  P('aer-5', 'corps', 'emboiter', /^Conduit d'air 5/),
+  N('corps-module-air', 'corps', 'installer', "Poser le module d'aération (déjà monté)", "Le module est monté à part (bloc « Aération du corps ») : on le pose d'un bloc, déjà assemblé, après l'isolant du plancher.", [/^Conduit d'air/]),
   P('corps-plancher', 'corps', 'emboiter', /^Plancher int$/, { text: "Ses dents traversent les fentes des murs extérieurs. Il n'a que le passage du conduit d'air." }),
   P('corps-avant-ext', 'corps', 'emboiter', /^Face avant ext$/, { text: (r) => `Ne pas monter ${r(/^Côté gauche ext$/)} maintenant : c'est la dernière paroi du corps, après le module d'aération et l'isolation.` }),
   P('corps-arriere-ext', 'corps', 'emboiter', /^Face arrière ext$/),
@@ -91,15 +103,9 @@ export const SEQ: Rule[] = [
   P('corps-nervures', 'corps', 'coller', /^Fixation arbre/, { text: 'Chaque nervure est faite de trois plaques collées face à face. Les dents traversent les fentes du mur arrière extérieur et ressortent de 6 mm dans l\'isolant, avec un trou de 3 × 20 mm pour la clavette. Soigner le collage.' }),
   P('corps-clavettes', 'corps', 'coller', /^Clavette fixation/, { text: 'Chaque clavette traverse les trois plaques de sa nervure par le trou de 3 × 20 mm et les verrouille contre la face intérieure du mur, sans espace.' }),
   P('corps-gaine', 'corps', 'installer', /^Gaine des fils/, { text: [
-    "À passer maintenant, pendant que tout est accessible. Elle monte dans le coin arrière droit, à 1 cm du mur arrière, et traverse des trous de Ø 16 mm, serrés : le fond, le plancher intérieur, puis plus tard les trois planches du cadre du toit, le dessous et le dessus du toit.",
+    "À passer maintenant, pendant que tout est accessible. Elle monte dans le coin arrière droit, à 1 cm du mur arrière, et traverse des trous de Ø 16 mm, serrés, dans le fond et le plancher intérieur, puis plus tard des trous de Ø 18 mm dans les trois planches du cadre du toit, le dessous et le dessus du toit.",
     "L'isolant n'est pas découpé autour : on pousse la gaine dans la laine.",
   ].join('\n') }),
-  N('corps-module-air', 'corps', 'installer', "Installer le module d'aération", (r) => [
-    `Le module est déjà en place (posé après l'isolation du bas, avant ${r(/^Plancher int$/)}). Le terminer AVANT de fixer ${r(/^Côté gauche ext$/)}.`,
-    "- Il traverse l'ouverture de « Dessous ext » et l'isolation du bas, passe par le passage du plancher intérieur.",
-    `- Il se colle contre la face extérieure de ${r(/^Côté gauche int$/)}, sa fente de 34 × 30 mm en face de la grille.`,
-    'Le côté gauche est encore ouvert : on y accède.',
-  ].join('\n'), [/^Conduit d'air/]),
   P('corps-iso-nid', 'corps', 'isoler', /^Isolant (gauche|droite$|arrière$)/, { all: true, title: 'Isolant autour du nid', text: "Tous les isolants qui entourent le nid se posent d'un coup, APRÈS le module d'aération et la gaine des fils (ils passent déjà dans ces isolants) et AVANT la paroi extérieure gauche." }),
   P('corps-gauche-ext', 'corps', 'emboiter', /^Côté gauche ext$/, { text: "Dernière paroi du corps : le module d'aération et l'isolation sont en place." }),
   P('corps-etriers', 'corps', 'coller', /^Étrier régulateur/, { text: 'Les tenons des bras traversent le fond par des fentes de 8 × 3 mm et affleurent son dessus : ils tiendront le régulateur sous le nichoir. Dernière pièce du corps : le régulateur se fixe dessous après le montage du corps.' }),
@@ -115,39 +121,53 @@ export const SEQ: Rule[] = [
     "Le bloc coulisse de haut en bas dans l'encoche des deux faces avant, toit retiré.",
   ].join('\n') }),
 
+  // ---- d'. Zone caméra : les 4 murs du compartiment, assemblés à part puis posés d'un bloc dans le toit ----
+  N('zc-huile', 'zonecam', 'huiler', 'Huiler les murs de la zone caméra', `${OIL_SHORT}\nLes quatre murs du compartiment de la caméra.`, [/^(Face (avant|arrière)|Côté (droit|gauche)) caméra 1$/]),
+  N('zc-sechage', 'zonecam', 'attendre', 'Séchage des murs de la zone caméra', DRY_TEXT, [/^(Face (avant|arrière)|Côté (droit|gauche)) caméra 1$/]),
+  P('zc-av-ar', 'zonecam', 'placer', /^Face (avant|arrière) caméra 1$/, { text: 'Compartiment de la caméra : les quatre murs s\'emboîtent entre eux sur l\'établi ; leurs dents du bas traverseront ensuite les fentes du plancher du toit.' }),
+  P('zc-cotes', 'zonecam', 'emboiter', /^Côté (droit|gauche) caméra 1$/),
+
+  // ---- d''. Goulotte du ventilateur : le siège fixe, assemblé à part ----
+  N('gl-huile', 'goulotte', 'huiler', 'Huiler la goulotte du ventilateur', `${OIL_SHORT}\nLes trois parois du siège du ventilateur.`, [/^Goulotte ventilateur (gauche|droite|avant)$/]),
+  N('gl-sechage', 'goulotte', 'attendre', 'Séchage de la goulotte du ventilateur', DRY_TEXT, [/^Goulotte ventilateur (gauche|droite|avant)$/]),
+  P('gl-avant', 'goulotte', 'placer', /^Goulotte ventilateur avant$/, { text: "Siège du ventilateur : la paroi avant et les deux côtés s'emboîtent par leurs arêtes verticales crénelées pour former un U, d'un seul bloc ; il n'y a aucune dent à l'arrière, où la plaque arrière du toit fait la quatrième paroi." }),
+  P('gl-cotes', 'goulotte', 'emboiter', /^Goulotte ventilateur (gauche|droite)$/),
+
+  // ---- d'''. Cassette du ventilateur : montée à part (ventilateur, grille, plots, câble, conduit de sortie), glissée ensuite dans la goulotte ----
+  N('cass-huile', 'cassette', 'huiler', 'Huiler la cassette du ventilateur', `${OIL_SHORT}\nParois, cadre du bas, couvercle, poignée et conduit de sortie de la cassette.`, [/^(Cassette ventilateur|Grille de protection ventilateur|Plot caoutchouc ventilateur|Ventilateur Noctua|Poignée cassette|Prise 4 broches du ventilateur|Fil cassette|Conduit de sortie)/]),
+  N('cass-sechage', 'cassette', 'attendre', 'Séchage de la cassette du ventilateur', DRY_TEXT, [/^(Cassette ventilateur|Grille de protection ventilateur|Plot caoutchouc ventilateur|Ventilateur Noctua|Poignée cassette|Prise 4 broches du ventilateur|Fil cassette|Conduit de sortie)/]),
+  P('cass-cadre', 'cassette', 'placer', /^Cassette ventilateur cadre du bas/, { text: 'Cassette du ventilateur : amovible à la main, sans outil ni vis. Quatre parois emboîtées par leurs arêtes verticales ; le cadre du bas et le couvercle s\'emboîtent dans les parois.' }),
+  P('cass-parois-1', 'cassette', 'emboiter', /^Cassette ventilateur 1$/),
+  P('cass-parois-2', 'cassette', 'emboiter', /^Cassette ventilateur 2$/),
+  P('cass-parois-34', 'cassette', 'emboiter', /^Cassette ventilateur [34]$/),
+  P('cass-grille', 'cassette', 'placer', /^Grille de protection ventilateur/, { text: 'Sur le cadre du bas, entre le cadre et le ventilateur : elle sort avec la cassette.' }),
+  P('cass-plots', 'cassette', 'placer', /^Plot caoutchouc ventilateur/, { all: true, text: 'Quatre plots en caoutchouc de 12 × 2 × 3 mm posés sur le cadre : les vibrations ne passent que par eux.' }),
+  P('cass-ventilateur', 'cassette', 'placer', /^Ventilateur Noctua/),
+  P('cass-couvercle', 'cassette', 'emboiter', /^Cassette ventilateur couvercle/),
+  P('cass-poignee', 'cassette', 'coller', /^Poignée cassette/, { text: 'U de contreplaqué : trois couches de 3 mm collées face à face (9 mm), pieds dans deux fentes du couvercle.' }),
+  P('cass-prise', 'cassette', 'placer', /^Prise 4 broches du ventilateur/, { text: "Le câble d'origine du ventilateur monte dans la cassette, traverse le couvercle par un passage de 12 × 6 mm et finit par cette prise femelle, collée sur la tranche avant du couvercle." }),
+  P('cass-fils', 'cassette', 'cabler', /^Fil cassette/),
+  P('cass-sortie-12', 'cassette', 'emboiter', /^Conduit de sortie [12]$/, { text: 'Conduit de sortie : ses dents entrent dans les fentes de la paroi arrière de la cassette, contre la fenêtre. Il sort et rentre avec elle.' }),
+  P('cass-sortie-34', 'cassette', 'emboiter', /^Conduit de sortie [34]$/),
+
   // ---- e. Toit ----
-  N('toit-huile', 'toit', 'huiler', 'Huiler les pièces du toit', `${OIL_SHORT}\nCadres, plaques, baguettes, siège et cassette du ventilateur.`, [/^(Cadre toit|Dessous toit|Dessus toit|(Face|Côté) \S+ toit|(Face|Côté) \S+ caméra 1|Baguette dessus toit|Goulotte ventilateur|Cassette ventilateur|Conduit de sortie|Poignée cassette)/]),
-  N('toit-sechage', 'toit', 'attendre', 'Séchage des pièces du toit', DRY_TEXT, [/^(Cadre toit|Dessous toit|Dessus toit|(Face|Côté) \S+ toit|(Face|Côté) \S+ caméra 1|Baguette dessus toit|Goulotte ventilateur|Cassette ventilateur|Conduit de sortie|Poignée cassette)/]),
-  P('toit-cadre', 'toit', 'coller', /^Cadre toit/, { text: 'Coller les trois planches l\'une sur l\'autre. Elles descendent dans l\'isolant entre les murs extérieur et intérieur et calent le toit. Les enfiler sur la gaine (trou de Ø 16 mm).' }),
+  N('toit-huile', 'toit', 'huiler', 'Huiler les pièces du toit', `${OIL_SHORT}\nCadres, plaques et baguettes du toit.`, [/^(Cadre toit|Dessous toit|Dessus toit|(Face|Côté) \S+ toit|Baguette dessus toit)/]),
+  N('toit-sechage', 'toit', 'attendre', 'Séchage des pièces du toit', DRY_TEXT, [/^(Cadre toit|Dessous toit|Dessus toit|(Face|Côté) \S+ toit|Baguette dessus toit)/]),
   P('toit-dessous', 'toit', 'placer', /^Dessous toit$/),
   P('toit-avant', 'toit', 'emboiter', /^Face avant toit$/),
   P('toit-arriere', 'toit', 'emboiter', /^Face arrière toit$/),
   P('toit-droit', 'toit', 'emboiter', /^Côté droit toit$/),
   P('toit-gauche', 'toit', 'emboiter', /^Côté gauche toit$/),
-  P('toit-cam-av-ar', 'toit', 'emboiter', /^Face (avant|arrière) caméra 1$/, { text: 'Compartiment de la caméra : les dents de ses murs traversent les fentes du plancher du toit.' }),
-  P('toit-cam-cotes', 'toit', 'emboiter', /^Côté (droit|gauche) caméra 1$/),
-  P('toit-siege-cotes', 'toit', 'emboiter', /^Goulotte ventilateur (gauche|droite)$/, { text: 'Siège du ventilateur : ses dents traversent le plancher du toit ; la plaque arrière du toit fait la quatrième paroi.' }),
-  P('toit-siege-avant', 'toit', 'emboiter', /^Goulotte ventilateur avant$/),
+  N('toit-zone-camera', 'toit', 'installer', 'Poser la zone caméra (déjà montée)', "La zone caméra se monte à part (bloc « Zone caméra ») : on la pose d'un bloc dans les fentes du plancher du toit.", [/^(Face (avant|arrière)|Côté (droit|gauche)) caméra 1$/]),
+  N('toit-goulotte', 'toit', 'installer', 'Poser la goulotte du ventilateur (déjà montée)', "La goulotte se monte à part (bloc « Goulotte ventilateur ») : ses dents du bas se posent d'un bloc dans les fentes du plancher du toit ; la plaque arrière du toit fait la quatrième paroi.", [/^Goulotte ventilateur (gauche|droite|avant)$/]),
+  N('toit-cassette', 'toit', 'installer', 'Glisser la cassette dans la goulotte', "La cassette se monte à part (bloc « Cassette du ventilateur ») ; elle se glisse par le haut dans la goulotte, ajustée au ponçage si besoin ; la prise d'origine (femelle) s'emboîte sur la prise mâle collée sur la face avant de la goulotte ; la rallonge se branche ensuite. On la retire à la main par le haut, après avoir débranché la prise 4 broches.", [/^Cassette ventilateur/]),
   P('toit-bag-cotes', 'toit', 'coller', /^Baguette dessus toit (gauche|droite)$/, { text: 'Les baguettes se posent à plat contre la face intérieure des plaques du toit, dents dans les fentes : elles portent « Dessus toit ».' }),
   P('toit-bag-avant', 'toit', 'coller', /^Baguette dessus toit avant$/),
   P('toit-bag-arriere-1', 'toit', 'coller', /^Baguette dessus toit arrière 1$/, { text: 'La baguette arrière est en deux morceaux : elle contourne le siège du ventilateur.' }),
   P('toit-bag-arriere-2', 'toit', 'coller', /^Baguette dessus toit arrière 2$/),
-  P('toit-iso', 'toit', 'isoler', /^Isolant toit/, { text: 'Isolant du toit, autour du compartiment de la caméra et du siège du ventilateur.' }),
+  P('toit-iso', 'toit', 'isoler', /^Isolant toit/, { all: true, title: 'Isolation du toit', text: 'Isolant du toit, autour du compartiment de la caméra et du siège du ventilateur.' }),
   P('toit-dessus', 'toit', 'placer', /^Dessus toit$/, { text: 'À plat sur les baguettes, sans crénelage. Son ouverture carrée est au-dessus du compartiment de la caméra ; son encoche à l\'arrière laisse passer le siège du ventilateur.' }),
-  P('cass-cadre', 'toit', 'placer', /^Cassette ventilateur cadre du bas/, { text: 'Cassette du ventilateur : amovible à la main, sans outil ni vis. Quatre parois emboîtées par leurs arêtes verticales ; le cadre du bas et le couvercle s\'emboîtent dans les parois.' }),
-  P('cass-parois-1', 'toit', 'emboiter', /^Cassette ventilateur 1$/),
-  P('cass-parois-2', 'toit', 'emboiter', /^Cassette ventilateur 2$/),
-  P('cass-parois-34', 'toit', 'emboiter', /^Cassette ventilateur [34]$/),
-  P('cass-grille', 'toit', 'placer', /^Grille de protection ventilateur/, { text: 'Sur le cadre du bas, entre le cadre et le ventilateur : elle sort avec la cassette.' }),
-  P('cass-plots', 'toit', 'placer', /^Plot caoutchouc ventilateur/, { all: true, text: 'Quatre plots en caoutchouc de 12 × 2 × 3 mm posés sur le cadre : les vibrations ne passent que par eux.' }),
-  P('cass-ventilateur', 'toit', 'placer', /^Ventilateur Noctua/),
-  P('cass-couvercle', 'toit', 'emboiter', /^Cassette ventilateur couvercle/),
-  P('cass-poignee', 'toit', 'coller', /^Poignée cassette/, { text: 'U de contreplaqué : trois couches de 3 mm collées face à face (9 mm), pieds dans deux fentes du couvercle.' }),
-  P('cass-prise', 'toit', 'placer', /^Prise 4 broches du ventilateur/, { text: "Le câble d'origine du ventilateur monte dans la cassette, traverse le couvercle par un passage de 12 × 6 mm et finit par cette prise femelle, collée sur la tranche avant du couvercle." }),
-  P('cass-fils', 'toit', 'cabler', /^Fil cassette/),
-  P('cass-sortie-12', 'toit', 'emboiter', /^Conduit de sortie [12]$/, { text: 'Conduit de sortie : ses dents entrent dans les fentes de la paroi arrière de la cassette, contre la fenêtre. Il sort et rentre avec elle.' }),
-  P('cass-sortie-34', 'toit', 'emboiter', /^Conduit de sortie [34]$/),
-  N('cass-pose', 'toit', 'installer', 'Poser la cassette dans le siège', 'La cassette se pose par gravité, ajustée pile au siège (sans joint) ; on la retire à la main par le haut, après avoir débranché la prise 4 broches.', [/^Cassette ventilateur/]),
+  P('toit-cadre', 'toit', 'coller', /^Cadre toit/, { text: 'Coller les trois planches l\'une sur l\'autre. Elles descendent dans l\'isolant entre les murs extérieur et intérieur et calent le toit. Dernière étape du toit : on les enfile sur la gaine (trou de Ø 18 mm) et on les colle sous le toit assemblé.' }),
 
   // ---- f. Le reste : habillage, couvercle, baguettes de cale ----
   N('hab-peinture', 'habillage', 'peindre', "Peindre l'habillage en blanc", PAINT_TEXT, [/^Lambris/]),
