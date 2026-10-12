@@ -9,7 +9,7 @@ function fingerprint(g: BufferGeometry) {
   return { n: pos.count, idx: g.index ? g.index.count : 0, pos: hashNumbers(pos.array), col: col ? hashNumbers(col.array) : null };
 }
 
-// le modèle binaire du Pi n'est jamais chargé dans les tests : `piModel` reste null (dessin simplifié du Zero)
+// le modèle binaire du Pi n'est jamais chargé dans les tests : `piModel` reste null (dessin simplifié du Pi 5)
 describe('géométrie 3D de chaque plaque (golden)', () => {
   for (const [name, over] of Object.entries(VARIANTS)) {
     it(name, () => {

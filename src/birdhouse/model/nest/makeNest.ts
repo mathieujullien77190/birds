@@ -300,7 +300,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   ] : [];
   // la nappe de la caméra (câble plat) : du connecteur de la caméra, elle monte par l'ouverture du toit puis court sur le toit jusqu'au connecteur du Pi
   // la nappe sort à l'HORIZONTALE du connecteur de la caméra (côté arrière), monte par l'ouverture, puis arrive à l'horizontale dans le connecteur du Pi par le côté gauche
-  // (le jack audio bouche le côté droit) ; sa largeur (16) est dans l'axe de chaque connecteur
+  // (Pi 5 : pas de jack audio ; les deux connecteurs de 22 broches sont à 6,3 mm l'un de l'autre, la nappe de la caméra 2 passe au-dessus de celle de la caméra 1 ; sens d'entrée réel à vérifier sur la carte) ; sa largeur (16) est dans l'axe de chaque connecteur
   const camZc = floorTop + 0.8 + 2.1; // hauteur du connecteur de la caméra
   const piZc = piZ + PI_CSI[2] - 2.6; // hauteur moyenne du connecteur du Pi (0,8 à 6,1 au-dessus du centre de la carte)
   // la nappe de la caméra 2 : LONGUE (la caméra est dehors) ; elle part du 2ᵉ port du Pi, court sur le dessus du toit, SORT par le trou de la plaque avant du toit et redescend jusqu'au connecteur de la caméra

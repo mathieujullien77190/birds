@@ -30,12 +30,12 @@ def test_tension_depuis_pourcent(m, p, attendu):
 
 
 def test_consommation(m):
-    assert m.consommation() == {"total_w": 4.9, "detail": {"pi": 3.5, "cameras": 1.4, "led": 0.0, "ventilo": 0.0}}
+    assert m.consommation() == {"total_w": 6.9, "detail": {"pi": 5.5, "cameras": 1.4, "led": 0.0, "ventilo": 0.0}}
     m.etat.update(cam1=False, led_nid=True, led_ext=True)
     m.etat["ventilo"]["pourcent"] = 100
     c = m.consommation()
-    assert c["detail"] == {"pi": 3.5, "cameras": 0.7, "led": 2.4, "ventilo": 0.6}
-    assert c["total_w"] == 7.2
+    assert c["detail"] == {"pi": 5.5, "cameras": 0.7, "led": 2.4, "ventilo": 0.6}
+    assert c["total_w"] == 9.2
 
 
 # ------------------------------------------------------------------ ventilo()

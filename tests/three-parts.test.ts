@@ -142,15 +142,15 @@ describe('driver, ventilateur, panneau solaire', () => {
 });
 
 describe('Raspberry Pi : dessin de repli', () => {
-  it('simplePiGeometry : carte 65 × 30 verte, composants argent / noir / or (40 broches)', () => {
-    const pi = simplePiGeometry(P({ w: 65, h: 30 }));
+  it('simplePiGeometry : carte 85 × 56 verte, composants argent / noir / or (40 broches)', () => {
+    const pi = simplePiGeometry(P({ w: 85, h: 56 }));
     const [sx, sy] = size(pi.geo);
-    expect(sx).toBeGreaterThanOrEqual(65); expect(sx).toBeLessThan(67); expect(sy).toBeGreaterThanOrEqual(30); expect(sy).toBeLessThan(32); // la carte + des connecteurs qui dépassent un peu
+    expect(sx).toBeGreaterThanOrEqual(85); expect(sx).toBeLessThan(89); expect(sy).toBeGreaterThanOrEqual(56); expect(sy).toBeLessThan(58); // la carte + le bloc Ethernet qui dépasse de 3 mm
     for (const c of [PALETTE.piGreen, PALETTE.silver, PALETTE.nearBlack, PALETTE.gold, PALETTE.offWhite]) expect(hasColor(pi.geo, c)).toBe(true);
     expect(pi.edges.attributes.position.count).toBeGreaterThan(0);
   });
   it("piGeometry sans modèle chargé retombe sur le dessin simplifié (avec arêtes)", () => {
-    const g = piGeometry(P({ w: 65, h: 30 }));
+    const g = piGeometry(P({ w: 85, h: 56 }));
     expect(g.edges.attributes.position.count).toBeGreaterThan(0);
   });
 });

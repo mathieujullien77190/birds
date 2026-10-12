@@ -1,6 +1,6 @@
 import { BufferAttribute, BufferGeometry, Float32BufferAttribute } from 'three';
 
-/** Modèle 3D du Raspberry Pi 4 (STEP converti en binaire compact, voir public/models/pi4.bin) : chargé une fois, partagé. */
+/** Modèle 3D du Raspberry Pi (STEP converti en binaire compact, voir public/models/pi4.bin) : forme du Pi 4, mêmes cotes que le Pi 5 (85 × 56 mm) ; à remplacer par un STEP du Pi 5 si fourni (le nom de fichier reste pi4.bin). Chargé une fois, partagé. */
 export let piModel: BufferGeometry | null = null;
 let piLoading: Promise<void> | null = null;
 export function loadPiModel(): Promise<void> {

@@ -1,4 +1,4 @@
-// Modèle 3D du Pi 4 : une fois chargé (fetch doublé), piGeometry le clone et la clé de forme de la plaque change.
+// Modèle 3D du Pi (forme du Pi 4, mêmes cotes que le Pi 5) : une fois chargé (fetch doublé), piGeometry le clone et la clé de forme de la plaque change.
 import { describe, expect, it, vi } from 'vitest';
 import type { Plank } from '@/birdhouse/model';
 import { loadPiModel, piModel } from '@/birdhouse/three/piModel';
@@ -17,7 +17,7 @@ function fakeBin(): ArrayBuffer {
   return buf;
 }
 
-describe('modèle 3D du Pi 4', () => {
+describe('modèle 3D du Pi (forme du Pi 4)', () => {
   it('avant le chargement : dessin simplifié, clé de forme sans modèle ; après : le modèle (cloné) et une autre clé', async () => {
     expect(piModel).toBeNull();
     const before = plankShapeKey(pi, 3), simple = piGeometry(pi);

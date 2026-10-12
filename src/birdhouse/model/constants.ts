@@ -30,15 +30,18 @@ export const OKOUME_T = 5, OKOUME_COLOR = '#f5f5f4';
 /** Okoumé NON peint (brun-rosé chaud) : le pan du toit, que l'utilisateur huile ou sature lui-même pour l'extérieur (l'habillage, lui, est peint en blanc : `OKOUME_COLOR`). */
 export const OKOUME_NATURAL = '#c98f69';
 /** Deuxième caméra : NUE, À L'EXTÉRIEUR, sous le débord du toit en okoumé, à l'avant gauche, inclinée et tournée pour viser le trou d'entrée (boîte en okoumé essayée puis retirée). Une longue nappe sort du Pi par une fente de la plaque avant du toit.
- *  PI_CSI2 = connecteur du 2ᵉ port caméra du Pi dans le repère de la carte (provisoire : emplacement du port DSI du Pi 4 tant que le Pi 5 n'est pas intégré). */
-export const PI_CSI2: [number, number] = [-38.5, 0];
+ *  PI_CSI2 = le connecteur de GAUCHE des deux ports de 22 broches du Pi 5 (caméra 2), dans le repère de la carte. Les deux connecteurs de 22 broches du Pi 5 (CAM/DISP 0 et 1) sont côte à côte sur le bord long, entre la 2ᵉ micro-HDMI et le bloc Ethernet :
+ *  positions lues sur le dessin mécanique officiel (https://pip.raspberrypi.com/documents/RP-008347-DS-raspberry-pi-5-mechanical-drawing.pdf, dimensions approximatives, non cotées : mesurées sur le dessin à l'échelle 1:1) :
+ *  centres à ≈ 48,7 mm et ≈ 55,0 mm du bord gauche, ≈ 8,5 mm du bord avant. Le sens d'entrée de la nappe (côté du levier) n'est pas lisible sur le dessin : à vérifier sur la carte réelle. */
+export const PI_CSI2: [number, number] = [-42.5 + 48.7, -28 + 8.5];
 
-/** Raspberry Pi 4 Model B (modèle 3D importé de public/models/pi4.bin) : carte de 85 × 56 mm, posée à plat sur le toit sur 3 mm de cales. */
+/** Raspberry Pi 5 : carte de 85 × 56 mm (mêmes cotes que le Pi 4), posée à plat sur le toit sur 3 mm de cales. Le dessin 3D (public/models/pi4.bin) est celui du Pi 4 : forme approchée, mêmes cotes que le Pi 5 ; à remplacer par un STEP du Pi 5 si fourni. */
 export const PI_W = 85, PI_H = 56;
 /** Boîtier du Pi (hauteur et paroi, mm) : transparent dans la vue pour voir la carte. */
 export const CASE_H = 35, CASE_WALL = 2.5;
-/** Repères de la carte, dans le repère de la plaque (centre de la carte, x vers la droite, y vers l'arrière) : connecteur de la nappe caméra (dessus), broches du GPIO. */
-export const PI_CSI: [number, number, number] = [4, -16.5, 6.1];
+/** Repères de la carte, dans le repère de la plaque (centre de la carte, x vers la droite, y vers l'arrière) : connecteur de la nappe caméra (dessus), broches du GPIO.
+ *  PI_CSI = le connecteur de DROITE des deux ports de 22 broches du Pi 5 (caméra 1 ; le plus près des prises, x ≈ 55,0 mm du bord gauche, y ≈ 8,5 mm du bord avant, même source que PI_CSI2) ; la hauteur (6,1) est celle du dessin 3D, non cotée sur le plan officiel. */
+export const PI_CSI: [number, number, number] = [-42.5 + 55.0, -28 + 8.5, 6.1];
 export const PI_PIN_Y = 25.77; // rangée extérieure du GPIO (broches paires : 2, 4, 6…)
 export const PI_PIN_X0 = -35.4 + 1.27; // broche 2 (x de la première colonne)
 export const SENSOR_CHIP_DX = -1.5; // décalage de la puce par rapport au centre de la carte du capteur (sensor.ts)

@@ -136,8 +136,10 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 
 - Il est posé sur des entretoises de 6 mm dans le coin arrière gauche du toit, calé au montage par des morceaux de baguette de contreplaqué collés sur tous les côtés (voir « Cales »).
 - Il pilote le ventilateur (PWM, tachymètre, interrupteur 12 V), lit le capteur, commande les deux caméras et allume les LED infrarouges.
-- Ses prises (USB, Ethernet, HDMI) regardent la plaque arrière, percée d'une fenêtre : on branche sans ouvrir le nichoir.
-- Il lui faut un convertisseur 12 V → 5 V capable de fournir 5 A.
+- Ses prises USB (2 × USB 3 et 2 × USB 2) et sa prise Ethernet regardent la plaque arrière, percée d'une fenêtre de 60 × 24 mm en face d'elles : on branche sans ouvrir le nichoir. Son USB-C d'alimentation et ses deux micro-HDMI sont sur l'autre grand bord, tourné vers le centre du toit, hors de cette fenêtre. Le Pi 5 n'a pas de prise jack audio.
+- Il lui faut un convertisseur 12 V → 5 V capable de fournir 5 A (le Pi 5 demande 5 V / 5 A en USB-C ; avec 3 A seulement, il limite le courant de ses ports USB).
+- Ses deux ports caméra sont des connecteurs de 22 broches côte à côte sur le bord tourné vers le centre du toit ; les caméras (nappes de 15 broches) s'y branchent par des nappes adaptatrices 22 → 15 broches.
+- Il possède un connecteur de pile RTC : une pile rechargeable dédiée garde l'heure sans réseau (option, voir « Points à vérifier »).
 
 **Cales.** Le Pi, le convertisseur, la batterie et l'interrupteur du ventilateur se calent avec des morceaux de baguette (19 morceaux, 726 mm en tout).
 
@@ -261,6 +263,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | --- | --- |
 | Tension d'entrée | au moins 10 à 15 V (la batterie va de 10 V à 14,6 V) |
 | Sortie | 5,1 V, 5 A (25 W), sortie USB-C |
+| Courant | 5 A continus au moins : le Pi 5 demande 5 V / 5 A pour alimenter ses ports USB ; avec 3 A il limite ces ports (la carte seule consomme environ 5,5 W ici) |
 | Rendement | plus de 90 % |
 | Négociation USB-PD | souhaitable : sans elle, le Pi 5 limite le courant de ses ports USB |
 | Protections | surintensité, court-circuit, surtempérature |
@@ -274,10 +277,13 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | --- | --- | --- |
 | Alimentation | 5 V, 5 A en USB-C (bloc officiel 27 W) | via le convertisseur |
 | Niveaux GPIO | 3,3 V seulement (ne tolère pas 5 V) | — |
-| Ports caméra | 2 ports CSI/DSI de 22 broches : nappes adaptatrices vers la caméra | position provisoire |
-| Dimensions | 85 × 56 mm, hauteur du composant environ 17 mm | 85 × 56 mm |
+| Ports caméra | 2 connecteurs CAM/DISP de 22 broches, côte à côte sur le bord long (à ≈ 49 et ≈ 55 mm du bord gauche, ≈ 8,5 mm du bord, d'après le dessin mécanique officiel) : nappes adaptatrices 22 → 15 broches vers les caméras | connecteurs à ces positions (dimensions du plan officiel, approximatives) ; le sens d'entrée des nappes est à vérifier sur la carte |
+| Prises | 2 × USB 3, 2 × USB 2, Ethernet, 2 × micro-HDMI, USB-C d'alimentation ; pas de jack audio | USB et Ethernet derrière la fenêtre de 60 × 24 mm de la plaque arrière |
+| Consommation | au repos environ 3 W ; avec deux flux caméra environ 5 à 6 W (estimation, à mesurer avec l'INA219) | 5,5 W dans le programme du Pi |
+| Horloge | connecteur de pile RTC sur la carte : une pile rechargeable dédiée garde l'heure sans réseau | option, non comptée dans les prix |
+| Dimensions | 85 × 56 mm (comme le Pi 4), hauteur du composant environ 17 mm | 85 × 56 mm ; le dessin 3D est celui du Pi 4 (mêmes cotes, forme approchée) ; un STEP du Pi 5, s'il est fourni, donnerait la forme exacte |
 | Stockage | carte microSD ou SSD | — |
-| Refroidissement | dissipateur ou ventilateur d'origine si le toit chauffe (le Pi est dans le grenier, que le ventilateur du nid ne refroidit pas) | — |
+| Refroidissement | dissipateur : Active Cooler officiel Raspberry Pi (ventilateur + dissipateur, se branche sur le connecteur de ventilateur de la carte) ou dissipateur passif silencieux ; le Pi est dans le grenier, que le ventilateur du nid ne refroidit pas. Sa hauteur au-dessus de la carte est à contrôler sous la pente du toit | non dessiné |
 | Modèle exact / lien | [Raspberry Pi 5 (4 Go) — page officielle](https://www.raspberrypi.com/products/raspberry-pi-5/) ; en France : [Kubii, Raspberry Pi 5 (choisir « 4 Go » ; le prix affiché, 76,80 €, est celui du 2 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html) + [carte micro-SD officielle 32 Go (Kubii, 34,20 €)](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) | — |
 
 ### Ventilateur Noctua NF-A6x25 PWM
@@ -317,11 +323,11 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | --- | --- | --- |
 | Modèle | Camera Module 3 NoIR (sans filtre infrarouge, pour la vision de nuit) | Oui |
 | Dimensions | environ 25 × 24 mm | 25 × 24 mm |
-| Liaison | nappe CSI, adaptateur vers le port 22 broches du Pi 5 | oui |
+| Liaison | nappe CSI 22 → 15 broches vers le connecteur de 22 broches du Pi 5 (un connecteur par caméra) | oui |
 | Caméra 2 : longueur de nappe | longue ; au-delà d'environ 30 cm, le signal peut devenir instable : à valider ou utiliser une nappe protégée / un prolongateur | longue nappe de 16 mm de large |
 | Caméra 2 : étanchéité | protéger l'objectif de la pluie sous le débord | sous le débord du toit |
 | Affleurement | la carte s'appuie contre le bois et l'objectif (embase Ø 8,5 + objectif Ø 7,4, de la hauteur du bois) traverse le trou et affleure la face extérieure | caméra 1 : trou Ø 10 dans le plafond (jeu 0,75), objectif au ras du dessous ; la caméra 2 est nue, sans bois |
-| Modèle exact / lien | [Camera Module 3 NoIR 75°, Amazon](https://www.amazon.fr/dp/B0BRY3L9H7) ; le Pi 5 demande une nappe 22 → 15 broches (vérifier si elle est fournie) | — |
+| Modèle exact / lien | [Camera Module 3 NoIR 75°, Amazon](https://www.amazon.fr/dp/B0BRY3L9H7) ; la caméra est livrée avec une nappe de 15 broches ; le Pi 5 a des connecteurs de 22 broches : il faut une nappe adaptatrice 22 → 15 broches par caméra (voir le tableau des prix) | — |
 
 ### Prise d'air basse (conduit dans l'isolant)
 
@@ -406,9 +412,9 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Régulateur solaire Genasun | modèle d'origine à **borniers à vis** | 4 mm² côté panneau, 2,5 mm² côté batterie | fils dénudés de 8 mm avec embouts, vis serrées à fond |
 | Fusible | porte-fusible lame **avec fils déjà montés** | 2,5 mm² | on le met en série sur le fil + de la batterie, avec les Wago |
 | Rail 12 V | Wago 221-413 (3 entrées) pour le + et Wago 221-415 (5 entrées) pour le −, sans outil, aucune soudure | 0,2 à 4 mm² | on lève le levier, on glisse le fil dénudé de 11 mm (fil souple avec embout conseillé), on rabat le levier |
-| Convertisseur 12 V → 5 V | modèle avec **sortie USB-C** et entrée à bornier à vis | 2,5 mm² côté 12 V | sortie USB-C directement dans le Pi, pas de câble à confectionner |
+| Convertisseur 12 V → 5 V | modèle de **5 A continus au moins** avec **sortie USB-C** et entrée à bornier à vis | 2,5 mm² côté 12 V | sortie USB-C directement dans le Pi, pas de câble à confectionner |
 | Batterie LiFePO4 | batterie avec **bornes à visser** ou fils livrés | 2,5 mm² | cosses ou embouts vissés sur les bornes |
-| Caméras | caméras Camera Module 3 NoIR avec **nappes plates** | nappe 15 ou 22 broches | la nappe s'enfiche dans le connecteur à levier (CSI) du Pi, sans outil |
+| Caméras | caméras Camera Module 3 NoIR avec **nappes plates** | nappe adaptatrice 22 → 15 broches (connecteur de 22 broches côté Pi 5, de 15 broches côté caméra) | la nappe s'enfiche dans le connecteur à levier (CSI) du Pi, sans outil |
 | Ventilateur Noctua | **prise 4 broches d'origine du ventilateur** + **rallonge 4 broches Noctua** (mâle ⇄ femelle, ≈ 30 cm) | fils du Noctua | la rallonge s'emboîte sur la prise d'origine ; l'autre bout se branche sur le toit ; aucune soudure ni sertissage |
 | Module INA219 (facultatif) | version **avec broches soudées** | cordons Dupont F/F | I2C : 3,3 V, SDA, SCL, masse |
 | Passage des fils | passe-câbles, gaine annelée de Ø 16 | — | on enfile les fils dans la gaine avant de brancher |
@@ -444,10 +450,31 @@ Contrôle des fils : les fils du ventilateur côté 12 V ne traversent ni nappe 
 
 ## Stratégie d'énergie (décision : on commence comme ça)
 
-- Batterie de 6 Ah (4 cellules 32700, 77 Wh) conservée pour le premier montage.
-- Consommation moyenne d'environ 7 W : Pi 3,5 W + caméras 1,4 W + LED, plus 0,6 W de ventilateur quand il tourne : la batterie de 77 Wh et le panneau de 100 W sont largement dimensionnés, sans changer le matériel.
+- Batterie de 6 Ah (4 cellules 32700, 77 Wh) pour le premier montage, à mesurer avant de conclure.
+- Consommation du Pi 5 : environ 3 W au repos, environ 5 à 6 W avec deux flux caméra (5,5 W retenus). Toutes les valeurs de ce paragraphe sont des **estimations** à remplacer par des mesures (INA219).
+
+**Calcul.** Convertisseur 12 → 5 V supposé à 90 % de rendement (estimation) ; énergie utilisable de la batterie 65 Wh, soit environ 85 % des 77 Wh (marge du BMS et réserve, estimation).
+
+| Cas | Charge côté 5 V | Tirée sur la batterie (÷ 0,9) | Autonomie (65 Wh ÷ puissance) |
+| --- | --- | --- | --- |
+| Pi au repos, caméras éteintes | 3 W | environ 3,3 W | environ 19 h |
+| Jour, deux caméras en flux (Pi 5,5 W + caméras 1,4 W) | 6,9 W | environ 7,7 W | environ 8,5 h |
+| Nuit, deux caméras + deux cartes de LED (2 × 1,2 W) | 9,3 W | environ 10,3 W | environ 6,3 h |
+
+Le ventilateur ajoute au plus 0,6 W, directement sur le 12 V, seulement quand il tourne.
+
+**Bilan journalier.** Énergie par jour E = P × 24 h (en Wh), avec P la puissance moyenne tirée sur la batterie. Le panneau de 100 W fournit E_panneau = 100 W × k × h_sol, où h_sol est le nombre d'heures de plein soleil équivalent par jour au site (valeur à lire sur un outil de relevé d'ensoleillement comme PVGIS, elle n'est pas donnée ici) et k le rendement de l'ensemble panneau, orientation, régulateur et charge (environ 0,7, estimation). Le bilan est équilibré quand h_sol ≥ E ÷ 70 W :
+
+| Cas, en continu | E par jour | h_sol minimale |
+| --- | --- | --- |
+| Pi au repos, caméras éteintes (3,3 W) | environ 80 Wh | environ 1,1 h |
+| Deux flux caméra, jour et nuit sans LED (7,7 W) | environ 184 Wh | environ 2,6 h |
+| Moitié du temps le cas « nuit » avec LED, moitié le cas « jour » | environ 216 Wh | environ 3,1 h |
+
+- La batterie de 6 Ah couvre une nuit courte avec les caméras en flux (6 à 8 h), pas une nuit d'hiver complète : sur la plage d'ensoleillement du site, l'hiver est le cas qui décide.
+- Les leviers, par ordre d'efficacité : flux caméra et LED seulement à la demande (le cas « repos » à 3,3 W suffit à la nuit), puis batterie de 12 Ah (8 cellules, autonomie doublée), puis panneau plus grand.
 - Le ventilateur ne tourne que quand il fait chaud (le Pi le règle en PWM, et coupe son 12 V par l'interrupteur quand il est inutile).
-- Si la marge est trop courte à l'usage, passer à 12 Ah (8 cellules) : à mesurer avec le vrai matériel avant de conclure.
+- Décision : on commence avec 6 Ah, on mesure la consommation réelle et le niveau de la batterie sur plusieurs jours (page du Pi, INA219), puis on passe à 12 Ah si la marge est trop courte.
 
 ## Poids (estimation)
 
@@ -479,6 +506,8 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | --- | --- | --- | --- | --- |
 | Électronique | Raspberry Pi 5 (4 Go) + microSD 32 Go | 75 € | [Raspberry Pi 5 (4 Go) — page officielle](https://www.raspberrypi.com/products/raspberry-pi-5/) ; en France : [Kubii, Raspberry Pi 5 (choisir « 4 Go » ; le prix affiché, 76,80 €, est celui du 2 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html) + [carte micro-SD officielle 32 Go (Kubii, 34,20 €)](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) | [ ] |
 | Électronique | 2 × Camera Module 3 NoIR 75° (34,90 € pièce) | 69,80 € | [Camera Module 3 NoIR 75°, Amazon](https://www.amazon.fr/dp/B0BRY3L9H7) | [x] |
+| Électronique | Active Cooler officiel Raspberry Pi 5 (ventilateur + dissipateur), ou dissipateur passif | 6 € | lien à trouver — référence exacte : Raspberry Pi Active Cooler pour Raspberry Pi 5 (prix estimé, à confirmer) | [ ] |
+| Électronique | 2 × nappe adaptatrice caméra 22 → 15 broches (une courte pour la caméra 1, une longue pour la caméra 2) | 10 € | courte : [Câble caméra Raspberry Pi 5, 22 → 15 broches, 200 mm (Adafruit 5818)](https://www.adafruit.com/product/5818) ; longue : lien à trouver — référence exacte : nappe caméra 22 → 15 broches pour Raspberry Pi 5, 500 mm ou plus, 16 mm de large (prix estimé, à confirmer) | [ ] |
 | Électronique | 2 × carte 4 LED infrarouges 850 nm (fils pré-soudés) | 10 € | lien à trouver — référence exacte : carte de 4 LED infrarouges 850 nm, 5 V, environ 12 × 24 mm, fils pré-soudés | [ ] |
 | Électronique | Capteur BME280 Pimoroni PIM472 (Kubii) + cordons Dupont | 16 € | [Pimoroni BME280 Breakout (PIM472), Kubii, 15,88 €, 16 en stock](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html) : I2C, 19 × 19 × 2,75 mm, brochage fait pour les broches 1, 3, 5, 7, 9 du Pi ; puce : [Bosch BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) | [ ] |
 | Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € | [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 × 60 × 25 mm, 12 V, 4 broches) ; en France : [Amazon.fr, NF-A6x25 PWM marron](https://www.amazon.fr/dp/B00VXTANZ4) | [ ] |
@@ -486,7 +515,7 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Module interrupteur 12 V côté + (P-MOSFET, commande 3,3 V) | 4 € | lien à trouver — référence exacte : module « high side switch » à P-MOSFET, 12 V, commande logique 3,3 V, borniers à vis | [ ] |
 | Électronique | Rallonge Noctua NA-EC1 4 broches (mâle ⇄ femelle, 30 cm), fournie avec le ventilateur | 0 € | incluse dans la boîte du ventilateur (câble NA-EC1, 4 broches, 30 cm) : voir [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) | [ ] |
 | Électronique | Module 2 × MOSFET | 5 € | lien à trouver — référence exacte : module 2 canaux MOSFET à niveau logique 3,3 V (IRLZ44N ou équivalent), borniers à vis | [ ] |
-| Électronique | Convertisseur 12 V → 5 V 5 A USB-C | 15 € | lien à trouver — référence exacte : convertisseur DC-DC 12 V → 5 V, 5 A continus, sortie USB-C, entrée à bornier à vis | [ ] |
+| Électronique | Convertisseur 12 V → 5 V 5 A USB-C (Raspberry Pi 5) | 15 € | lien à trouver — référence exacte : convertisseur DC-DC 12 V → 5 V, 5 A continus minimum, sortie USB-C avec négociation PD pour Raspberry Pi 5, entrée à bornier à vis | [ ] |
 | Électronique | 4 cellules LiFePO4 32700 + BMS 4S + support | 40 € | [Cellule HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523) ; BMS 4S LiFePO4 et support : lien à trouver | [ ] |
 | Électronique | Fusible + porte-fusible (lot de 5 porte-fusibles avec 14 fusibles, + pack de 5 fusibles 15 A de rechange) | 15 € | [Amazon.fr, JOREST, 5 porte-fusibles étanches en ligne ATC/ATO dont 1 à fils de 12 AWG et 4 de 16 AWG, avec 14 fusibles standard de 2 à 35 A](https://www.amazon.fr/dp/B0DBPQBGBQ) : on utilise le porte-fusible à fils de **12 AWG** avec le fusible de **15 A** du lot ; [Amazon.fr, SeKi, 5 fusibles à lame ATO standard 15 A bleu, 19 mm, 32 V DC](https://www.amazon.fr/dp/B0CVQGRH7L) en rechange (prix non lisibles en ligne, à confirmer) ; un seul fusible sur le rail, on garde le plan de base | [ ] |
 | Électronique | Cordons Dupont F/F 40 cm, lot de 40 | 8 € | lien à trouver — référence exacte : cordons Dupont femelle-femelle 40 cm, lot de 40 | [ ] |
@@ -518,7 +547,11 @@ Le ventilateur, sa grille et son interrupteur coûtent environ 22 €. Le poste 
 - **Taille de la batterie.** Le pack de 4 cellules 32700 (70 × 128 × 32 mm) est dessiné à sa vraie taille et dépasse du mur droit. Choix à faire : pack 2×2 ou batterie hors du toit.
 - **Régulateur sous le nichoir.** Il n'est protégé que par le lambris. Il chauffe de 2 à 5 W, donc ne pas le noyer dans l'isolant. La gaine de Ø 16 mm traverse sept plaques par des trous de 16 mm, serrés : elle tient sans jeu. Le nichoir doit être posé assez haut pour que le régulateur (33 mm) ne touche pas le sol.
 - **Convertisseur 12 → 5 V.** Dessiné avec une taille estimée, à confirmer avec le module acheté.
-- **Pi 5.** Le modèle 3D n'est pas encore intégré : les ports caméra sont à une position provisoire.
+- **Pi 5 (forme 3D).** Le dessin 3D du Pi est celui du Pi 4 (mêmes cotes 85 × 56 mm, prises USB et Ethernet au même endroit) ; un STEP du Pi 5, s'il est fourni, donnerait la forme exacte. Les deux connecteurs de 22 broches sont placés d'après le dessin mécanique officiel (dimensions approximatives, non cotées) ; le sens d'entrée des nappes se vérifie sur la carte.
+- **Alimentation du Pi 5.** Convertisseur de 5 A continus au moins ; sans négociation USB-PD, le Pi limite le courant de ses ports USB. Référence à choisir (voir le tableau des prix).
+- **Refroidissement du Pi 5.** Le grenier est clos : contrôler la température du processeur en été et la hauteur de l'Active Cooler sous la pente.
+- **Horloge.** Le Pi n'a pas d'horloge sans réseau : l'heure du graphique et du jour / nuit en dépend. Le connecteur de pile RTC du Pi 5 (pile rechargeable dédiée, option non comptée dans les prix) y remédie.
+- **Autonomie.** Les valeurs de consommation et d'ensoleillement de la « Stratégie d'énergie » sont des estimations : mesurer avant de conclure sur 6 Ah ou 12 Ah.
 
 ## Liens des composants
 
@@ -527,6 +560,7 @@ Chaque lien a été ouvert et vérifié (page et référence exacte). Les élém
 - [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/) (page officielle, « Buy a Raspberry Pi 5 »)
 - [Camera Module 3, variantes standard / Wide / NoIR](https://www.raspberrypi.com/products/camera-module-3/) (page officielle)
 - [Câble caméra Raspberry Pi 5, 22 broches → 15 broches, 200 mm (Adafruit 5818)](https://www.adafruit.com/product/5818)
+- [Raspberry Pi 5, dessin mécanique officiel (PDF)](https://pip.raspberrypi.com/documents/RP-008347-DS-raspberry-pi-5-mechanical-drawing.pdf) : source de la position des deux connecteurs de 22 broches (dimensions approximatives)
 - Chez [Kubii](https://www.kubii.com/fr/) (boutique française de Raspberry Pi) : [Raspberry Pi 5 (1 à 16 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html), [module caméra v3 Infrarouge](https://www.kubii.com/fr/cameras-capteurs/3879-module-camera-v3-infrarouge-raspberry-pi-3272496313682.html) (fiche à vérifier : filtre IR annoncé), [nappe CSI / MIPI pour Pi 5](https://www.kubii.com/fr/nappes-cables-adaptateurs/4116-1860-nappe-csi-mipi-camera-pour-raspberry-pi-5-3272496316669.html), [carte micro-SD officielle](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) (pages ouvertes le 2026-10-11 ; le 4 Go du Pi 5 était en rupture à cette date)
 - [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 mm, 12 V, 4 broches ; la boîte contient la rallonge NA-EC1 de 30 cm) ; [grille de protection Noctua NA-FG1-6 Sx2, 2 pièces, pour ventilateurs de 60 mm (Amazon.fr)](https://www.amazon.fr/dp/B0B1QRWHW3) ; [la même référence sur Amazon.fr](https://www.amazon.fr/dp/B00VXTANZ4) (page ouverte : modèle NF-A6x25 PWM, 60 × 25 mm, 3000 tr/min, 4 broches ; contenu de la boîte non lisible sur la page)
 - [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413)
