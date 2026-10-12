@@ -15,6 +15,8 @@ export const MAP: [RegExp, Keys][] = [
   [/^LED infrarouges extérieures/, { nodes: ['IR2'], edges: [] }],
   [/^LED infrarouges$/, { nodes: ['IR'], edges: [] }],
   [/^Capteur température/, { nodes: ['SENS'], edges: [] }],
+  [/^(Sonde de température extérieure|Module DS18B20)/, { nodes: ['SONDE'], edges: [] }],
+  [/^(Câble sonde extérieure|Fil sonde)/, { nodes: [], edges: [['PI', 'SONDE']] }],
   [/^(Ventilateur|Cassette ventilateur|Goulotte ventilateur|Grille ventilateur|Plot caoutchouc|Poignée cassette|Connecteur ventilateur|Grillage inox maille 5 mm|Bloc isolant d'hiver|Isolant bloc d'hiver|Oreille bloc d'hiver)/, { nodes: ['FAN'], edges: [] }],
   [/^Module interrupteur 12 V/, { nodes: ['SWF'], edges: [] }],
   [/^Module 2 MOSFET/, { nodes: ['SW'], edges: [] }],
@@ -45,7 +47,7 @@ export const MAP: [RegExp, Keys][] = [
 /** Fiches des composants : les sections « ### … » du document (tableaux de paramètres), repérées par le début de leur titre. */
 export const FICHES: Record<string, string> = {
   PV: 'Panneau solaire', MPPT: 'Régulateur de charge', BAT: 'Batterie', FUSE: 'Fusible', BUCK: 'Convertisseur', PI: 'Raspberry Pi', FAN: 'Ventilateur', SWF: 'Interrupteur 12 V du ventilateur',
-  CAM1: 'Caméras', CAM2: 'Caméras', IR: 'Carte de 4 LED', IR2: 'Carte de 4 LED', SENS: 'Capteur de température', SW: 'Module 2 × MOSFET', RAIL: 'Wago 221',
+  CAM1: 'Caméras', CAM2: 'Caméras', IR: 'Carte de 4 LED', IR2: 'Carte de 4 LED', SENS: 'Capteur de température', SONDE: 'Sonde de température extérieure', SW: 'Module 2 × MOSFET', RAIL: 'Wago 221',
 };
 export const SECTIONS = (() => {
   const out: { title: string; md: string }[] = [];

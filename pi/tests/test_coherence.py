@@ -39,7 +39,7 @@ def test_each_nested_interface_matches_runtime_keys(client, m):
     texte = TYPES.read_text(encoding="utf-8")
     m.lecture()
     d = client.get("/api/etat").get_json()
-    for nom, obj in [("DeviceState", d), ("Fan", d["ventilo"]), ("Battery", d["batterie"]), ("Weather", d["meteo"]), ("AutoState", d["auto"]),
+    for nom, obj in [("DeviceState", d), ("Fan", d["ventilo"]), ("Battery", d["batterie"]), ("Outside", d["ext"]), ("AutoState", d["auto"]),
                      ("Consumption", d["conso"])]:
         extra = set(obj) - interface(texte, nom)
         if nom == "AutoState":   # AutoState étend AutoSettings : ses champs sont dans l'autre interface
@@ -55,7 +55,7 @@ def test_typescript_fields_are_all_sent_by_the_pi(client, m):
     d = client.get("/api/etat").get_json()
     requis = re.findall(r"^\s*(\w+):", re.search(r"interface DeviceState \{(.*?)\n\}", texte, re.S).group(1), re.M)
     assert set(requis) <= set(d), sorted(set(requis) - set(d))
-    for nom, obj in [("Fan", d["ventilo"]), ("Weather", d["meteo"])]:
+    for nom, obj in [("Fan", d["ventilo"]), ("Outside", d["ext"])]:
         assert set(re.findall(r"^\s*(\w+):", re.search(r"interface " + nom + r" \{(.*?)\n\}", texte, re.S).group(1), re.M)) <= set(obj), nom
 
 
@@ -69,7 +69,7 @@ def test_error_keys_of_the_code_are_declared_in_device_ts():
     utilisees |= set(re.findall(r'\be\.pop\("(\w+)"', code))
     utilisees |= {f"camera{n}" for n in (1, 2)} if 'f"camera{' in code else set()
     utilisees -= {"gpio_"}
-    assert {"mock", "gpio", "bme280", "ventilo", "delestage", "meteo", "alerte_chaleur", "batterie", "tachymetre", "picamera2", "camera1"} <= utilisees
+    assert {"mock", "gpio", "bme280", "ventilo", "delestage", "sonde_ext", "alerte_chaleur", "batterie", "tachymetre", "picamera2", "camera1"} <= utilisees
     assert sorted(utilisees - declarees) == [], f"clés d'erreur du Pi absentes de DeviceErrors : {sorted(utilisees - declarees)}"
 
 

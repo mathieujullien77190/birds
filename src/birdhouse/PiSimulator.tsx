@@ -89,7 +89,7 @@ def forcer(nid, ext):
 def restaurer():
     nichoir.MOCK_FORCE["nid"] = nichoir.MOCK_FORCE["ext"] = None
     nichoir.sim["effet"] = 0.0
-    nichoir.MOCK_PANNES["bme"] = nichoir.MOCK_PANNES["ventilo"] = False
+    nichoir.MOCK_PANNES["bme"] = nichoir.MOCK_PANNES["ventilo"] = nichoir.MOCK_PANNES["sonde"] = False
     nichoir.etat["auto"].update({k: v for k, v in nichoir.AUTO_DEFAUT.items()})
     nichoir.etat["auto"]["avertissements"] = []
     nichoir.ventilo(0)
@@ -98,7 +98,7 @@ def restaurer():
     nichoir.leds(False, False)
     nichoir.camera(0, True)
     nichoir.camera(1, True)
-    for k in ("ventilo", "alerte_chaleur", "delestage", "bme280"):
+    for k in ("ventilo", "alerte_chaleur", "delestage", "bme280", "sonde_ext"):
         nichoir.etat["erreurs"].pop(k, None)
     nichoir.lecture()
 
@@ -144,7 +144,7 @@ const PAGE = indexHtml
   );
 
 /** État renvoyé par `/api/etat` (seulement ce que les essais lisent). */
-interface PiState { t_nid: number | null; ventilo: { pourcent: number; rpm: number | null; mode: string; raison: string; alimente: boolean }; led_nid: boolean; led_ext: boolean; cam1: boolean; cam2: boolean; erreurs: Record<string, string>; batterie: { pourcent: number | null }; auto: { actif: boolean; etat: string; raison: string } }
+interface PiState { t_nid: number | null; ext: { t: number | null }; ventilo: { pourcent: number; rpm: number | null; mode: string; raison: string; alimente: boolean }; led_nid: boolean; led_ext: boolean; cam1: boolean; cam2: boolean; erreurs: Record<string, string>; batterie: { pourcent: number | null }; auto: { actif: boolean; etat: string; raison: string } }
 type PyFns = Record<'restaurer' | 'panne' | 'batterie' | 'forcer', (...a: unknown[]) => unknown>;
 
 /** Essais automatiques : on provoque un cas limite dans le Python simulé, puis on attend que le programme réagisse comme prévu (sinon l'essai échoue au bout de `timeout` secondes). */
@@ -171,6 +171,9 @@ const PI_TESTS: PiTest[] = [
   { id: 'nid-panne-auto', label: 'Capteur du nid en panne (automatique)', hint: "Nid chaud, automatique activé, mais le BME280 ne répond plus : on ne sait pas s'il fait chaud, le ventilateur ne doit pas démarrer (sécurité)", timeout: 10,
     setup: (f, cmd) => { f.restaurer(); f.forcer(33, 26); f.panne('bme', true); cmd('/api/auto', { actif: true }); },
     expect: (e) => e.ventilo.pourcent === 0 && e.auto.etat === 'securite' && !!e.erreurs.bme280, ok: (e) => `ventilateur arrêté — ${e.auto.raison}` },
+  { id: 'sonde-panne-auto', label: 'Sonde de dehors en panne (automatique)', hint: "Nid chaud, automatique activé, mais la sonde extérieure DS18B20 ne répond plus : on ne sait pas si l'air de dehors est plus frais, le ventilateur ne doit pas démarrer (sécurité)", timeout: 10,
+    setup: (f, cmd) => { f.restaurer(); f.forcer(33, 26); f.panne('sonde', true); cmd('/api/auto', { actif: true }); },
+    expect: (e) => e.ventilo.pourcent === 0 && e.auto.etat === 'securite' && !!e.erreurs.sonde_ext && e.ext.t === null, ok: (e) => `ventilateur arrêté — ${e.auto.raison}` },
   { id: 'nid', label: 'Capteur du nid en panne', hint: "Le BME280 ne répond plus : la page doit afficher « — » et l'erreur, sans planter", timeout: 10,
     setup: (f) => { f.restaurer(); f.panne('bme', true); },
     expect: (e) => e.t_nid === null && !!e.erreurs.bme280, ok: (e) => e.erreurs.bme280 },

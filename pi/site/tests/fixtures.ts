@@ -13,7 +13,7 @@ export function makeState(over: Partial<DeviceState> = {}): DeviceState {
     erreurs: {},
     derniere_lecture: '12:34:56',
     batterie: { pourcent: 80, tension: 13.1, source: 'mesurée', solaire_w: 12 },
-    meteo: { t_ext: 20, hum_ext: 60, nuages: 40, vent_kmh: 12, jour: true, rayonnement: 500, source: 'Open-Meteo', maj: '12:30' },
+    ext: { t: 20, source: 'DS18B20', maj: '12:30' },
     auto: {
       seuil_marche: 28, ecart_ext: 2, hysteresis: 1, vitesse_min: 30, vitesse_max: 100, plage: 6, alerte_chaleur: 38,
       actif: false, hiver: false, etat: 'inactif', raison: 'désactivée', avertissements: [],

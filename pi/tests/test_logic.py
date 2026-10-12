@@ -1,4 +1,4 @@
-"""Logique : ventilo(), ventilation automatique, caméras, LED, batterie, alertes, météo, simulation, réglages, historique."""
+"""Logique : ventilo(), ventilation automatique, caméras, LED, batterie, alertes, sonde extérieure, simulation, réglages, historique."""
 import io
 import json
 import struct
@@ -9,9 +9,9 @@ import pytest
 from conftest import StopLoop
 
 
-def set_nid(m, t, ext=None):
+def set_nid(m, t, ext=10.0):
     m.etat["t_nid"] = t
-    m.etat["meteo"]["t_ext"] = ext
+    m.etat["ext"]["t"] = ext
 
 
 def auto_on(m, **kw):
@@ -103,7 +103,8 @@ def test_auto_inactive(m):
 def test_warnings(m):
     m.regler_auto()
     assert len(m.etat["auto"]["avertissements"]) == 1 and "extérieure" in m.etat["auto"]["avertissements"][0]
-    m.etat["meteo"]["t_ext"] = 10.0
+    assert "sonde absente" in m.etat["auto"]["avertissements"][0]
+    m.etat["ext"]["t"] = 10.0
     assert m.avertissements() == []
     m.TACHO_OK = False
     assert "tachymètre absent" in m.avertissements()[0]
@@ -151,14 +152,14 @@ def test_auto_blocked_when_not_running(m):
 def test_auto_plausible_bounds_inclusive(m):
     auto_on(m, seuil_marche=45.0)
     for t in (-40.0, 60.0):
-        set_nid(m, t, None)
+        set_nid(m, t, 10.0)
         m.regler_auto()
         assert m.etat["auto"]["etat"] != "securite"
 
 
 def test_auto_starts_proportionally(m, capsys):
     auto_on(m)   # seuil 28, vitesse 30..100, plage 5
-    set_nid(m, 30.0, None)
+    set_nid(m, 30.0, 10.0)
     m.regler_auto()
     v, a = m.etat["ventilo"], m.etat["auto"]
     assert (v["pourcent"], v["mode"]) == (58, "auto")      # 30 + 70 * 2/5
@@ -175,9 +176,9 @@ def test_auto_starts_proportionally(m, capsys):
 
 def test_auto_small_change_ignored(m):
     auto_on(m)
-    set_nid(m, 30.0, None)
+    set_nid(m, 30.0, 10.0)
     m.regler_auto()
-    set_nid(m, 30.2, None)   # 61 % vs 58 : écart < 5
+    set_nid(m, 30.2, 10.0)   # 61 % vs 58 : écart < 5
     m.regler_auto()
     assert m.etat["ventilo"]["pourcent"] == 58
     assert m.etat["auto"]["raison"].endswith("ventilateur à 58 %")
@@ -185,7 +186,7 @@ def test_auto_small_change_ignored(m):
 
 def test_auto_speed_range_uses_settings(m):
     auto_on(m, vitesse_min=40.0, vitesse_max=60.0, plage=10.0, seuil_marche=20.0)
-    set_nid(m, 25.0, None)
+    set_nid(m, 25.0, 10.0)
     m.regler_auto()
     assert m.etat["ventilo"]["pourcent"] == 50
     m.etat["auto"]["vitesse_max"] = 10.0   # incohérent : max est relevé au min
@@ -196,13 +197,13 @@ def test_auto_speed_range_uses_settings(m):
 
 def test_auto_stops_below_hysteresis(m):
     auto_on(m)
-    set_nid(m, 31.0, None)
+    set_nid(m, 31.0, 10.0)
     m.regler_auto()
     assert m.etat["ventilo"]["pourcent"] > 0
-    set_nid(m, 26.5, None)          # entre seuil - hyst (26) et seuil : continue
+    set_nid(m, 26.5, 10.0)          # entre seuil - hyst (26) et seuil : continue
     m.regler_auto()
     assert m.etat["ventilo"]["pourcent"] > 0
-    set_nid(m, 26.0, None)          # <= seuil - hyst : s'arrête
+    set_nid(m, 26.0, 10.0)          # <= seuil - hyst : s'arrête
     m.regler_auto()
     v, a = m.etat["ventilo"], m.etat["auto"]
     assert v["pourcent"] == 0 and a["etat"] == "veille"
@@ -233,10 +234,41 @@ def test_auto_waits_when_difference_too_small(m):
     assert m.etat["ventilo"]["pourcent"] > 0
 
 
+def test_auto_does_not_start_without_outside_probe(m):
+    """Température de dehors inconnue : sécurité, l'automatique ne démarre pas, même si le nid est très chaud."""
+    auto_on(m)
+    set_nid(m, 40.0, None)
+    m.regler_auto()
+    a = m.etat["auto"]
+    assert m.etat["ventilo"]["pourcent"] == 0 and a["etat"] == "securite"
+    assert "sonde extérieure absente ou muette" in a["raison"] and "ne démarre pas" in a["raison"]
+    assert "extérieure" in a["avertissements"][0]
+
+
+def test_auto_keeps_running_if_probe_is_lost_then_stops_when_cool(m):
+    auto_on(m)
+    set_nid(m, 31.0, 20.0)
+    m.regler_auto()
+    assert m.etat["ventilo"]["pourcent"] > 0
+    set_nid(m, 31.0, None)          # sonde muette : il continue, on ne coupe pas d'un coup
+    m.regler_auto()
+    assert m.etat["ventilo"]["pourcent"] > 0 and m.etat["auto"]["etat"] == "ventile"
+    set_nid(m, 25.0, None)          # nid frais : il s'arrête
+    m.regler_auto()
+    assert m.etat["ventilo"]["pourcent"] == 0
+
+
+def test_heat_alert_independent_of_probe(m, monkeypatch):
+    monkeypatch.setattr(m, "notifier", lambda t, msg: None)
+    set_nid(m, 36.0, None)
+    m.verifier_alerte()
+    assert "alerte_chaleur" in m.etat["erreurs"]
+
+
 def test_auto_takes_over_a_manual_fan_when_hot(m):
     auto_on(m)
     m.ventilo(80, "manuel")
-    set_nid(m, 33.0, None)
+    set_nid(m, 33.0, 10.0)
     m.regler_auto()
     assert m.etat["ventilo"]["mode"] == "auto"
 
@@ -449,68 +481,77 @@ def test_fan_failure_not_reported_when(m, cas):
     assert "ventilo" not in m.etat["erreurs"]
 
 
-# ------------------------------------------------------------------ météo
-class Rep(io.BytesIO):
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *a):
-        self.close()
-
-
-CURRENT = {"current": {"temperature_2m": 12.5, "relative_humidity_2m": 80, "cloud_cover": 40, "wind_speed_10m": 9.5, "is_day": 1, "shortwave_radiation": 300}}
+# ------------------------------------------------------------------ sonde extérieure DS18B20
+def sonde(m, tmp_path, contenu, nom="28-0123456789ab"):
+    """Pose un faux fichier w1_slave dans un faux /sys/bus/w1/devices."""
+    m.W1_DOSSIER = str(tmp_path / "w1")
+    d = tmp_path / "w1" / nom
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "w1_slave").write_bytes(contenu if isinstance(contenu, bytes) else contenu.encode("ascii"))
 
 
-def patch_meteo(m, monkeypatch, payload=CURRENT, fail=None):
-    urls = []
-
-    def f(url, timeout=None):
-        urls.append((url, timeout))
-        if fail:
-            raise fail
-        return Rep(json.dumps(payload).encode())
-    monkeypatch.setattr(m.urllib.request, "urlopen", f)
-    return urls
+BON = "4b 01 4b 46 7f ff 0c 10 d1 : crc=d1 YES\n4b 01 4b 46 7f ff 0c 10 d1 t=%d\n"
 
 
-def test_meteo_success_and_throttle(load, monkeypatch):
+@pytest.mark.parametrize("milli,attendu", [(21437, 21.4), (-5125, -5.1), (0, 0.0), (-40000, -40.0), (60000, 60.0)])
+def test_probe_reading_ok(load, tmp_path, milli, attendu):
     m = load(mock=False)
-    urls = patch_meteo(m, monkeypatch)
-    m.etat["erreurs"]["meteo"] = "ancienne"
-    m.maj_meteo()
-    mt = m.etat["meteo"]
-    assert mt == {"t_ext": 12.5, "hum_ext": 80, "nuages": 40, "vent_kmh": 9.5, "jour": True, "rayonnement": 300, "source": "Open-Meteo", "maj": mt["maj"]}
-    assert "meteo" not in m.etat["erreurs"]
-    assert "latitude=48.51" in urls[0][0] and "longitude=2.64" in urls[0][0] and urls[0][1] == 8
-    m.maj_meteo()
-    assert len(urls) == 1                      # moins de 600 s
-    m.time.now += 600
-    m.maj_meteo()
-    assert len(urls) == 2
+    sonde(m, tmp_path, BON % milli)
+    assert m.lire_sonde_ext() == (attendu, None)
+    m.etat["erreurs"]["sonde_ext"] = "ancienne"
+    m.maj_sonde_ext()
+    assert m.etat["ext"] == {"t": attendu, "source": "DS18B20", "maj": m.etat["ext"]["maj"]} and m.etat["ext"]["maj"]
+    assert "sonde_ext" not in m.etat["erreurs"]
 
 
-def test_meteo_failure_sets_error_keeps_data(load, monkeypatch):
+def test_probe_absent(load, tmp_path, capsys):
     m = load(mock=False)
-    patch_meteo(m, monkeypatch, fail=OSError("hors ligne"))
-    m.etat["meteo"]["t_ext"] = 7.0
-    m.maj_meteo()
-    assert m.etat["erreurs"]["meteo"] == "météo indisponible : hors ligne" and m.etat["meteo"]["t_ext"] == 7.0
+    m.W1_DOSSIER = str(tmp_path / "rien")
+    t, err = m.lire_sonde_ext()
+    assert t is None and "sonde extérieure absente" in err
+    m.maj_sonde_ext()
+    assert m.etat["ext"]["t"] is None and m.etat["erreurs"]["sonde_ext"] == err
+    assert "! sonde extérieure absente" in capsys.readouterr().out
+    m.maj_sonde_ext()                                   # même erreur : une seule ligne de journal
+    assert capsys.readouterr().out == ""
 
 
-def test_meteo_bad_payload_is_an_error(load, monkeypatch):
+def test_probe_silent_after_working(load, tmp_path):
     m = load(mock=False)
-    patch_meteo(m, monkeypatch, payload={"current": {}})
-    m.maj_meteo()
-    assert "météo indisponible" in m.etat["erreurs"]["meteo"]
+    sonde(m, tmp_path, BON % 12000)
+    m.maj_sonde_ext()
+    assert m.etat["ext"]["t"] == 12.0
+    (tmp_path / "w1" / "28-0123456789ab" / "w1_slave").unlink()
+    (tmp_path / "w1" / "28-0123456789ab" / "w1_slave").mkdir()   # lecture impossible (c'est un dossier)
+    m.maj_sonde_ext()
+    assert m.etat["ext"]["t"] is None and m.etat["ext"]["source"] is None and "lecture de la sonde extérieure" in m.etat["erreurs"]["sonde_ext"]
 
 
-def test_meteo_skipped_in_mock_unless_real_requested(m, monkeypatch):
-    urls = patch_meteo(m, monkeypatch)
-    m.maj_meteo()
-    assert urls == []
-    monkeypatch.setenv("NICHOIR_MOCK_METEO_REEL", "1")
-    m.maj_meteo()
-    assert len(urls) == 1 and m.etat["meteo"]["source"] == "Open-Meteo"
+@pytest.mark.parametrize("contenu,mot", [
+    ("4b 01 : crc=d1 NO\n4b 01 t=21437\n", "CRC mauvais"),
+    ("4b 01 : crc=d1 YES\n", "CRC mauvais"),
+    ("", "CRC mauvais"),
+    ("4b 01 : crc=d1 YES\n4b 01 sans valeur\n", "illisible"),
+    ("4b 01 : crc=d1 YES\n4b 01 t=abc\n", "illisible"),
+    (BON % 85000, "85,0 °C"),
+    (BON % 61000, "aberrante"),
+    (BON % -41000, "aberrante"),
+    (BON % 127937, "aberrante"),
+    (b"\xff\xfe", "lecture de la sonde"),
+])
+def test_probe_refused_values(load, tmp_path, contenu, mot):
+    m = load(mock=False)
+    sonde(m, tmp_path, contenu)
+    t, err = m.lire_sonde_ext()
+    assert t is None and mot in err
+    m.maj_sonde_ext()
+    assert m.etat["ext"]["t"] is None and mot in m.etat["erreurs"]["sonde_ext"]
+
+
+def test_probe_not_read_in_mock(m, tmp_path):
+    sonde(m, tmp_path, BON % 5000)
+    m.maj_sonde_ext()
+    assert m.etat["ext"]["t"] is None
 
 
 # ------------------------------------------------------------------ simulation
@@ -526,14 +567,15 @@ def test_simulation_day_and_night(calm):
     m = calm
     m.time.hour = 12
     m.simuler()
-    assert m.etat["meteo"]["jour"] is True and m.etat["meteo"]["t_ext"] == 16.0
-    assert m.etat["meteo"]["source"] == "simulée" and m.etat["meteo"]["rayonnement"] > 0
+    assert m.etat["ext"]["t"] == 16.0
+    assert m.etat["ext"]["source"] == "simulée" and "sonde_ext" not in m.etat["erreurs"]
+    assert m.etat["batterie"]["solaire_w"] > 0
     assert m.etat["t_nid"] == pytest.approx(16 + 3.05, abs=0.06)
     assert m.etat["batterie"]["source"] == "simulée" and m.etat["batterie"]["solaire_w"] > 0
     m.time.hour = 3
     m.simuler()
-    assert m.etat["meteo"]["jour"] is False and m.etat["meteo"]["t_ext"] == 9.0
-    assert m.etat["meteo"]["rayonnement"] == 0 and m.etat["batterie"]["solaire_w"] == 0.0
+    assert m.etat["ext"]["t"] == 9.0
+    assert m.etat["batterie"]["solaire_w"] == 0.0
 
 
 def test_simulation_night_override(calm):
@@ -541,11 +583,11 @@ def test_simulation_night_override(calm):
     m.time.hour = 12
     m.MOCK_NUIT = True
     m.simuler()
-    assert m.etat["meteo"]["jour"] is False
+    assert m.etat["ext"]["t"] == 9.0 and m.etat["batterie"]["solaire_w"] == 0.0
     m.time.hour = 3
     m.MOCK_NUIT = False
     m.simuler()
-    assert m.etat["meteo"]["jour"] is True
+    assert m.etat["ext"]["t"] == 16.0 and m.etat["batterie"]["solaire_w"] > 0
 
 
 def test_simulation_forced_temperatures(calm):
@@ -553,7 +595,7 @@ def test_simulation_forced_temperatures(calm):
     m.MOCK_FORCE["ext"] = 5.0
     m.MOCK_FORCE["nid"] = 40.0
     m.simuler()
-    assert m.etat["meteo"]["t_ext"] == 5.0 and m.etat["t_nid"] == pytest.approx(40.0, abs=0.1)
+    assert m.etat["ext"]["t"] == 5.0 and m.etat["t_nid"] == pytest.approx(40.0, abs=0.1)
 
 
 def test_simulation_fan_cools_the_nest(calm):
@@ -575,17 +617,15 @@ def test_simulation_bme_failure_and_recovery(calm):
     assert m.etat["t_nid"] is not None and "bme280" not in m.etat["erreurs"]
 
 
-def test_simulation_real_weather_is_kept(calm, monkeypatch):
+def test_simulation_probe_failure_and_recovery(calm):
     m = calm
-    monkeypatch.setenv("NICHOIR_MOCK_METEO_REEL", "1")
-    m.etat["meteo"] = {"t_ext": 3.0, "source": "Open-Meteo"}
+    m.MOCK_PANNES["sonde"] = True
     m.simuler()
-    assert m.etat["meteo"] == {"t_ext": 3.0, "source": "Open-Meteo"}
-    assert m.etat["t_nid"] == pytest.approx(3.0 + 3.05, abs=0.06)
-    m.etat["meteo"]["t_ext"] = None   # pas encore reçue : t_ext simulé pour le nid
+    assert m.etat["ext"] == {"t": None, "source": None, "maj": None} and "sonde_ext" in m.etat["erreurs"]
+    assert m.etat["t_nid"] == pytest.approx(16 + 3.1, abs=0.1)   # le nid simulé suit toujours la température de dehors simulée
+    m.MOCK_PANNES["sonde"] = False
     m.simuler()
-    assert m.etat["meteo"]["t_ext"] is None
-    assert m.etat["t_nid"] == pytest.approx(16 + 3.1, abs=0.1)
+    assert m.etat["ext"]["t"] == 16.0 and "sonde_ext" not in m.etat["erreurs"]
 
 
 def test_simulation_cloud_change(calm, monkeypatch):
@@ -714,7 +754,7 @@ def lire(path):
 
 def test_history_sampling_and_saving(m):
     m.etat.update(t_nid=21.0, hum_nid=60.0)
-    m.etat["meteo"]["t_ext"] = 15.0
+    m.etat["ext"]["t"] = 15.0
     m.ventilo(50)
     m.enregistrer_historique()
     assert m.historique == [{"t": m.historique[0]["t"], "nid": 21.0, "ext": 15.0, "hum": 60.0, "ventilo": 50}]

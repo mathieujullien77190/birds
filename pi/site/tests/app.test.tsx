@@ -20,7 +20,7 @@ describe('App', () => {
     expect(container.querySelector('.banner')?.textContent).toBe('MODE SIMULÉ');
     expect(container.querySelector('#maj')?.textContent).toBe('12:34:56');
     expect([...container.querySelectorAll('h2')].map((h) => h.textContent)).toEqual([
-      'Nid', 'Dehors', 'Ventilateur', 'Batterie', 'Consommation', 'Températures (24 h)', 'Caméra 1 (nid)', 'Caméra 2 (entrée)',
+      'Nid', 'Dehors (sonde)', 'Ventilateur', 'Batterie', 'Consommation', 'Températures (24 h)', 'Caméra 1 (nid)', 'Caméra 2 (entrée)',
     ]);
     await waitFor(() => expect(container.querySelector('svg#histo')).not.toBeNull());
     expect(container.querySelector('#batt_pct')?.textContent).toBe('80');

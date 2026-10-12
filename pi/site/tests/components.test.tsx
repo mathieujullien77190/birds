@@ -2,7 +2,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { Header } from '@/components/Header';
 import { NestCard } from '@/components/NestCard';
-import { WeatherCard } from '@/components/WeatherCard';
+import { OutsideCard } from '@/components/OutsideCard';
 import { BatteryCard } from '@/components/BatteryCard';
 import { ConsumptionCard } from '@/components/ConsumptionCard';
 import { CameraCard } from '@/components/CameraCard';
@@ -43,7 +43,7 @@ describe('NestCard', () => {
     expect(text(container, '#ecart_nid')).toBe('4.5 °C plus chaud que dehors.');
   });
   it('plus froid, écart affiché en positif', () => {
-    const { container } = render(<NestCard state={makeState({ t_nid: 15, meteo: { ...makeState().meteo, t_ext: 18.5 } })} />);
+    const { container } = render(<NestCard state={makeState({ t_nid: 15, ext: { ...makeState().ext, t: 18.5 } })} />);
     expect(text(container, '#ecart_nid')).toBe('3.5 °C plus froid que dehors.');
   });
   it('écart nul = « plus chaud » de 0', () => {
@@ -57,8 +57,8 @@ describe('NestCard', () => {
     expect(container.querySelector('#ecart_nid')).toBeNull();
     expect(text(container, '.err')).toBe('BME280 introuvable');
   });
-  it('météo absente : pas d\'écart', () => {
-    const { container } = render(<NestCard state={makeState({ meteo: { ...makeState().meteo, t_ext: null } })} />);
+  it('sonde sans mesure : pas d\'écart', () => {
+    const { container } = render(<NestCard state={makeState({ ext: { ...makeState().ext, t: null } })} />);
     expect(container.querySelector('#ecart_nid')).toBeNull();
   });
   it('sans état', () => {
@@ -68,48 +68,42 @@ describe('NestCard', () => {
   });
 });
 
-describe('WeatherCard', () => {
-  it('météo complète de jour', () => {
-    const { container } = render(<WeatherCard state={makeState()} />);
+describe('OutsideCard', () => {
+  it('mesure en direct : valeur, écart et état', () => {
+    const { container } = render(<OutsideCard state={makeState()} />);
+    expect(container.textContent).toContain('Dehors (sonde)');
     expect(text(container, '#t_ext')).toBe('20');
-    const t = container.textContent!;
-    expect(t).toContain("60 % d'humidité");
-    expect(t).toContain('nuages 40 %');
-    expect(t).toContain('vent 12 km/h');
-    expect(t).toContain('☀ jour');
-    expect(t).toContain('rayonnement 500 W/m²');
-    expect(t).toContain('Source : Open-Meteo, 12:30');
-    expect(t).not.toContain('Pas encore de météo');
+    expect(text(container, '#ecart_sonde')).toBe('Nid − dehors : +4.5 °C');
+    expect(text(container, '#etat_sonde')).toBe('Sonde DS18B20 : mesure en direct, 12:30');
+    expect(container.textContent).not.toContain('ne démarre pas');
   });
-  it('de nuit, source sans heure de mise à jour', () => {
-    const { container } = render(<WeatherCard state={makeState({ meteo: { ...makeState().meteo, jour: false, maj: null } })} />);
-    expect(container.textContent).toContain('🌙 nuit');
-    expect(container.textContent).toContain('Source : Open-Meteo');
-    expect(container.textContent).not.toContain('Open-Meteo,');
+  it('sonde simulée sans heure, nid plus froid : écart négatif', () => {
+    const { container } = render(<OutsideCard state={makeState({ t_nid: 15, ext: { t: 18.5, source: 'simulée', maj: null } })} />);
+    expect(text(container, '#etat_sonde')).toBe('Sonde simulée : mesure en direct');
+    expect(text(container, '#ecart_sonde')).toBe('Nid − dehors : -3.5 °C');
   });
-  it('rien reçu : tirets et « Pas encore de météo »', () => {
-    const meteo = { t_ext: null, hum_ext: null, nuages: null, vent_kmh: null, jour: null, rayonnement: null, source: null, maj: null };
-    const { container } = render(<WeatherCard state={makeState({ meteo })} />);
+  it('écart nul : sans signe', () => {
+    const { container } = render(<OutsideCard state={makeState({ t_nid: 20 })} />);
+    expect(text(container, '#ecart_sonde')).toBe('Nid − dehors : 0 °C');
+  });
+  it('sonde muette : tirets, erreur affichée, l\'automatique ne démarre pas', () => {
+    const { container } = render(<OutsideCard state={makeState({ ext: { t: null, source: null, maj: null }, erreurs: { sonde_ext: 'CRC mauvais' } })} />);
     expect(text(container, '#t_ext')).toBe('—');
-    const t = container.textContent!;
-    expect(t).toContain('— %');
-    expect(t).toContain('nuages —');
-    expect(t).toContain('vent —');
-    expect(t).not.toContain('jour');
-    expect(t).not.toContain('nuit');
-    expect(t).not.toContain('rayonnement');
-    expect(t).toContain('Pas encore de météo.');
+    expect(container.querySelector('#ecart_sonde')).toBeNull();
+    expect(text(container, '#etat_sonde')).toBe('Sonde absente ou muette : pas de mesure');
+    expect(text(container, '.err')).toBe('CRC mauvais');
+    expect(container.textContent).toContain('la ventilation automatique ne démarre pas');
   });
-  it('erreur météo : l\'erreur remplace « Pas encore de météo »', () => {
-    const meteo = { ...makeState().meteo, source: null };
-    const { container } = render(<WeatherCard state={makeState({ meteo, erreurs: { meteo: 'hors ligne' } })} />);
-    expect(text(container, '.err')).toBe('hors ligne');
-    expect(container.textContent).not.toContain('Pas encore de météo');
+  it('rien reçu et pas d\'erreur : « Pas encore de mesure »', () => {
+    const { container } = render(<OutsideCard state={makeState({ ext: { t: null, source: null, maj: null } })} />);
+    expect(text(container, '#etat_sonde')).toBe('Pas encore de mesure');
+    expect(container.querySelector('.err')).toBeNull();
   });
   it('sans état : tirets, aucun message', () => {
-    const { container } = render(<WeatherCard state={null} />);
+    const { container } = render(<OutsideCard state={null} />);
     expect(text(container, '#t_ext')).toBe('—');
-    expect(container.textContent).not.toContain('Pas encore de météo');
+    expect(container.querySelector('#etat_sonde')).toBeNull();
+    expect(container.textContent).not.toContain('ne démarre pas');
     expect(container.querySelector('.err')).toBeNull();
   });
 });

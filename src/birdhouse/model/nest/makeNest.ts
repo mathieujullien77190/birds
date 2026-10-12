@@ -434,6 +434,27 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       return wire(nm, color, [[sx, SENSOR_Y - 7.5, bodyH + 6], [sx, SENSOR_Y - 4, bodyH + 12], [sx, SENSOR_Y + 2, bodyH + 22], [sx, SENSOR_Y + 2, topZ + 6], [sx, SENSOR_Y + 2, hh], [...pw(px, PI_PIN_Y - 2.54), hh], [...pw(px, PI_PIN_Y - 2.54), piZ + 3.5]] as Vec3[]);
     }),
   ];
+  // SONDE DE TEMPÉRATURE EXTÉRIEURE : DS18B20 étanche (tube inox Ø 6 × 50) collée contre le DESSOUS du pan en okoumé, sous le débord de 30 mm du côté gauche, à l'ombre, à y ≈ +40 (milieu de la lame d'habillage qui porte son passage) :
+  // loin de la caméra 2 (avant gauche), du ventilateur (arrière droit) et du régulateur (sous le nichoir, à droite). Son câble (3 conducteurs) entre dans le grenier par un petit passage rond Ø 5 percé dans la lame d'habillage gauche
+  // et dans la plaque gauche du toit (le pan n'est pas percé : un trou y donnerait sur le dessus du toit), sous la baguette du couvercle ; il rejoint un petit module 3 broches (résistance de rappel 4,7 kΩ) près du Pi.
+  // Trois cordons Dupont vont du module au Pi : 3,3 V broche 17, GPIO4 (1-Wire) broche 7, masse broche 20.
+  const SONDE_LEN = 50, SONDE_D = 6, SONDE_HOLE = 5;
+  const lamSy = D / Math.max(1, Math.round(D / LAM_W)), SONDE_Y = r2(-D / 2 + (Math.floor((40 + D / 2) / lamSy) + 0.5) * lamSy); // centre de la lame d'habillage gauche qui contient y = +40
+  const sondeX = r2(-W / 2 - lamT - 4 - SONDE_D / 2), sondeCx = r2(-W / 2 - 24), sondeZh = r2(panZl(SONDE_Y) - 15); // sonde 4 mm devant l'habillage ; câble à 24 mm du mur ; passage sous le corps de la baguette (10 mm sous le pan) avec 5 mm de bois au-dessus
+  const sondeS = (SONDE_Y - PAN_YMID) / PAN_COS, sondeC = panPt(sondeX, sondeS, -SONDE_D / 2), sondeBack = panPt(sondeX, sondeS + SONDE_LEN / 2, -SONDE_D / 2); // centre et bout arrière (sortie du câble) de la sonde, collée sous le pan
+  const DSX = r2(-(W / 2 - t) + 12), DSY = r2(piY - 42.5 - 10), DSZ = topZ + 3 + 3; // module 3 broches : 16 × 10 × 6, sur le dessus du toit, devant le Pi, contre le mur gauche
+  const probeSet: Plank[] = [
+    part('Sonde de température extérieure DS18B20 (étanche, tube inox Ø 6 × 50, câble 1 à 3 m)', SONDE_D, SONDE_LEN, SONDE_D, sondeC[0], sondeC[1], sondeC[2], 'block', '#9ca3af', [r2((PAN_ANG * 180) / Math.PI), 0, 0]),
+    part('Module DS18B20 (résistance 4,7 kΩ, 3 broches)', 16, 10, 6, DSX, DSY, DSZ, 'block', '#065f46'),
+    wire('Câble sonde extérieure (DS18B20, 3 conducteurs)', '#1c1917', [
+      sondeBack, [sondeX, r2(sondeBack[1] + 14), r2(sondeBack[2] - 1)], [sondeCx, r2(sondeBack[1] + 14), r2(sondeBack[2] - 12)], [sondeCx, SONDE_Y, sondeZh],
+      [r2(-W / 2 + t + 12), SONDE_Y, sondeZh], [r2(-W / 2 + t + 12), r2(SONDE_Y - 30), sondeZh], [r2(-W / 2 + t + 12), r2(DSY + 8), sondeZh - 4], [DSX - 5, r2(DSY + 2), r2(DSZ + 14)], [DSX - 5, DSY, r2(DSZ + 3.5)],
+    ] as Vec3[], 2.9),
+    ...([['Fil sonde 3,3 V (rouge)', '#dc2626', 8, 0, 34, 1], ['Fil sonde DATA (jaune)', '#eab308', 3, 0, 38, 0], ['Fil sonde masse (noir)', '#111827', 9, 1, 42, -1]] as const).map(([nm, color, pinIdx, row, lvl, dx]): Plank => {
+      const [xp, yp] = pw(PI_PIN_X0 + pinIdx * 2.54, PI_PIN_Y - 2.54 * (1 - row)), hh = topZ + lvl; // broches 17 et 7 : rangée intérieure (impaires) ; broche 20 : rangée extérieure
+      return wire(nm, color, [[DSX + dx * 4, DSY + 4, DSZ + 3.5], [DSX + dx * 4, DSY + 9, r2(DSZ + 10)], [xp, yp - 12, hh], [xp, yp, hh], [xp, yp, r2(piZ + 8)], [xp, yp, r2(piZ + 3.5)]] as Vec3[]);
+    }),
+  ];
   // ===== VENTILATEUR =====
   const sideRot = rotFromBasis([0, 1, 0], [0, 0, 1]), faceRot = rotFromBasis([1, 0, 0], [0, 0, 1]);
   const wood = (name: string, w: number, h: number, pos: Vec3, rot: Vec3, grp: string, holes: Hole[] = []): Plank => ({ id: uid(), name, w: r2(w), h: r2(h), pos: [r2(pos[0]), r2(pos[1]), r2(pos[2])] as Vec3, rot, notches: [], holes, group: grp });
@@ -728,7 +749,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     ...solar, ...brackets, ...mounts, ...keys,
     ...camBox, ...cable2, ...wires2, ...ledSwitch,
     ...power, ...solarElec,
-    ...sensorSet, ...fanSet, ...fanWood, ...airWood, ...plugBox,
+    ...sensorSet, ...probeSet, ...fanSet, ...fanWood, ...airWood, ...plugBox,
     ...insulation,
     ...entry,
     ...strips,
@@ -738,6 +759,10 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     ...roofParts, ...frames, ...camParts, ...camera, ...pi, ...cable, ...wires,
     { id: uid(), name: 'Schéma électronique', w: 1, h: 1, pos: [0, 0, -30] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: docGroupId, special: 'doc' as const }, // document (pas une pièce physique) : un clic dans « Pièces » l'ouvre
   ];
+  for (const p of planks) { // passage du câble de la sonde extérieure : trou Ø 5 dans la plaque gauche du toit et dans la lame d'habillage gauche qui porte la sonde
+    if (/^Côté gauche toit/.test(p.name)) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: r2(SONDE_Y - p.pos[1]), y: r2(sondeZh - p.pos[2]), size: SONDE_HOLE })];
+    if (/^Lambris gauche/.test(p.name) && Math.abs(p.pos[1] - SONDE_Y) < 0.01) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: 0, y: r2(sondeZh - p.pos[2]), size: SONDE_HOLE })];
+  }
   if (n.solar) { // la gaine traverse le fond, le plancher intérieur, le cadre du toit et le plancher / dessus du toit, dans l'isolant du côté droit
     for (const p of planks) if (/^(Dessous ext|Plancher int|Cadre toit (bas|milieu|haut)|Dessous toit|Dessus toit)/.test(p.name)) p.holes = [...p.holes, fitHole(p, { id: uid(), shape: 'round' as const, x: r2(CND_X - p.pos[0]), y: r2(CND_Y - p.pos[1]), size: CND_D })]; // pile le diamètre de la gaine, serrée (plus de jeu : elle nageait)
   }
@@ -763,7 +788,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // un seul groupe « Électronique » : tout le reste de l'électronique (Pi, caméras, nappes, fils, ventilateur, batterie…) et le panneau solaire
   const merged = new Set([solGroupId]);
   const LINKS: [RegExp, string][] = [ // fiches de référence (constructeur ou revendeur)
-    [/^Raspberry Pi/, 'https://www.raspberrypi.com/products/raspberry-pi-5/'],
+    [/^Raspberry Pi/, 'https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html#/ram-2_gb'],
     [/^Caméra( 2)?$/, 'https://www.amazon.fr/dp/B0BRY3L9H7'],
     [/^(Ventilateur Noctua|Prise 4 broches du ventilateur|Rallonge ventilateur)/, 'https://www.amazon.fr/dp/B00VXTANZ4'],
     [/^Grille de protection ventilateur/, 'https://www.amazon.fr/dp/B0B1QRWHW3'],

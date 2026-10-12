@@ -1,7 +1,7 @@
 import { CameraCard } from '@/components/CameraCard';
 import { Header } from '@/components/Header';
 import { NestCard } from '@/components/NestCard';
-import { WeatherCard } from '@/components/WeatherCard';
+import { OutsideCard } from '@/components/OutsideCard';
 import { FanCard } from '@/components/FanCard';
 import { HistoryChart } from '@/components/HistoryChart';
 import { BatteryCard } from '@/components/BatteryCard';
@@ -15,7 +15,7 @@ export function App() {
       <Header state={state} unreachable={unreachable} />
       <div className="grid">
         <NestCard state={state} />
-        <WeatherCard state={state} />
+        <OutsideCard state={state} />
         <FanCard state={state} onFan={fan} onAuto={auto} />
         <BatteryCard state={state} />
         <ConsumptionCard state={state} />

@@ -4,7 +4,7 @@ import { nestDelta } from './helpers';
 import type { NestCardProps } from './types';
 
 export function NestCard({ state }: NestCardProps) {
-  const delta = nestDelta(state?.t_nid, state?.meteo.t_ext);
+  const delta = nestDelta(state?.t_nid, state?.ext.t);
   return (
     <Card title="Nid">
       <Stat id="t_nid" value={fmt(state?.t_nid)} unit="°C" />

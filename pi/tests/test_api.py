@@ -97,6 +97,7 @@ def test_api_auto_ignores_unknown_keys_and_persists(client, m):
 def test_api_auto_enable_resets_fan_then_regulates(client, m):
     m.ventilo(70, "manuel")
     m.etat["t_nid"] = 33.0
+    m.etat["ext"]["t"] = 10.0
     d = post(client, "/api/auto", {"actif": True}).get_json()
     assert d["auto"]["actif"] is True
     assert d["ventilo"]["mode"] == "auto" and d["ventilo"]["pourcent"] == 100 and d["auto"]["etat"] == "ventile"
@@ -109,6 +110,7 @@ def test_api_auto_enable_cool_nest_waits(client, m):
 
 def test_api_auto_disable_stops_auto_fan_only(client, m):
     m.etat["t_nid"] = 33.0
+    m.etat["ext"]["t"] = 10.0
     post(client, "/api/auto", {"actif": True})
     assert m.etat["ventilo"]["pourcent"] > 0
     d = post(client, "/api/auto", {"actif": False}).get_json()
@@ -126,6 +128,7 @@ def test_api_auto_same_state_is_noop(client, m, capsys):
     assert "Ventilation automatique" not in capsys.readouterr().out
     m.etat["auto"]["actif"] = True
     m.etat["t_nid"] = 33.0
+    m.etat["ext"]["t"] = 10.0
     m.regler_auto()
     p = m.etat["ventilo"]["pourcent"]
     capsys.readouterr()

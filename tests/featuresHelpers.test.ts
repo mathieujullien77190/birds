@@ -38,9 +38,11 @@ describe('buildSchema : schéma dynamique', () => {
     expect(out).toContain('subgraph DEHORS');
     expect(linkStyles(out)).toHaveLength(arrowsOf(out).length);
   });
-  it('sans aucune option : la zone « Dehors » devenue vide disparaît', () => {
+  it('sans aucune option : la zone « Dehors » garde la sonde de température extérieure', () => {
     const out = buildSchema({ cam2: false, solar: false });
-    expect(out).not.toContain('subgraph DEHORS');
+    expect(out).toContain('subgraph DEHORS');
+    expect(out).toContain('SONDE[');
+    expect(out).not.toContain('CAM2[');
     expect(out).toContain('subgraph TOIT');
     expect(linkStyles(out)).toHaveLength(arrowsOf(out).length);
   });

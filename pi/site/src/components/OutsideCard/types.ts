@@ -1,5 +1,5 @@
 import type { DeviceState } from '@/types';
 
-export interface WeatherCardProps {
+export interface OutsideCardProps {
   state: DeviceState | null;
 }

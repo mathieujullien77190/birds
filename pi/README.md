@@ -1,6 +1,6 @@
 # Programme de test du nichoir (Raspberry Pi 5)
 
-Version minimale pour vérifier que le matériel marche : lecture du capteur du nid (BME280), la météo de dehors, les deux caméras en direct, le ventilateur de 60 mm (manuel ou automatique), les deux cartes de LED infrarouges et l'historique des températures sur 24 h, sur une page web. (Le Peltier a été retiré le 2026-10-11 : trop faible.)
+Version minimale pour vérifier que le matériel marche : lecture du capteur du nid (BME280), la sonde de température de dehors (DS18B20 étanche), les deux caméras en direct, le ventilateur de 60 mm (manuel ou automatique), les deux cartes de LED infrarouges et l'historique des températures sur 24 h, sur une page web. (Le Peltier a été retiré le 2026-10-11 : trop faible.)
 
 | Fichier | Rôle |
 | --- | --- |
@@ -13,7 +13,7 @@ Version minimale pour vérifier que le matériel marche : lecture du capteur du 
 ## Installation (une seule fois, sur le Pi)
 
 ```sh
-sudo raspi-config                # Interface Options : activer I2C et les caméras
+sudo raspi-config                # Interface Options : activer I2C et les caméras ; 1-Wire : ligne dtoverlay=w1-gpio dans /boot/firmware/config.txt
 sudo apt install -y python3-picamera2 git
 mkdir -p /home/pi/nichoir && cd /home/pi/nichoir
 # copier ici nichoir.py, web/, nichoir.service, requirements.txt (scp, clé USB ou git)
@@ -43,13 +43,13 @@ Dans l'app 3D, le bouton « 🐍 Pi » fait la même chose **sans installer Pyth
 
 ## Brochage
 
-Voir le document « Schéma électronique » de l'application. En résumé : ventilateur Noctua NF-A6x25 PWM : **GPIO27 (broche 13) = interrupteur 12 V (MOSFET côté +)**, **GPIO18 (broche 12) = PWM** (gpiozero / lgpio : 25 kHz visé, repli à 10 kHz), **GPIO17 (broche 11) = tachymètre** (pull-up), masse commune broche 14, 12 V du rail ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; INA219 (batterie) I2C 0x41 ; caméras sur CAM0 et CAM1.
+Voir le document « Schéma électronique » de l'application. En résumé : ventilateur Noctua NF-A6x25 PWM : **GPIO27 (broche 13) = interrupteur 12 V (MOSFET côté +)**, **GPIO18 (broche 12) = PWM** (gpiozero / lgpio : 25 kHz visé, repli à 10 kHz), **GPIO17 (broche 11) = tachymètre** (pull-up), masse commune broche 14, 12 V du rail ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; sonde de dehors DS18B20 : 3,3 V broche 17, masse broche 20, donnée GPIO4 (broche 7, 1-Wire : `dtoverlay=w1-gpio` dans `/boot/firmware/config.txt`) ; INA219 (batterie) I2C 0x41 ; caméras sur CAM0 et CAM1.
 
 **À valider sur le Pi 5** : gpiozero / lgpio limite peut-être le PWM à 10 kHz ; le programme essaie 25 kHz et retombe sur 10 kHz en le signalant. « Arrêt » coupe vraiment le 12 V (GPIO27 bas, PWM à 0), car un Noctua tourne encore à ~20 % à 0 % de PWM ; à la mise en marche : 12 V, 0,5 s, puis PWM.
 
 ## Ce que fait la page
 
-- Toutes les 5 s : température et humidité du nid (et écart avec dehors), météo extérieure (Open-Meteo), batterie, consommation estimée.
+- Toutes les 5 s : température et humidité du nid (et écart avec dehors), température de dehors (sonde DS18B20), batterie, consommation estimée.
 - Carte Ventilateur : vitesse, tr/min, boutons Arrêt / Marche, curseur de 30 à 100 %, **ventilation automatique** (réglages modifiables et case « Mode hiver » (cassette retirée, bloc isolant, bouchon du dessous), gardés dans `reglages.json`).
 - Graphique des températures sur 24 h (un point toutes les 5 min dans `historique.json`).
 - Deux flux vidéo MJPEG (640 × 480) et boutons caméras / LED infrarouges.

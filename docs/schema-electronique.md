@@ -1,6 +1,6 @@
 # Schéma électronique du nichoir isolé
 
-Un panneau solaire de 100 W charge une batterie LiFePO4 12,8 V ; la batterie alimente un Raspberry Pi 5 (via un convertisseur 12 V → 5 V) et un ventilateur silencieux de 60 mm qui aspire l'air chaud du nid à travers le toit (l'entrée d'air est le trou d'envol et une prise d'air basse dans l'isolant). Le ventilateur ne tourne que quand il fait chaud : le Pi le pilote en PWM et peut couper son 12 V par un petit interrupteur. Ce document décrit le montage tel qu'il est modélisé dans l'outil « Plaques » (groupe « Électronique »), puis donne, composant par composant, les paramètres à respecter.
+Un panneau solaire de 100 W charge une batterie LiFePO4 12,8 V ; la batterie alimente un Raspberry Pi 5 (via un convertisseur 12 V → 5 V) et un ventilateur silencieux de 60 mm qui aspire l'air chaud du nid à travers le toit (l'entrée d'air est le trou d'envol et une prise d'air basse dans l'isolant). Le ventilateur ne tourne que quand il fait chaud : le Pi le pilote en PWM et peut couper son 12 V par un petit interrupteur. Une sonde de température étanche, sous le débord du toit, donne la température de dehors. Ce document décrit le montage tel qu'il est modélisé dans l'outil « Plaques » (groupe « Électronique »), puis donne, composant par composant, les paramètres à respecter.
 
 ## Schéma général
 
@@ -11,6 +11,7 @@ flowchart TB
     MPPT["Régulateur de charge solaire<br/>compatible LiFePO4<br/>sous le nichoir, protégé<br/>par le lambris"]
     CAM2["Caméra 2 (dehors)<br/>Camera Module 3"]
     IR2["Carte 4 LED infrarouges<br/>extérieures"]
+    SONDE["Sonde de température extérieure<br/>DS18B20 étanche, sous le débord du toit<br/>(module 3 broches dans le grenier)"]
   end
   subgraph TOIT["Électronique dans le grenier"]
     FUSE["Fusible"]
@@ -46,6 +47,7 @@ flowchart TB
   SW -->|"masse commutée OUT1"| IR
   SW -->|"masse commutée OUT2"| IR2
   PI -->|"I2C : 3,3 V broche 1, SDA 3, SCL 5, masse 9"| SENS
+  PI -->|"1-Wire GPIO4 (broche 7)<br/>3,3 V broche 17, masse broche 20"| SONDE
   linkStyle 0 stroke:#111827,stroke-width:2.5px
   linkStyle 1 stroke:#dc2626,stroke-width:2.5px
   linkStyle 2 stroke:#dc2626,stroke-width:2.5px
@@ -65,6 +67,7 @@ flowchart TB
   linkStyle 16 stroke:#111827,stroke-width:2.5px
   linkStyle 17 stroke:#111827,stroke-width:2.5px
   linkStyle 18 stroke:#eab308,stroke-width:2.5px
+  linkStyle 19 stroke:#eab308,stroke-width:2.5px
   classDef pv fill:#1e3a8a,stroke:#1c1917,color:#fff
   classDef mppt fill:#1d4ed8,stroke:#1c1917,color:#fff
   classDef fuse fill:#dc2626,stroke:#1c1917,color:#fff
@@ -77,6 +80,7 @@ flowchart TB
   classDef cam fill:#166534,stroke:#1c1917,color:#fff
   classDef ir fill:#7f1d1d,stroke:#1c1917,color:#fff
   classDef sens fill:#1d4ed8,stroke:#1c1917,color:#fff
+  classDef sonde fill:#475569,stroke:#1c1917,color:#fff
   class PV pv
   class MPPT mppt
   class FUSE fuse
@@ -89,9 +93,10 @@ flowchart TB
   class CAM1,CAM2 cam
   class IR,IR2 ir
   class SENS sens
+  class SONDE sonde
 ```
 
-Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régulateur bleu, fusible rouge, batterie verte, convertisseur bleu-vert, Pi vert, interrupteur violet, ventilateur brun, LED brun-rouge…). Couleur des traits = couleur des fils dans la 3D : rouge pour le + (12 V, 5 V), noir pour la masse et le câble du panneau, orange (violet-orangé) pour la commande de l'interrupteur, bleu pour le PWM du ventilateur, jaune pour l'I2C, gris pour la commande des LED, orange foncé pour les nappes caméra.
+Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régulateur bleu, fusible rouge, batterie verte, convertisseur bleu-vert, Pi vert, interrupteur violet, ventilateur brun, LED brun-rouge…). Couleur des traits = couleur des fils dans la 3D : rouge pour le + (12 V, 5 V), noir pour la masse et le câble du panneau, orange (violet-orangé) pour la commande de l'interrupteur, bleu pour le PWM du ventilateur, jaune pour l'I2C et le 1-Wire de la sonde de dehors, gris pour la commande des LED, orange foncé pour les nappes caméra.
 
 ## Branchements, fil par fil
 
@@ -110,6 +115,7 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 | LED infrarouges extérieures | Pi broche 2 (5 V) | Carte 4 LED IR à côté de la caméra 2 | Masse par le module MOSFET (OUT2) ; les fils suivent la nappe dans le même canal |
 | Module MOSFET | Pi GPIO23 (broche 16), GPIO24 (broche 18), masse broche 6 | Module 2 canaux (MOSFET logique 3,3 V) | Coupe la masse de chaque carte de LED ; 5 V direct, courant des LED hors du GPIO |
 | Capteur température / humidité | Pi broches 1 (3,3 V), 3 (SDA), 5 (SCL), 9 (masse) | Capteur dans le compartiment de la caméra, à fleur du plafond | Liaison I2C, 4 fils |
+| Sonde de température extérieure | Pi : broche 17 (3,3 V), GPIO4 (broche 7, donnée 1-Wire), broche 20 (masse) | Module 3 broches DS18B20 (résistance de rappel de 4,7 kΩ), puis la sonde étanche par son câble de 3 conducteurs | Trois cordons Dupont du Pi au module ; le câble de la sonde (rouge 3,3 V, noir masse, jaune donnée) entre dans le grenier par un trou de 5 mm dans la lame d'habillage gauche et dans la plaque gauche du toit. Le 1-Wire est activé par `dtoverlay=w1-gpio` dans `/boot/firmware/config.txt` |
 | Prise d'air basse | — (pas d'électronique) | Conduit de contreplaqué dans l'isolant du mur gauche avant, fente dans la paroi intérieure à mi-hauteur | Section libre 10,9 cm² ; grille de bois sur la fente (la prise d'air reste toujours ouverte, sans clapet), ouverture de 26 × 6 mm au ras du plancher pour l'eau, sous-boîte isolante amovible par le dessous (lèvre de 11 mm sous le fond) |
 
 **Fiche d'un fil dans l'application.** Un clic sur un fil (ou sur sa carte dans « Pièces ») de la vue 3D ouvre sa fiche : couleur, diamètre dessiné et section, longueur du trajet, longueur de cordon à prévoir, de → vers (broche et GPIO du Pi, borne, Wago), rôle, tension, courant, raccord. Les broches de cette fiche sont celles de ce tableau ; la longueur est calculée sur le trajet dessiné.
@@ -135,11 +141,19 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 **Cerveau.** Le Raspberry Pi 5 pilote tout le montage.
 
 - Il est posé sur des entretoises de 6 mm dans le coin arrière gauche du toit, calé au montage par des morceaux de baguette de contreplaqué collés sur tous les côtés (voir « Cales »).
-- Il pilote le ventilateur (PWM, tachymètre, interrupteur 12 V), lit le capteur, commande les deux caméras et allume les LED infrarouges.
+- Il pilote le ventilateur (PWM, tachymètre, interrupteur 12 V), lit le capteur du nid et la sonde de dehors, commande les deux caméras et allume les LED infrarouges.
 - Ses prises USB (2 × USB 3 et 2 × USB 2) et sa prise Ethernet regardent la plaque arrière, percée d'une fenêtre de 60 × 24 mm en face d'elles : on branche sans ouvrir le nichoir. Son USB-C d'alimentation et ses deux micro-HDMI sont sur l'autre grand bord, tourné vers le centre du toit, hors de cette fenêtre. Le Pi 5 n'a pas de prise jack audio.
 - Il lui faut un convertisseur 12 V → 5 V capable de fournir 5 A (le Pi 5 demande 5 V / 5 A en USB-C ; avec 3 A seulement, il limite le courant de ses ports USB).
 - Ses deux ports caméra sont des connecteurs de 22 broches côte à côte sur le bord tourné vers le centre du toit ; les caméras (nappes de 15 broches) s'y branchent par des nappes adaptatrices 22 → 15 broches.
 - Il possède un connecteur de pile RTC : une pile rechargeable dédiée garde l'heure sans réseau (option, voir « Points à vérifier »).
+
+**Température de dehors.** Une sonde DS18B20 étanche mesure l'air extérieur ; aucun service en ligne n'intervient.
+
+- **Position** : sur le côté gauche, sous le débord de 30 mm du toit, collée contre le dessous du pan en okoumé, à y = +42 mm (vers l'arrière). Elle est à l'ombre, à 129 mm du ventilateur et de sa sortie (arrière droit), à 176 mm de la caméra 2 et de ses LED infrarouges (avant gauche) et à 191 mm du régulateur solaire (sous le nichoir, à droite).
+- **Passage du câble** : un trou rond de 5 mm dans la lame d'habillage gauche et dans la plaque gauche du toit, à 15 mm sous le dessous du pan, sous le corps de 10 mm de la baguette gauche du couvercle. Le pan en okoumé n'est pas percé.
+- **Module** : le câble de 3 conducteurs finit dans un module 3 broches (résistance de rappel de 4,7 kΩ) posé sur le dessus du toit, devant le Pi, contre le mur gauche. Trois cordons Dupont le relient au Pi : 3,3 V (broche 17), donnée sur GPIO4 (broche 7), masse (broche 20).
+- **Lecture** : le noyau lit la sonde par le 1-Wire dans `/sys/bus/w1/devices/28-*/w1_slave`. Le programme refuse un CRC mauvais, la valeur d'erreur 85,0 °C du DS18B20 et toute valeur hors −40 à 60 °C.
+- **Ventilation automatique** : la comparaison nid / dehors utilise cette mesure. Sans mesure valable de dehors (sonde absente, muette ou hors plage), l'automatique ne démarre pas, la page l'indique (état « sécurité », avertissement) ; l'alerte à 35 °C du nid ne dépend pas de la sonde.
 
 **Cales.** Le Pi, le convertisseur, la batterie et l'interrupteur du ventilateur se calent avec des morceaux de baguette (19 morceaux, 726 mm en tout).
 
@@ -275,7 +289,8 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
-| Alimentation | 5 V, 5 A en USB-C (bloc officiel 27 W) | via le convertisseur |
+| Alimentation | 5 V, 5 A en USB-C : dans le nichoir, le convertisseur 12 V → 5 V de 5 A au moins alimente le Pi ; l'alimentation secteur officielle 27 W USB-C (5 V / 5 A, [Kubii, alimentation Raspberry Pi 27 W USB-C](https://www.kubii.com/fr/alimentations/4107-1818-alimentation-raspberry-pi-27w-usb-c-3272496315761.html#/couleur-blanc/embout_d_alimentation-europeenne_ue)) sert à configurer et tester le Pi sur l'établi | via le convertisseur |
+| Mémoire | 2 Go suffisent avec Raspberry Pi OS Lite, flux caméra en 720p au plus, zram activé ; 1 Go est possible mais sans marge | — |
 | Niveaux GPIO | 3,3 V seulement (ne tolère pas 5 V) | — |
 | Ports caméra | 2 connecteurs CAM/DISP de 22 broches, côte à côte sur le bord long (à ≈ 49 et ≈ 55 mm du bord gauche, ≈ 8,5 mm du bord, d'après le dessin mécanique officiel) : nappes adaptatrices 22 → 15 broches vers les caméras | connecteurs à ces positions (dimensions du plan officiel, approximatives) ; le sens d'entrée des nappes est à vérifier sur la carte |
 | Prises | 2 × USB 3, 2 × USB 2, Ethernet, 2 × micro-HDMI, USB-C d'alimentation ; pas de jack audio | USB et Ethernet derrière la fenêtre de 60 × 24 mm de la plaque arrière |
@@ -283,8 +298,8 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Horloge | connecteur de pile RTC sur la carte : une pile rechargeable dédiée garde l'heure sans réseau | option, non comptée dans les prix |
 | Dimensions | 85 × 56 mm (comme le Pi 4), hauteur du composant environ 17 mm | 85 × 56 mm ; le dessin 3D est celui du Pi 4 (mêmes cotes, forme approchée) ; un STEP du Pi 5, s'il est fourni, donnerait la forme exacte |
 | Stockage | carte microSD ou SSD | — |
-| Refroidissement | dissipateur : Active Cooler officiel Raspberry Pi (ventilateur + dissipateur, se branche sur le connecteur de ventilateur de la carte) ou dissipateur passif silencieux ; le Pi est dans le grenier, que le ventilateur du nid ne refroidit pas. Sa hauteur au-dessus de la carte est à contrôler sous la pente du toit | non dessiné |
-| Modèle exact / lien | [Raspberry Pi 5 (4 Go) — page officielle](https://www.raspberrypi.com/products/raspberry-pi-5/) ; en France : [Kubii, Raspberry Pi 5 (choisir « 4 Go » ; le prix affiché, 76,80 €, est celui du 2 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html) + [carte micro-SD officielle 32 Go (Kubii, 34,20 €)](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) | — |
+| Refroidissement | dissipateur : Active Cooler officiel Raspberry Pi (ventilateur + dissipateur, se branche sur le connecteur de ventilateur de la carte) ou dissipateur passif silencieux ([Kubii, ventilateur + dissipateur pour Raspberry Pi 5](https://www.kubii.com/fr/ventilateurs-dissipateurs-thermiques/4109-ventilateur-dissipateur-pour-raspberry-pi-5-5056561803357.html)) ; le Pi est dans le grenier, que le ventilateur du nid ne refroidit pas. Sa hauteur au-dessus de la carte est à contrôler sous la pente du toit | non dessiné |
+| Modèle exact / lien | [Kubii, Raspberry Pi 5 (2 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html#/ram-2_gb) (76,80 €) + [carte micro-SD officielle 32 Go (Kubii, 34,20 €)](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) | — |
 
 ### Ventilateur Noctua NF-A6x25 PWM
 
@@ -367,6 +382,22 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Rôle | donne au Pi la température du nid pour piloter le ventilateur ; toujours présent | oui |
 | Modèle exact / lien | [Pimoroni BME280 Breakout (PIM472), Kubii, 15,88 €, 16 en stock](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html) : I2C, 19 × 19 × 2,75 mm, brochage fait pour les broches 1, 3, 5, 7, 9 du Pi ; puce : [Bosch BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) | — |
 
+### Sonde de température extérieure (DS18B20 étanche)
+
+| Paramètre | Valeur à viser | Dans le modèle |
+| --- | --- | --- |
+| Modèle | sonde DS18B20 étanche : tube inox de Ø 6 × 50 mm, câble de 3 conducteurs (rouge 3,3 V, noir masse, jaune donnée) de 1 à 3 m | tube de Ø 6 × 50 mm, câble de Ø 2,9 mm |
+| Alimentation | 3,3 V, jamais 5 V (la donnée va sur un GPIO qui ne tolère que 3,3 V) | broche 17 |
+| Bus | 1-Wire sur GPIO4 (broche 7) ; masse sur la broche 20 | broches 7, 17 et 20, trois cordons Dupont |
+| Résistance de rappel | 4,7 kΩ entre la donnée et le 3,3 V : elle est sur le module 3 broches (aucune soudure, bornier à vis ou broches) | module de 16 × 10 × 6 mm, dans le grenier, devant le Pi contre le mur gauche |
+| Plage et précision | −55 à +125 °C, ± 0,5 °C de −10 à +85 °C ; le programme du Pi refuse le CRC mauvais, 85,0 °C (valeur d'erreur à la mise sous tension) et les valeurs hors −40 à 60 °C | — |
+| Activation du 1-Wire | `dtoverlay=w1-gpio` dans `/boot/firmware/config.txt`, puis redémarrage ; lecture dans `/sys/bus/w1/devices/28-*/w1_slave` | — |
+| Position | sous le débord de 30 mm du côté gauche, collée contre le dessous du pan en okoumé, à l'ombre, à environ y = +40 mm | x = −117 mm, y = +42 mm, face haute contre le dessous du pan ; 129 mm du ventilateur, 176 mm de la caméra 2, 191 mm du régulateur |
+| Passage du câble | un trou rond de 5 mm dans la lame d'habillage gauche et dans la plaque gauche du toit, sous le corps de la baguette gauche du couvercle ; le pan n'est pas percé | trou à 15 mm sous le dessous du pan, y = +42 mm |
+| Remarque | en plein soleil ou contre un mur chaud, la sonde lit 1 à 2 °C de trop : l'ombre du débord limite l'écart | — |
+| Rôle | température de dehors pour la comparaison nid / dehors de la ventilation automatique ; sans mesure valable l'automatique ne démarre pas | oui |
+| Modèle exact / lien | lien à trouver — référence exacte : sonde DS18B20 étanche câble 1 m ou 3 m + module adaptateur 3 broches résistance 4,7 kΩ | — |
+
 ### Module 2 × MOSFET (LED infrarouges)
 
 | Paramètre | Valeur à viser | Dans le modèle |
@@ -405,8 +436,9 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 
 | Composant | À acheter (référence type) | Section de fil | Comment le brancher |
 | --- | --- | --- | --- |
-| Raspberry Pi 5 (GPIO) | cordons Dupont femelle-femelle de **40 cm**, lot de 40 (les fils du modèle mesurent de 20 à 36 cm vers le Pi, 36 cm pour la commande de l'interrupteur GPIO27 : 40 cm partout, on plie le surplus en S) | fil du cordon (≈ 0,1 mm²) | un cordon par picot : PWM ventilateur GPIO18 (broche 12), tachymètre GPIO17 (broche 11), commande de l'interrupteur GPIO27 (broche 13), masse (broche 14), capteur (broches 1, 3, 5, 9), LED et module MOSFET (broches 2, 4, 6, 16, 18, 20) ; l'autre bout dans le bornier ou la broche du module |
+| Raspberry Pi 5 (GPIO) | cordons Dupont femelle-femelle de **40 cm**, lot de 40 (les fils du modèle mesurent de 20 à 36 cm vers le Pi, 36 cm pour la commande de l'interrupteur GPIO27 : 40 cm partout, on plie le surplus en S) | fil du cordon (≈ 0,1 mm²) | un cordon par picot : PWM ventilateur GPIO18 (broche 12), tachymètre GPIO17 (broche 11), commande de l'interrupteur GPIO27 (broche 13), masse (broche 14), capteur du nid (broches 1, 3, 5, 9), sonde de dehors (broches 17, 7, 20), LED et module MOSFET (broches 2, 4, 6, 16, 18) ; l'autre bout dans le bornier ou la broche du module |
 | Capteur BME280 | Pimoroni BME280 Breakout (PIM472, Kubii) : rangée de 5 broches faite pour les broches 1, 3, 5, 7 et 9 du Pi (3,3 V, SDA, SCL, GPIO4 non utilisé, masse) | cordons Dupont | sur le modèle, 4 cordons Dupont vont de la rangée de broches de la carte aux broches 1, 3, 5 et 9 du Pi ; la fiche Kubii ne dit pas si les broches sont fournies ou à souder : à vérifier avant de commander |
+| Sonde de température extérieure DS18B20 étanche | sonde **étanche avec câble de 1 m ou 3 m** (3 fils) + **module adaptateur 3 broches avec résistance de rappel de 4,7 kΩ** et bornier à vis (ou broches) | fils du câble de la sonde (≈ 0,25 mm²) | les trois fils de la sonde dans le bornier à vis du module (rouge 3,3 V, noir masse, jaune donnée) ; trois cordons Dupont du module aux broches 17, 7 et 20 du Pi ; le surplus de câble s'enroule dans le grenier |
 | Cartes de 4 LED infrarouges 850 nm | modèle à **fils pré-soudés** ou à **bornier à vis** | fils fournis (≈ 0,3 mm²) | 5 V sur la broche 2 ou 4 du Pi par un cordon Dupont ; l'autre fil dans le bornier du module MOSFET |
 | Module 2 × MOSFET (LED) et module interrupteur 12 V du ventilateur | cartes **avec borniers à vis** | 0,25 à 0,5 mm² | fil dénudé de 6 mm dans le bornier, vis serrée au tournevis plat de 2 mm ; commande par cordon Dupont sur le GPIO |
 | Régulateur solaire Genasun | modèle d'origine à **borniers à vis** | 4 mm² côté panneau, 2,5 mm² côté batterie | fils dénudés de 8 mm avec embouts, vis serrées à fond |
@@ -444,6 +476,7 @@ Contrôle fait par calcul sur le modèle : recouvrement entre chaque composant e
 | Prise d'air basse | le conduit (35 × 46 mm) traverse l'isolant sous le plancher, le fond intérieur (par un passage découpé) et l'isolant du mur gauche ; libre dessous, loin du régulateur |
 | Fils et nappes | tous passent sous la pente |
 | Pièces en bois | contrôle de recouvrement par boîtes orientées : les seuls recouvrements restants sont voulus (dents dans leurs fentes, parois du siège et de la cassette qui traversent le dessus du toit par son encoche, conduit d'air dans le passage du fond) |
+| Sonde de température extérieure | dehors, sous le débord gauche du pan, contre son dessous ; le câble passe par un trou de 5 mm (lame d'habillage et plaque gauche du toit), sous la baguette du couvercle, et rejoint le module devant le Pi ; aucun fil ne traverse de bois hors de ce trou |
 | Caméra 2 | dehors, nue, sous le pan en okoumé, avec la carte de LED infrarouges 20 mm à sa gauche (même orientation), tournée vers le trou d'envol ; sa nappe et les fils des LED passent par le canal du toit (28 mm, dans la plaque crénelée du pan) |
 
 Contrôle des fils : les fils du ventilateur côté 12 V ne traversent ni nappe ni autre fil ; les quatre fils vers le Pi (PWM, tachymètre, masse commune, commande de l'interrupteur) restent sur le dessus du toit, passent par-dessus la cassette sous la pente (2 mm au moins) et peuvent croiser les nappes et d'autres fils : à reprendre au cas par cas au montage. Limite du contrôle : les formes des pièces sont des boîtes, donc les trous et encoches ne sont pas pris en compte. Les composants sont dessinés à leur vraie taille même quand ils ne tiennent pas : les chevauchements restants (régulateur, batterie) sont à corriger en choisissant d'autres emplacements ou composants.
@@ -489,7 +522,7 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 | Batterie 4 × 32700 + BMS + support | 0,6 kg |
 | Régulateur de charge Genasun | 0,25 kg |
 | Raspberry Pi 5 + carte microSD | 0,05 kg |
-| Caméras, LED, capteur, convertisseur, modules, fusible | 0,15 kg |
+| Caméras, LED, capteurs (nid et dehors), convertisseur, modules, fusible | 0,15 kg |
 | Ventilateur, prise et rallonge, interrupteur, plots, mousse, bloc d'hiver | 0,15 kg |
 | Câbles, gaine, nappes | 0,15 kg |
 | Morceaux de baguette de cale, étriers, clavettes | 0,1 kg |
@@ -498,18 +531,49 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 
 **Tenue de la fixation.** 4,6 kg font 45 N. Ils sont repris par 4 dents de 9 × 32 mm dans du contreplaqué de 3 mm : la pression sur le bois reste sous 1 MPa, pour une résistance d'au moins 20 MPa. Le centre de gravité est à environ 11 cm du dos, ce qui ajoute un couple de 6 N·m, soit un effort d'environ 60 N sur la dent du haut : toujours loin de la limite. Les 4 vis Ø 5 dans le tronc (ou une sangle) tiennent cela sans difficulté. Les points à soigner : le collage des 3 plaques de chaque nervure, et des vis inox de 5 × 60 dans du bois sain.
 
+## Finition du bois (huile de lin)
+
+**Règle.** Toutes les pièces en contreplaqué de peuplier de 3 mm et l'okoumé de 5 mm du toit sont huilées à l'huile de lin cuite (ou avec siccatif), sauf tout ce qui touche l'espace des oiseaux : les parois, le plancher intérieur, le bloc d'entrée côté nid et la face intérieure du tunnel (« Face avant int », « Côté … int », « Plancher int ») restent bruts, poncés, sans suie de découpe. L'habillage d'okoumé est peint en blanc (pas d'huile).
+
+| Zone | Finition | Pourquoi |
+| --- | --- | --- |
+| Nid (parois intérieures, plancher intérieur, bloc d'entrée côté nid, face intérieure du tunnel) | brut, poncé (grains 120 puis 180), sans suie de découpe | l'huile et son odeur ne doivent pas rester là où vivent les oiseaux |
+| Pièces cachées en peuplier (parois extérieures, toit, cadres, baguettes, étriers, clavettes, nervures) | huile de lin cuite, 2 couches | protège le bois de l'humidité de l'isolant et de la condensation |
+| Chants (tranches découpées) | 2 couches d'huile | les chants boivent l'huile et l'eau par les fibres |
+| Toit en okoumé de 5 mm (deux plaques) | huile de lin cuite, 2 couches | bois exposé à la pluie, non peint |
+| Habillage en okoumé | peinture blanche, pas d'huile | la peinture ne tient pas sur une surface huilée |
+| Dessous du nichoir et conduit d'air (zones mouillées en permanence) | huile de lin, plus vernis ou lasure à l'eau (étiquette jouets EN 71-3) | l'huile seule ne suffit pas à un bois toujours humide |
+
+**Procédure d'huilage.**
+
+1. Découper au laser, puis brosser et poncer la suie (papier de verre grain 120, puis grain 180).
+2. Repérer et masquer au ruban de peintre les dents, les fentes et toutes les surfaces à coller : l'huile empêche la colle d'accrocher.
+3. Appliquer une première couche fine au pinceau ou au chiffon ; les chants en reçoivent deux, car ils boivent.
+4. Essuyer l'excès après 15 à 30 minutes.
+5. Laisser sécher 24 à 72 heures par couche (temps indicatif, il dépend de la température et de l'humidité), puis passer la seconde couche.
+6. Enlever le ruban, puis coller (colle à bois de classe D3 ou D4).
+7. Aérer plusieurs jours avant d'installer le nichoir : l'odeur ne doit pas rester dans le nid.
+8. Zones mouillées en permanence (dessous du nichoir, conduit d'air) : ajouter, ou mettre à la place, un vernis ou une lasure à l'eau (étiquette jouets EN 71-3).
+
+**Sécurité.** Un chiffon imbibé d'huile de lin peut s'enflammer tout seul en séchant en tas : on l'étale à plat dehors, ou on le noie dans l'eau avant de le jeter.
+
+**Choix du contreplaqué.** Colle extérieure (classe 3 / CTBX), ou au minimum résistante à l'humidité, et classe d'émission E1 : le peuplier courant est collé « intérieur » et se décolle dans un nichoir dehors.
+
 ## Prix (ordre de grandeur, 2026)
 
 Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifier au moment de l'achat. Décoche une ligne ou un groupe entier pour l'enlever du total (le choix est gardé). La colonne « Vérifié » se coche quand le lien a été ouvert et contrôlé à la main.
 
 | Groupe | Élément | Prix | Modèle exact / lien | Vérifié |
 | --- | --- | --- | --- | --- |
-| Électronique | Raspberry Pi 5 (4 Go) + microSD 32 Go | 75 € | [Raspberry Pi 5 (4 Go) — page officielle](https://www.raspberrypi.com/products/raspberry-pi-5/) ; en France : [Kubii, Raspberry Pi 5 (choisir « 4 Go » ; le prix affiché, 76,80 €, est celui du 2 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html) + [carte micro-SD officielle 32 Go (Kubii, 34,20 €)](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) | [ ] |
+| Électronique | Raspberry Pi 5 (2 Go) | 76,80 € | [Kubii, Raspberry Pi 5 (2 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html#/ram-2_gb) | [ ] |
+| Électronique | Carte microSD officielle 32 Go | 34,20 € | [Kubii, carte micro-SD officielle 32 Go](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) | [ ] |
+| Électronique | Alimentation officielle Raspberry Pi 27 W USB-C (blanche, prise UE), pour configurer et tester le Pi sur l'établi | 12,90 € | [Kubii, alimentation Raspberry Pi 27 W USB-C](https://www.kubii.com/fr/alimentations/4107-1818-alimentation-raspberry-pi-27w-usb-c-3272496315761.html#/couleur-blanc/embout_d_alimentation-europeenne_ue) | [ ] |
 | Électronique | 2 × Camera Module 3 NoIR 75° (34,90 € pièce) | 69,80 € | [Camera Module 3 NoIR 75°, Amazon](https://www.amazon.fr/dp/B0BRY3L9H7) | [x] |
-| Électronique | Active Cooler officiel Raspberry Pi 5 (ventilateur + dissipateur), ou dissipateur passif | 6 € | lien à trouver — référence exacte : Raspberry Pi Active Cooler pour Raspberry Pi 5 (prix estimé, à confirmer) | [ ] |
+| Électronique | Active Cooler officiel Raspberry Pi 5 (ventilateur + dissipateur) | 6 € | [Kubii, ventilateur + dissipateur pour Raspberry Pi 5](https://www.kubii.com/fr/ventilateurs-dissipateurs-thermiques/4109-ventilateur-dissipateur-pour-raspberry-pi-5-5056561803357.html) | [ ] |
 | Électronique | 2 × nappe adaptatrice caméra 22 → 15 broches (une courte pour la caméra 1, une longue pour la caméra 2) | 10 € | courte : [Câble caméra Raspberry Pi 5, 22 → 15 broches, 200 mm (Adafruit 5818)](https://www.adafruit.com/product/5818) ; longue : lien à trouver — référence exacte : nappe caméra 22 → 15 broches pour Raspberry Pi 5, 500 mm ou plus, 16 mm de large (prix estimé, à confirmer) | [ ] |
 | Électronique | 2 × carte 4 LED infrarouges 850 nm (fils pré-soudés) | 10 € | lien à trouver — référence exacte : carte de 4 LED infrarouges 850 nm, 5 V, environ 12 × 24 mm, fils pré-soudés | [ ] |
 | Électronique | Capteur BME280 Pimoroni PIM472 (Kubii) + cordons Dupont | 16 € | [Pimoroni BME280 Breakout (PIM472), Kubii, 15,88 €, 16 en stock](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html) : I2C, 19 × 19 × 2,75 mm, brochage fait pour les broches 1, 3, 5, 7, 9 du Pi ; puce : [Bosch BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) | [ ] |
+| Électronique | Sonde de température extérieure DS18B20 étanche (câble 1 à 3 m) + module 3 broches avec résistance 4,7 kΩ (prix estimé, à confirmer) | 5 € | lien à trouver — référence exacte : sonde DS18B20 étanche câble 1 m ou 3 m + module adaptateur 3 broches résistance 4,7 kΩ | [ ] |
 | Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € | [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 × 60 × 25 mm, 12 V, 4 broches) ; en France : [Amazon.fr, NF-A6x25 PWM marron](https://www.amazon.fr/dp/B00VXTANZ4) | [ ] |
 | Électronique | Grille de protection Noctua NA-FG1-6 Sx2 (lot de 2, métal, pour ventilateurs de 60 mm ; une seule est utilisée, sur la cassette) | 15 € | [Amazon.fr, Noctua NA-FG1-6 Sx2](https://www.amazon.fr/dp/B0B1QRWHW3) : le titre annonce 2 grilles métal pour ventilateurs de 60 mm ; prix 15,06 € lu sur la page ; épaisseur, entraxe (50 mm attendus) et vis fournies ou non : à vérifier sur la page | [ ] |
 | Électronique | Module interrupteur 12 V côté + (P-MOSFET, commande 3,3 V) | 4 € | lien à trouver — référence exacte : module « high side switch » à P-MOSFET, 12 V, commande logique 3,3 V, borniers à vis | [ ] |
@@ -530,13 +594,17 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Solaire | Régulateur de charge Genasun GV-10-Li | 120 € | [Genasun GV-10-Li-14.2V (4S LiFePO4, 10,5 A)](https://sunforgellc.com/product/gv-10/) ; revendeur : [DigiKey GV-10-Li-14.2V-OEM](https://www.digikey.com/en/products/detail/genasun/GV-10-Li-14-2V-OEM/24614948) | [ ] |
 | Corps | Contreplaqué peuplier 3 mm (9 planches de 41 × 40 cm, baguettes de cale et pièces fines de rechange comprises : elles se rangent dans les creux des planches) | 22 € | lien à trouver — référence exacte : contreplaqué peuplier 3 mm, planches de 41 × 40 cm | [ ] |
 | Corps | Laine de bois 40 mm, panneaux Soprema 122 × 60 cm, lot de 10 (7,3 m² : il en faut environ 0,3 m², le reste sert de réserve) | 50 € | [Leroy Merlin, 10 panneaux isolants en fibre de bois Soprema 122 × 60 cm, ép. 4 cm, R 1,05 (réf. 80145323)](https://www.leroymerlin.fr/produits/10-panneaux-isolants-en-fibre-de-bois-soprema-122x60cm-ep-4-cm-r-1-05-80145323.html) : panneau de 40 mm comprimé à 39 mm dans la double paroi (jeu nul voulu : le panneau se tasse et tient seul) ; prix estimé (page non lisible en ligne, autre marque à titre de repère : Isover Flex 40, 5,20 € le m²), à confirmer | [ ] |
-| Corps | Colle, vis inox | 8 € | lien à trouver — référence exacte : colle à bois vinylique D3 (résistante à l'eau), vis inox A2 | [ ] |
+| Corps | Colle à bois D3 / D4 (résistante à l'eau), vis inox | 8 € | lien à trouver — référence exacte : colle à bois vinylique D3 ou D4 (résistante à l'eau), vis inox A2 | [ ] |
 | Corps | Bloc isolant d'hiver (mousse de 35 mm + cadre de contreplaqué) | 6 € | fabriqué : mousse de 35 mm + contreplaqué | [ ] |
 | Corps | Prise d'air basse (contreplaqué du conduit) | 1 € | fabriquée : contreplaqué | [ ] |
 | Corps | Sous-boîte isolante de la prise d'air (contreplaqué + laine de bois) | 1 € | fabriquée : contreplaqué + laine de bois | [ ] |
 | Habillage | Contreplaqué okoumé extérieur 5 mm (4 planches de 41 × 40 cm, soit 0,48 m² de pièces : l'habillage et le toit en deux plaques), découpé au laser ; l'habillage est peint en blanc, le toit reste au naturel | 24 € | lien à trouver — référence exacte : contreplaqué okoumé extérieur (CTBX) 5 mm, feuille d'au moins 410 × 400 mm (prix estimé, à confirmer) | [ ] |
 | Habillage | Peinture blanche (habillage) | 7 € | lien à trouver — référence exacte : peinture blanche extérieure pour bois | [ ] |
-| Habillage | Huile ou saturateur extérieur pour bois (toit en okoumé), 0,5 à 1 L | 15 € | lien à trouver — référence exacte : saturateur ou huile pour bois d'extérieur, 0,5 à 1 L | [ ] |
+| Finition | Huile de lin cuite (ou avec siccatif), 0,5 à 1 L : prix estimé, à confirmer | 10 € | lien à trouver — référence exacte : huile de lin cuite (ou avec siccatif) pour bois, 0,5 à 1 L | [ ] |
+| Finition | Pinceau et chiffons : prix estimé, à confirmer | 5 € | lien à trouver — référence exacte : pinceau plat de 30 à 50 mm et chiffons de coton non pelucheux | [ ] |
+| Finition | Ruban de peintre : prix estimé, à confirmer | 4 € | lien à trouver — référence exacte : ruban de peintre (masquage) de 25 à 30 mm | [ ] |
+| Finition | Papier de verre grains 120 et 180 : prix estimé, à confirmer | 4 € | lien à trouver — référence exacte : papier de verre grain 120 et grain 180, feuilles pour ponçage à la main | [ ] |
+| Finition | Vernis ou lasure à l'eau, 0,5 L (étiquette jouets EN 71-3) : prix estimé, à confirmer | 12 € | lien à trouver — référence exacte : vernis ou lasure à l'eau pour bois, 0,5 L, conforme jouets EN 71-3 | [ ] |
 
 Le ventilateur, sa grille et son interrupteur coûtent environ 22 €. Le poste le plus cher est le régulateur Genasun (120 €) : un régulateur PWM LiFePO4 à 20 € ferait le travail avec un rendement moindre, et enlèverait 100 € au total. La découpe laser n'est pas comptée.
 
@@ -551,17 +619,18 @@ Le ventilateur, sa grille et son interrupteur coûtent environ 22 €. Le poste 
 - **Alimentation du Pi 5.** Convertisseur de 5 A continus au moins ; sans négociation USB-PD, le Pi limite le courant de ses ports USB. Référence à choisir (voir le tableau des prix).
 - **Refroidissement du Pi 5.** Le grenier est clos : contrôler la température du processeur en été et la hauteur de l'Active Cooler sous la pente.
 - **Horloge.** Le Pi n'a pas d'horloge sans réseau : l'heure du graphique et du jour / nuit en dépend. Le connecteur de pile RTC du Pi 5 (pile rechargeable dédiée, option non comptée dans les prix) y remédie.
+- **Colle du contreplaqué de peuplier.** Le type de colle du contreplaqué acheté (extérieure classe 3 / CTBX, ou au moins résistante à l'humidité, classe d'émission E1) est à vérifier sur la fiche du vendeur avant la découpe : un peuplier collé « intérieur » se décolle.
 - **Autonomie.** Les valeurs de consommation et d'ensoleillement de la « Stratégie d'énergie » sont des estimations : mesurer avant de conclure sur 6 Ah ou 12 Ah.
 
 ## Liens des composants
 
-Chaque lien a été ouvert et vérifié (page et référence exacte). Les éléments sans lien sont dans le tableau des prix, avec leur référence exacte à chercher.
+Les liens des composants sont ceux des fiches ci-dessus ; la colonne « Vérifié » du tableau des prix indique ceux qui ont été ouverts à la main. Les éléments sans lien sont dans le tableau des prix, avec leur référence exacte à chercher.
 
 - [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/) (page officielle, « Buy a Raspberry Pi 5 »)
 - [Camera Module 3, variantes standard / Wide / NoIR](https://www.raspberrypi.com/products/camera-module-3/) (page officielle)
 - [Câble caméra Raspberry Pi 5, 22 broches → 15 broches, 200 mm (Adafruit 5818)](https://www.adafruit.com/product/5818)
 - [Raspberry Pi 5, dessin mécanique officiel (PDF)](https://pip.raspberrypi.com/documents/RP-008347-DS-raspberry-pi-5-mechanical-drawing.pdf) : source de la position des deux connecteurs de 22 broches (dimensions approximatives)
-- Chez [Kubii](https://www.kubii.com/fr/) (boutique française de Raspberry Pi) : [Raspberry Pi 5 (1 à 16 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html), [module caméra v3 Infrarouge](https://www.kubii.com/fr/cameras-capteurs/3879-module-camera-v3-infrarouge-raspberry-pi-3272496313682.html) (fiche à vérifier : filtre IR annoncé), [nappe CSI / MIPI pour Pi 5](https://www.kubii.com/fr/nappes-cables-adaptateurs/4116-1860-nappe-csi-mipi-camera-pour-raspberry-pi-5-3272496316669.html), [carte micro-SD officielle](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html) (pages ouvertes le 2026-10-11 ; le 4 Go du Pi 5 était en rupture à cette date)
+- Chez [Kubii](https://www.kubii.com/fr/) (boutique française de Raspberry Pi) : [Raspberry Pi 5 (2 Go)](https://www.kubii.com/fr/cartes-nano-ordinateurs/4106-2106-raspberry-pi-5-3272496315938.html#/ram-2_gb), [module caméra v3 Infrarouge](https://www.kubii.com/fr/cameras-capteurs/3879-module-camera-v3-infrarouge-raspberry-pi-3272496313682.html) (fiche à vérifier : filtre IR annoncé), [nappe CSI / MIPI pour Pi 5](https://www.kubii.com/fr/nappes-cables-adaptateurs/4116-1860-nappe-csi-mipi-camera-pour-raspberry-pi-5-3272496316669.html), [carte micro-SD officielle](https://www.kubii.com/fr/support-de-stockage/4392-2101-carte-sd-officielle-raspberry-pi-3272496319158.html), [alimentation Raspberry Pi 27 W USB-C](https://www.kubii.com/fr/alimentations/4107-1818-alimentation-raspberry-pi-27w-usb-c-3272496315761.html#/couleur-blanc/embout_d_alimentation-europeenne_ue), [ventilateur + dissipateur pour Raspberry Pi 5](https://www.kubii.com/fr/ventilateurs-dissipateurs-thermiques/4109-ventilateur-dissipateur-pour-raspberry-pi-5-5056561803357.html)
 - [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 mm, 12 V, 4 broches ; la boîte contient la rallonge NA-EC1 de 30 cm) ; [grille de protection Noctua NA-FG1-6 Sx2, 2 pièces, pour ventilateurs de 60 mm (Amazon.fr)](https://www.amazon.fr/dp/B0B1QRWHW3) ; [la même référence sur Amazon.fr](https://www.amazon.fr/dp/B00VXTANZ4) (page ouverte : modèle NF-A6x25 PWM, 60 × 25 mm, 3000 tr/min, 4 broches ; contenu de la boîte non lisible sur la page)
 - [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413)
 - [WAGO 221-415, borne à levier 5 conducteurs](https://www.wago.com/221-415)

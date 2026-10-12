@@ -16,7 +16,8 @@ describe('le Peltier est parti', () => {
   for (const [name, over] of Object.entries(VARIANTS)) {
     it(`aucune pièce de climatisation ni d'évacuation (${name})`, () => {
       const sc = buildNest(over);
-      expect(by(sc, /Peltier|Dissipateur|Pont en H|Filtre LC|DS18B20|Plaque froide|Sonde température|Gouttière|Évacuation/i)).toEqual([]);
+      expect(by(sc, /Peltier|Dissipateur|Pont en H|Filtre LC|Plaque froide|Sonde température|Gouttière|Évacuation/i)).toEqual([]);
+      expect(by(sc, /DS18B20/).map((p) => p.name).filter((nm) => !/^(Sonde de température extérieure|Module DS18B20|Câble sonde extérieure)/.test(nm))).toEqual([]); // seule la sonde de dehors (et son module) existe
       expect(sc.planks.some((p) => (p.special as string) === 'alu' || (p.special as string) === 'peltier' || (p.special as string) === 'heatsink')).toBe(false);
       expect(Object.values(sc.groupNames ?? {})).not.toContain('Évacuation');
     });

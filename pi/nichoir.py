@@ -1,7 +1,7 @@
 """Nichoir high tech — programme de test sur le Raspberry Pi 5.
 
 Version volontairement minimale pour vérifier le matériel :
-- lit le capteur du nid (BME280, I2C), la batterie (INA219, facultatif) et la météo extérieure (en ligne) ;
+- lit le capteur du nid (BME280, I2C), la batterie (INA219, facultatif) et la sonde de température extérieure (DS18B20 étanche, 1-Wire) ;
 - montre les deux caméras en direct (flux MJPEG) ;
 - pilote le ventilateur de 60 mm (PWM gpiozero / lgpio : 25 kHz visé, repli à 10 kHz ; tachymètre) et les deux cartes de LED infrarouges ;
 - ventilation automatique : le ventilateur n'aspire l'air chaud du nid que quand il fait trop chaud (désactivée au départ) ;
@@ -16,12 +16,15 @@ Brochage (voir docs/schema-electronique.md) :
   Ventilateur (Noctua NF-A6x25 PWM, 12 V) : interrupteur 12 V côté + GPIO27 (broche 13), PWM GPIO18 (broche 12), tachymètre GPIO17 (broche 11, pull-up), masse commune broche 14
   LED du nid : GPIO23 (module MOSFET IN1)   LED extérieures : GPIO24 (IN2)
   BME280 : I2C adresse 0x76 (ou 0x77)        INA219 (batterie) : I2C adresse 0x41
+  Sonde extérieure DS18B20 : 3,3 V broche 17, masse broche 20, donnée GPIO4 (broche 7, 1-Wire, résistance de rappel 4,7 kΩ sur le module) ;
+    activer le 1-Wire : `dtoverlay=w1-gpio` dans /boot/firmware/config.txt (puis redémarrer) ; lecture : /sys/bus/w1/devices/28-*/w1_slave
 """
 import math
 import os
 import random
 import struct
 import sys
+import glob
 import json
 import threading
 import time
@@ -38,7 +41,7 @@ def log(msg):
 
 # Ventilation AUTOMATIQUE (désactivée au départ ; tous les réglages sont modifiables depuis la page et gardés dans reglages.json).
 # Les seuils portent sur la température INTÉRIEURE du nid (BME280) :
-#   démarre  : le nid dépasse `seuil_marche` ET (dehors inconnu OU le nid dépasse dehors d'au moins `ecart_ext`) ;
+#   démarre  : le nid dépasse `seuil_marche` ET le nid dépasse dehors (sonde extérieure) d'au moins `ecart_ext` ; sans mesure de dehors (sonde absente, muette, hors plage) l'automatique NE DÉMARRE PAS ;
 #   vitesse  : de `vitesse_min` à `vitesse_max`, proportionnelle sur `plage` °C au-dessus du seuil ;
 #   s'arrête : le nid repasse sous `seuil_marche` − `hysteresis`, OU le nid n'est plus plus chaud que dehors (aspirer l'air de dehors ne refroidirait plus) ;
 #   `hiver` : « mode hiver » (cassette du ventilateur retirée, bloc isolant à sa place, bouchon de la prise d'air du dessous posé) : l'automatique ne démarre jamais le ventilateur (la commande manuelle reste possible) ;
@@ -55,11 +58,11 @@ FICHIER_REGLAGES = os.path.join(_DOSSIER, "reglages.json")
 VENTILO_MIN = 30    # % : vitesse minimale réelle quand le ventilateur tourne (en dessous : arrêt)
 VENTILO_PANNE_S = 10   # s : commandé mais 0 tr/min depuis plus longtemps que ça = panne
 PERIODE = 5.0       # secondes entre deux lectures
-# FACULTATIF : météo extérieure (API gratuite Open-Meteo, sans clé). Sans connexion internet la page affiche « — » et le reste marche.
-# À RÉGLER : les coordonnées du nichoir (variables d'environnement NICHOIR_LAT / NICHOIR_LON, ou ici). Par défaut : Dammarie-les-Lys.
-LATITUDE = float(os.environ.get("NICHOIR_LAT", "48.51"))
-LONGITUDE = float(os.environ.get("NICHOIR_LON", "2.64"))
-METEO_PERIODE = 600   # secondes entre deux demandes (l'API met à jour toutes les 15 min : inutile d'insister)
+# FACULTATIF : sonde de température extérieure DS18B20 étanche (1-Wire, GPIO4). Le noyau la lit dans /sys/bus/w1/devices/28-*/w1_slave
+# (activer `dtoverlay=w1-gpio` dans /boot/firmware/config.txt). Sans elle la page affiche « — », l'automatique ne démarre pas et le reste marche.
+W1_DOSSIER = "/sys/bus/w1/devices"
+EXT_PLAUSIBLE = (-40.0, 60.0)   # hors de ces bornes une mesure de dehors est jugée aberrante (sonde défaillante)
+EXT_ERREUR_DS18B20 = 85.0       # valeur lue par un DS18B20 qui n'a pas encore converti (mise sous tension) : jamais une température
 BATTERIE_BASSE = 20      # % : en dessous, message d'économie d'énergie (plus rien de gourmand à couper : le ventilateur reste actif, c'est la sécurité du nid)
 BATTERIE_CRITIQUE = 10   # % : en dessous, les caméras et les LED infrarouges sont coupées (et refusées)
 CAPACITE_WH = 76.8  # batterie LiFePO4 12,8 V × 6 Ah
@@ -79,7 +82,7 @@ HISTO_PERIODE = 5 if MOCK else 300    # secondes entre deux points (5 s en mode 
 SIM_ACCEL = float(os.environ.get("NICHOIR_MOCK_ACCEL", "1"))  # 1 = temps réel ; 10 ou 60 = le temps passe plus vite sur la batterie simulée (pour voir le niveau bouger)
 MOCK_FORCE = {"nid": None, "ext": None}  # températures imposées pour les essais (nid de base, extérieur)
 MOCK_NUIT = None   # None : jour / nuit d'après l'horloge ; True / False : imposé (le simulateur de l'app suit son bouton Jour / Nuit)
-MOCK_PANNES = {"bme": False, "ventilo": False}  # pannes simulées (essais depuis le simulateur de l'app) ; « ventilo » : le tachymètre ne compte plus rien
+MOCK_PANNES = {"bme": False, "ventilo": False, "sonde": False}  # pannes simulées (essais depuis le simulateur de l'app) ; « ventilo » : le tachymètre ne compte plus rien ; « sonde » : la sonde de dehors est muette
 
 # ---------------------------------------------------------------- matériel (chaque bloc est optionnel)
 etat = {
@@ -88,7 +91,7 @@ etat = {
     "led_nid": False, "led_ext": False,
     "batterie": {"pourcent": None, "tension": None, "source": None},   # niveau de charge (mesuré par l'INA219 si présent, sinon simulé)
     "conso": {"total_w": None, "detail": {}},                          # consommation estimée selon ce qui est allumé
-    "meteo": {"t_ext": None, "hum_ext": None, "nuages": None, "vent_kmh": None, "jour": None, "rayonnement": None, "source": None, "maj": None},   # météo extérieure
+    "ext": {"t": None, "source": None, "maj": None},                   # température de dehors (sonde DS18B20) ; t = null sans mesure valable
     "auto": {**AUTO_DEFAUT, "etat": "inactif", "raison": "mode désactivé", "avertissements": []},   # ventilation automatique : réglages, état (inactif / veille / ventile / securite) et raison
     "cam1": True, "cam2": True,   # caméras allumées (flux en direct) ou éteintes (économie d'énergie)
     "erreurs": {},        # nom du matériel → message, quand quelque chose manque
@@ -146,6 +149,8 @@ try:
 except Exception as e:
     BME_OK = False
     etat["erreurs"]["bme280"] = f"capteur du nid indisponible : {e}"
+
+# FACULTATIF : la sonde extérieure DS18B20 n'a pas de bibliothèque à installer : le noyau (1-Wire) la présente comme un fichier (voir lire_sonde_ext).
 
 # FACULTATIF : mesure de la batterie par un module INA219 (I2C 0x41, shunt de 10 mΩ). Sans lui, la page affiche « — » pour le niveau mais la consommation estimée reste visible.
 try:
@@ -278,8 +283,6 @@ if MOCK:
         h = time.localtime().tm_hour
         nuit = MOCK_NUIT if MOCK_NUIT is not None else not 6 <= h < 18
         t_ext = (16 if not nuit else 9) + 3 * math.sin(time.time() / 900) + random.uniform(-0.1, 0.1)
-        if os.environ.get("NICHOIR_MOCK_METEO_REEL") and etat["meteo"]["t_ext"] is not None:
-            t_ext = etat["meteo"]["t_ext"]
         if MOCK_FORCE["ext"] is not None:
             t_ext = MOCK_FORCE["ext"]
         sim["exces"] += ((2.0 if nuit else 4.0) - sim["exces"]) * 0.05
@@ -304,10 +307,12 @@ if MOCK:
             apport = max(0.05 * apport, apport * (100 - pc) / 10)
         sim["wh"] = min(CAPACITE_WH, max(0.0, sim["wh"] + apport * PERIODE / 3600 * SIM_ACCEL))
         pc = 100 * sim["wh"] / CAPACITE_WH
-        if not os.environ.get("NICHOIR_MOCK_METEO_REEL"):  # météo inventée, cohérente avec le jour / la nuit et les nuages de la simulation
-            etat["meteo"] = {"t_ext": round(t_ext, 1), "hum_ext": round(70 - 20 * sim["nuage"] + random.uniform(-1, 1)), "nuages": round(100 * (1 - sim["nuage"])),
-                             "vent_kmh": round(8 + 4 * math.sin(time.time() / 300), 1), "jour": not nuit, "rayonnement": 0 if nuit else round(800 * sim["nuage"]),
-                             "source": "simulée", "maj": time.strftime("%H:%M:%S")}
+        if MOCK_PANNES["sonde"]:   # sonde de dehors simulée : plausible jour / nuit, ou muette en cas de panne simulée
+            etat["ext"] = {"t": None, "source": None, "maj": None}
+            etat["erreurs"]["sonde_ext"] = "sonde extérieure : pas de réponse (panne simulée)"
+        else:
+            etat["ext"] = {"t": round(t_ext, 1), "source": "simulée", "maj": time.strftime("%H:%M:%S")}
+            etat["erreurs"].pop("sonde_ext", None)
         etat["batterie"] = {"pourcent": round(pc, 1), "tension": round(tension_depuis_pourcent(pc), 2), "source": "simulée", "solaire_w": round(solaire, 1)}
 
 
@@ -440,7 +445,7 @@ def enregistrer_historique():
     if now - _histo["dernier"] < HISTO_PERIODE:
         return
     _histo["dernier"] = now
-    historique.append({"t": time.strftime("%H:%M"), "nid": etat["t_nid"], "ext": etat["meteo"]["t_ext"], "hum": etat["hum_nid"], "ventilo": etat["ventilo"]["pourcent"]})
+    historique.append({"t": time.strftime("%H:%M"), "nid": etat["t_nid"], "ext": etat["ext"]["t"], "hum": etat["hum_nid"], "ventilo": etat["ventilo"]["pourcent"]})
     del historique[:-HISTO_MAX]
     if now - _histo["sauve"] >= 60:
         _histo["sauve"] = now
@@ -507,8 +512,8 @@ def verifier_ventilo():
 def avertissements():
     """Limites de notre montage à signaler à l'utilisateur (le mode reste utilisable) : pas de sonde dehors, pas de tachymètre."""
     w = []
-    if etat["meteo"]["t_ext"] is None:
-        w.append("température extérieure inconnue (pas d'internet) : le ventilateur ne compare pas le nid avec dehors")
+    if etat["ext"]["t"] is None:
+        w.append("température extérieure inconnue (sonde absente, muette ou hors plage) : l'automatique ne démarre pas")
     if not TACHO_OK:
         w.append("tachymètre absent : une panne du ventilateur ne peut pas être détectée")
     return w
@@ -521,7 +526,7 @@ def regler_auto():
     if not a["actif"]:
         a["etat"], a["raison"] = "inactif", "mode désactivé"
         return
-    t, t_ext, e = etat["t_nid"], etat["meteo"]["t_ext"], etat["erreurs"]
+    t, t_ext, e = etat["t_nid"], etat["ext"]["t"], etat["erreurs"]
     marche = v["mode"] == "auto" and v["pourcent"] > 0
     if a["hiver"]:   # mode hiver : le ventilateur est retiré, rien à démarrer
         if marche:
@@ -538,6 +543,9 @@ def regler_auto():
             ventilo(0, "arret", "sécurité : " + blocage)
         a["etat"], a["raison"] = "securite", blocage
         return
+    if t_ext is None and not marche:   # on ne sait pas si l'air de dehors est plus frais : par sécurité l'automatique ne démarre pas
+        a["etat"], a["raison"] = "securite", "sonde extérieure absente ou muette : on ne sait pas si l'air de dehors est plus frais, l'automatique ne démarre pas"
+        return
     seuil, hyst = a["seuil_marche"], a["hysteresis"]
     plus_chaud_dehors = t_ext is not None and t <= t_ext + 0.5
     if marche:
@@ -546,7 +554,7 @@ def regler_auto():
         elif plus_chaud_dehors:
             ventilo(0, "arret", f"le nid ({t} °C) n'est plus plus chaud que dehors ({t_ext} °C)")
     if not (v["mode"] == "auto" and v["pourcent"] > 0):   # à l'arrêt : doit-il démarrer ?
-        if not (t > seuil and (t_ext is None or t > t_ext + a["ecart_ext"])):
+        if not (t > seuil and t > t_ext + a["ecart_ext"]):
             if t <= seuil:
                 a["raison"] = f"nid à {t} °C, sous le seuil de {seuil} °C"
             elif plus_chaud_dehors:
@@ -563,29 +571,43 @@ def regler_auto():
     a["etat"], a["raison"] = "ventile", f"nid à {t} °C, ventilateur à {v['pourcent']} %"
 
 
-
-
-_meteo = {"dernier": 0.0}
-
-
-def maj_meteo():
-    """Demande la météo extérieure à Open-Meteo toutes les METEO_PERIODE secondes (échec silencieux : l'erreur s'affiche, le reste continue)."""
-    if MOCK and not os.environ.get("NICHOIR_MOCK_METEO_REEL"):
-        return  # en mode simulé la météo est inventée par simuler()
-    if time.time() - _meteo["dernier"] < METEO_PERIODE:
-        return
-    _meteo["dernier"] = time.time()
-    url = (f"https://api.open-meteo.com/v1/forecast?latitude={LATITUDE}&longitude={LONGITUDE}"
-           "&current=temperature_2m,relative_humidity_2m,cloud_cover,wind_speed_10m,is_day,shortwave_radiation&timezone=auto")
+def lire_sonde_ext():
+    """Lit la sonde DS18B20 par le noyau : retourne (température en °C, None) ou (None, message d'erreur).
+    Le fichier w1_slave a deux lignes : « … crc=xx YES » (CRC bon) puis « … t=21437 » (millièmes de °C)."""
+    fichiers = sorted(glob.glob(os.path.join(W1_DOSSIER, "28-*", "w1_slave")))
+    if not fichiers:
+        return None, "sonde extérieure absente : aucun 28-* dans /sys/bus/w1/devices (1-Wire activé ? câblage ?)"
     try:
-        with urllib.request.urlopen(url, timeout=8) as r:
-            c = json.load(r)["current"]
-        etat["meteo"] = {"t_ext": c["temperature_2m"], "hum_ext": c["relative_humidity_2m"], "nuages": c["cloud_cover"], "vent_kmh": c["wind_speed_10m"],
-                         "jour": bool(c["is_day"]), "rayonnement": c["shortwave_radiation"], "source": "Open-Meteo", "maj": time.strftime("%H:%M:%S")}
-        etat["erreurs"].pop("meteo", None)
-        log(f"Météo : {c['temperature_2m']} °C dehors, nuages {c['cloud_cover']} %")
-    except Exception as e:
-        etat["erreurs"]["meteo"] = f"météo indisponible : {e}"
+        with open(fichiers[0], encoding="ascii") as f:
+            lignes = f.read().strip().splitlines()
+    except (OSError, UnicodeDecodeError) as e:
+        return None, f"lecture de la sonde extérieure : {e}"
+    if len(lignes) < 2 or not lignes[0].rstrip().endswith("YES"):
+        return None, "sonde extérieure : CRC mauvais (câble trop long, résistance 4,7 kΩ absente ?)"
+    try:
+        t = int(lignes[1].rsplit("t=", 1)[1]) / 1000
+    except (IndexError, ValueError):
+        return None, "sonde extérieure : réponse illisible"
+    if t == EXT_ERREUR_DS18B20:
+        return None, "sonde extérieure : 85,0 °C = valeur d'erreur du DS18B20 (pas encore de conversion), refusée"
+    if not EXT_PLAUSIBLE[0] <= t <= EXT_PLAUSIBLE[1]:
+        return None, f"sonde extérieure : valeur aberrante ({round(t, 1)} °C)"
+    return round(t, 1), None
+
+
+def maj_sonde_ext():
+    """Une lecture de la sonde de dehors (en mode simulé, simuler() s'en charge). Une mesure refusée laisse `ext.t` à null et l'erreur s'affiche."""
+    if MOCK:
+        return
+    t, err = lire_sonde_ext()
+    if err:
+        etat["ext"] = {"t": None, "source": None, "maj": etat["ext"]["maj"]}
+        if etat["erreurs"].get("sonde_ext") != err:
+            log("! " + err)
+        etat["erreurs"]["sonde_ext"] = err
+    else:
+        etat["ext"] = {"t": t, "source": "DS18B20", "maj": time.strftime("%H:%M:%S")}
+        etat["erreurs"].pop("sonde_ext", None)
 
 
 LOG_TOUS_LES = 10   # une ligne de situation toutes les 10 lectures (50 s sur le Pi, 10 s en mode simulé)
@@ -624,7 +646,7 @@ def lecture():
         etat["erreurs"]["delestage"] = f"Batterie à {pc} % : {niveau}"
     else:
         etat["erreurs"].pop("delestage", None)
-    maj_meteo()
+    maj_sonde_ext()
     verifier_alerte()
     verifier_ventilo()
     regler_auto()
@@ -633,7 +655,7 @@ def lecture():
     etat["derniere_lecture"] = time.strftime("%H:%M:%S")
     _lectures[0] += 1
     if _lectures[0] % LOG_TOUS_LES == 1:  # un point de situation de temps en temps, pas à chaque lecture (le journal restait noyé)
-        parts = [f"nid {etat['t_nid']} °C, {etat['hum_nid']} %", f"dehors {etat['meteo']['t_ext']} °C"]
+        parts = [f"nid {etat['t_nid']} °C, {etat['hum_nid']} %", f"dehors {etat['ext']['t']} °C"]
         if etat["ventilo"]["pourcent"]:  # le ventilateur n'est cité que quand il tourne
             rpm = etat["ventilo"]["rpm"]
             parts.append(f"ventilateur {etat['ventilo']['pourcent']} %" + (f" ({rpm} tr/min)" if rpm is not None else ""))

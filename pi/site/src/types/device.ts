@@ -12,7 +12,7 @@ export interface DeviceErrors {
   delestage?: string;
   picamera2?: string;
   batterie?: string;
-  meteo?: string;
+  sonde_ext?: string;
   alerte_chaleur?: string;
   camera1?: string;
   camera2?: string;
@@ -29,7 +29,7 @@ export interface DeviceState {
   erreurs: DeviceErrors;
   derniere_lecture: string | null;
   batterie: Battery;
-  meteo: Weather;
+  ext: Outside;
   auto: AutoState;
   conso: Consumption;
 }
@@ -84,15 +84,10 @@ export interface HistoryPoint {
   ventilo: number;
 }
 
-/** Météo extérieure (Open-Meteo, ou simulée) ; les champs sont null tant qu'on n'a rien reçu. */
-export interface Weather {
-  t_ext: number | null;
-  hum_ext: number | null;
-  nuages: number | null;
-  vent_kmh: number | null;
-  jour: boolean | null;
-  rayonnement: number | null;
-  source: string | null;
+/** Température de dehors, lue par la sonde DS18B20 étanche (ou simulée) ; `t` est null sans mesure valable (sonde absente, muette, hors plage). */
+export interface Outside {
+  t: number | null;
+  source: 'DS18B20' | 'simulée' | null;
   maj: string | null;
 }
 

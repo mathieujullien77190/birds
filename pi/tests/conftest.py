@@ -140,7 +140,6 @@ def load(monkeypatch, tmp_path):
             monkeypatch.setenv("NICHOIR_MOCK", "1")
         else:
             monkeypatch.delenv("NICHOIR_MOCK", raising=False)
-        monkeypatch.delenv("NICHOIR_MOCK_METEO_REEL", raising=False)
         monkeypatch.setattr(sys, "argv", argv or ["nichoir.py"])
         names = ["gpiozero", "bme280", "smbus2", "ina219", "picamera2", "picamera2.encoders", "picamera2.outputs"]
         for n in names:

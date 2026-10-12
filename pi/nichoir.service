@@ -6,8 +6,6 @@ After=network-online.target
 [Service]
 User=pi
 WorkingDirectory=/home/pi/nichoir
-Environment=NICHOIR_LAT=48.51
-Environment=NICHOIR_LON=2.64
 ExecStart=/home/pi/nichoir/venv/bin/python nichoir.py
 Restart=always
 RestartSec=5
