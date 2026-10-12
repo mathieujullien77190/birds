@@ -18,6 +18,8 @@ export interface SceneSyncState {
   cut: Cut;
   hidden: Set<string>;
   piReady: boolean;
+  /** Pièces de l'étape de montage en cours : surlignées comme au survol. */
+  assembly?: Set<string>;
   /** Écrire le code de chaque plaque découpée sur sa face (bouton « N° »). */
 }
 
@@ -26,7 +28,7 @@ export interface SceneSyncState {
  * 1. les meshes (une par plaque : forme, position, rotation, transparence ; les plaques supprimées sont libérées) ;
  * 2. la surbrillance (sélection, survol) ; 3. la coupe et la visibilité ; 4–6. les repères (face tirée, plan de coupe) et les cotes de l'habillage ; 7. les codes écrits sur les plaques.
  */
-export function useSceneSync(view: MutableRefObject<View | null>, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady }: SceneSyncState) {
+export function useSceneSync(view: MutableRefObject<View | null>, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady, assembly }: SceneSyncState) {
   // 1. une mesh par plaque, géométrie refaite si la forme change, position / rotation recopiées
   useEffect(() => {
     const v = view.current;
@@ -61,12 +63,12 @@ export function useSceneSync(view: MutableRefObject<View | null>, { sc, selected
       const m = v.meshes.get(p.id);
       if (!m) continue;
       const mat = m.material;
-      const hovered = !!hover && (hover.plank === p.id || (!!hover.group && hover.group === p.group));
+      const hovered = (!!hover && (hover.plank === p.id || (!!hover.group && hover.group === p.group))) || !!assembly?.has(p.id);
       const chosen = groupSel ? p.group === groupSel : p.id === selectedId; // boîte choisie : toutes ses plaques
       mat.emissive.set(hovered ? EMISSIVE.hover : chosen ? EMISSIVE.chosen : extra.has(p.id) ? EMISSIVE.extra : EMISSIVE.none); // survolé dans la liste : ambre
       mat.emissiveIntensity = hovered ? EMISSIVE.hoverIntensity : EMISSIVE.baseIntensity;
     }
-  }, [view, sc, selectedId, extra, hover, groupSel]);
+  }, [view, sc, selectedId, extra, hover, groupSel, assembly]);
 
   // 3. plan de coupe (le côté « devant » est gardé, l'autre devient invisible) et plaques cachées (hors de la couche 0 : ni dessinées ni touchées par les clics)
   useEffect(() => {

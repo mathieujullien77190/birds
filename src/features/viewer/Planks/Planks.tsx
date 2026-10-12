@@ -9,9 +9,9 @@ import { makeNest, moveWithGroup, setAirPlug, setCassetteMode, nextCassette, win
 import { PiSimulator } from '@/birdhouse/PiSimulator';
 import { loadPiModel, piModel } from '@/birdhouse/three/piModel';
 import type { View } from '@/birdhouse/three/types';
-import { ContextMenu, CutPanel, LeftPanel, MobileBar, PartsSheet, PiecesList, PullBar, RightPanel, SelectionBar, ViewToolbar, WireSheet, wireSheetFor } from '../components';
+import { AssemblyPanel, hiddenFor, ContextMenu, CutPanel, LeftPanel, MobileBar, PartsSheet, PiecesList, PullBar, RightPanel, SelectionBar, ViewToolbar, WireSheet, wireSheetFor } from '../components';
 import { HIDDEN_AT_CREATION, STORAGE } from '../constants';
-import { useCutPlane, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useThreeView, useFanSpeed, useIrBeams } from '../hooks';
+import { useCutPlane, useHiddenPlanks, useHistory, useKeyboardShortcuts, useDayNight, useNestParams, usePiCameraShot, useSceneSync, useAssembly, useThreeView, useFanSpeed, useIrBeams } from '../hooks';
 import type { ContextMenuState, Hover, PullState } from '../types';
 
 /** Écran du nichoir : vue 3D (Three.js), panneaux gauche / droite, schéma, documents, simulateur du Pi. Garde la scène, la sélection et « Retour ». */
@@ -38,6 +38,8 @@ export default function Planks() {
   const [schemaOn, setSchemaOn] = usePersistentFlag(STORAGE.schema); // ouvert par défaut ; schéma électrique à côté de la 3D
   const { cut, setCut, cutRef, midOf } = useCutPlane(scRef);
   const { hidden, setHidden, toggleHidden } = useHiddenPlanks(); // pièces cachées dans la 3D (œil du volet « Pièces »)
+  const asm = useAssembly(sc); // mode Montage : étape courante, pièces affichées et surlignées (ne touche ni à la scène ni à `hidden`)
+  const shownHidden = useMemo(() => (asm.view ? hiddenFor(sc.planks.map((p) => p.id), asm.view.visible) : hidden), [asm.view, sc.planks, hidden]); // en montage, seules les pièces des étapes faites et de l'étape en cours sont affichées
   const [piReady, setPiReady] = useState(!!piModel); // le modèle 3D du Pi est chargé : on redessine les Pi
   useEffect(() => { if (!piModel) void loadPiModel().then(() => setPiReady(!!piModel)); }, []);
   const [wireClosed, setWireClosed] = useState<string | null>(null); // fil dont la fiche flottante a été fermée (elle revient dès qu'on choisit une pièce)
@@ -101,7 +103,7 @@ export default function Planks() {
   const [fanPct, setFanPct] = useState(0); // vitesse du ventilateur lue dans le simulateur du Pi (le rotor de la 3D tourne)
   useFanSpeed(view, fanPct);
   const [leds, setLeds] = useState({ nid: false, ext: false }); // LED infrarouges allumées dans le simulateur du Pi (faisceaux visibles dans la 3D)
-  useSceneSync(view, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden, piReady });
+  useSceneSync(view, { sc, selectedId, extra, hover, groupSel, pull, cut, hidden: shownHidden, piReady, assembly: asm.view?.highlight });
   useIrBeams(view, sc, leds); // après useSceneSync : les meshes des cartes de LED existent
 
   // ----- actions -----
@@ -172,14 +174,16 @@ export default function Planks() {
   if (mobile) { // téléphone : barre en haut, la 3D en grand, réglages et pièces (afficher / cacher) en feuilles qui se ferment
     return (
       <div className="flex h-full w-full flex-col overflow-hidden bg-stone-100 text-stone-800">
-        <MobileBar settingsOn={mSettings} onSettings={() => { setMSettings((v) => !v); setMParts(false); }} partsOn={mParts} onParts={() => { setMParts((v) => !v); setMSettings(false); }}
+        <MobileBar settingsOn={mSettings} onSettings={() => { setMSettings((v) => !v); setMParts(false); asm.setOn(false); }} partsOn={mParts} onParts={() => { setMParts((v) => !v); setMSettings(false); asm.setOn(false); }}
+          assemblyOn={asm.on} onToggleAssembly={() => { if (!asm.on) { setMSettings(false); setMParts(false); } asm.setOn(!asm.on); }}
           winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug}
           cutOn={cut.on} onToggleCut={toggleCut} />
         <main className="relative min-h-0 flex-1">
           <div ref={host} className="h-full w-full touch-none" />
           {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
           {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
-          {!mSettings && !mParts && wireSheetEl}
+          {!mSettings && !mParts && !asm.on && wireSheetEl}
+          {asm.on && <AssemblyPanel steps={asm.steps} index={asm.index} setIndex={asm.setIndex} onClose={() => asm.setOn(false)} mobile />}
           {mSettings && (
             <div className="absolute inset-0 z-20 flex flex-col bg-stone-50 [&>aside]:!w-full [&>aside]:flex-1">
               <LeftPanel open setOpen={(o) => setMSettings(o)} sc={sc} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} hideMachine />
@@ -200,9 +204,10 @@ export default function Planks() {
       <main className="relative min-w-0 flex-1" onClick={() => setCtx(null)}>
         <div ref={host} className="h-full w-full" />
         {cutView && <LaserPreview svg={preview} cutCfg={cutCfg} sheets={sheets} />}
-        <ViewToolbar winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={openPi} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
+        <ViewToolbar assemblyOn={asm.on} onToggleAssembly={() => asm.setOn(!asm.on)} winter={wState} onToggleCassette={toggleCassette} onTogglePlug={togglePlug} schemaOn={schemaOn} onToggleSchema={() => setSchemaOn((v) => !v)} onOpenPi={openPi} cutOn={cut.on} onToggleCut={() => setCut((c) => (c.on ? { ...c, on: false } : { ...c, on: true, pos: midOf(c.axis) }))} />
         {cut.on && <CutPanel cut={cut} setCut={setCut} sc={sc} midOf={midOf} />}
         {wireSheetEl}
+        {asm.on && <AssemblyPanel steps={asm.steps} index={asm.index} setIndex={asm.setIndex} onClose={() => asm.setOn(false)} mobile={false} />}
         {pull && <PullBar cutOn={cut.on} onDone={() => setPull(null)} />}
         {extra.size > 0 && <SelectionBar count={extra.size + (selectedId ? 1 : 0)} onLink={linkSelection} onUnlink={unlinkSelection} onCancel={() => setExtra(new Set())} />}
 

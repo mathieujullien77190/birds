@@ -32,7 +32,7 @@ Origine de travail = coin **bas-gauche** de la planche vue de dessus, X vers la 
 `G21 G90 G54 G94`, `M5`, `M4 S0` (mode laser dynamique), puis pour chaque contour un `G0` (laser éteint) et des `G1` avec `F` (vitesse) et `S` (puissance = % × `$30` / 100, jamais au-dessus du plafond ni de `$30`), enfin `M5`, retour `G0 X0 Y0`, `M5`. Les pièces sont coupées des plus petites aux plus grandes, **trous avant le contour extérieur** de chaque pièce. Passes : toute la planche puis on recommence, ou contour par contour. **Le code de chaque plaque (en bleu dans les SVG) est gravé avant la coupe, à bas régime ; les noms des pièces ne sont pas gravés** (voir « Numérotation et gravure des plaques »).
 
 ## Numérotation et gravure des plaques
-Chaque plaque découpée au laser porte un **code** pour la retrouver au montage : la première lettre du groupe (Toit → **T**, Habillage → **H**, Ventilation → **V**…) puis un numéro à deux chiffres (**T-01**, **T-02**…, un tiret entre la catégorie et le numéro pour la lisibilité). **Des pièces strictement identiques** (même matériau et épaisseur, mêmes dimensions, même contour, mêmes trous et mêmes crans) **portent le même numéro** ; une pièce en miroir d'une autre n'est pas identique. Quand deux groupes commencent par la même lettre, ils prennent le plus court préfixe qui les distingue (Électronique / Entrée → **EL-01** / **EN-01**, Corps / Couvercle → **COR-01** / **COU-01**). Les numéros suivent l'ordre d'apparition des plaques dans la scène ; le code se recalcule tout seul quand une pièce change (`src/birdhouse/model/sheets/partCodes.ts`).
+Chaque plaque découpée au laser porte un **code** pour la retrouver au montage : la première lettre du groupe (Toit → **T**, Habillage → **H**, Ventilation → **V**, Aération du corps → **A**…) puis un numéro à deux chiffres (**T-01**, **T-02**…, un tiret entre la catégorie et le numéro pour la lisibilité). **Des pièces strictement identiques** (même matériau et épaisseur, mêmes dimensions, même contour, mêmes trous et mêmes crans) **portent le même numéro** ; une pièce en miroir d'une autre n'est pas identique. Quand deux groupes commencent par la même lettre, ils prennent le plus court préfixe qui les distingue (Électronique / Entrée → **EL-01** / **EN-01**, Corps / Couvercle → **COR-01** / **COU-01**). Les numéros suivent l'ordre d'apparition des plaques dans la scène ; le code se recalcule tout seul quand une pièce change (`src/birdhouse/model/sheets/partCodes.ts`).
 
 - **Dans « Pièces »** : une petite pastille bleue avec le code précède le nom de chaque plaque découpée.
 - **Dans la 3D** : le bouton **N°** de la barre du haut écrit le code sur la face +z de chaque plaque (la face qui reste vers le haut sur la planche de découpe) ; il se retient d'une visite à l'autre.
@@ -47,16 +47,17 @@ Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la sc
 | H-01 | Lambris droite 1, Lambris gauche 1 | Habillage | okoumé | 2 |
 | H-02 | Lambris droite 2, Lambris gauche 2 | Habillage | okoumé | 2 |
 | H-03 | Lambris droite 3, Lambris gauche 3 | Habillage | okoumé | 2 |
-| H-04 | Lambris droite 4, Lambris gauche 4 | Habillage | okoumé | 2 |
-| H-05 | Lambris droite 5, Lambris gauche 5 | Habillage | okoumé | 2 |
-| H-06 | Lambris avant 1, Lambris avant 2… (4 noms) | Habillage | okoumé | 4 |
-| H-07 | Lambris arrière 1 | Habillage | okoumé | 1 |
-| H-08 | Lambris arrière 2.1 | Habillage | okoumé | 1 |
-| H-09 | Lambris arrière 2.2, Lambris arrière 3.2 | Habillage | okoumé | 2 |
-| H-10 | Lambris avant 3 (percé) | Habillage | okoumé | 1 |
-| H-11 | Lambris arrière 3.1 | Habillage | okoumé | 1 |
-| H-12 | Lambris arrière 4 | Habillage | okoumé | 1 |
-| H-13 | Lambris arrière 5 | Habillage | okoumé | 1 |
+| H-04 | Lambris droite 4 | Habillage | okoumé | 1 |
+| H-05 | Lambris gauche 4 | Habillage | okoumé | 1 |
+| H-06 | Lambris droite 5, Lambris gauche 5 | Habillage | okoumé | 2 |
+| H-07 | Lambris avant 1, Lambris avant 2… (4 noms) | Habillage | okoumé | 4 |
+| H-08 | Lambris arrière 1 | Habillage | okoumé | 1 |
+| H-09 | Lambris arrière 2.1 | Habillage | okoumé | 1 |
+| H-10 | Lambris arrière 2.2, Lambris arrière 3.2 | Habillage | okoumé | 2 |
+| H-11 | Lambris avant 3 (percé) | Habillage | okoumé | 1 |
+| H-12 | Lambris arrière 3.1 | Habillage | okoumé | 1 |
+| H-13 | Lambris arrière 4 | Habillage | okoumé | 1 |
+| H-14 | Lambris arrière 5 | Habillage | okoumé | 1 |
 | COU-01 | Baguette couvercle avant | Couvercle | contreplaqué | 4 |
 | COU-02 | Baguette couvercle arrière | Couvercle | contreplaqué | 4 |
 | COU-03 | Baguette couvercle gauche, Baguette couvercle droite | Couvercle | contreplaqué | 8 |
@@ -80,10 +81,10 @@ Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la sc
 | V-08 | Goulotte ventilateur avant | Ventilation | contreplaqué | 1 |
 | V-09 | Conduit de sortie 1, Conduit de sortie 2 | Ventilation | contreplaqué | 8 |
 | V-10 | Conduit de sortie 3, Conduit de sortie 4 | Ventilation | contreplaqué | 8 |
-| V-11 | Conduit d'air 3, Conduit d'air 4 | Ventilation | contreplaqué | 2 |
-| V-12 | Conduit d'air 2 | Ventilation | contreplaqué | 1 |
-| V-13 | Conduit d'air 1 | Ventilation | contreplaqué | 1 |
-| V-14 | Conduit d'air 5 (couvercle) | Ventilation | contreplaqué | 1 |
+| A-01 | Conduit d'air 3, Conduit d'air 4 | Aération du corps | contreplaqué | 2 |
+| A-02 | Conduit d'air 2 | Aération du corps | contreplaqué | 1 |
+| A-03 | Conduit d'air 1 | Aération du corps | contreplaqué | 1 |
+| A-04 | Conduit d'air 5 (couvercle) | Aération du corps | contreplaqué | 1 |
 | P-06 | Bouchon-boîte prise d'air 3, Bouchon-boîte prise d'air 4 | Pièces d'hiver (rechange) | contreplaqué | 2 |
 | P-07 | Bouchon-boîte prise d'air 2, Bouchon-boîte prise d'air 1 | Pièces d'hiver (rechange) | contreplaqué | 2 |
 | P-08 | Bouchon-boîte prise d'air couvercle | Pièces d'hiver (rechange) | contreplaqué | 1 |
@@ -104,18 +105,19 @@ Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la sc
 | COR-13 | Côté gauche int | Corps | contreplaqué | 1 |
 | T-01 | Face avant toit | Toit | contreplaqué | 1 |
 | T-02 | Face arrière toit | Toit | contreplaqué | 1 |
-| T-03 | Côté droit toit, Côté gauche toit | Toit | contreplaqué | 2 |
-| T-04 | Dessus toit | Toit | contreplaqué | 1 |
-| T-05 | Dessous toit | Toit | contreplaqué | 1 |
-| T-06 | Baguette dessus toit gauche, Baguette dessus toit droite | Toit | contreplaqué | 8 |
-| T-07 | Baguette dessus toit avant | Toit | contreplaqué | 4 |
-| T-08 | Baguette dessus toit arrière 1 | Toit | contreplaqué | 4 |
-| T-09 | Baguette dessus toit arrière 2 | Toit | contreplaqué | 4 |
-| T-10 | Cadre toit haut, Cadre toit milieu, Cadre toit bas | Toit | contreplaqué | 3 |
-| T-11 | Face avant caméra 1, Face arrière caméra 1 | Toit | contreplaqué | 2 |
-| T-12 | Côté droit caméra 1, Côté gauche caméra 1 | Toit | contreplaqué | 2 |
+| T-03 | Côté droit toit | Toit | contreplaqué | 1 |
+| T-04 | Côté gauche toit | Toit | contreplaqué | 1 |
+| T-05 | Dessus toit | Toit | contreplaqué | 1 |
+| T-06 | Dessous toit | Toit | contreplaqué | 1 |
+| T-07 | Baguette dessus toit gauche, Baguette dessus toit droite | Toit | contreplaqué | 8 |
+| T-08 | Baguette dessus toit avant | Toit | contreplaqué | 4 |
+| T-09 | Baguette dessus toit arrière 1 | Toit | contreplaqué | 4 |
+| T-10 | Baguette dessus toit arrière 2 | Toit | contreplaqué | 4 |
+| T-11 | Cadre toit haut, Cadre toit milieu, Cadre toit bas | Toit | contreplaqué | 3 |
+| T-12 | Face avant caméra 1, Face arrière caméra 1 | Toit | contreplaqué | 2 |
+| T-13 | Côté droit caméra 1, Côté gauche caméra 1 | Toit | contreplaqué | 2 |
 
-Total : 220 plaques, 70 codes.
+Total : 220 plaques, 72 codes.
 
 ## Réglages à calibrer
 Valeurs de départ prudentes : 300 mm/min, 60 %, 3 passes, plafond de puissance 80 %. Elles dépendent du contreplaqué, de la focale et de l'air assist : la **planche d'essai** découpe une grille de petits carrés (colonnes = vitesses, lignes = puissances) ; le tableau à l'écran donne la position de chaque carré. Retenir le couple qui détache le carré proprement avec le moins de brûlure.

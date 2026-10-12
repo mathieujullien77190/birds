@@ -2,7 +2,8 @@ import { ToolbarButton } from '@/ui';
 import type { WinterState } from '@/birdhouse/model';
 
 /** Barre du haut du téléphone : réglages, retour, pièces (afficher / cacher), puis les outils de la vue (cassette, prise d'air, coupe) sur une ligne qui défile. */
-export function MobileBar({ settingsOn, onSettings, partsOn, onParts, winter, onToggleCassette, onTogglePlug, cutOn, onToggleCut }: {
+export function MobileBar({ assemblyOn, onToggleAssembly, settingsOn, onSettings, partsOn, onParts, winter, onToggleCassette, onTogglePlug, cutOn, onToggleCut }: {
+  assemblyOn: boolean; onToggleAssembly: () => void;
   settingsOn: boolean; onSettings: () => void; partsOn: boolean; onParts: () => void;
   winter: WinterState; onToggleCassette: () => void; onTogglePlug: () => void; cutOn: boolean; onToggleCut: () => void;
 }) {
@@ -10,6 +11,7 @@ export function MobileBar({ settingsOn, onSettings, partsOn, onParts, winter, on
     <header className="z-10 shrink-0 border-b border-stone-200 bg-white">
       <div className="flex items-center gap-1 px-2 py-1">
         <ToolbarButton icon="☰" active={settingsOn} aria-pressed={settingsOn} onClick={onSettings}>Réglages</ToolbarButton>
+        <ToolbarButton icon="🛠" tone="emerald" active={assemblyOn} aria-pressed={assemblyOn} onClick={onToggleAssembly}>Montage</ToolbarButton>
         <span className="flex-1" />
         <ToolbarButton icon="👁" active={partsOn} aria-pressed={partsOn} onClick={onParts}>Pièces</ToolbarButton>
       </div>

@@ -61,6 +61,10 @@ Effet de cassette translucide désactivé à la demande de l'utilisateur (la cas
 - Un matériau ou une texture partagés = un accesseur `lazy(...)` dans le registre, pas un `new` au niveau du module.
 - `createScene().dispose()` arrête la boucle, retire les écouteurs (les contrôleurs d'`interactions/` renvoient chacun leur désinscription), libère les meshes, les repères, le registre, les contrôles et le renderer.
 
+## Mode Montage
+
+`useSceneSync` reçoit un `hidden` calculé par le mode Montage (pièces hors des étapes faites et de l'étape courante : couche de visibilité distincte du `hidden` persistant de « Pièces », jamais écrite) et un ensemble `assembly` dont les pièces prennent la surbrillance ambre du survol (effet 2). La caméra ne bouge pas. La logique (étapes, pièces visibles) est pure : `model/assembly/` et `AssemblyPanel/helpers.ts`.
+
 ## Tests
 
 - `npm test` (vitest). Les tests « golden » comparent à `tests/golden/*.json` : le modèle (`makeNest` et ses variantes), les empreintes des géométries (chaque plaque, chaque type de pièce) et les fonctions pures (`outline`, `bounds`, `pullFace`…). Une différence veut dire que le modèle ou le rendu a changé : si c'est voulu, régénérer avec `UPDATE_GOLDEN=1 npx vitest run` et relire le diff.

@@ -14,6 +14,7 @@ La liste complète et à jour est la **section 1 (et 2 pour un fil)** de `docs/c
 3. Si la pièce est de l'électronique : mettre à jour `docs/schema-electronique.md` (schéma mermaid, **liste `linkStyle` dans l'ordre des flèches**, `classDef`, branchements, fiche `###`, poids, prix avec lien vérifié) et `src/features/schema/SchemaPanel/constants.ts` (`MAP`, `FICHES`).
 4. Lancer `npx vitest run`. Les golden (`tests/golden/`) changent : **relire le diff** (`git diff --stat tests/golden`), puis seulement `UPDATE_GOLDEN=1 npx vitest run`. Ne jamais régénérer à l'aveugle.
 5. `tests/coherence.test.ts` signale un oubli (nom de `VENT_PIECES` sans pièce, fil sans ligne dans `MAP`, `special` sans fabrique, motif de `LINKS` mort). `tests/wiresSolid.test.ts` et `tests/ventilation.test.ts` vérifient qu'aucun fil ne traverse une pièce.
+5 bis. **Montage pas à pas** : toute pièce ajoutée, renommée ou retirée se déclare dans la table `SEQ` de `src/birdhouse/model/assembly/data.ts` (une étape par pièce, au bon endroit de l'ordre : isolant avant ce qu'il recouvre, finition avant collage) ; `tests/assembly.test.ts` échoue sinon (bloc « Autres pièces »).
 6. Mettre à jour `CLAUDE.md` par remplacement ciblé (jamais une réécriture) et `README.md` si c'est visible.
 7. Finir par `npm run check` (skill `verifier-et-publier`).
 

@@ -9,3 +9,4 @@ export * from './WireSheet';
 export * from './ViewToolbar';
 export * from './MobileBar';
 export * from './PartsSheet';
+export * from './AssemblyPanel';

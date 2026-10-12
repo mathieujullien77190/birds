@@ -39,6 +39,7 @@ export default defineConfig({
         // sheets : 100 % des lignes, 99 % des branches : restent la garde `if (!best) continue` de nestSheets (pièce creuse qui ne rentre sur aucune planche neuve) et le départage `l < k` de deux rectangles libres identiques ; non atteints par les essais (à revoir si on touche au rangement)
         'src/birdhouse/model/sheets/**': { lines: 100, statements: 100, functions: 100, branches: 99 },
         'src/birdhouse/model/wires/**': { lines: 100, statements: 100, functions: 100, branches: 100 }, // longueur, section, fiche de chaque fil : rien n'est exclu
+        'src/birdhouse/model/assembly/**': { lines: 100, statements: 100, functions: 100, branches: 100 }, // étapes du montage pas à pas : table de règles et moteur purs, rien n'est exclu
         'src/birdhouse/model/persistence.ts': { lines: 100, statements: 100, functions: 100, branches: 100 },
         'src/birdhouse/model/nest/{box,cameras,winter}.ts': { lines: 100, statements: 100, functions: 100, branches: 100 },
         // makeNest.ts : 98 % lignes, 88 % branches. Le reste est du code mort volontairement gardé : options forcées en tête de makeNest (cam = 38, pente, lambris, solaire toujours vrais), anciennes variantes « toit plat » / sans solaire / sans lambris, conditions en `false && …` (liste précise dans CLAUDE.md)

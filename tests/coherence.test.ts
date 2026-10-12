@@ -117,7 +117,7 @@ describe('cohérence : réglages et configuration', () => {
   it('clés localStorage : valeurs figées (les renommer efface les réglages enregistrés de l\'utilisateur)', () => {
     expect(STORAGE).toEqual({
       leftOpen: 'plaques-menu-gauche', rightOpen: 'plaques-menu-droit', night: 'plaques-nuit',
-      schema: 'plaques-schema', cut: 'plaques-coupe', hidden: 'plaques-caches', nest: 'plaques-nichoir-3',
+      schema: 'plaques-schema', cut: 'plaques-coupe', hidden: 'plaques-caches', nest: 'plaques-nichoir-3', assembly: 'plaques-montage',
     });
     expect(new Set(Object.values(STORAGE)).size).toBe(Object.keys(STORAGE).length);
   });
@@ -179,6 +179,13 @@ describe('cohérence : makeNest, pièces, groupes, liens', () => {
       const re = new RegExp('^' + alt);
       expect(names.some((n) => re.test(n)), `VENT_PIECES : « ${alt} » ne correspond à aucune pièce`).toBe(true);
     }
+  });
+  it('AIR_PIECES (groupe « Aération du corps ») correspond à des pièces générées, aucune n\'est dans VENT_PIECES', () => {
+    const m = /const AIR_PIECES = \/(.*)\/;/.exec(makeNestSrc);
+    expect(m, 'AIR_PIECES introuvable dans makeNest.ts').not.toBeNull();
+    expect(names.some((n) => new RegExp(m![1]).test(n))).toBe(true);
+    const v = /const VENT_PIECES = \/(.*)\/;/.exec(makeNestSrc)!;
+    expect(names.some((n) => new RegExp(m![1]).test(n) && new RegExp(v[1]).test(n))).toBe(false);
   });
   it('chaque motif de LINKS correspond à une pièce et porte une adresse https ; chaque pièce liée a son url', () => {
     const block = makeNestSrc.slice(makeNestSrc.indexOf('const LINKS'), makeNestSrc.indexOf('const underRoof'));

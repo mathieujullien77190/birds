@@ -17,7 +17,8 @@ Déclencheur : une plaque, un composant, un fil, une nappe, un pavé ou un group
 | Son dessin 3D : une fabrique dans `part/` et une ligne dans la table `FACTORIES` | `src/birdhouse/three/factories/part/index.ts` | **auto** : `tests/parts.golden.test.ts` |
 | Une nouvelle propriété de `Plank` qui change le dessin : l'ajouter à la clé de géométrie (`plankShapeKey`) | `src/birdhouse/three/factories/plank.ts` | `tests/plankKey.test.ts` |
 | Couleur de la pièce | `src/birdhouse/three/registry/palette.ts` | `tests/parts.golden.test.ts` |
-| Pièce de ventilation : ajouter son nom à `VENT_PIECES` (groupe « Ventilateur ») | `src/birdhouse/model/nest/makeNest.ts` | **auto** : `tests/coherence.test.ts` (chaque alternative de `VENT_PIECES` correspond à une pièce générée) |
+| **Montage pas à pas** : une pièce nouvelle ou renommée doit apparaître dans UNE étape de la table `SEQ` (par son nom) ; sinon elle tombe dans le bloc « Autres pièces » | `src/birdhouse/model/assembly/data.ts` | **auto** : `tests/assembly.test.ts` (chaque pièce dans une seule étape, aucune pièce « divers ») |
+| Pièce de ventilation : ajouter son nom à `VENT_PIECES` (groupe « Ventilation »), ou à `AIR_PIECES` pour le conduit de la prise d'air (groupe « Aération du corps ») | `src/birdhouse/model/nest/makeNest.ts` | **auto** : `tests/coherence.test.ts` (chaque alternative de `VENT_PIECES` correspond à une pièce générée) |
 | Pièce cachée à la création (isolant, toit en okoumé) | `HIDDEN_AT_CREATION` dans `src/features/viewer/constants.ts` | **auto** : `tests/coherence.test.ts` |
 | Lien du composant (constructeur ou revendeur) | tableau `LINKS` de `makeNest.ts` | **auto** : `tests/coherence.test.ts` (chaque motif correspond à une pièce) |
 | Références golden : régénérer **puis relire le diff** | `UPDATE_GOLDEN=1 npx vitest run`, fichiers de `tests/golden/` | `npm test` (ne jamais régénérer à l'aveugle) |
