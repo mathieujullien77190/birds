@@ -4,7 +4,7 @@ import type { MachineSettings } from './types';
 export const MACHINE_SETTINGS_KEY = 'laser-reglages';
 
 /**
- * Valeurs de départ PRUDENTES, À CALIBRER : elles ne sont qu'un point de départ pour un contreplaqué de 3 mm sur une diode de 10 W.
+ * Valeurs de départ PRUDENTES, À CALIBRER : elles ne sont qu'un point de départ pour un contreplaqué de 3 mm sur la diode de 22 W de la Sculpfun S30 Ultra (puissance lumineuse annoncée).
  * Lancer la planche d'essai (carrés par vitesse × puissance) pour trouver le bon couple avant de couper de vraies pièces.
  */
 export const DEFAULT_MACHINE_SETTINGS: MachineSettings = {
@@ -12,7 +12,7 @@ export const DEFAULT_MACHINE_SETTINGS: MachineSettings = {
   power: 60,
   passes: 3,
   passMode: 'all',
-  air: false,
+  air: true, // l'assistance d'air de la S30 Ultra est commandée par la carte (M8 / M9)
   capPct: 80,
   jogFeed: 3000,
   jogStep: 10,

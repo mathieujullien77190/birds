@@ -14,7 +14,7 @@ export function parseMachineSettings(raw: string | null): MachineSettings {
     power: clamp(s.power, 0, 100, d.power),
     passes: Math.round(clamp(s.passes, 1, 20, d.passes)),
     passMode: s.passMode === 'contour' ? 'contour' : 'all',
-    air: s.air === true,
+    air: typeof s.air === 'boolean' ? s.air : d.air,
     capPct: clamp(s.capPct, 1, 100, d.capPct),
     jogFeed: clamp(s.jogFeed, 50, 6000, d.jogFeed),
     engraveFeed: clamp(s.engraveFeed, 1, 6000, d.engraveFeed),

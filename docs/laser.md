@@ -1,4 +1,4 @@
-# Pilotage de la laser (Sculpfun S30 Pro)
+# Pilotage de la laser (Sculpfun S30 Ultra 22 W)
 
 > Le logiciel de pilotage est un **projet autonome** : le dossier `laser-control/` (son `README.md` décrit l'installation, l'export et le format `LaserJob`). Il tourne seul (`npm install && npm run dev`, SVG ou G-code déposé sur la page) et l'app du nichoir l'utilise via l'alias `@laser` ; le mode d'emploi ci-dessous est le même dans les deux.
 
@@ -7,9 +7,9 @@ L'app pilote la découpeuse directement depuis le navigateur (API **Web Serial**
 ## Matériel et branchement
 | Élément | Valeur |
 |---|---|
-| Machine | Sculpfun S30 Pro, diode 10 W, air assist |
+| Machine | Sculpfun S30 Ultra 22 W (la seule machine prise en charge), diode de 22 W (puissance lumineuse annoncée), assistance d'air commandée par la carte |
 | Contrôleur | GRBL 1.1, USB série 115200 bauds 8N1 |
-| Zone | 410 × 400 mm (planche par défaut de l'app) ; boutons « Machine » de la section « Découpe laser » : S30 Pro (410 × 400) et S30 Ultra 22 W (590 × 595) |
+| Zone | 590 × 595 mm (zone de gravure de la machine) ; la planche par défaut de l'app est de 400 × 400 mm (le contreplaqué du commerce), réglable par les curseurs de « Découpe laser » |
 | Navigateur | Chrome ou Edge, page en HTTPS ou sur `localhost` (Firefox et Safari : pas de Web Serial) |
 
 1. Brancher le câble USB, allumer la machine.
@@ -17,8 +17,8 @@ L'app pilote la découpeuse directement depuis le navigateur (API **Web Serial**
 3. Fermer tout autre logiciel connecté au port (LaserGRBL, LightBurn, autre onglet).
 4. « Connecter la laser » : le navigateur demande de choisir le port (clic obligatoire).
 
-## Autre machine : Sculpfun S30 Ultra 22 W (envisagée)
-Fiche du vendeur : diode de 22 W (puissance lumineuse annoncée), zone de gravure de 590 × 595 mm (600 × 600 sur certaines fiches), carte 32 bits avec assistance d'air commandée par la carte (pompe 24 V, 30 L/min), USB ou Bluetooth, logiciels LightBurn et LaserGRBL, environ 114 W. **À confirmer avant achat** : la version de GRBL (`$I`) et le 115200 bauds en USB ; le guide de démarrage du constructeur ne cite que LightBurn. Dans l'app, le bouton « S30 Ultra 22 W » règle la planche à 590 × 595 mm (moins de planches) ; la case **« Assistance d'air (M8 / M9) »** des réglages de coupe fait envoyer `M8` avant la coupe et `M9` après ; éteinte par défaut, le G-code d'une S30 Pro ne change pas. Le Web Serial réel reste non testé faute de machine.
+## La machine : Sculpfun S30 Ultra 22 W
+Fiche du vendeur : diode de 22 W (puissance lumineuse annoncée), zone de gravure de 590 × 595 mm (600 × 600 sur certaines fiches), carte 32 bits avec assistance d'air commandée par la carte (pompe 24 V, 30 L/min), USB ou Bluetooth, logiciels LightBurn et LaserGRBL, environ 114 W. **À confirmer à la réception** : la version de GRBL (`$I`) et le 115200 bauds en USB ; le guide de démarrage du constructeur ne cite que LightBurn. La case **« Assistance d'air (M8 / M9) »** des réglages de coupe est cochée par défaut : le programme envoie `M8` avant la coupe et `M9` après. Le Web Serial réel reste non testé faute de machine.
 
 ## Mise en place d'une découpe
 1. Connexion ; vérifier `$32 = 1` (mode laser). Sinon l'app avertit, verrouille la découpe et propose `$32=1` après confirmation.
@@ -32,7 +32,7 @@ Fiche du vendeur : diode de 22 W (puissance lumineuse annoncée), zone de gravur
 Origine de travail = coin **bas-gauche** de la planche vue de dessus, X vers la droite, Y vers l'**arrière** de la machine. Le SVG de l'app a y vers le bas : `Y_machine = H − y_svg`. Unités en mm, `G21 G90`, système G54.
 
 ## G-code produit
-`G21 G90 G54 G94`, `M5`, (`M8` si l'assistance d'air est cochée), `M4 S0` (mode laser dynamique), puis pour chaque contour un `G0` (laser éteint) et des `G1` avec `F` (vitesse) et `S` (puissance = % × `$30` / 100, jamais au-dessus du plafond ni de `$30`), enfin `M5`, (`M9` si l'assistance d'air est cochée), retour `G0 X0 Y0`, `M5`. Les pièces sont coupées des plus petites aux plus grandes, **trous avant le contour extérieur** de chaque pièce. Passes : toute la planche puis on recommence, ou contour par contour. **Le code de chaque plaque (en bleu dans les SVG) est gravé avant la coupe, à bas régime ; les noms des pièces ne sont pas gravés** (voir « Numérotation et gravure des plaques »).
+`G21 G90 G54 G94`, `M5`, (`M8` : assistance d'air, cochée par défaut), `M4 S0` (mode laser dynamique), puis pour chaque contour un `G0` (laser éteint) et des `G1` avec `F` (vitesse) et `S` (puissance = % × `$30` / 100, jamais au-dessus du plafond ni de `$30`), enfin `M5`, (`M9`), retour `G0 X0 Y0`, `M5`. Les pièces sont coupées des plus petites aux plus grandes, **trous avant le contour extérieur** de chaque pièce. Passes : toute la planche puis on recommence, ou contour par contour. **Le code de chaque plaque (en bleu dans les SVG) est gravé avant la coupe, à bas régime ; les noms des pièces ne sont pas gravés** (voir « Numérotation et gravure des plaques »).
 
 ## Numérotation et gravure des plaques
 Chaque plaque découpée au laser porte un **code** pour la retrouver au montage : la première lettre du groupe (Toit → **T**, Habillage → **H**, Ventilation → **V**, Aération du corps → **A**…) puis un numéro à deux chiffres (**T-01**, **T-02**…, un tiret entre la catégorie et le numéro pour la lisibilité). **Des pièces strictement identiques** (même matériau et épaisseur, mêmes dimensions, même contour, mêmes trous et mêmes crans) **portent le même numéro** ; une pièce en miroir d'une autre n'est pas identique. Quand deux groupes commencent par la même lettre, ils prennent le plus court préfixe qui les distingue (Électronique / Entrée → **EL-01** / **EN-01**, Corps / Couvercle → **COR-01** / **COU-01**). Les numéros suivent l'ordre d'apparition des plaques dans la scène ; le code se recalcule tout seul quand une pièce change (`src/birdhouse/model/sheets/partCodes.ts`).

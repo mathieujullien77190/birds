@@ -108,7 +108,7 @@ describe('import G-code', () => {
   it('suit les arcs G2 / G3 et signale un tracé hors de la machine', () => {
     const { job } = parseGcode('G21 G90\nM4 S0\nG0 X0 Y0\nG3 X20 Y0 I10 J0 F500 S300\nM5\n', OPT_G);
     expect(job.stats.cutMm).toBeCloseTo(Math.PI * 10, 0);
-    const big = parseGcode('G90\nM4 S0\nG1 X500 Y0 F500 S100\nM5\n', OPT_G);
+    const big = parseGcode('G90\nM4 S0\nG1 X700 Y0 F500 S100\nM5\n', OPT_G);
     expect(big.job.stats.outOfBounds).toBe(true);
   });
 });

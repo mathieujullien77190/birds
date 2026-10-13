@@ -38,7 +38,7 @@ export function buildGcode(job: LaserJob, opt: CutOptions): GcodeJob {
   return {
     lines: w.lines, lineTimes: w.lineTimes, segments: w.segments, stats,
     header: [
-      `${job.title ?? 'Découpe laser'} (Sculpfun S30 Pro / S30 Ultra, GRBL 1.1)`,
+      `${job.title ?? 'Découpe laser'} (Sculpfun S30 Ultra 22 W, GRBL 1.1)`,
       `Planche ${num(job.widthMm)} x ${num(job.heightMm)} mm ; origine de travail = coin bas-gauche, X à droite, Y vers l'arrière`,
       `${contours.length} contours, ${Math.max(1, Math.round(opt.passes))} passe(s) (${opt.passMode === 'all' ? 'tout le jeu' : 'contour par contour'}), F${num(feed)} mm/min, S${s}/${opt.sMax}`,
       ...(opt.air ? ["Assistance d'air : M8 avant la coupe, M9 après"] : []),

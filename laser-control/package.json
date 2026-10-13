@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Pilotage d'une laser Sculpfun S30 Pro (GRBL 1.1) depuis le navigateur : SVG ou G-code, cadre à vide, planche d'essai, machine simulée",
+  "description": "Pilotage d'une laser Sculpfun S30 Ultra 22 W (GRBL 1.1) depuis le navigateur : SVG ou G-code, cadre à vide, planche d'essai, machine simulée",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

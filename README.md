@@ -14,8 +14,8 @@ Un nichoir à mésanges isolé, dessiné en 3D dans le navigateur et découpé a
 - Mode **jour / nuit** de la scène, et **schéma électronique** à côté de la 3D : survoler un fil ou un composant le met en surbrillance des deux côtés, clic sur un module pour sa fiche.
 
 **Fabriquer**
-- **Découpe laser** : toutes les plaques rangées automatiquement sur des planches de 410 × 400 mm, exportées en SVG.
-- **Pilotage de la laser** (Sculpfun S30 Pro) depuis le navigateur : connexion USB, déplacements, cadre à vide, génération du G-code, planche d'essai, envoi avec pause et arrêt, et une machine simulée pour essayer sans rien brancher.
+- **Découpe laser** : toutes les plaques rangées automatiquement sur des planches de 400 × 400 mm (réglable), exportées en SVG.
+- **Pilotage de la laser** (Sculpfun S30 Ultra 22 W) depuis le navigateur : connexion USB, déplacements, cadre à vide, génération du G-code, planche d'essai, envoi avec pause et arrêt, et une machine simulée pour essayer sans rien brancher.
 
 **Surveiller et commander le nichoir** (programme sur le Raspberry Pi, site React + TypeScript)
 - Température et humidité du nid, température de l'extérieur (sonde DS18B20 étanche sous le débord du toit).
@@ -37,7 +37,7 @@ Cinq documents Markdown dans [`docs/`](docs/), lisibles aussi dans l'application
 | [`docs/logiciel.md`](docs/logiciel.md) | **Logiciel** : programme Python sur le Pi (capteurs, ventilateur, LED, caméras), sécurités (alerte à 35 °C, capteur muet, ventilateur en panne, batterie faible), sonde de température extérieure, niveau de batterie et consommation, page web React, simulateur et essais, service systemd, accès à distance. |
 | [`docs/architecture-3d.md`](docs/architecture-3d.md) | **Architecture 3D** : modèle pur et couche Three.js, comment ajouter une pièce, libération des ressources, tests. |
 | [`docs/checklist-changements.md`](docs/checklist-changements.md) | **Checklist** : quand je change X, quels fichiers mettre à jour et quelle commande vérifie. |
-| [`docs/laser.md`](docs/laser.md) | **Pilotage de la laser** (Sculpfun S30 Pro, GRBL) : branchement USB, mise en place pas à pas, cadre à vide, réglages de coupe à calibrer, sécurité, convention d'axes. |
+| [`docs/laser.md`](docs/laser.md) | **Pilotage de la laser** (Sculpfun S30 Ultra 22 W, GRBL) : branchement USB, mise en place pas à pas, cadre à vide, réglages de coupe à calibrer, sécurité, convention d'axes. |
 
 ## Lancer en local
 

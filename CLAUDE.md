@@ -13,7 +13,7 @@ Vite + React 19 + TypeScript + Tailwind v4 + Three.js. Alias `@/` → `src/`, `@
 | `src/birdhouse/model/` | Modèle pur (aucun import three.js). `makeNest` = le nichoir, `model.ts` = barrel |
 | `src/birdhouse/three/` | Rendu Three.js (scène, fabriques de pièces, interactions) |
 | `src/features/viewer/` | Écran `Planks`, composants, hooks |
-| `src/features/laser/` | Adaptateur vers `laser-control/` (pilotage Sculpfun S30 Pro) |
+| `src/features/laser/` | Adaptateur vers `laser-control/` (pilotage Sculpfun S30 Ultra 22 W) |
 | `src/features/docs/`, `schema/` | Documents, schéma mermaid, code |
 | `src/ui/`, `hooks/`, `lib/` | Briques UI et utilitaires sans logique métier |
 | `pi/` | Programme du Raspberry (`nichoir.py`) et site `pi/site/` (compilé dans `pi/web/`, committé) |

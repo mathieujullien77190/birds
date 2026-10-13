@@ -33,7 +33,7 @@ export function LaserPanel({ m, top }: { m: LaserMachine; top?: ReactNode }) {
   );
 }
 
-/** Fenêtre « Pilotage de la laser » (Sculpfun S30 Pro, GRBL 1.1, Web Serial) : le même contenu dans une fenêtre modale. */
+/** Fenêtre « Pilotage de la laser » (Sculpfun S30 Ultra 22 W, GRBL 1.1, Web Serial) : le même contenu dans une fenêtre modale. */
 export function LaserMachineModal({ m }: { m: LaserMachine }) {
   const ind = indicator(m.grbl);
   return (
