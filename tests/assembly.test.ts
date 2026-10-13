@@ -163,7 +163,7 @@ describe('assemblySteps : les ordres imposés', () => {
   });
   it('ventilateur : cassette glissée < rallonge et fils du ventilateur < essais (établi, multimètre, batterie) < toit en okoumé posé en dernier', () => {
     const toitOkoume = stepIdx('elec-pose-toit'), cassette = stepIdx('toit-cassette');
-    const fan = sc0.planks.filter((p) => /^(Rallonge ventilateur|Module interrupteur 12 V ventilateur|Fil (PWM|tachymètre|masse commune|commande interrupteur) ventilateur|Fil (Wago \+ → interrupteur|interrupteur → ventilateur|ventilateur −|masse interrupteur))/.test(p.name));
+    const fan = sc0.planks.filter((p) => /^(Rallonge ventilateur|Module relais 3 V ventilateur|Fil (PWM|tachymètre|masse commune|commande interrupteur) ventilateur|Fil (Wago \+ → interrupteur|interrupteur → ventilateur|ventilateur −|3,3 V relais|masse relais))/.test(p.name));
     expect(fan.length).toBeGreaterThanOrEqual(10);
     for (const p of fan) { const i = stepOf(steps0, p.id); expect(i, p.name).toBeGreaterThan(cassette); expect(i, p.name).toBeLessThan(stepIdx('essai-multimetre')); expect(i, p.name).toBeLessThan(toitOkoume); }
     expect(stepIdx('essai-multimetre')).toBeLessThan(stepIdx('essai-batterie')); expect(stepIdx('essai-batterie')).toBeLessThan(toitOkoume);
@@ -194,7 +194,7 @@ describe('assemblySteps : les ordres imposés', () => {
     for (const id of ['pi-sd', 'pi-programme', 'banc-capteurs', 'banc-cameras', 'banc-ventilateur', 'banc-page']) expect(steps0.some((x) => x.id === id), id).toBe(false);
     expect(ASSEMBLY_BLOCKS.some((b) => b.id === 'banc')).toBe(false);
     const tests = ['essai-multimetre', 'essai-batterie'].map(stepIdx);
-    const panel = idx(/^Panneau solaire/), cable = idx(/^Câble 12 V vers le toit/);
+    const panel = idx(/^Panneau solaire/), cable = idx(/^Câble 12 V panneau \+/);
     for (const t of tests) { expect(t).toBeGreaterThan(idx(/^Batterie/)); expect(t).toBeGreaterThan(idx(/^Fusible/)); expect(t).toBeGreaterThan(idx(/^Régulateur de charge/)); expect(t).toBeLessThan(panel); }
     expect(panel).toBe(steps0.length - 2);
     expect(cable).toBe(steps0.length - 1);

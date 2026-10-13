@@ -7,6 +7,7 @@ import { shapedBlockGeometry } from './blockShaped';
 import { cameraBoardGeometry } from './camera';
 import { caseGeometry } from './case';
 import { driverGeometry } from './driver';
+import { relayGeometry } from './relay';
 import { fanGeometry } from './fan';
 import { guardGeometry } from './guard';
 import { irBoardGeometry } from './ir';
@@ -28,6 +29,7 @@ const FACTORIES: Partial<Record<Special, PartFactory>> = {
   fan: fanGeometry,
   guard: guardGeometry,
   driver: driverGeometry,
+  relay: relayGeometry,
   sensor: sensorGeometry,
   block: (p, t) => (p.holes.length || p.poly ? shapedBlockGeometry(p, t) : blockGeometry(p, t)), // percé ou à contour libre : plaque épaisse ; sinon boîte pleine
   cable: ribbonGeometry,

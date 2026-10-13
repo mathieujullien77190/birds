@@ -18,19 +18,20 @@ export const MAP: [RegExp, Keys][] = [
   [/^(Sonde de température extérieure|Module DS18B20)/, { nodes: ['SONDE'], edges: [] }],
   [/^(Câble sonde extérieure|Fil sonde)/, { nodes: [], edges: [['PI', 'SONDE']] }],
   [/^(Ventilateur|Cassette ventilateur|Goulotte ventilateur|Grille ventilateur|Plot caoutchouc|Poignée cassette|Connecteur ventilateur|Grillage inox maille 5 mm|Bloc isolant d'hiver|Isolant bloc d'hiver|Oreille bloc d'hiver)/, { nodes: ['FAN'], edges: [] }],
-  [/^Module interrupteur 12 V/, { nodes: ['SWF'], edges: [] }],
+  [/^Module relais 3 V/, { nodes: ['SWF'], edges: [] }],
   [/^Modules MOSFET/, { nodes: ['SW'], edges: [] }],
   [/^Convertisseur/, { nodes: ['BUCK'], edges: [] }],
   [/^Batterie/, { nodes: ['BAT'], edges: [] }],
   [/^Fusible/, { nodes: ['FUSE'], edges: [] }],
   [/^Régulateur/, { nodes: ['MPPT'], edges: [] }],
   [/^Panneau solaire/, { nodes: ['PV'], edges: [] }],
-  [/^Câble 12 V/, { nodes: [], edges: [['PV', 'MPPT']] }],
+  [/^(Câble 12 V|Connecteurs MC4)/, { nodes: [], edges: [['PV', 'MPPT']] }],
   [/^Fil régulateur → batterie/, { nodes: [], edges: [['MPPT', 'FUSE']] }],
   [/^Gaine des fils/, { nodes: [], edges: [['FUSE', 'RAIL']] }],
   [/^Fil fusible → batterie/, { nodes: [], edges: [['FUSE', 'BAT']] }],
   [/^Fil (fusible|batterie −) → Wago/, { nodes: [], edges: [['FUSE', 'RAIL']] }],
-  [/^Fil (Wago \+ → interrupteur|masse interrupteur)/, { nodes: [], edges: [['RAIL', 'SWF']] }],
+  [/^Fil Wago \+ → interrupteur/, { nodes: [], edges: [['RAIL', 'SWF']] }],
+  [/^Fil (3,3 V|masse) relais/, { nodes: [], edges: [['PI', 'SWF']] }],
   [/^Câble d'origine du ventilateur/, { nodes: [], edges: [['SWF', 'FAN'], ['RAIL', 'FAN'], ['PI', 'FAN']] }],
   [/^Fil interrupteur → ventilateur/, { nodes: [], edges: [['SWF', 'FAN']] }],
   [/^Fil ventilateur −/, { nodes: [], edges: [['RAIL', 'FAN']] }],
@@ -49,7 +50,7 @@ export const MAP: [RegExp, Keys][] = [
 ];
 /** Fiches des composants : les sections « ### … » du document (tableaux de paramètres), repérées par le début de leur titre. */
 export const FICHES: Record<string, string> = {
-  PV: 'Panneau solaire', MPPT: 'Régulateur de charge', BAT: 'Batterie', FUSE: 'Fusible', BUCK: 'Convertisseur', PI: 'Raspberry Pi', FAN: 'Ventilateur', SWF: 'Interrupteur 12 V du ventilateur',
+  PV: 'Panneau solaire', MPPT: 'Régulateur de charge', BAT: 'Batterie', FUSE: 'Fusible', BUCK: 'Convertisseur', PI: 'Raspberry Pi', FAN: 'Ventilateur', SWF: 'Relais 3 V du ventilateur',
   CAM1: 'Caméras', CAM2: 'Caméras', IR: 'Carte de 4 LED', IR2: 'Carte de 4 LED', SENS: 'Capteur de température', SONDE: 'Sonde de température extérieure', SW: 'Modules MOSFET', RAIL: 'Wago 221',
 };
 export const SECTIONS = (() => {

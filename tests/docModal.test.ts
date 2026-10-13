@@ -4,11 +4,11 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { enhancePrices } from '@/features/docs/DocModal/helpers';
 
 const KEY = 'plaques-prix-decoches';
-const TABLE = `<table><thead><tr><th>Groupe</th><th>Élément</th><th>Prix</th><th>Modèle exact / lien</th><th>Vérifié</th></tr></thead><tbody>
-<tr><td>Énergie</td><td>Batterie</td><td>100 €</td><td><a href="https://x.fr">fiche</a></td><td>[x]</td></tr>
-<tr><td>Énergie</td><td>Fusible</td><td>2,50 €</td><td>réf</td><td>[ ]</td></tr>
-<tr><td>Pi</td><td>Raspberry</td><td>80 €</td><td></td></tr>
-<tr><td>Pi</td><td>Gratuit</td><td>offert</td></tr>
+const TABLE = `<table><thead><tr><th>Groupe</th><th>Désignation</th><th>Quantité</th><th>Prix</th><th>Prix du lot</th><th>Modèle exact / lien</th><th>Vérifié</th></tr></thead><tbody>
+<tr><td>Énergie</td><td>Batterie</td><td>1</td><td>100 €</td><td>100 €</td><td><a href="https://x.fr">fiche</a></td><td>[x]</td></tr>
+<tr><td>Énergie</td><td>Fusible</td><td>1 sur 5</td><td>2,50 €</td><td>12,50 €</td><td>réf</td><td>[ ]</td></tr>
+<tr><td>Pi</td><td>Raspberry</td><td>1</td><td>80 €</td><td></td></tr>
+<tr><td>Pi</td><td>Gratuit</td><td>1</td><td>offert</td></tr>
 </tbody></table><table><thead><tr><th>Autre</th><th>x</th><th>y</th></tr></thead><tbody><tr><td>a</td><td>b</td><td>c</td></tr></tbody></table>`;
 
 const mount = (dev = false, doFetch: typeof fetch = (() => Promise.reject(new Error('pas de serveur'))) as typeof fetch) => { const root = document.createElement('div'); root.innerHTML = TABLE; enhancePrices(root, dev, doFetch); return root; };
@@ -27,13 +27,21 @@ describe('enhancePrices', () => {
     const root = mount();
     const r = rows(root);
     expect(r.map((x) => x.className)).toEqual(['doc-price-group', '', '', 'doc-price-group', '', '', 'doc-price-total']);
-    expect(num(r[0].children[2])).toBe(102.5);
-    expect(num(r[3].children[2])).toBe(80); // « offert » : prix 0
-    expect(num(r[6].children[2])).toBe(182.5);
+    expect(num(r[0].children[3])).toBe(102.5);
+    expect(num(r[3].children[3])).toBe(80); // « offert » : prix 0
+    expect(num(r[6].children[3])).toBe(182.5);
     expect(root.querySelector('thead')!.textContent).toContain('Modèle exact / lien');
-    expect(r[1].children[3].innerHTML).toContain('href="https://x.fr"'); // le lien est gardé
-    expect(r[5].children[3].innerHTML).toBe(''); // ligne sans 4ᵉ colonne
+    expect(r[1].children[5].innerHTML).toContain('href="https://x.fr"'); // le lien est gardé
+    expect(r[5].children[5].innerHTML).toBe(''); // ligne sans 4ᵉ colonne
     expect(rows(root).every((x) => x === r[6] || box(x).checked)).toBe(true);
+  });
+
+  it('colonne « Prix du lot » : sous-totaux et total du lot ; sans prix de lot, le prix du besoin compte', () => {
+    const r = rows(mount());
+    expect(num(r[0].children[4])).toBe(112.5); // 100 + 12,50
+    expect(num(r[3].children[4])).toBe(80); // pas de prix de lot : le besoin
+    expect(num(r[6].children[4])).toBe(192.5);
+    expect(num(r[2].children[4])).toBe(12.5);
   });
 
   it('colonne « Vérifié » : case par ligne lue du Markdown, compteurs par groupe et au total, indépendante de la case du total', () => {
@@ -41,9 +49,9 @@ describe('enhancePrices', () => {
     const r = rows(root);
     expect(root.querySelector('thead')!.textContent).toContain('Vérifié');
     expect([r[1], r[2], r[4], r[5]].map((x) => vbox(x).checked)).toEqual([true, false, false, false]);
-    expect(r[0].children[4].textContent).toBe('1 / 2 vérifiés');
-    expect(r[3].children[4].textContent).toBe('0 / 2 vérifiés');
-    expect(r[6].children[4].textContent).toBe('1 / 4 vérifiés');
+    expect(r[0].children[6].textContent).toBe('1 / 2 vérifiés');
+    expect(r[3].children[6].textContent).toBe('0 / 2 vérifiés');
+    expect(r[6].children[6].textContent).toBe('1 / 4 vérifiés');
     click(box(r[1])); // décocher l'inclusion ne change pas « Vérifié »
     expect(vbox(rows(root)[1]).checked).toBe(true);
   });
@@ -54,7 +62,7 @@ describe('enhancePrices', () => {
     click(vbox(rows(root)[2])); // Fusible -> vérifié
     click(vbox(rows(root)[1])); // Batterie (md [x]) -> pas vérifié
     expect(JSON.parse(localStorage.getItem(VKEY)!)).toEqual({ 'Énergie\u0000Fusible': true, 'Énergie\u0000Batterie': false });
-    expect(rows(root)[0].children[4].textContent).toBe('1 / 2 vérifiés');
+    expect(rows(root)[0].children[6].textContent).toBe('1 / 2 vérifiés');
     const again = rows(mount(false));
     expect([vbox(again[1]).checked, vbox(again[2]).checked]).toEqual([false, true]);
   });
@@ -111,11 +119,11 @@ describe('enhancePrices', () => {
     const r = rows(root);
     expect(r[1].className).toBe('doc-price-off');
     expect(box(r[1]).checked).toBe(false);
-    expect(num(r[0].children[2])).toBe(2.5);
-    expect(num(r[6].children[2])).toBe(82.5);
+    expect(num(r[0].children[3])).toBe(2.5);
+    expect(num(r[6].children[3])).toBe(82.5);
     expect(JSON.parse(localStorage.getItem(KEY)!)).toEqual(['Batterie']);
     click(box(rows(root)[1])); // on recoche
-    expect(num(rows(root)[6].children[2])).toBe(182.5);
+    expect(num(rows(root)[6].children[3])).toBe(182.5);
     expect(JSON.parse(localStorage.getItem(KEY)!)).toEqual([]);
   });
 
@@ -125,23 +133,23 @@ describe('enhancePrices', () => {
     let r = rows(root);
     expect(box(r[0]).checked).toBe(false);
     expect([r[1].className, r[2].className]).toEqual(['doc-price-off', 'doc-price-off']);
-    expect(num(r[0].children[2])).toBe(0);
-    expect(num(r[6].children[2])).toBe(80);
+    expect(num(r[0].children[3])).toBe(0);
+    expect(num(r[6].children[3])).toBe(80);
     expect(JSON.parse(localStorage.getItem(KEY)!).sort()).toEqual(['Batterie', 'Fusible']);
     click(box(rows(root)[0]));
     r = rows(root);
     expect(box(r[0]).checked).toBe(true);
-    expect(num(r[6].children[2])).toBe(182.5);
+    expect(num(r[6].children[3])).toBe(182.5);
   });
 
   it('relit les lignes décochées au montage, et ignore un stockage illisible', () => {
     localStorage.setItem(KEY, JSON.stringify(['Raspberry']));
     let r = rows(mount());
     expect(r[4].className).toBe('doc-price-off');
-    expect(num(r[6].children[2])).toBe(102.5);
+    expect(num(r[6].children[3])).toBe(102.5);
     localStorage.setItem(KEY, 'pas du json');
     r = rows(mount());
-    expect(num(r[6].children[2])).toBe(182.5);
+    expect(num(r[6].children[3])).toBe(182.5);
   });
 
   it('un stockage qui refuse l\'écriture ne casse pas le tableau', () => {
@@ -149,7 +157,7 @@ describe('enhancePrices', () => {
     const orig = Storage.prototype.setItem;
     Storage.prototype.setItem = () => { throw new Error('quota'); };
     try { click(box(rows(root)[1])); } finally { Storage.prototype.setItem = orig; }
-    expect(num(rows(root)[6].children[2])).toBe(82.5);
+    expect(num(rows(root)[6].children[3])).toBe(82.5);
   });
 });
 

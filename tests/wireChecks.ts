@@ -20,7 +20,7 @@ export function materialAt(p: Plank, pt: Vector3, t: number, margin: number): bo
 export function crossings(sc: PlankScene): [string, string, number][] {
   const t = sc.t, solids = sc.planks.filter((p) => !p.path && p.special !== 'doc' && !OK.test(p.name));
   const out = new Map<string, number>();
-  for (const w of sc.planks.filter((p) => p.special === 'wire' && p.path && p.name !== 'Câble 12 V vers le toit')) {
+  for (const w of sc.planks.filter((p) => p.special === 'wire' && p.path && !/^Câble 12 V/.test(p.name))) {
     const it = pathItems([w])[0], r = w.w / 2, a = it.ends[0], z = it.ends[1];
     for (let i = 1; i < it.pts.length; i++) {
       const pt = it.pts[i];

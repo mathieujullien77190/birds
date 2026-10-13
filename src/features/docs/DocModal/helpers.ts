@@ -2,9 +2,10 @@ import { marked } from 'marked';
 import { hljs } from './highlight';
 import { VERIFIED_KEY, isChecked, persistVerified, verifiedKey } from './verified';
 
-/** Tableau des prix interactif : un tableau Markdown dont l'en-tête est « Groupe | Élément | Prix » est regroupé par groupe, chaque ligne et chaque groupe ont une case à cocher,
+/** Tableau des prix interactif : un tableau Markdown dont l'en-tête est « Groupe | Désignation | Quantité | Prix | Prix du lot » est regroupé par groupe, chaque ligne et chaque groupe ont une case à cocher,
  *  les sous-totaux et le total se recalculent ; les lignes décochées sont gardées dans localStorage (`plaques-prix-decoches`).
- *  5ᵉ colonne « Vérifié » : case par ligne (hors du total), compteur « N / M vérifiés » par groupe et au total. Valeur de départ = le `[x]` / `[ ]` du Markdown ;
+ *  Colonnes : Groupe, Désignation, Quantité, Prix (le besoin exact), Prix du lot (ce qu'on paie en achetant le lot entier), lien, Vérifié ; sous-totaux et total donnent les deux prix.
+ *  Dernière colonne « Vérifié » : case par ligne (hors du total), compteur « N / M vérifiés » par groupe et au total. Valeur de départ = le `[x]` / `[ ]` du Markdown ;
  *  en développement (`dev`) un clic réécrit la ligne de `docs/schema-electronique.md` (plugin Vite) ; sinon, ou si la requête échoue, le choix reste dans localStorage (`plaques-prix-verifies`)
  *  et une note le dit. */
 export function enhancePrices(root: HTMLElement, dev: boolean = import.meta.env.DEV, doFetch?: typeof fetch) {
@@ -17,11 +18,12 @@ export function enhancePrices(root: HTMLElement, dev: boolean = import.meta.env.
   const saveOver = () => { try { localStorage.setItem(VERIFIED_KEY, JSON.stringify(over)); } catch { /* rien */ } };
   for (const table of Array.from(root.querySelectorAll('table'))) {
     const head = Array.from(table.querySelectorAll('thead th')).map((th) => th.textContent?.trim());
-    if (head[0] !== 'Groupe' || head[2] !== 'Prix') continue;
-    const rows = Array.from(table.querySelectorAll('tbody tr')).map((tr) => { const c = tr.querySelectorAll('td'); return { group: c[0].textContent!.trim(), label: c[1].textContent!.trim(), html: c[1].innerHTML, link: c[3]?.innerHTML ?? '', md: isChecked(c[4]?.textContent), price: parseFloat((c[2].textContent!).replace(/[^0-9.,]/g, '').replace(',', '.')) || 0 }; });
+    if (head[0] !== 'Groupe' || head[3] !== 'Prix') continue;
+    const num = (td: Element | undefined) => parseFloat((td?.textContent ?? '').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+    const rows = Array.from(table.querySelectorAll('tbody tr')).map((tr) => { const c = tr.querySelectorAll('td'); const price = num(c[3]); return { group: c[0].textContent!.trim(), label: c[1].textContent!.trim(), html: c[1].innerHTML, qty: c[2]?.innerHTML ?? '', link: c[5]?.innerHTML ?? '', md: isChecked(c[6]?.textContent), price, lot: c[4] && c[4].textContent!.trim() !== '' ? num(c[4]) : price }; });
     const groups = [...new Set(rows.map((r) => r.group))];
     const fmt = (v: number) => v.toLocaleString('fr-FR') + ' €';
-    const thead = table.querySelector('thead')!; thead.innerHTML = '<tr><th></th><th>Élément</th><th>Prix</th><th>Modèle exact / lien</th><th>Vérifié</th></tr>';
+    const thead = table.querySelector('thead')!; thead.innerHTML = '<tr><th></th><th>Désignation</th><th>Quantité</th><th>Prix</th><th>Prix du lot</th><th>Modèle exact / lien</th><th>Vérifié</th></tr>';
     const tbody = table.querySelector('tbody')!; tbody.innerHTML = '';
     const note = document.createElement('p'); note.className = 'doc-price-note';
     const say = (fileWritten: boolean) => { note.textContent = fileWritten ? 'Vérifié : le fichier docs/schema-electronique.md est réécrit à chaque case cochée.' : 'Vérifié : enregistré dans le navigateur seulement ; en développement, le fichier docs/schema-electronique.md est réécrit.'; };
@@ -38,24 +40,24 @@ export function enhancePrices(root: HTMLElement, dev: boolean = import.meta.env.
     };
     const render = () => {
       tbody.innerHTML = '';
-      let total = 0;
+      let total = 0, totalLot = 0;
       for (const g of groups) {
-        const items = rows.filter((r) => r.group === g), sub = items.filter((r) => !off.has(r.label)).reduce((t, r) => t + r.price, 0), allOff = items.every((r) => off.has(r.label));
-        total += sub;
+        const items = rows.filter((r) => r.group === g), sub = items.filter((r) => !off.has(r.label)).reduce((t, r) => t + r.price, 0), subLot = items.filter((r) => !off.has(r.label)).reduce((t, r) => t + r.lot, 0), allOff = items.every((r) => off.has(r.label));
+        total += sub; totalLot += subLot;
         const trg = document.createElement('tr'); trg.className = 'doc-price-group';
-        trg.innerHTML = `<td><input type="checkbox" ${allOff ? '' : 'checked'} title="Tout le groupe" /></td><td><strong>${g}</strong></td><td><strong>${fmt(sub)}</strong></td><td></td><td>${items.filter(isV).length} / ${items.length} vérifiés</td>`;
+        trg.innerHTML = `<td><input type="checkbox" ${allOff ? '' : 'checked'} title="Tout le groupe" /></td><td><strong>${g}</strong></td><td></td><td><strong>${fmt(sub)}</strong></td><td><strong>${fmt(subLot)}</strong></td><td></td><td>${items.filter(isV).length} / ${items.length} vérifiés</td>`;
         trg.querySelector('input')!.addEventListener('change', (e) => { const on = (e.target as HTMLInputElement).checked; for (const r of items) { if (on) off.delete(r.label); else off.add(r.label); } save(); render(); });
         tbody.appendChild(trg);
         for (const r of items) {
           const tr = document.createElement('tr'); const isOff = off.has(r.label); if (isOff) tr.className = 'doc-price-off';
-          tr.innerHTML = `<td><input type="checkbox" ${isOff ? '' : 'checked'} /></td><td>${r.html}</td><td>${fmt(r.price)}</td><td>${r.link}</td><td><input type="checkbox" class="doc-verified" ${isV(r) ? 'checked' : ''} title="Lien vérifié à la main" /></td>`;
+          tr.innerHTML = `<td><input type="checkbox" ${isOff ? '' : 'checked'} /></td><td>${r.html}</td><td>${r.qty}</td><td>${fmt(r.price)}</td><td>${fmt(r.lot)}</td><td>${r.link}</td><td><input type="checkbox" class="doc-verified" ${isV(r) ? 'checked' : ''} title="Lien vérifié à la main" /></td>`;
           tr.querySelector('input')!.addEventListener('change', (e) => { if ((e.target as HTMLInputElement).checked) off.delete(r.label); else off.add(r.label); save(); render(); });
           tr.querySelector('input.doc-verified')!.addEventListener('change', (e) => { setV(r, (e.target as HTMLInputElement).checked); render(); });
           tbody.appendChild(tr);
         }
       }
       const trt = document.createElement('tr'); trt.className = 'doc-price-total';
-      trt.innerHTML = `<td></td><td><strong>Total coché</strong></td><td><strong>${fmt(total)}</strong></td><td></td><td><strong>${rows.filter(isV).length} / ${rows.length} vérifiés</strong></td>`;
+      trt.innerHTML = `<td></td><td><strong>Total coché</strong></td><td></td><td><strong>${fmt(total)}</strong></td><td><strong>${fmt(totalLot)}</strong></td><td></td><td><strong>${rows.filter(isV).length} / ${rows.length} vérifiés</strong></td>`;
       tbody.appendChild(trt);
     };
     render();

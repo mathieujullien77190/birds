@@ -171,16 +171,16 @@ describe('fenêtre des documents', () => {
     const secs = splitSections(md);
     expect(secs.filter((s) => !s.intro).length).toBeGreaterThanOrEqual(10);
     const mermaidIn = secs.filter((s) => s.md.includes('```mermaid'));
-    expect(mermaidIn.map((s) => s.title)).toEqual(['Schéma général']); // un seul bloc, dans sa section
+    expect(mermaidIn.map((s) => s.title)).toEqual(['Schéma général', expect.stringMatching(/^Prix/)]); // le schéma, et le camembert des prix
     const prix = secs.find((s) => s.title.startsWith('Prix'))!;
-    expect(prix.md).toContain('| Groupe | Élément | Prix |');
+    expect(prix.md).toContain('| Groupe | Désignation | Quantité | Prix |');
     localStorage.setItem('plaques-doc-section', JSON.stringify({ schema: prix.id }));
     const { DOCS } = await import('@/features/docs/DocModal/constants');
     const { container } = render(<DocModal doc={DOCS[0]} onClose={() => {}} />);
     expect(container.ownerDocument.querySelector('.doc-price-total')).not.toBeNull(); // enhancePrices a tourné sur la section affichée
-    expect(container.ownerDocument.querySelector('pre.mermaid')).toBeNull();
+    expect(container.ownerDocument.querySelector('pre.mermaid')!.textContent).toContain('pie'); // la section « Prix » n'a que le camembert, pas le schéma
     fireEvent.click(screen.getByRole('button', { name: 'Schéma général' }));
-    expect(container.ownerDocument.querySelector('pre.mermaid')).not.toBeNull();
+    expect(container.ownerDocument.querySelector('pre.mermaid')!.textContent).not.toContain('pie');
     fireEvent.click(screen.getByRole('button', { name: 'Logiciel (Pi, page web)' }));
     expect(screen.getByRole('navigation', { name: 'Sommaire' })).toBeTruthy(); // les autres documents ont aussi leur sommaire
     fireEvent.click(screen.getByRole('button', { name: 'Code' }));

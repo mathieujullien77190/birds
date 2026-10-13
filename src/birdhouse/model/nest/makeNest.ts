@@ -233,7 +233,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const FOP_Y0 = r2(FY0 + t + 3), FOP_Y1 = r2(Math.min(FANY + FAN_OPEN / 2, n.L / 2 - 2)); // l'ouverture du plafond commence 3 mm après la paroi avant du siège (ligament) et reste au-dessus du nid (le mur intérieur est à L/2) : 56 de large
   const FOP_YC = r2((FOP_Y0 + FOP_Y1) / 2), FOP_H = r2(FOP_Y1 - FOP_Y0);
   const DUCT_Z1 = bodyH + VENT_Z0 + VENT_H + VENT_GAP; // haut de la fenêtre de sortie = haut des parois de la cassette et du siège
-  const CONX = r2(FANX + FO / 2 + 4), SWX = r2(CND_X - CND_D / 2 - 3.5 - 8.5), SWY = r2(D / 2 - t - 18); // connecteur de la cassette, module interrupteur
+  const CONX = r2(FANX + FO / 2 + 4), SWX = r2(W / 2 - t - 42), SWY = r2(-(D / 2 - t) + 42); // connecteur de la cassette, module interrupteur
   // PRISE D'AIR BASSE : un conduit de contreplaqué (4 parois + couvercle) dans l'isolant du mur GAUCHE, à l'AVANT, du dessous de la boîte à mi-hauteur du nid, puis une fente dans la paroi intérieure
   const AIR_X0 = r2(-(W / 2 - t) + 4.7), AIR_X1 = r2(-(n.l / 2 + t)), AIR_CX = r2((AIR_X0 + AIR_X1) / 2), AIR_LX = r2(AIR_X1 - AIR_X0), AIR_LY = 52; // ≥ 4,5 mm de bois entre le conduit et les fentes de dents voisines (mur extérieur à l'ouest, mur intérieur à l'est) ; plus long vers l'AVANT // empreinte extérieure du conduit
   const AIR_ZT = AIR_ZS + AIR_SH / 2, AIR_ZTOP = AIR_ZT + 8; // haut de la fente ; haut du conduit (≥ 4,5 mm de bois entre la fente et les crans du haut)
@@ -452,7 +452,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       .flatMap(([x0, y0, x1, y1], k) => block(`Isolant toit ${k + 1}`, x0, x1, y0, y1, bodyH + t, bodyH + roofH - t)),
   ];
   // outils pour les pièces de l'électronique (groupe Électronique) : pavé et fil
-  const part = (name: string, w: number, h: number, depth: number, x: number, y: number, z: number, special: 'block' | 'driver', color = '#cbd5e1', rot: Vec3 = [0, 0, 0]): Plank =>
+  const part = (name: string, w: number, h: number, depth: number, x: number, y: number, z: number, special: 'block' | 'driver' | 'relay', color = '#cbd5e1', rot: Vec3 = [0, 0, 0]): Plank =>
     ({ id: uid(), name, w, h, depth, pos: [x, y, z] as Vec3, rot, notches: [], holes: [], group: elecGroup, special, color });
   const wire = (name: string, color: string, path: Vec3[], d = 1.2): Plank => ({ id: uid(), name, w: d, h: d, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'wire' as const, color, path });
   const CVX = -(W / 2 - t) + 10 + 18, CVY = -(D / 2 - t) + 10 + 30; // convertisseur : coin avant gauche, 1 cm des murs
@@ -590,7 +590,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // module interrupteur 12 V (côté +), près du Wago + : le Noctua tourne encore à ≈ 20 % quand le PWM est à 0 %, il faut pouvoir couper son 12 V ; côté + (pas la masse) : une masse coupée ferait remonter 12 V dans les fils PWM / tachymètre
   wedgeNeed.push(31, 31, 17, 17); // besoin en cales de l'interrupteur
   const swFan: Plank[] = [
-    part('Module interrupteur 12 V ventilateur (côté +, commande 3,3 V)', 17, 25, 8, SWX, SWY, topZ + 3 + 4, 'block', '#7e22ce'),
+    part('Module relais 3 V ventilateur (côté +, commande 3,3 V)', 17, 70, 20, SWX, SWY, topZ + 3 + 10, 'relay', '#111827'),
   ];
   // fils : côté cassette (câble d'origine du ventilateur : quatre fils du ventilateur par le trou du couvercle jusqu'à la prise femelle), côté toit (de la prise mâle au module, au Wago − et au Pi, en contournant le siège)
   const cableFan = (): Plank => { const x = r2((PX(0) + PX(3)) / 2); return wire("Câble d'origine du ventilateur (gaine noire, 4 fils)", '#111827', ([[x, FANY + HOLE_Y, FAN_Z + FAN_T / 2], [x, FANY + HOLE_Y, FAN_Z + FAN_T / 2 + 4], [x, FANY + HOLE_Y, DUCT_Z1 - 4], [x, FANY + HOLE_Y, LID + 1.2], [x, CASS_Y0 + 3, LID + 1.2], [x, CASS_Y0 - 1.5, LID + 1.2]] as Vec3[]).map((q) => q.map(r2) as Vec3), 4); }; // UN seul câble noir gainé, celui vendu avec le Noctua (4 fils dedans : pas de couleur à suivre dans la 3D) ; points au centième : la cassette se range et se remet en place sans écart
@@ -604,16 +604,18 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   };
   const fanWires: Plank[] = [
     cableFan(),
-    wire('Fil Wago + → interrupteur ventilateur (rouge)', '#dc2626', [...wgEnd(wgPort(WGP_Y, 3, 0), [[r2(WGF - 29), r2(WGP_Y + 17.5), topZ + 12], [r2(WGF - 29), wgPort(WGP_Y, 3, 0), WG_Z]]).reverse(), [SWX + 4, SWY - 17, topZ + 12], [SWX + 4, SWY - 12.5, topZ + 11.5]] as Vec3[], 1.6),
-    // 12 V commuté : de l'interrupteur, par le couloir à l'est du siège (x = CONX, entre le siège et la gaine), jusqu'à l'espace devant le siège puis la prise mâle
-    wire('Fil interrupteur → ventilateur + (rouge)', '#dc2626', [[SWX - 3, SWY + 10, topZ + 11.5], [SWX - 6, YREAR - 1.5, topZ + 14], [SWX - 6, YREAR - 1.5, ZL(0)], [CONX, YREAR - 3, ZL(0)], [CONX, yG, ZL(0)], ...plugExit(0, 0).reverse()] as Vec3[], 1.6),
+    wire('Fil Wago + → interrupteur ventilateur (rouge)', '#dc2626', [...wgEnd(wgPort(WGP_Y, 3, 0), [[r2(WGF - 29), r2(WGP_Y + 17.5), topZ + 39], [r2(WGF - 29), wgPort(WGP_Y, 3, 0), WG_Z]]).reverse(), [SWX + 4.5, SWY - 38, topZ + 39], [SWX + 4.5, SWY - 28.5, topZ + 15.5]] as Vec3[], 1.6), // bornier COM du relais (bout sud du module)
+    // 12 V commuté : de la borne NO du relais, par le couloir à l'est du siège (x = CONX, entre le siège et la gaine), jusqu'à l'espace devant le siège puis la prise mâle
+    wire('Fil interrupteur → ventilateur + (rouge)', '#dc2626', [[SWX, SWY - 28.5, topZ + 15.5], [SWX, SWY - 38, topZ + 43], [SWX - 6, SWY - 38, topZ + 43], [SWX - 6, YREAR - 1.5, topZ + 43], [SWX - 6, YREAR - 1.5, ZL(0)], [CONX, YREAR - 3, ZL(0)], [CONX, yG, ZL(0)], ...plugExit(0, 0).reverse()] as Vec3[], 1.6),
     wire('Fil ventilateur − (noir)', '#111827', [...plugExit(3, 3), [CONX - 2, yG, ZL(3)], [CONX - 2, r2(WGP_Y - 8.5), ZL(3)], [CONX - 2, r2(WGP_Y - 8.5), topZ + 9], [CONX, r2(WGP_Y - 8.5), topZ + 9], ...wgEnd(wgPort(WGM_Y, 5, 1), [[r2(WGF - 25.2), r2(WGP_Y - 11), topZ + 9], [r2(WGF - 25.2), wgPort(WGM_Y, 5, 1), WG_Z]])] as Vec3[], 1.6),
-    wire('Fil masse interrupteur → Wago − (noir)', '#111827', [[SWX - 2, SWY - 12.5, topZ + 11.5], [SWX - 4, SWY - 16, topZ + 14], [r2(WGF + 2.8), r2(WGP_Y + 11.5), topZ + 22], [r2(WGF - 20.7), r2(WGP_Y + 11.5), topZ + 22], ...wgEnd(wgPort(WGM_Y, 5, 0), [[r2(WGF - 20.7), wgPort(WGM_Y, 5, 0), WG_Z]])] as Vec3[], 1.6),
     toPi('Fil PWM ventilateur (bleu)', '#2563eb', 1, plugExit(1, 1), yG, 5, PI_PIN_Y, true, ZL(1)),
     toPi('Fil tachymètre ventilateur (jaune)', '#eab308', 2, plugExit(2, 2), yG, 5, PI_PIN_Y - 2.54, false, ZL(2)),
     toPi('Fil masse commune ventilateur (noir)', '#111827', 3, plugExit(3, 4), yG, 6, PI_PIN_Y, true, ZL(4)),
     // GPIO27 (broche 13) : de l'interrupteur, par le couloir à l'est du siège (x = CONX + 2), puis devant le siège vers l'ouest (plus par-dessus la cassette)
-    toPi('Fil commande interrupteur ventilateur (orange)', '#f97316', 0, [[SWX + 3, SWY + 10, topZ + 11.5], [SWX + 4, YREAR - 6.5, topZ + 19], [CONX + 2, YREAR - 6.5, topZ + 19], [CONX + 2, yG - 1, topZ + 19], [CONX + 2, yG - 1, topZ + 36]], yG - 1, 6, PI_PIN_Y - 2.54, false, topZ + 36),
+    toPi('Fil commande interrupteur ventilateur (orange)', '#f97316', 0, [[SWX + 4.5, SWY + 28.5, topZ + 15.5], [SWX + 4.5, SWY + 28.5, topZ + 24], [SWX + 4.5, YREAR - 6.5, topZ + 24], [CONX + 2, YREAR - 6.5, topZ + 24], [CONX + 2, yG - 1, topZ + 24], [CONX + 2, yG - 1, topZ + 36]], yG - 1, 6, PI_PIN_Y - 2.54, false, topZ + 36),
+    // alimentation 3,3 V de la bobine du relais : VCC et GND du bornier de signal, mêmes couloirs que la commande ; le 3,3 V est partagé avec la sonde de dehors sur la broche 17 (un Wago 221-413 raccorde les deux cordons)
+    toPi('Fil 3,3 V relais (rouge)', '#dc2626', 4, [[SWX - 4.5, SWY + 28.5, topZ + 15.5], [SWX - 4.5, SWY + 28.5, topZ + 30], [SWX - 4.5, YREAR - 9.5, topZ + 30], [CONX + 5, YREAR - 9.5, topZ + 30], [CONX + 5, yG - 4, topZ + 30], [CONX + 5, yG - 4, topZ + 36]], yG - 4, 8, PI_PIN_Y - 2.54, false, topZ + 36),
+    toPi('Fil masse relais (noir)', '#111827', 5, [[SWX, SWY + 28.5, topZ + 15.5], [SWX, SWY + 28.5, topZ + 27], [SWX, YREAR - 12.5, topZ + 27], [CONX + 8, YREAR - 12.5, topZ + 27], [CONX + 8, yG - 7, topZ + 27], [CONX + 8, yG - 7, topZ + 36]], yG - 7, 12, PI_PIN_Y - 2.54, false, topZ + 36),
   ];
   // CONDUIT DE SORTIE : petit tube de contreplaqué (makeBox sans ses deux faces avant / arrière : quatre plaques crénelées) FIXE, collé à la face intérieure de la plaque arrière autour de sa fenêtre ;
   // la cassette (descendue par le haut) s'appuie sur son autre bout : fenêtre de la cassette, intérieur du conduit et fenêtre de la plaque ont la même section EXW × VENT_H
@@ -672,8 +674,22 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const jb = (lx: number, ly: number, lz: number): Vec3 => { const a = (TILT_P * Math.PI) / 180; return [SX + lx, r2(ly * Math.cos(a) - lz * Math.sin(a)), r2(195 + ly * Math.sin(a) + lz * Math.cos(a))]; };
   const solar: Plank[] = n.solar ? [
     { ...sp('Panneau solaire 100 W enjoy solar (92,5 × 58)', 925, 580, 35, SX, 0, 195, '#1e3a8a', [TILT_P, 0, 0]), special: 'solar' as const }, // posé sur un support métallique (pas dessiné : aucun piquet en bois), bord bas près du sol
-    { id: uid(), name: 'Câble 12 V vers le toit', w: 7, h: 7, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: solGroup, special: 'wire' as const, color: '#111827',
-      path: [jb(30, 175, -28), [SX + 38, 170, 235], [SX + 55, 120, 140], [SX + 60, 70, 60], [SX + 60, 40, 15], [300, 40, 6], [W / 2 + 95, RGY + 10, 4], [W / 2 + 55, RGY - 30, -14], [W / 2 + 30, RGY - 20, -50], [W / 2 + 10, RGY - 20, -68], [W / 2 - 2, RGY - 20, -68], [W / 2 - 8, RGY - 20, -40], [RT_X, r2(RGY - 20), RT_Z]] as Vec3[] },
+    ...(() => { // le panneau sort deux câbles de 90 cm (rouge +, noir −) terminés par des MC4 ; ils se branchent sur la rallonge solaire de 4 mm² (MC4 aux deux bouts) qui va jusqu'au régulateur
+      const full = [jb(30, 175, -28), [SX + 38, 170, 235], [SX + 55, 120, 140], [SX + 60, 70, 60], [SX + 60, 40, 15], [300, 40, 6], [W / 2 + 95, RGY + 10, 4], [W / 2 + 55, RGY - 30, -14], [W / 2 + 30, RGY - 20, -50], [W / 2 + 10, RGY - 20, -68], [W / 2 - 2, RGY - 20, -68], [W / 2 - 8, RGY - 20, -40], [RT_X, r2(RGY - 20), RT_Z]] as Vec3[];
+      const len = (a: Vec3, b: Vec3) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+      let acc = 0, cut = 1; const SPLIT = 900; // 90 cm de câble livré avec le panneau, le long du trajet
+      while (cut < full.length && acc + len(full[cut - 1], full[cut]) < SPLIT) { acc += len(full[cut - 1], full[cut]); cut++; }
+      const f = (SPLIT - acc) / len(full[cut - 1], full[cut]), p0 = full[cut - 1], p1 = full[cut];
+      const mid: Vec3 = [r2(p0[0] + (p1[0] - p0[0]) * f), r2(p0[1] + (p1[1] - p0[1]) * f), r2(p0[2] + (p1[2] - p0[2]) * f)];
+      const head = [...full.slice(0, cut), mid] as Vec3[], tail = [mid, ...full.slice(cut)] as Vec3[];
+      const off = (pts: Vec3[], dx: number): Vec3[] => pts.map(([x, y, z]) => [r2(x + dx), y, z] as Vec3);
+      const cable = (name: string, color: string, pts: Vec3[]): Plank => ({ id: uid(), name, w: 4.8, h: 4.8, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: solGroup, special: 'wire' as const, color, path: pts });
+      return [
+        cable('Câble 12 V panneau + (rouge, 90 cm, MC4)', '#dc2626', off(head, 2.5)), cable('Câble 12 V panneau − (noir, 90 cm, MC4)', '#111827', off(head, -2.5)),
+        { ...sp('Connecteurs MC4 panneau ↔ rallonge (2 paires, étanches IP67)', 24, 36, 16, mid[0], mid[1], mid[2], '#111827'), rot: [0, 0, 0] as Vec3 },
+        cable('Câble 12 V rallonge + (rouge, 4 mm², MC4 vers régulateur)', '#dc2626', [...off(tail, 2.5).slice(0, -1), [RT_X, r2(RGY - 20 + 2.5), RT_Z]] as Vec3[]), cable('Câble 12 V rallonge − (noir, 4 mm², MC4 vers régulateur)', '#111827', [...off(tail, -2.5).slice(0, -1), [RT_X, r2(RGY - 20 - 2.5), RT_Z]] as Vec3[]),
+      ];
+    })(),
   ] : [];
   // habillage (groupe spécial « Habillage ») : un pourtour en lambris de 10 mm d'épaisseur qui descend de 10 mm sous le nichoir, et un toit en okoumé qui déborde
 
@@ -925,7 +941,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const unnumber = (nm: string) => (start === 1 ? nm.replace(/^((?:Face avant|Face arrière|Côté droit|Côté gauche|Dessus|Dessous)(?: (?:ext|int|toit|compartiment))?|Grille anti-insectes) 1$/, "$1") : nm); // un seul nichoir : plus de « 1 » derrière les plaques des boîtes (les numéros des séries — lambris, cales, isolant… — restent)
   const ventGroup = uid(); // groupe « Ventilation » : tout ce qui sert à ventiler (cassette du ventilateur, grilles, clapets, interrupteur 12 V, fils, prise d'air basse) ; le bloc isolant d'hiver garde son groupe
   const airGroup = uid(); // groupe « Aération du corps » : le conduit de la prise d'air basse (5 plaques), monté dans le corps ; la sous-boîte isolante qui le bouche garde le groupe « Pièces d'hiver »
-  const finalPlanks = planks.map((p) => { let q = p.group && merged.has(p.group) ? { ...p, group: elecGroup, name: unnumber(p.name) } : { ...p, name: unnumber(p.name) }; if (q.path && q.special !== 'solar' && q.name !== 'Câble 12 V vers le toit') if (!/LED extérieures|^Nappe caméra 2/.test(q.name)) q = { ...q, path: q.path.map(underRoof) }; /* la nappe et les fils de la caméra 2 passent DANS le toit (canal du pan) : pas ramenés sous la pente */ const l = LINKS.find(([re]) => re.test(q.name)); if (VENT_PIECES.test(q.name)) q = { ...q, group: ventGroup }; else if (AIR_PIECES.test(q.name)) q = { ...q, group: airGroup }; return l ? { ...q, url: l[1] } : q; });
+  const finalPlanks = planks.map((p) => { let q = p.group && merged.has(p.group) ? { ...p, group: elecGroup, name: unnumber(p.name) } : { ...p, name: unnumber(p.name) }; if (q.path && q.special !== 'solar' && !/^Câble 12 V/.test(q.name)) if (!/LED extérieures|^Nappe caméra 2/.test(q.name)) q = { ...q, path: q.path.map(underRoof) }; /* la nappe et les fils de la caméra 2 passent DANS le toit (canal du pan) : pas ramenés sous la pente */ const l = LINKS.find(([re]) => re.test(q.name)); if (VENT_PIECES.test(q.name)) q = { ...q, group: ventGroup }; else if (AIR_PIECES.test(q.name)) q = { ...q, group: airGroup }; return l ? { ...q, url: l[1] } : q; });
   const spareGroup = uid(); // « Pièces fines de rechange » : THIN.copies exemplaires de chaque plaque fine, à plat derrière les pièces d'hiver et les baguettes de cale (à gauche du nichoir, à l'arrière : jamais sur eux)
   const spares = thinSpares(finalPlanks, t, spareGroup, r2(-W / 2 - SPARE_GAP), r2(D / 2 + SPARE_GAP + 100));
   return { planks: [...summerLayout({ t, fit, planks: finalPlanks }).planks, ...spares], group, name: 'Corps', groupNames: { [group]: 'Corps', [roofGroup]: 'Toit', [elecGroup]: 'Électronique', ...(n.lambris && n.pente ? { [coverGroup]: 'Couvercle' } : {}), [entryGroup]: 'Entrée', [isoGroup]: 'Isolant', [wGroup]: "Pièces d'hiver (rechange)", [stripGroup]: 'Baguettes de cale (à couper)', ...(spares.length ? { [spareGroup]: 'Pièces fines de rechange' } : {}), [ventGroup]: 'Ventilation', [airGroup]: 'Aération du corps', [lamGroup]: 'Habillage' } }; // un seul nichoir : groupes sans numéro, le corps s'appelle « Corps »

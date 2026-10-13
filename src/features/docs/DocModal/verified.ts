@@ -8,7 +8,7 @@ export const VERIFIED_ROUTE = '/__doc/verified';
 export interface VerifiedBody { groupe: string; element: string; verified: boolean }
 export type ApplyResult = { ok: true; md: string } | { ok: false; error: 'tableau' | 'introuvable' | 'ambigu' };
 
-const HEADER = '| Groupe | Élément | Prix |';
+const HEADER = '| Groupe | Désignation | Quantité | Prix |';
 const CELL = /\[[ xX]\](\s*\|\s*)$/;
 
 /** Texte brut d'une cellule Markdown : liens réduits à leur texte, `*` et `` ` `` retirés, espaces fusionnés. */

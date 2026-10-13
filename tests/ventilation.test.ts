@@ -41,7 +41,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(by(sc0, /^Cassette ventilateur/).length).toBeGreaterThanOrEqual(6);
     expect(by(sc0, /^Grille de sortie ventilation|^Grille d'aération du corps/)).toEqual([]); // grilles percées dans les plaques (« Face arrière toit », « Côté gauche int »), plus de plaque séparée
     one(sc0, /^Prise 4 broches du ventilateur/); one(sc0, /^Rallonge ventilateur 4 broches/);
-    one(sc0, /^Module interrupteur 12 V ventilateur \(côté \+, commande 3,3 V\)/);
+    one(sc0, /^Module relais 3 V ventilateur \(côté \+, commande 3,3 V\)/);
     expect(by(sc0, /^Cale /)).toEqual([]); // plus de cales de bois : des baguettes de contreplaqué à couper au montage (tests/wedge-strips.test.ts)
     const guard = one(sc0, /^Grille de protection ventilateur 60 mm \(fil d'acier\)/);
     expect(guard.special).toBe('guard'); expect(guard.holes).toEqual([]); // composant acheté, pas une plaque de contreplaqué percée
@@ -113,7 +113,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(Math.abs(hb.max.y - lb.min.y)).toBeLessThan(0.01); expect(hb.min.z).toBeLessThan(lb.max.z); expect(hb.max.z).toBeGreaterThan(lb.max.z); // collée sur la tranche avant du couvercle
     expect(head.group).toBe(lid.group); // la prise d'origine part avec la cassette (groupe Ventilation)
     expect(sc0.groupNames?.[plug.group ?? '']).toBe('Électronique'); // la prise mâle de la rallonge est de l'électronique
-    for (const re of [/^Module interrupteur 12 V ventilateur/, /^Fil PWM ventilateur/, /^Fil tachymètre ventilateur/, /^Fil masse commune ventilateur/, /^Fil interrupteur → ventilateur/, /^Fil commande interrupteur/]) expect(sc0.groupNames?.[one(sc0, re).group ?? ''], re.source).toBe('Électronique');
+    for (const re of [/^Module relais 3 V ventilateur/, /^Fil PWM ventilateur/, /^Fil tachymètre ventilateur/, /^Fil masse commune ventilateur/, /^Fil interrupteur → ventilateur/, /^Fil commande interrupteur/]) expect(sc0.groupNames?.[one(sc0, re).group ?? ''], re.source).toBe('Électronique');
     for (const re of [/^Câble d'origine du ventilateur/, /^Ventilateur Noctua/, /^Prise 4 broches du ventilateur/]) expect(sc0.groupNames?.[one(sc0, re).group ?? ''], re.source).toBe('Ventilation'); // le ventilateur, son câble et sa prise
     expect(gap(hb, aabb(handle, t))).toBeGreaterThan(1.5); expect(gap(pb, aabb(handle, t))).toBeGreaterThan(1.5);
     const passage = lid.holes.find((h) => Math.min(h.size, h.sh ?? h.size) <= 6 && Math.max(h.size, h.sh ?? h.size) >= 10)!; expect(passage).toBeTruthy(); expect(ligament(lid, passage).min).toBeGreaterThanOrEqual(4.5 - 1e-6); // passage du câble d origine, près du bord avant
@@ -184,7 +184,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     const ends = names.map((n) => { const p = one(sc0, new RegExp('^' + n.replace(/[()]/g, '\\$&') + '$')); return p.path![p.path!.length - 1]; });
     for (let i = 0; i < ends.length; i++) for (let j = i + 1; j < ends.length; j++) expect(new Vector3(...ends[i]).distanceTo(new Vector3(...ends[j]))).toBeGreaterThan(2);
     for (const q of sc0.planks.filter((x) => x.special === 'wire' && !names.includes(x.name) && x.path)) { const e = q.path![q.path!.length - 1]; for (const f of ends) if (Math.hypot(e[0] - f[0], e[1] - f[1]) < 1.5) throw new Error(`${q.name} arrive sur la même broche que ${f}`); }
-    expect(by(sc0, /^Fil .*(ventilateur|cassette|interrupteur)/)).toHaveLength(8); // les quatre fils du ventilateur ne forment plus qu'un câble noir
+    expect(by(sc0, /^Fil .*(ventilateur|cassette|interrupteur)/)).toHaveLength(7); // plus de fil de masse d'interrupteur (le relais coupe le +), les quatre fils du ventilateur ne forment plus qu'un câble noir
     expect(by(sc0, /^Câble d'origine du ventilateur/)).toHaveLength(1);
   });
   it('la sortie : fenêtre de la plaque arrière en face de celle de la cassette, jamais dans la zone du Pi ni de la batterie', () => {
@@ -271,7 +271,7 @@ describe('poignées en U : sens de pose', () => {
 
 describe('Wago du rail 12 V : pavés aux cotes officielles, fils alignés', () => {
   const plus = () => one(sc0, /^Wago 221-413 .3 entrées. rail 12 V .$/), minus = () => one(sc0, /^Wago 221-415 .5 entrées. rail 12 V −$/);
-  const WIRES: [() => Plank, string[]][] = [[plus, ['Fil Wago + → interrupteur ventilateur (rouge)', 'Fil fusible → Wago + (rouge)', 'Fil rail → convertisseur + (rouge)']], [minus, ['Fil masse interrupteur → Wago − (noir)', 'Fil ventilateur − (noir)', 'Fil rail → convertisseur − (noir)', 'Fil batterie − → Wago − (noir)']]];
+  const WIRES: [() => Plank, string[]][] = [[plus, ['Fil Wago + → interrupteur ventilateur (rouge)', 'Fil fusible → Wago + (rouge)', 'Fil rail → convertisseur + (rouge)']], [minus, ['Fil ventilateur − (noir)', 'Fil rail → convertisseur − (noir)', 'Fil batterie − → Wago − (noir)']]];
   const wire = (nm: string) => one(sc0, new RegExp('^' + nm.replace(/[()+→−]/g, '.') + '$'));
   it('simples pavés (special block), cotes WAGO : 221-413 = 18,8 × 8,4 × 18,8 mm, 221-415 = 30 × 8,4 × 18,8 mm', () => {
     for (const [w, len] of [[plus(), 18.8], [minus(), 30]] as [Plank, number][]) { expect(w.special).toBe('block'); expect([w.w, w.h, w.depth]).toEqual([18.8, len, 8.4]); expect(w.holes).toEqual([]); expect(w.poly).toBeUndefined(); } // w : profondeur (sens des fils), h : largeur de la rangée, depth : hauteur
@@ -294,7 +294,7 @@ describe('Wago du rail 12 V : pavés aux cotes officielles, fils alignés', () =
       expect(new Set(used).size).toBe(used.length); expect(names.length).toBeLessThanOrEqual(n); // la 5e entrée du 221-415 reste libre
       expect(used.slice().sort((p, q) => p - q), 'ordre des ports du nord au sud').toEqual(used.slice().sort((p, q) => p - q));
     }
-    expect(WIRES[1][1].length).toBe(4); // le − : 4 fils sur 5 entrées
+    expect(WIRES[1][1].length).toBe(3); // le − : 3 fils sur 5 entrées (plus de masse d'interrupteur : le relais coupe le +)
   });
   it('ordre des fils = ordre des ports : aucun fil du même Wago n en croise ou n en touche un autre', () => {
     for (const [get, names] of WIRES) { get(); const items = pathItems(names.map(wire)); expect(pathContacts(items, 0.3).filter((c) => !c.shared).map((c) => c.A + ' / ' + c.B)).toEqual([]); }

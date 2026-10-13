@@ -210,12 +210,12 @@ export const SEQ: Rule[] = [
   P('elec-convertisseur', 'elec', 'installer', /^Convertisseur/, { text: 'Sortie USB-C directement dans le Pi : pas de câble à confectionner. Taille estimée dans le modèle, à confirmer avec le module acheté.' }),
   P('elec-wago-plus', 'elec', 'installer', /^Wago 221-413/, { text: 'Wago : lever le levier, glisser le fil dénudé de 11 mm, rabattre le levier. Aucune soudure.' }),
   P('elec-wago-moins', 'elec', 'installer', /^Wago 221-415/),
-  P('elec-interrupteur', 'elec', 'installer', /^Module interrupteur 12 V ventilateur/, { text: 'Côté +12 V, près du Wago + : couper la masse ferait remonter 12 V dans les fils PWM et tachymètre, vers les GPIO du Pi (3,3 V seulement).' }),
+  P('elec-interrupteur', 'elec', 'installer', /^Module relais 3 V ventilateur/, { text: 'Côté +12 V, près du Wago + : couper la masse ferait remonter 12 V dans les fils PWM et tachymètre, vers les GPIO du Pi (3,3 V seulement).' }),
   P('elec-rallonge', 'elec', 'installer', /^Rallonge ventilateur/, { text: 'Prise mâle collée sur la face avant du siège, contre son haut ; la prise femelle de la cassette s\'y emboîte à la verticale.' }),
   P('elec-fil-wago-interrupteur', 'elec', 'cabler', /^Fil Wago \+ → interrupteur/),
   P('elec-fil-interrupteur-ventilateur', 'elec', 'cabler', /^Fil interrupteur → ventilateur/),
   P('elec-fil-ventilateur-moins', 'elec', 'cabler', /^Fil ventilateur /),
-  P('elec-fil-masse-interrupteur', 'elec', 'cabler', /^Fil masse interrupteur/),
+  P('elec-fil-alim-relais', 'elec', 'cabler', /^Fil (3,3 V|masse) relais/, { all: true, text: 'La bobine du relais est en 3 V : son VCC va sur le 3,3 V du Pi (broche 17, partagée avec la sonde par un Wago 221-413) et son GND sur la masse (broche 25). Ne jamais le brancher sur le 5 V.' }),
   P('elec-fil-pwm', 'elec', 'cabler', /^Fil PWM ventilateur/),
   P('elec-fil-tacho', 'elec', 'cabler', /^Fil tachymètre ventilateur/),
   P('elec-fil-masse-commune', 'elec', 'cabler', /^Fil masse commune/),
@@ -239,7 +239,7 @@ export const SEQ: Rule[] = [
 
   // ---- g. Panneau solaire, tout dernier ----
   P('sol-panneau', 'solaire', 'installer', /^Panneau solaire/, { text: 'Déporté à environ 70 cm à droite du nichoir, incliné de 35° vers l\'avant, son bord bas près du sol.' }),
-  P('sol-cable', 'solaire', 'cabler', /^Câble 12 V vers le toit/, { text: [
+  P('sol-cable', 'solaire', 'cabler', /^(Câble 12 V|Connecteurs MC4)/, { all: true, text: [
     'Il part de la boîte de jonction au dos du panneau, longe le sol, remonte contre l\'habillage et passe sous l\'habillage, sans le percer, jusqu\'au régulateur sous le nichoir. Le panneau se branche en dernier, une fois les essais validés.',
     "Ensuite, suivre le niveau de la batterie sur la page du Pi : la stratégie d'énergie prévoit de mesurer plusieurs jours avant de décider de passer de 6 Ah à 12 Ah.",
   ].join('\n') }),

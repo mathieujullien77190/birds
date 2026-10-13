@@ -6,13 +6,13 @@ import { applyVerified, isChecked, isLocalHost, parseVerifiedBody, persistVerifi
 
 const MD = [
   'Avant', '',
-  '| Groupe | Élément | Prix | Modèle exact / lien | Vérifié |',
-  '| --- | --- | --- | --- | --- |',
-  '| Pi | Raspberry **Pi 5** | 75 € | [page](https://x.fr/a) | [ ] |',
-  '| Pi | Caméra | 35 € | lien à trouver — référence exacte : caméra | [x] |',
-  '| Corps | Caméra | 5 € | fabriqué | [ ] |',
-  '| Corps | Colle | 8 € | fabriqué | [ ] |',
-  '| Corps | Colle | 9 € | fabriqué | [ ] |',
+  '| Groupe | Désignation | Quantité | Prix | Prix du lot | Modèle exact / lien | Vérifié |',
+  '| --- | --- | --- | --- | --- | --- | --- |',
+  '| Pi | Raspberry **Pi 5** | 1 | 75 € | 75 € | [page](https://x.fr/a) | [ ] |',
+  '| Pi | Caméra | 1 | 35 € | 35 € | lien à trouver — référence exacte : caméra | [x] |',
+  '| Corps | Caméra | 1 | 5 € | 5 € | fabriqué | [ ] |',
+  '| Corps | Colle | 1 | 8 € | 8 € | fabriqué | [ ] |',
+  '| Corps | Colle | 1 | 9 € | 9 € | fabriqué | [ ] |',
   '', 'Après [ ] | [ ] |',
 ].join('\n');
 const md = (r: unknown) => (r as { md: string }).md;
@@ -21,14 +21,14 @@ describe('applyVerified', () => {
   it('coche et décoche la seule ligne visée, le reste du fichier est intact', () => {
     const r = applyVerified(MD, 'Pi', 'Raspberry Pi 5', true);
     const a = md(r).split('\n'), b = MD.split('\n');
-    expect(a.filter((l, i) => l !== b[i])).toEqual(['| Pi | Raspberry **Pi 5** | 75 € | [page](https://x.fr/a) | [x] |']);
+    expect(a.filter((l, i) => l !== b[i])).toEqual(['| Pi | Raspberry **Pi 5** | 1 | 75 € | 75 € | [page](https://x.fr/a) | [x] |']);
     expect(applyVerified(md(r), 'Pi', 'Raspberry Pi 5', false)).toEqual({ ok: true, md: MD });
     expect(md(applyVerified(MD, 'Pi', 'Caméra', true))).toBe(MD); // déjà cochée : idempotent
   });
   it('le groupe départage deux éléments de même nom', () => {
     const r = md(applyVerified(MD, 'Corps', 'Caméra', true));
-    expect(r).toContain('| Corps | Caméra | 5 € | fabriqué | [x] |');
-    expect(r).toContain('| Pi | Caméra | 35 € | lien à trouver — référence exacte : caméra | [x] |');
+    expect(r).toContain('| Corps | Caméra | 1 | 5 € | 5 € | fabriqué | [x] |');
+    expect(r).toContain('| Pi | Caméra | 1 | 35 € | 35 € | lien à trouver — référence exacte : caméra | [x] |');
   });
   it('ligne ambiguë, inexistante, ou tableau absent : échec propre', () => {
     expect(applyVerified(MD, 'Corps', 'Colle', true)).toEqual({ ok: false, error: 'ambigu' });
@@ -36,13 +36,13 @@ describe('applyVerified', () => {
     expect(applyVerified('# rien', 'Pi', 'x', true)).toEqual({ ok: false, error: 'tableau' });
   });
   it('ligne sans case « Vérifié » en fin : introuvable (jamais de réécriture à l\'aveugle)', () => {
-    const t = '| Groupe | Élément | Prix |\n| - | - | - |\n| A | b | 1 € | x | oui |\n';
+    const t = '| Groupe | Désignation | Quantité | Prix |\n| - | - | - | - |\n| A | b | 1 | 1 € | 1 € | x | oui |\n';
     expect(applyVerified(t, 'A', 'b', true)).toEqual({ ok: false, error: 'introuvable' });
   });
   it('garde les fins de ligne CRLF (et le LF d\'un fichier LF)', () => {
     const crlf = MD.replace(/\n/g, '\r\n');
     const r = md(applyVerified(crlf, 'Corps', 'Caméra', true));
-    expect(r).toBe(crlf.replace('| Corps | Caméra | 5 € | fabriqué | [ ]', '| Corps | Caméra | 5 € | fabriqué | [x]'));
+    expect(r).toBe(crlf.replace('| Corps | Caméra | 1 | 5 € | 5 € | fabriqué | [ ]', '| Corps | Caméra | 1 | 5 € | 5 € | fabriqué | [x]'));
     expect(md(applyVerified(MD, 'Corps', 'Caméra', true))).not.toContain('\r');
   });
   it('s\'arrête au bout du tableau', () => {
@@ -50,7 +50,7 @@ describe('applyVerified', () => {
   });
   it('le vrai document : chaque ligne du tableau se retrouve par groupe + élément', () => {
     const doc = readFileSync(join(__dirname, '..', 'docs', 'schema-electronique.md'), 'utf8');
-    const start = doc.indexOf('| Groupe | Élément | Prix |'), rows = doc.slice(start, doc.indexOf('\n\n', start)).split('\n').slice(2);
+    const start = doc.indexOf('| Groupe | Désignation | Quantité | Prix |'), rows = doc.slice(start, doc.indexOf('\n\n', start)).split('\n').slice(2);
     for (const l of rows) {
       const c = l.split('|').slice(1, -1).map((x) => x.trim());
       expect(applyVerified(doc, c[0], c[1], true).ok, l).toBe(true);

@@ -52,6 +52,8 @@ export const PALETTE = {
   irCathode: '#111827', // patte courte (cathode, −)
   sensorBlue: '#1d4ed8',
   terminalBlue: '#2563eb',
+  terminalGreen: '#16a34a',
+  relayBlue: '#1d4ed8',
   ledGreen: '#22c55e',
   // panneau solaire
   solarGlass: '#0b1b4a',

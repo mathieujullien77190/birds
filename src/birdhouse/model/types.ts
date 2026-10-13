@@ -17,7 +17,7 @@ export interface Plank {
   /** Élément spécial (pas du bois) : dessiné par son propre modèle 3D, exclu de la découpe laser. « camera » (carte caméra) ou « ir » (carte de LED infrarouges). */
   /** Contour libre (repère de la plaque, sens trigonométrique) : remplace le rectangle (crans et trous restent possibles). */
   poly?: [number, number][];
-  special?: 'camera' | 'ir' | 'bar' | 'pi' | 'cable' | 'wire' | 'case' | 'block' | 'sensor' | 'fan' | 'driver' | 'solar' | 'doc' | 'conduit' | 'guard' | 'pin';
+  special?: 'camera' | 'ir' | 'bar' | 'pi' | 'cable' | 'wire' | 'case' | 'block' | 'sensor' | 'fan' | 'driver' | 'relay' | 'solar' | 'doc' | 'conduit' | 'guard' | 'pin';
   /** « block » (pavé) ou plaque d'un autre matériau (`material`) : épaisseur réelle selon z, au lieu de l'épaisseur du bois. */
   depth?: number;
   /** Caméra, LED infrarouges, capteur : épaisseur de bois que traverse leur corps (lentille, LED, puce). La carte s'appuie sur une face du bois, le bout du corps affleure l'autre face. */
