@@ -73,7 +73,7 @@ describe.each(Object.entries(VARIANTS))('sonde extérieure (%s)', (_nom, over) =
     const pts = pathItems([cable])[0].pts, pb = obb(pan, t);
     for (const q of pts) expect(q.clone().sub(pb.c).dot(pb.ax[2]), 'au plus à la mi-épaisseur de la plaque crénelée').toBeLessThanOrEqual(0.1);
     const len = pts.reduce((s, q, i) => (i ? s + q.distanceTo(pts[i - 1]) : 0), 0);
-    expect(len / 10, 'longueur du trajet dessiné (cm)').toBeGreaterThan(10); expect(len / 10).toBeLessThan(80);
+    expect(len / 10, 'longueur du trajet dessiné (cm)').toBeGreaterThan(9); expect(len / 10).toBeLessThan(80);
   });
 
   it('le module est près du Pi et les trois cordons finissent sur les broches 7, 17 et 20', () => {

@@ -366,14 +366,14 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const camZc = floorTop + 0.8 + 2.1; // hauteur du connecteur de la caméra
   const piZc = piZ + PI_CSI[2] - 2.6; // hauteur moyenne du connecteur du Pi (0,8 à 6,1 au-dessus du centre de la carte)
   // la nappe de la caméra 2 : LONGUE (la caméra est dehors) ; elle part du 2ᵉ port du Pi, court sur le dessus du toit, SORT par le trou de la plaque avant du toit et redescend jusqu'au connecteur de la caméra
-  const MX = -50, MY = -16, MZ = topZ + 3; // module 2 × MOSFET des LED (20 × 14 × 6), posé sur le dessus du toit devant le Pi
+  const MX = -50, MY = -16, MZ = topZ + 3; // les deux modules MOSFET des LED (un par carte), représentés par un seul pavé de 23 × 36 × 4 (deux cartes plates de 23 × 17 mm l'une derrière l'autre, sans bornier : les fils sont soudés), posés sur le dessus du toit devant le Pi
   const ledSwitch: Plank[] = n.cam > 0 ? [
-    { id: uid(), name: 'Module 2 MOSFET (LED infrarouges on / off)', w: 20, h: 14, depth: 6, pos: [MX, MY, MZ + 3] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'driver' as const, color: '#1f2937' },
+    { id: uid(), name: 'Modules MOSFET LR7843 (LED infrarouges on / off, un par carte)', w: 23, h: 36, depth: 4, pos: [MX, MY, MZ + 2] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'driver' as const, color: '#1f2937' },
     // masse du module → masse du Pi (broche 6) ; commandes : IN1 = GPIO23 (broche 16) pour les LED du nid, IN2 = GPIO24 (broche 18) pour les LED extérieures
     ...([['Fil masse module LED (noir)', '#111827', 2, 0, -4], ['Fil IN1 LED du nid (gris, GPIO23 broche 16)', '#6b7280', 7, 0, 0], ['Fil IN2 LED extérieures (blanc, GPIO24 broche 18)', '#e5e7eb', 8, 0, 4]] as const).map(([nm, color, pinIdx, _r, dx]): Plank => {
       const [xt, yt] = pw(PI_PIN_X0 + pinIdx * 2.54, PI_PIN_Y);
       return { id: uid(), name: nm, w: 1.2, h: 1.2, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'wire' as const, color,
-        path: [[MX + dx, MY + 7, MZ + 4], [MX + dx, MY + 12, MZ + 16], [xt + 6, yt, topZ + 20], [xt, yt, piZ + 8], [xt, yt, piZ + 3.5]] as Vec3[] };
+        path: [[MX + dx * 4, MY + 18, MZ + 4.5], [MX + dx * 4, MY + 23, MZ + 16], [xt + 6, yt, topZ + 20], [xt, yt, piZ + 8], [xt, yt, piZ + 3.5]] as Vec3[] };
     }),
   ] : [];
   // trajet commun (de l'intérieur vers la caméra 2) : sous le pan à l'avant du caisson, MONTE par l'extrémité arrière (B) du canal, court DANS le canal (h = 2,5 : au milieu de la plaque crénelée de 5 mm, sous la plaque pleine), redescend par l'extrémité avant (A), dans le débord, jusqu'au-dessus de la caméra ; perpendiculaire au pan aux deux bouts
@@ -388,7 +388,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     const yGap = r2(irY + IR_W / 2 + 1.5); // couloir entre la carte et la caméra
     const hw = r2(plateTop + IR_LIFT + 1.6 + 1); // les fils redescendent à gauche de la nappe, restent au-dessus de la caméra, puis plongent sur la carte des LED
     return { id: uid(), name: nm, w: 1.2, h: 1.2, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'wire' as const, color,
-      path: [...(pinIdx === 9 ? [[MX + 4, MY - 7, MZ + 4], [MX + 4, MY - 12, MZ + 10], [sx + 10, -34, topZ + 24]] as Vec3[] : [[xt, yt, piZ + 3.5], [xt, yt, piZ + 10], [xt + dx, yt - 10, topZ + 27]] as Vec3[]), ...panRoute(sx, true), [sx, camCon[1], hw], [sx, yGap, hw], [end[0], yGap, hw], [end[0], end[1], hw], end] as Vec3[] };
+      path: [...(pinIdx === 9 ? [[MX + 4, MY - 18, MZ + 4.5], [MX + 4, MY - 23, MZ + 10], [sx + 10, -34, topZ + 24]] as Vec3[] : [[xt, yt, piZ + 3.5], [xt, yt, piZ + 10], [xt + dx, yt - 10, topZ + 27]] as Vec3[]), ...panRoute(sx, true), [sx, camCon[1], hw], [sx, yGap, hw], [end[0], yGap, hw], [end[0], end[1], hw], end] as Vec3[] };
   }) : [];
   const cable2: Plank[] = n.cam2 ? [{
     id: uid(), name: "Nappe caméra 2 (longue, vers l'extérieur)", w: 16, h: 0.3, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'cable' as const,
@@ -409,7 +409,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     const [padX, padY] = pinIdx === 1 ? irHole(2, 3) : irHole(2, 10); // pastilles de la carte de LED : 5 V en colonne 2 rangée 3, masse en colonne 2 rangée 10
     const sx = r2(IR_X + padX), sy = r2(CAM_Y + padY), zPad = r2(floorTop + 0.8 + IR_LIFT + 0.8 + 0.4), px = PI_PIN_X0 + pinIdx * 2.54, top = topZ + 19.5 + dx * 0.4; // au-dessus de la carte du Pi (haut à topZ + 15,5)
     return { id: uid(), name: nm, w: 1.2, h: 1.2, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'wire' as const, color,
-      path: [[sx, sy, zPad], [sx, sy, floorTop + 14], [sx, CAM_Y + 6, floorTop + 14], [sx, CAM_Y + 9, roofTop - 8], [sx, CAM_Y + 14, top], ...(pinIdx === 2 ? [[MX + 16, MY - 2, top], [MX + 10, MY - 2, MZ + 4]] as Vec3[] : [[...pw(px, 20), top], [...pw(px, PI_PIN_Y), piZ + 8], [...pw(px, PI_PIN_Y), piZ + 3.5]] as Vec3[])] as Vec3[] }; // la masse des LED passe par le module (OUT1) : le Pi peut les éteindre
+      path: [[sx, sy, zPad], [sx, sy, floorTop + 14], [sx, CAM_Y + 6, floorTop + 14], [sx, CAM_Y + 9, roofTop - 8], [sx, CAM_Y + 14, top], ...(pinIdx === 2 ? [[MX + 16, MY - 2, top], [MX + 8, MY - 2, MZ + 4.5]] as Vec3[] : [[...pw(px, 20), top], [...pw(px, PI_PIN_Y), piZ + 8], [...pw(px, PI_PIN_Y), piZ + 3.5]] as Vec3[])] as Vec3[] }; // la masse des LED passe par le module (OUT1) : le Pi peut les éteindre
   }) : [];
   // bloc d'entrée : carrés de OPEN × OPEN percés du trou d'envol, empilés sur toute l'épaisseur de la double paroi (de la face extérieure à la face intérieure),
   // avec un surplus (+12) : une collerette derrière le trou, à l'extérieur du mur extérieur, et tous les carrés qui sont dans l'isolant, entre les deux murs ; seuls les carrés qui traversent les murs restent à OPEN ;
@@ -468,7 +468,9 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   wedgeNeed.push(66, 66, 36, 36); // besoin en cales du convertisseur (66 + 66 + 36 + 36) : plus de pièces, seulement des longueurs
   // alimentation : toujours présente (le Pi en a besoin) — batterie 4 × 32700, fusible, deux Wago du rail 12 V, convertisseur 12 → 5 V, leurs cales et leurs fils
   const power: Plank[] = [
-    part('Convertisseur 12 V → 5 V 5 A USB-C (taille à confirmer, ≈ 60 × 36 × 16)', 36, 60, 16, CVX, CVY, topZ + 3 + 8, 'block', '#0e7490'), // centré dans la place libre de l'avant gauche, calé
+    part('Convertisseur 12 V → USB-C PD Konnected 65 W, coudé (taille à confirmer, ≈ 60 × 36 × 16)', 36, 60, 16, CVX, CVY, topZ + 3 + 8, 'block', '#0e7490'), // centré dans la place libre de l'avant gauche, calé
+    // câble USB-C (non fourni avec le convertisseur) : de la sortie coudée du convertisseur, au-dessus du module MOSFET, jusqu'à la prise USB-C du Pi 5 (bord est de la carte, à 11,2 mm de son coin, tournée vers l'est)
+    wire('Câble USB-C convertisseur → Pi (non fourni, 20 à 30 cm)', '#1f2937', [[CVX + 8, CVY + 30, topZ + 17], [CVX + 8, CVY + 36, topZ + 24], [r2(pw(-31.3, -28)[0] + 10), r2(CVY + 36), topZ + 24], [r2(pw(-31.3, -28)[0] + 10), r2(pw(-31.3, -28)[1]), topZ + 24], [r2(pw(-31.3, -28)[0] + 10), r2(pw(-31.3, -28)[1]), r2(piZ + 3)], [r2(pw(-31.3, -28)[0] + 3), r2(pw(-31.3, -28)[1]), r2(piZ + 3)]] as Vec3[], 4),
     part('Fusible lame 15 A (19 × 18 × 5, posé à plat)', 19, 18.5, 5, FUX, FUY, -2.5, 'block', '#dc2626'), // sous le fond, dans le couloir entre la batterie et le régulateur, collé contre le dessous du nichoir, au plus près du + de la batterie
     part('Wago 221-413 (3 entrées) rail 12 V +', WG_W, WG_L3, WG_H, WGBX, WGP_Y, WG_Z, 'block', '#f97316'), // bornier du rail 12 V : le fusible, l'interrupteur du ventilateur, le convertisseur
     part('Wago 221-415 (5 entrées) rail 12 V −', WG_W, WG_L5, WG_H, WGBX, WGM_Y, WG_Z, 'block', '#9ca3af'), // batterie −, convertisseur −, ventilateur −, masse de l'interrupteur (+ 1 entrée libre) ; taille à vérifier sur la fiche WAGO
@@ -503,18 +505,18 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const sondeX = r2(-W / 2 - lamT - 4 - SONDE_D / 2); // sonde 4 mm devant l'habillage
   const sondeS = (SONDE_Y - PAN_YMID) / PAN_COS, sondeC = panPt(sondeX, sondeS, -SONDE_D / 2), sondeBack = panPt(sondeX, sondeS + SONDE_LEN / 2, -SONDE_D / 2); // centre et bout arrière (sortie du câble) de la sonde, collée sous le pan
   const SONDE_CH_W = 8, SONDE_SC = r2(sondeS + SONDE_LEN / 2 + 6), SONDE_XA = r2(sondeX - SONDE_CH_W / 2), SONDE_XB = r2(-(W / 2 - 6) + 15); // canal du câble dans la plaque crénelée du toit : largeur 8, centré à 6 mm derrière le bout de la sonde (SONDE_SC, le long de la pente), de l'à-plomb de la sonde (XA) jusque 15 mm derrière la face intérieure de la baguette gauche (XB)
-  const DSX = r2(-(W / 2 - t) + 12), DSY = r2(piY - 42.5 - 10), DSZ = topZ + 3 + 3; // module 3 broches : 16 × 10 × 6, sur le dessus du toit, devant le Pi, contre le mur gauche
+  const DSX = r2(-(W / 2 - t) + 13), DSY = r2(piY - 42.5 - 10), DSZ = topZ + 3 + 6; // module 3 broches à bornier à vis : 20,5 × 23 × 12 (carte de 20,5 × 23 mm, bornier de 12 mm de haut), sur le dessus du toit, devant le Pi, contre le mur gauche
   const sondeCanalY = panPt(r2(-(W / 2 - 6) + 12), r2(SONDE_SC + 3), -9)[1]; // ordonnée (monde) où le câble ressort du canal
   const probeSet: Plank[] = [
     part('Sonde de température extérieure DS18B20 (étanche, tube inox Ø 6 × 50, câble 1 à 3 m)', SONDE_D, SONDE_LEN, SONDE_D, sondeC[0], sondeC[1], sondeC[2], 'block', '#9ca3af', [r2((PAN_ANG * 180) / Math.PI), 0, 0]),
-    part('Module DS18B20 (résistance 4,7 kΩ, 3 broches)', 16, 10, 6, DSX, DSY, DSZ, 'block', '#065f46'),
+    part('Module DS18B20 (résistance 4,7 kΩ, 3 broches)', 20.5, 23, 12, DSX, DSY, DSZ, 'block', '#065f46'),
     wire('Câble sonde extérieure (DS18B20, 3 conducteurs)', '#1c1917', [
       sondeBack, panPt(sondeX, r2(sondeS + SONDE_LEN / 2 + 3), -1.5), panPt(r2(sondeX + 3), SONDE_SC, 2.5), panPt(r2(-(W / 2 - 6) - 3), SONDE_SC, 2.5), panPt(r2(-(W / 2 - 6) + 11), SONDE_SC, 2.5), // il monte dans le canal du toit (entre les deux plaques d'okoumé), passe au-dessus du chant de la baguette gauche et ressort dans le caisson
       panPt(r2(-(W / 2 - 6) + 12), r2(SONDE_SC + 3), -9), [r2(SONDE_XB - 3), r2(sondeCanalY - 22), r2(panZl(sondeCanalY - 22) - 12)], [r2(SONDE_XB - 3), r2(DSY + 14), r2(panZl(DSY + 14) - 12)], [DSX - 5, r2(DSY + 2), r2(DSZ + 14)], [DSX - 5, DSY, r2(DSZ + 3.5)],
     ] as Vec3[], 2.9),
     ...([['Fil sonde 3,3 V (rouge)', '#dc2626', 8, 0, 34, 1], ['Fil sonde DATA (jaune)', '#eab308', 3, 0, 38, 0], ['Fil sonde masse (noir)', '#111827', 9, 1, 42, -1]] as const).map(([nm, color, pinIdx, row, lvl, dx]): Plank => {
       const [xp, yp] = pw(PI_PIN_X0 + pinIdx * 2.54, PI_PIN_Y - 2.54 * (1 - row)), hh = topZ + lvl; // broches 17 et 7 : rangée intérieure (impaires) ; broche 20 : rangée extérieure
-      return wire(nm, color, [[DSX + dx * 4, DSY + 4, DSZ + 3.5], [DSX + dx * 4, DSY + 9, r2(DSZ + 10)], [xp, yp - 12, hh], [xp, yp, hh], [xp, yp, r2(piZ + 8)], [xp, yp, r2(piZ + 3.5)]] as Vec3[]);
+      return wire(nm, color, [[DSX + dx * 4, DSY + 4, DSZ + 6.5], [DSX + dx * 4, DSY + 9, r2(DSZ + 13)], [xp, yp - 12, hh], [xp, yp, hh], [xp, yp, r2(piZ + 8)], [xp, yp, r2(piZ + 3.5)]] as Vec3[]);
     }),
   ];
   // ===== VENTILATEUR =====

@@ -14,7 +14,7 @@ pour essayer la page sur un ordinateur sans rien de branché (voir README).
 
 Brochage (voir docs/schema-electronique.md) :
   Ventilateur (Noctua NF-A6x25 PWM, 12 V) : interrupteur 12 V côté + GPIO27 (broche 13), PWM GPIO18 (broche 12), tachymètre GPIO17 (broche 11, pull-up), masse commune broche 14
-  LED du nid : GPIO23 (module MOSFET IN1)   LED extérieures : GPIO24 (IN2)
+  LED du nid : GPIO23 (module MOSFET du nid, PWM)   LED extérieures : GPIO24 (module MOSFET extérieur, PWM)
   BME280 : I2C adresse 0x76 (ou 0x77)        INA219 (batterie) : I2C adresse 0x41
   Sonde extérieure DS18B20 : 3,3 V broche 17, masse broche 20, donnée GPIO4 (broche 7, 1-Wire, résistance de rappel 4,7 kΩ sur le module) ;
     activer le 1-Wire : `dtoverlay=w1-gpio` dans /boot/firmware/config.txt (puis redémarrer) ; lecture : /sys/bus/w1/devices/28-*/w1_slave

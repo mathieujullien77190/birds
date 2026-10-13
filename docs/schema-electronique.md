@@ -20,13 +20,13 @@ flowchart TB
   subgraph TOIT["Électronique dans le grenier"]
     subgraph V12["Côté 12 V"]
       RAIL(("Rail 12 V<br/>Wago 221-413 (+) et 221-415 (−)"))
-      BUCK["Convertisseur 12 V → 5 V 5 A<br/>sortie USB-C"]
+      BUCK["Convertisseur 12 V → USB-C PD<br/>65 W, sortie 5 V"]
       SWF["Interrupteur 12 V du ventilateur<br/>MOSFET côté +"]
       FAN["Ventilateur Noctua NF-A6x25 PWM<br/>60 mm, 12 V, cassette amovible"]
     end
     subgraph V33["Côté 5 V et 3,3 V (logique)"]
       PI["Raspberry Pi 5"]
-      SW["Module 2 MOSFET<br/>LED on / off"]
+      SW["Modules MOSFET<br/>LED on / off"]
     end
   end
   subgraph NID["Dans le nid (sous le plafond)"]
@@ -47,11 +47,11 @@ flowchart TB
   PI -->|"GPIO18 (broche 12) PWM 25 kHz visé (10 kHz si refusé)<br/>GPIO17 (broche 11) tachymètre<br/>masse broche 14"| FAN
   PI -->|"nappe CSI → CAM0"| CAM1
   PI -->|"longue nappe CSI → CAM1<br/>par le canal du toit en okoumé"| CAM2
-  PI -->|"GPIO23 (broche 16) IN1<br/>GPIO24 (broche 18) IN2<br/>masse broche 6"| SW
+  PI -->|"GPIO23 (broche 16) PWM nid<br/>GPIO24 (broche 18) PWM ext<br/>masse broche 6"| SW
   PI -->|"5 V broche 4"| IR
   PI -->|"5 V broche 2<br/>par le canal du toit"| IR2
-  SW -->|"masse commutée OUT1"| IR
-  SW -->|"masse commutée OUT2"| IR2
+  SW -->|"masse commutée LOAD nid"| IR
+  SW -->|"masse commutée LOAD ext"| IR2
   PI -->|"I2C : 3,3 V broche 1, SDA 3, SCL 5, masse 9"| SENS
   PI -->|"1-Wire GPIO4 (broche 7)<br/>3,3 V broche 17, masse broche 20"| SONDE
   linkStyle 0 stroke:#111827,stroke-width:2.5px
@@ -114,15 +114,15 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 | Charge | Régulateur | Batterie, via le fusible | Tout se passe sous le nichoir, dans la jupe de l'habillage : le régulateur Victron (à l'avant droit), la batterie (à l'arrière gauche, à plat, tournée de 90°, tenue par quatre étriers) et le fusible (collé sous le fond, entre la batterie et le mur droit). Deux fils de 2,5 mm² (≈ 8 cm pour le + et ≈ 13 cm pour le −) relient les bornes batterie du régulateur, sur sa face est, au fusible (lame A, avec le + de la batterie) et à la borne − de la batterie. La charge ne passe pas par la lame B du fusible |
 | Montée vers le toit | Fusible (lame B) et borne − de la batterie | Wago + et Wago −, sur le dessus du toit | Deux fils de 2,5 mm² montent dans une gaine de Ø 16 mm, dans l'isolant du coin arrière droit (à 5 mm du mur arrière et à 5 mm du mur de droite) : ils traversent le fond et le plancher intérieur par des trous de 16 mm, pile le diamètre de la gaine, puis la pièce en C, les trois planches du cadre, le dessous du toit, le fourreau de petits carrés empilés dans le toit et son dessus par des trous de Ø 18 mm (la gaine y passe tranquillement), et arrivent sur le dessus du toit (≈ 37 cm de fil pour le + et ≈ 49 cm pour le −). Le fusible protège la batterie et le câblage du rail |
 | Rail 12 V | Fusible / batterie (par la gaine) | Convertisseur 12 → 5 V et ventilateur (par son interrupteur) | Fils rouge (+) et noir (−), répartis par un **Wago 221-413 à 3 entrées pour le +** (fusible, interrupteur du ventilateur, convertisseur) et un **Wago 221-415 à 5 entrées pour le −** (batterie, convertisseur, ventilateur, masse de l'interrupteur, une entrée de réserve), posés à droite de la sortie de la gaine : chaque fil a sa propre entrée |
-| Alimentation du Pi | Convertisseur 12 → 5 V | Prise USB-C du Pi 5 | 5 V, 5 A recommandés pour le Pi 5 |
+| Alimentation du Pi | Convertisseur 12 V → USB-C PD (Konnected) | Prise USB-C du Pi 5 | 5 V, au moins 3 A (5 A recommandés pour le Pi 5, non annoncés par ce modèle) |
 | Interrupteur du ventilateur | Wago + (12 V) ; Pi GPIO27 (broche 13) ; masse sur le Wago − | Entrée, commande 3,3 V et masse du module interrupteur 12 V (côté +) | Le Noctua ne s'arrête pas à 0 % de PWM (il tourne à environ 20 %) : on coupe son 12 V. Côté **+**, pas côté masse : une masse coupée ferait remonter jusqu'à 12 V dans les fils PWM et tachymètre vers les GPIO |
 | 12 V du ventilateur | Sortie de l'interrupteur (+, rouge) ; Wago − (−, noir) | Prise 4 broches d'origine du ventilateur (sur le bord avant du couvercle de la cassette) + rallonge 4 broches (prise mâle collée sur la face avant du siège) | Fils de 1,6 mm de diamètre ; on débranche la prise à la main, une seule fois, avant de sortir la cassette ; aucune soudure |
 | Commande du ventilateur | Pi GPIO18 (broche 12, PWM par gpiozero / lgpio : 25 kHz visé, repli à 10 kHz si le Pi le refuse), GPIO17 (broche 11, tachymètre), masse commune broche 14 | Fils PWM (bleu) et tachymètre (jaune) du Noctua, par la prise 4 broches d'origine et la rallonge | Le PWM est référencé à la masse du ventilateur : d'où le fil de masse commune vers la broche 14. Le tachymètre est collecteur ouvert : tirage interne du GPIO17 (pull-up logiciel) |
 | Caméra 1 | Pi, port CSI CAM0 | Camera Module 3 NoIR, dans le nid | Courte nappe, passe par l'ouverture du toit |
 | Caméra 2 | Pi, port CSI CAM1 | Caméra 2, dehors, sur sa plaque au-dessus du trou d'envol, au centre, sous le débord du toit en okoumé | Longue nappe, passe DANS le toit : par le canal oblong du pan (40 mm de large), entre ses deux plaques collées |
-| LED infrarouges | Pi broche 4 (5 V) | Carte 4 LED IR | Masse par le module MOSFET (OUT1) : le Pi les allume ou les éteint |
-| LED infrarouges extérieures | Pi broche 2 (5 V) | Carte 4 LED IR devant la caméra 2, sur la même plaque | Masse par le module MOSFET (OUT2) ; les fils suivent la nappe dans le même canal |
-| Module MOSFET | Pi GPIO23 (broche 16), GPIO24 (broche 18), masse broche 6 | Module 2 canaux (MOSFET logique 3,3 V) | Coupe la masse de chaque carte de LED ; 5 V direct, courant des LED hors du GPIO |
+| LED infrarouges | Pi broche 4 (5 V) | Carte 4 LED IR | Masse par le module MOSFET du nid (LOAD) : le Pi les allume ou les éteint |
+| LED infrarouges extérieures | Pi broche 2 (5 V) | Carte 4 LED IR devant la caméra 2, sur la même plaque | Masse par le module MOSFET extérieur (LOAD) ; les fils suivent la nappe dans le même canal |
+| Module MOSFET | Pi GPIO23 (broche 16), GPIO24 (broche 18), masse broche 6 | Deux modules à 1 canal (MOSFET LR7843, logique 3,3 V), un par carte de LED | Coupe la masse de chaque carte de LED ; 5 V direct, courant des LED hors du GPIO |
 | Capteur température / humidité | Pi broches 1 (3,3 V), 3 (SDA), 5 (SCL), 9 (masse) | Capteur dans le compartiment de la caméra, à fleur du plafond | Liaison I2C, 4 fils |
 | Sonde de température extérieure | Pi : broche 17 (3,3 V), GPIO4 (broche 7, donnée 1-Wire), broche 20 (masse) | Module 3 broches DS18B20 (résistance de rappel de 4,7 kΩ), puis la sonde étanche par son câble de 3 conducteurs | Trois cordons Dupont du Pi au module ; le câble de la sonde (rouge 3,3 V, noir masse, jaune donnée) entre dans le toit par un canal oblong de 8 mm de la plaque crénelée du pan (fermé par la plaque pleine) et ressort dans le caisson, derrière la baguette gauche du couvercle. Le 1-Wire est activé par `dtoverlay=w1-gpio` dans `/boot/firmware/config.txt` |
 | Prise d'air basse | — (pas d'électronique) | Conduit de contreplaqué dans l'isolant du mur gauche avant, fente dans la paroi intérieure à mi-hauteur | Section libre 10,9 cm² ; grille de bois sur la fente (la prise d'air reste toujours ouverte, sans clapet), ouverture de 26 × 6 mm au ras du plancher pour l'eau, sous-boîte isolante amovible par le dessous (lèvre de 11 mm sous le fond) |
@@ -154,7 +154,7 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 - Il est posé sur des entretoises de 6 mm dans le coin arrière gauche du toit, calé au montage par des morceaux de baguette de contreplaqué collés sur tous les côtés (voir « Cales »).
 - Il pilote le ventilateur (PWM, tachymètre, interrupteur 12 V), lit le capteur du nid et la sonde de dehors, commande les deux caméras et allume les LED infrarouges.
 - Ses prises USB (2 × USB 3 et 2 × USB 2) et sa prise Ethernet regardent la plaque arrière, percée d'une fenêtre de 60 × 35,5 mm en face d'elles (la même hauteur que la sortie du ventilateur) : on branche sans ouvrir le nichoir, en retirant au besoin la plaque de ventilation arrière de l'habillage. Son USB-C d'alimentation et ses deux micro-HDMI sont sur l'autre grand bord, tourné vers le centre du toit, hors de cette fenêtre. Le Pi 5 n'a pas de prise jack audio.
-- Il lui faut un convertisseur 12 V → 5 V capable de fournir 5 A (le Pi 5 demande 5 V / 5 A en USB-C ; avec 3 A seulement, il limite le courant de ses ports USB).
+- Il lui faut un convertisseur 12 V → USB-C PD : celui du document fournit 5 V sous au moins 3 A (le Pi 5 voudrait 5 A ; avec 3 A il limite le courant de ses ports USB, sans effet ici).
 - Ses deux ports caméra sont des connecteurs de 22 broches côte à côte sur le bord tourné vers le centre du toit ; les caméras (nappes de 15 broches) s'y branchent par des nappes adaptatrices 22 → 15 broches.
 - Il possède un connecteur de pile RTC : une pile rechargeable dédiée garde l'heure sans réseau (option, voir « Points à vérifier »).
 
@@ -313,19 +313,20 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Type | fusible à lame automobile 12 V avec porte-fusible, placé au plus près du + de la batterie | 19 × 18,5 × 5 mm, posé à plat, collé contre le dessous du fond, entre la batterie et le mur droit ; lame A : + de la batterie et + du régulateur, lame B : vers le rail |
 | Modèle exact / lien | [Amazon.fr, JOREST, 5 porte-fusibles étanches en ligne ATC/ATO dont 1 à fils de 12 AWG et 4 de 16 AWG, avec 14 fusibles standard de 2 à 35 A](https://www.amazon.fr/dp/B0DBPQBGBQ) : on utilise le porte-fusible à fils de **12 AWG** avec le fusible de **15 A** du lot ; [Amazon.fr, SeKi, 5 fusibles à lame ATO standard 15 A bleu, 19 mm, 32 V DC](https://www.amazon.fr/dp/B0CVQGRH7L) en rechange (prix non lisibles en ligne, à confirmer) ; un seul fusible sur le rail, on garde le plan de base | — |
 
-### Convertisseur 12 V → 5 V
+### Convertisseur 12 V → 5 V (USB-C PD)
 
 | Paramètre | Valeur à viser |
 | --- | --- |
-| Tension d'entrée | au moins 10 à 15 V (la batterie va de 10 V à 14,6 V) |
-| Sortie | 5,1 V, 5 A (25 W), sortie USB-C |
-| Courant | 5 A continus au moins : le Pi 5 demande 5 V / 5 A pour alimenter ses ports USB ; avec 3 A il limite ces ports (la carte seule consomme environ 5,5 W ici) |
-| Rendement | plus de 90 % |
-| Négociation USB-PD | souhaitable : sans elle, le Pi 5 limite le courant de ses ports USB |
-| Protections | surintensité, court-circuit, surtempérature |
-| Dimensions dans le modèle | environ 60 × 36 × 16 mm : estimation à confirmer avec le module acheté |
+| Tension d'entrée | 10 à 30 V, fils nus (la batterie va de 10 V à 14,6 V) ; protection contre l'inversion de polarité |
+| Sortie | USB-C PD jusqu'à 65 W (20 V / 3,25 A), négocie 5, 9, 12, 15 ou 20 V ; le Pi 5 prend 5 V |
+| Courant | 5 V / 3 A au moins (la carte seule consomme ≈ 5,5 W ici) ; le profil 5 V / 5 A n'est pas annoncé : le Pi 5 limite alors le courant de ses ports USB, sans effet pour nous. En cas d'avertissement, `usb_max_current_enable=1` dans `/boot/firmware/config.txt` |
+| Protections | inversion de polarité en entrée, surintensité à 3,5 A (réarmement automatique), court-circuit |
+| Température | −20 à +60 °C, et **au-delà de 35 °C ambiants le courant nominal est réduit de moitié** (≈ 1,6 A à 20 V, soit 5 V sous ≈ 1,5 A : encore assez pour le Pi, ≈ 1,1 A à 5 V). Sous le toit en plein été la température peut dépasser 35 °C : surveiller la température du nid sur la page du Pi |
+| Rendement et veille | ≈ 90 % à charge nominale ; consommation au repos < 30 mA sous 12 V (≈ 0,36 W, dont le Pi n'est pas éteint par ce biais) |
+| Câble | **câble USB-C non inclus** : un câble USB-C court (20 à 30 cm, de préférence coudé) relie la sortie du convertisseur à la prise du Pi ; les deux fils nus (rouge +, noir −) vont, eux, au rail 12 V de la batterie |
+| Dimensions dans le modèle | environ 60 × 36 × 16 mm : estimation à confirmer avec le module reçu ; modèle **coudé** (câble plaqué à plat) |
 | À déterminer | fixation dans le toit |
-| Modèle exact / lien | lien à trouver — référence exacte : convertisseur DC-DC 12 V → 5 V, 5 A continus, sortie USB-C, entrée à bornier à vis |
+| Modèle exact / lien | [Konnected convertisseur DC vers USB-C PD, entrée 10-30 V, 65 W, coudé (Amazon)](https://www.amazon.fr/dp/B0GX7ZXRXQ) : PD 3.0 / PD 2.0 / PPS / QC 3.0 |
 
 ### Raspberry Pi 5
 
@@ -407,7 +408,7 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Fils | fils soudés sur la carte (carte faite à la main, voir « Fabrication des cartes de LED infrarouges ») | — |
 | Alimentation | 5 V depuis le Pi | broche 4 |
 | Courant | environ 66 mA par carte : 2 branches de 2 LED à ≈ 33 mA (résistance de 68 Ω, LED à 1,3 à 1,5 V, 50 mA maximum) ; bien plus que la limite d'une broche GPIO : ne jamais l'alimenter par un GPIO | 0,33 W par carte |
-| Commande | module 2 × MOSFET (niveau logique 3,3 V, ex. IRLZ44N ou module « 2 channel MOSFET »), coupure côté masse | module MOSFET, GPIO23 / GPIO24 |
+| Commande | 2 modules MOSFET à 1 canal (LR7843, niveau logique 3,3 V), coupure côté masse | module MOSFET, GPIO23 / GPIO24 |
 | Dimensions | carte maison de 3 colonnes × 12 rangées (pas de 2,54 mm), 7,7 × 30,5 mm, carte de 1,6 mm | 7,7 × 30,5 mm ; 4 LED de 3 mm (corps de 5,3 mm) en 2 branches de 2 (colonnes 1 et 3). La carte est posée sur deux cales de 3 mm (morceaux de baguette de 8 mm) sous ses deux bouts : le bout des LED arrive à 0,7 mm sous le dessous du bois de 3 mm. Fenêtre de 8,9 × 8,9 mm dans le plafond du nid et dans la plaque extérieure |
 | Modèle exact / lien | [YIXISI 40 LED infrarouges 3 mm 850 nm (Amazon)](https://www.amazon.fr/dp/B0GKFSSZ4X) : 1,3 à 1,5 V, 50 mA, 20 à 30 mW/sr, angle de 45° ; [kit de 10 cartes PCB prototype double face 2 × 8 cm (Amazon)](https://www.amazon.fr/dp/B0B87NGPR3) | — |
 
@@ -432,27 +433,27 @@ Sur une LED de 850 nm, l'œil humain voit une faible lueur rouge ; pour les oise
 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
-| Modèle | sonde DS18B20 étanche : tube inox de Ø 6 × 50 mm, câble de 3 conducteurs (rouge 3,3 V, noir masse, jaune donnée) de 1 à 3 m | tube de Ø 6 × 50 mm, câble de Ø 2,9 mm |
+| Modèle | sonde DS18B20 étanche : tube inox de Ø 6 × 50 mm, câble de 3 conducteurs (rouge 3,3 V, noir masse, jaune donnée) de 1 m, vendue avec son module adaptateur à bornier à vis | tube de Ø 6 × 50 mm, câble de Ø 2,9 mm |
 | Alimentation | 3,3 V, jamais 5 V (la donnée va sur un GPIO qui ne tolère que 3,3 V) | broche 17 |
 | Bus | 1-Wire sur GPIO4 (broche 7) ; masse sur la broche 20 | broches 7, 17 et 20, trois cordons Dupont |
-| Résistance de rappel | 4,7 kΩ entre la donnée et le 3,3 V : elle est sur le module 3 broches (aucune soudure, bornier à vis ou broches) | module de 16 × 10 × 6 mm, dans le grenier, devant le Pi contre le mur gauche |
+| Résistance de rappel | 4,7 kΩ entre la donnée et le 3,3 V : elle est déjà sur le module (marquée « 472 » sur la carte : à vérifier à la réception ; aucune soudure : les 3 fils de la sonde se vissent dans le bornier, les 3 broches mâles GND, VCC, DAT reçoivent les cordons Dupont ; **l'ordre des broches du module (GND, VCC, DAT) n'est pas celui des couleurs de la sonde : lire les inscriptions de la carte avant de visser**) | module de 20,5 × 23 × 12 mm, dans le grenier, devant le Pi contre le mur gauche |
 | Plage et précision | −55 à +125 °C, ± 0,5 °C de −10 à +85 °C ; le programme du Pi refuse le CRC mauvais, 85,0 °C (valeur d'erreur à la mise sous tension) et les valeurs hors −40 à 60 °C | — |
 | Activation du 1-Wire | `dtoverlay=w1-gpio` dans `/boot/firmware/config.txt`, puis redémarrage ; lecture dans `/sys/bus/w1/devices/28-*/w1_slave` | — |
 | Position | sous le débord de 30 mm du côté gauche, collée contre le dessous du pan en okoumé, à l'ombre, à environ y = +40 mm | x = −117 mm, y = +42 mm, face haute contre le dessous du pan ; 129 mm du ventilateur, 176 mm de la caméra 2, 191 mm du régulateur |
 | Passage du câble | un canal oblong de 8 mm de large dans la plaque crénelée du pan, fermé par la plaque pleine ; la baguette gauche du couvercle omet sa dent dans le canal ; ni la lame d'habillage ni la plaque gauche du toit ne sont percées | canal de 37 × 8 mm (bouts ronds, x de −121 à −84 mm), câble à 2,5 mm du dessous du pan, trajet dessiné de 15 cm jusqu'au module |
 | Remarque | en plein soleil ou contre un mur chaud, la sonde lit 1 à 2 °C de trop : l'ombre du débord limite l'écart | — |
 | Rôle | température de dehors pour la comparaison nid / dehors de la ventilation automatique ; sans mesure valable l'automatique ne démarre pas | oui |
-| Modèle exact / lien | lien à trouver — référence exacte : sonde DS18B20 étanche câble 1 m ou 3 m + module adaptateur 3 broches résistance 4,7 kΩ | — |
+| Modèle exact / lien | [Kit de 2 sondes DS18B20 étanches (câble 1 m) avec 2 modules adaptateurs à bornier (Amazon)](https://www.amazon.fr/dp/B0932WK2JD) : 3,0 à 5,5 V, −55 à +125 °C, ± 0,5 °C ; une seule sonde sert, l'autre est de rechange | — |
 
-### Module 2 × MOSFET (LED infrarouges)
+### Modules MOSFET (LED infrarouges)
 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
-| Rôle | allumer et éteindre les deux cartes de LED depuis le Pi, en coupant leur masse | module 20 × 14 × 6 mm |
-| Commande | niveau logique 3,3 V (MOSFET « logic level », par exemple IRLZ44N), IN1 sur GPIO23 (broche 16), IN2 sur GPIO24 (broche 18) | broches 16, 18 et masse 6 |
+| Rôle | allumer et éteindre chaque carte de LED depuis le Pi, en coupant sa masse : un module à 1 canal par carte | un pavé de 23 × 36 × 4 mm (2 cartes plates de 23 × 17 mm l'une derrière l'autre) |
+| Commande | niveau logique 3,3 V (MOSFET LR7843, 30 V, 161 A) ; PWM du module du nid sur GPIO23 (broche 16), PWM du module extérieur sur GPIO24 (broche 18) ; à la réception : lire « 7843 » sur le composant noir (« 520 » ou « 120N » = renvoyer) et tester avec une carte de LED | broches 16, 18 et masse 6 |
 | Courant | largement au-dessus des LED (quelques centaines de mA) | — |
-| Alimentation des LED | 5 V direct depuis les broches 2 et 4 du Pi, la masse passe par le module (OUT1 : nid, OUT2 : extérieur) | — |
-| Modèle exact / lien | lien à trouver — référence exacte : module 2 canaux MOSFET à niveau logique 3,3 V (IRLZ44N ou équivalent), borniers à vis | — |
+| Alimentation des LED | 5 V direct depuis les broches 2 et 4 du Pi, la charge se branche entre les trous « + » et « LOAD » du module (fils soudés dans les trous de la carte) (un module pour le nid, un pour l'extérieur) : le « + » reçoit le 5 V du Pi, la borne « − » la masse du Pi, la carte de LED son + sur « + » et son − sur « LOAD » ; le signal va sur les picots PWM (GPIO) et GND (masse du Pi) | — |
+| Modèle exact / lien | [GERUI module de commande MOSFET LR7843 (Amazon, variante LR7843, 7,85 € le module)](https://www.amazon.fr/dp/B0DG8KH7HQ) : 30 V, 161 A, signal 3 V ou 5 V ; carte plate de 23 × 17 mm, **sans bornier : les fils se soudent dans les trous de la carte** | — |
 
 ### Wago 221 du rail 12 V
 
@@ -567,7 +568,7 @@ Ponts d'étain à faire (8 en tout) : **(1,3)–(2,3)** et **(2,3)–(3,3)** (le
 
 1. **Les cales** : colle sous les deux bouts de la carte (sous les rangées 1-2 et 11-12, qui n'ont aucune soudure dessous) deux morceaux de baguette de cale de 8 mm de long (3 mm de haut, 5 mm de large) : ils sont posés sur le bois de chaque côté de la fenêtre, et la carte repose dessus par ses deux bouts, les LED vers le bas, le bout des LED à 0,7 mm sous le dessous du bois (pas de LED qui dépasse).
 2. **Carte du nid** (dans le compartiment de la caméra, à droite de l'objectif, la rangée 1 vers l'avant du nichoir, le fil rouge du côté avant). **Carte extérieure** (sur la plaque, devant la caméra, la rangée 1 à droite quand on regarde la façade, le fil rouge de ce côté).
-3. Les fils rejoignent le Pi (5 V, broche 4 pour le nid, broche 2 pour l'extérieur) et le module 2 × MOSFET (masse) : voir la fiche de chaque fil.
+3. Les fils rejoignent le Pi (5 V, broche 4 pour le nid, broche 2 pour l'extérieur) et les modules MOSFET (masse) : voir la fiche de chaque fil.
 4. **Dehors** : vernis ou silicone sur la carte et les soudures, sans toucher le dessous des LED.
 5. **Réglage** : si les LED chauffent ou si tu veux économiser de l'énergie, passe à 100 Ω (≈ 22 mA). Ne descends jamais sous 68 Ω : le 47 Ω du kit donnerait ≈ 47 mA, trop près du maximum de 50 mA par LED.
 
@@ -579,13 +580,14 @@ Ponts d'étain à faire (8 en tout) : **(1,3)–(2,3)** et **(2,3)–(3,3)** (le
 | --- | --- | --- | --- |
 | Raspberry Pi 5 (GPIO) | cordons Dupont de **40 cm** (lot de 120 : 40 M/M + 40 M/F + 40 F/F ; on utilise les F/F, et les M/F au besoin ; les fils du modèle mesurent de 20 à 36 cm vers le Pi, 36 cm pour la commande de l'interrupteur GPIO27 : 40 cm partout, on plie le surplus en S) | fil du cordon (≈ 0,1 mm²) | un cordon par picot : PWM ventilateur GPIO18 (broche 12), tachymètre GPIO17 (broche 11), commande de l'interrupteur GPIO27 (broche 13), masse (broche 14), capteur du nid (broches 1, 3, 5, 9), sonde de dehors (broches 17, 7, 20), LED et module MOSFET (broches 2, 4, 6, 16, 18) ; l'autre bout dans le bornier ou la broche du module |
 | Capteur BME280 | Pimoroni BME280 Breakout (PIM472, Kubii) : rangée de 5 broches faite pour les broches 1, 3, 5, 7 et 9 du Pi (3,3 V, SDA, SCL, GPIO4 non utilisé, masse) | cordons Dupont | sur le modèle, 4 cordons Dupont vont de la rangée de broches de la carte aux broches 1, 3, 5 et 9 du Pi ; la fiche Kubii ne dit pas si les broches sont fournies ou à souder : à vérifier avant de commander |
-| Sonde de température extérieure DS18B20 étanche | sonde **étanche avec câble de 1 m ou 3 m** (3 fils) + **module adaptateur 3 broches avec résistance de rappel de 4,7 kΩ** et bornier à vis (ou broches) | fils du câble de la sonde (≈ 0,25 mm²) | les trois fils de la sonde dans le bornier à vis du module (rouge 3,3 V, noir masse, jaune donnée) ; trois cordons Dupont du module aux broches 17, 7 et 20 du Pi ; le surplus de câble s'enroule dans le grenier |
+| Sonde de température extérieure DS18B20 étanche | sonde **étanche avec câble de 1 m** (3 fils) + **module adaptateur à bornier à vis avec résistance de rappel de 4,7 kΩ** (kit de 2 : sondes, modules et petits câbles Dupont de 20 cm) | fils du câble de la sonde (≈ 0,25 mm²) | les trois fils de la sonde dans le bornier à vis du module (rouge 3,3 V, noir masse, jaune donnée) ; trois cordons Dupont du module aux broches 17, 7 et 20 du Pi ; le surplus de câble s'enroule dans le grenier |
 | Cartes de 4 LED infrarouges 850 nm | modèle à **fils pré-soudés** ou à **bornier à vis** | fils fournis (≈ 0,3 mm²) | 5 V sur la broche 2 ou 4 du Pi par un cordon Dupont ; l'autre fil dans le bornier du module MOSFET |
-| Module 2 × MOSFET (LED) et module interrupteur 12 V du ventilateur | cartes **avec borniers à vis** | 0,25 à 0,5 mm² | fil dénudé de 6 mm dans le bornier, vis serrée au tournevis plat de 2 mm ; commande par cordon Dupont sur le GPIO |
+| Modules MOSFET des LED (LR7843) | cartes plates à trous, **sans bornier** : fils soudés | 0,25 à 0,5 mm² | fils dénudés de 4 mm, soudés dans les trous « + », « − » et « LOAD » ; commande par cordon Dupont (un bout coupé) soudé sur PWM / GND |
+| Module interrupteur 12 V du ventilateur | carte **avec borniers à vis** | 0,25 à 0,5 mm² | fil dénudé de 6 mm dans le bornier, vis serrée au tournevis plat de 2 mm ; commande par cordon Dupont sur le GPIO |
 | Régulateur solaire Victron SmartSolar 75/10 | modèle d'origine à **borniers à vis** | 4 mm² côté panneau, 2,5 mm² côté batterie | fils dénudés de 8 mm avec embouts, vis serrées à fond |
 | Fusible | porte-fusible lame **avec fils déjà montés** | 2,5 mm² | on le met en série sur le fil + de la batterie, avec les Wago |
 | Rail 12 V | Wago 221-413 (3 entrées) pour le + et Wago 221-415 (5 entrées) pour le −, sans outil, aucune soudure | 0,2 à 4 mm² | on lève le levier, on glisse le fil dénudé de 11 mm (fil souple avec embout conseillé), on rabat le levier |
-| Convertisseur 12 V → 5 V | modèle de **5 A continus au moins** avec **sortie USB-C** et entrée à bornier à vis | 2,5 mm² côté 12 V | sortie USB-C directement dans le Pi, pas de câble à confectionner |
+| Convertisseur 12 V → USB-C PD | modèle **Konnected 10-30 V, 65 W, coudé**, entrée à **fils nus** (dans les Wago du rail 12 V) | 2,5 mm² côté 12 V | sortie USB-C directement dans le Pi, pas de câble à confectionner |
 | Batterie LiFePO4 | batterie avec **bornes à visser** ou fils livrés | 2,5 mm² | cosses ou embouts vissés sur les bornes |
 | Caméras | caméras Camera Module 3 NoIR avec **nappes plates** | nappe adaptatrice 22 → 15 broches (connecteur de 22 broches côté Pi 5, de 15 broches côté caméra) | la nappe s'enfiche dans le connecteur à levier (CSI) du Pi, sans outil |
 | Ventilateur Noctua | **prise 4 broches d'origine du ventilateur** + **rallonge 4 broches Noctua** (mâle ⇄ femelle, ≈ 30 cm) | fils du Noctua | la rallonge s'emboîte sur la prise d'origine ; l'autre bout se branche sur le toit ; aucune soudure ni sertissage |
@@ -732,12 +734,12 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Kit de 10 cartes PCB prototype double face 2 × 8 cm, pas de 2,54 mm, étamées (2 cartes de LED, le reste en réserve) | 9,95 € | [Kit de 10 cartes PCB 2 × 8 cm (Amazon)](https://www.amazon.fr/dp/B0B87NGPR3) | [x] |
 | Électronique | 4 résistances 68 Ω à film carbone 1/4 W 5 % pour les 2 cartes de LED, prises dans un assortiment de 250 (25 valeurs, 10 de chaque ; 8,99 € le kit : 4 / 250 × 8,99 €) | 0,14 € | [Assortiment de résistances ALLECIN 1/4 W (Amazon)](https://www.amazon.fr/dp/B0BTP6WYH1) | [x] |
 | Électronique | Capteur BME280 Pimoroni PIM472 (Kubii) + cordons Dupont | 15,88 € | [Pimoroni BME280 Breakout (PIM472), Kubii, 15,88 €, 16 en stock](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html) : I2C, 19 × 19 × 2,75 mm, brochage fait pour les broches 1, 3, 5, 7, 9 du Pi ; puce : [Bosch BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) | [x] |
-| Électronique | Sonde de température extérieure DS18B20 étanche (câble 1 à 3 m) + module 3 broches avec résistance 4,7 kΩ (prix estimé, à confirmer) | 5 € | lien à trouver — référence exacte : sonde DS18B20 étanche câble 1 m ou 3 m + module adaptateur 3 broches résistance 4,7 kΩ | [ ] |
+| Électronique | Sonde de température extérieure DS18B20 étanche (câble 1 m) + module adaptateur à bornier avec résistance 4,7 kΩ, dans un kit de 2 (11,99 € le kit : la moitié) | 6 € | [Kit de 2 sondes DS18B20 étanches avec modules adaptateurs (Amazon)](https://www.amazon.fr/dp/B0932WK2JD) | [ ] |
 | Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € | [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 × 60 × 25 mm, 12 V, 4 broches) ; en France : [Amazon.fr, NF-A6x25 PWM marron](https://www.amazon.fr/dp/B00VXTANZ4) | [x] |
 | Électronique | Grille de protection Noctua NA-FG1-6 Sx2 (lot de 2, métal, pour ventilateurs de 60 mm ; une seule est utilisée, sur la cassette) | 15 € | [Amazon.fr, Noctua NA-FG1-6 Sx2](https://www.amazon.fr/dp/B0B1QRWHW3) : le titre annonce 2 grilles métal pour ventilateurs de 60 mm ; prix 15,06 € lu sur la page ; épaisseur, entraxe (50 mm attendus) et vis fournies ou non : à vérifier sur la page | [x] |
 | Électronique | Module interrupteur 12 V côté + (P-MOSFET, commande 3,3 V) | 4 € | lien à trouver — référence exacte : module « high side switch » à P-MOSFET, 12 V, commande logique 3,3 V, borniers à vis | [ ] |
-| Électronique | Module 2 × MOSFET | 5 € | lien à trouver — référence exacte : module 2 canaux MOSFET à niveau logique 3,3 V (IRLZ44N ou équivalent), borniers à vis | [ ] |
-| Électronique | Convertisseur 12 V → 5 V 5 A USB-C (Raspberry Pi 5) | 15 € | lien à trouver — référence exacte : convertisseur DC-DC 12 V → 5 V, 5 A continus minimum, sortie USB-C avec négociation PD pour Raspberry Pi 5, entrée à bornier à vis | [ ] |
+| Électronique | 2 modules MOSFET à 1 canal LR7843, un par carte de LED (7,85 € le module, un par carte) | 15,70 € | [GERUI module de commande MOSFET LR7843 (Amazon, variante LR7843)](https://www.amazon.fr/dp/B0DG8KH7HQ) : 30 V, 161 A, signal 3 V ou 5 V | [x] |
+| Électronique | Convertisseur 12 V → USB-C PD Konnected, entrée 10-30 V, 65 W, coudé (Raspberry Pi 5) | 25,14 € | [Konnected convertisseur DC vers USB-C PD, entrée 10-30 V, 65 W, coudé (Amazon)](https://www.amazon.fr/dp/B0GX7ZXRXQ) | [ ] |
 | Électronique | 4 cellules LiFePO4 32700 + BMS 4S + support | 40 € | [Cellule HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523) ; BMS 4S LiFePO4 et support : lien à trouver | [ ] |
 | Électronique | Fusible + porte-fusible (lot de 5 porte-fusibles avec 14 fusibles, + pack de 5 fusibles 15 A de rechange) | 15 € | [Amazon.fr, JOREST, 5 porte-fusibles étanches en ligne ATC/ATO dont 1 à fils de 12 AWG et 4 de 16 AWG, avec 14 fusibles standard de 2 à 35 A](https://www.amazon.fr/dp/B0DBPQBGBQ) : on utilise le porte-fusible à fils de **12 AWG** avec le fusible de **15 A** du lot ; [Amazon.fr, SeKi, 5 fusibles à lame ATO standard 15 A bleu, 19 mm, 32 V DC](https://www.amazon.fr/dp/B0CVQGRH7L) en rechange (prix non lisibles en ligne, à confirmer) ; un seul fusible sur le rail, on garde le plan de base | [x] |
 | Électronique | 16 cordons Dupont 40 cm pris dans un lot de 120 (40 M/M, 40 M/F, 40 F/F ; 8,79 € le lot : 16 / 120 × 8,79 €) | 1,17 € | [Cordons Dupont Heevhas 40 cm, lot de 120 (Amazon)](https://www.amazon.fr/dp/B0D91BZT76) | [x] |
@@ -763,9 +765,9 @@ Le ventilateur, sa grille et son interrupteur coûtent environ 22 €. Le régul
 - **Batterie sous le nichoir.** Le BMS du pack doit couper la charge sous 0 °C (la batterie est dans l'air extérieur, à l'ombre de la jupe de l'habillage, sans la chaleur du nid) ; ni coffret étanche ni vernis ne sont prévus : la jupe protège de la pluie directe mais pas de l'humidité ni des éclaboussures. Un coffret étanche, s'il est ajouté, n'est pas compté dans les prix. À surveiller en hiver (température du pack) et après les premières pluies.
 - **Fusible sous le fond.** Il est collé contre le dessous du fond, à l'air libre : un porte-fusible étanche est utilisé (voir le tableau des prix) ; contrôler la colle à chaud en été.
 - **Régulateur sous le nichoir.** Il n'est protégé que par le lambris. Il chauffe de 2 à 5 W, donc ne pas le noyer dans l'isolant. La gaine de Ø 16 mm traverse sept plaques : le fond et le plancher intérieur par des trous de 16 mm, serrés, la pièce en C, les trois planches du cadre, le dessous du toit, le fourreau et le dessus du toit par des trous de 18 mm : elle tient serrée dans le corps et passe tranquillement dans le toit. Le nichoir doit être posé assez haut pour que le régulateur (33 mm) ne touche pas le sol.
-- **Convertisseur 12 → 5 V.** Dessiné avec une taille estimée, à confirmer avec le module acheté.
+- **Convertisseur 12 V → USB-C PD.** Dessiné avec une taille estimée (60 × 36 × 16 mm), à confirmer avec le module reçu.
 - **Pi 5 (forme 3D).** Le dessin 3D du Pi est celui du Pi 4 (mêmes cotes 85 × 56 mm, prises USB et Ethernet au même endroit) ; un STEP du Pi 5, s'il est fourni, donnerait la forme exacte. Les deux connecteurs de 22 broches sont placés d'après le dessin mécanique officiel (dimensions approximatives, non cotées) ; le sens d'entrée des nappes se vérifie sur la carte.
-- **Alimentation du Pi 5.** Convertisseur de 5 A continus au moins ; sans négociation USB-PD, le Pi limite le courant de ses ports USB. Référence à choisir (voir le tableau des prix).
+- **Alimentation du Pi 5.** Convertisseur Konnected USB-C PD (5 V sous au moins 3 A, pas de profil 5 A annoncé) : à vérifier au premier démarrage, le Pi limite le courant de ses ports USB s'il le juge insuffisant ; la limite de 60 °C du convertisseur est à surveiller en été.
 - **Refroidissement du Pi 5.** Le grenier est clos : contrôler la température du processeur en été et la hauteur de l'Active Cooler sous la pente.
 - **Horloge.** Le Pi n'a pas d'horloge sans réseau : l'heure du graphique et du jour / nuit en dépend. Le connecteur de pile RTC du Pi 5 (pile rechargeable dédiée, option non comptée dans les prix) y remédie.
 - **Colle du contreplaqué de peuplier.** Le type de colle du contreplaqué acheté (extérieure classe 3 / CTBX, ou au moins résistante à l'humidité, classe d'émission E1) est à vérifier sur la fiche du vendeur avant la découpe : un peuplier collé « intérieur » se décolle.

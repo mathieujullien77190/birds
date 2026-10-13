@@ -14,7 +14,7 @@ export function PiecesList(props: PiecesListProps) {
   const scale = cardScale(sc.planks);
   const card = (p: Plank) => (
     <PlankCard key={p.id} p={p} code={codes.get(p.id)} planks={props.sc.planks} scale={scale} selectedId={props.selectedId} groupSel={groupSel} extra={props.extra} hidden={props.hidden} dropOn={dropOn} setDropOn={props.setDropOn} setHover={props.setHover}
-      setGroupSel={props.setGroupSel} pick={props.pick} update={props.update} toggleHidden={props.toggleHidden} duplicate={props.duplicate} remove={props.remove} dropPlank={props.dropPlank} />
+      setGroupSel={props.setGroupSel} pick={props.pick} toggleHidden={props.toggleHidden} remove={props.remove} dropPlank={props.dropPlank} />
   );
   // les plaques liées sont rangées sous une seule ligne (boîte, groupe) qui se déplie
   const seen = new Set<string>();
@@ -29,7 +29,7 @@ export function PiecesList(props: PiecesListProps) {
     rows.push({ rank: groupRank(name), node:
       <GroupRow key={'g' + g} g={g} name={name} members={members} open={openGroups.has(g)} isSelected={selected?.group === g} groupSel={groupSel} hidden={props.hidden}
         dropOn={dropOn} setDropOn={props.setDropOn} setHover={props.setHover} setOpenGroups={props.setOpenGroups} setSelectedId={props.setSelectedId} setGroupSel={props.setGroupSel} setExtra={props.setExtra}
-        commit={props.commit} toggleHidden={props.toggleHidden} duplicateGroup={props.duplicateGroup} removeGroup={props.removeGroup} dropPlank={props.dropPlank}>
+        toggleHidden={props.toggleHidden} removeGroup={props.removeGroup} dropPlank={props.dropPlank}>
         {members.map((m) => card(m))}
       </GroupRow> });
   }

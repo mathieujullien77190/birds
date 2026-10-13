@@ -108,16 +108,18 @@ describe('fils, gaine et nappe', () => {
 });
 
 describe('driver, ventilateur, panneau solaire', () => {
-  it("driverGeometry : carte de la couleur p.color sinon rouge, composants de la palette, épaisseur depth ou 20 par défaut", () => {
-    const a = driverGeometry(P({ w: 40, h: 30, depth: 30 })), b = driverGeometry(P({ w: 40, h: 30, color: '#00ff88' }));
+  it("driverGeometry : une carte plate par tranche de 19 mm de p.h, de la couleur p.color sinon rouge, puce et optocoupleur de la palette, dessous à −depth/2", () => {
+    const a = driverGeometry(P({ w: 23, h: 17, depth: 30 })), b = driverGeometry(P({ w: 23, h: 36, color: '#00ff88' }));
     expect(hasColor(a.geo, PALETTE.driverRed)).toBe(true);
-    expect(hasColor(a.geo, PALETTE.terminalBlue)).toBe(true);
-    expect(hasColor(a.geo, PALETTE.ledGreen)).toBe(true);
-    expect(hasColor(b.geo, '#00ff88')).toBe(true); expect(hasColor(b.geo, PALETTE.driverRed)).toBe(false);
-    // la carte est collée au bas de l'épaisseur : le dessous est à −depth/2
+    expect(hasColor(a.geo, PALETTE.slate)).toBe(true);
+    expect(hasColor(a.geo, PALETTE.steel)).toBe(true);
+    expect(hasColor(b.geo, '#00ff88')).toBe(true); expect(hasColor(b.geo, PALETTE.driverRed)).toBe(true); // la couleur de la diode reste rouge
     a.geo.computeBoundingBox(); b.geo.computeBoundingBox();
     expect(a.geo.boundingBox!.min.z).toBeCloseTo(-15, 5);
     expect(b.geo.boundingBox!.min.z).toBeCloseTo(-10, 5);
+    // deux cartes de 17 mm dans 36 mm : toute la hauteur est occupée
+    expect(b.geo.boundingBox!.max.y - b.geo.boundingBox!.min.y).toBeCloseTo(36, 5);
+    expect(a.geo.boundingBox!.max.y - a.geo.boundingBox!.min.y).toBeCloseTo(17, 5);
   });
   it("fanGeometry : cadre percé + rotor à part, profondeur depth ou 25 ; couleur du cadre p.color sinon ardoise", () => {
     const a = fanGeometry(P({ w: 60, h: 60 })), b = fanGeometry(P({ w: 60, h: 60, depth: 40, color: '#8b5a2b' }));

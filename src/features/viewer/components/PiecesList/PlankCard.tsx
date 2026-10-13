@@ -6,13 +6,12 @@ import { wireSummary } from '../WireSheet';
 import type { DropTarget } from './types';
 
 /** Carte d'une plaque dans « Pièces » : nom (renommable), œil, dupliquer, supprimer, dessin à plat (ou bouton du document), glisser-déposer. */
-export function PlankCard({ p, code, planks, scale, selectedId, groupSel, extra, hidden, dropOn, setDropOn, setHover, setGroupSel, pick, update, toggleHidden, duplicate, remove, dropPlank }: {
+export function PlankCard({ p, code, planks, scale, selectedId, groupSel, extra, hidden, dropOn, setDropOn, setHover, setGroupSel, pick, toggleHidden, remove, dropPlank }: {
   p: Plank; /** Code de la plaque découpée (T01…), absent pour un composant. */ code?: string; planks: Plank[]; scale: number; selectedId: string | null; groupSel: string | null; extra: Set<string>; hidden: Set<string>;
   dropOn: string | null; setDropOn: Dispatch<SetStateAction<string | null>>; setHover: (h: Hover | null) => void;
   setGroupSel: (g: string | null) => void;
   pick: (id: string | null, ctrl: boolean) => void;
-  update: (id: string, patch: Partial<Plank>, label?: string) => void;
-  toggleHidden: (ids: string[]) => void; duplicate: (p: Plank) => void; remove: (id: string) => void;
+  toggleHidden: (ids: string[]) => void; remove: (id: string) => void;
   dropPlank: (id: string, target: DropTarget) => void;
 }) {
   const pickPlank = (e: MouseEvent) => { pick(p.id, e.ctrlKey || e.metaKey); if (!(e.ctrlKey || e.metaKey)) setGroupSel(null); };
@@ -32,9 +31,8 @@ export function PlankCard({ p, code, planks, scale, selectedId, groupSel, extra,
     >
       <div className="mb-1 flex items-center gap-1 text-[11px]">
         {code && <span className="shrink-0 rounded bg-sky-50 px-1 font-mono text-[10px] font-semibold text-sky-800" title="Code de la plaque : gravé sur la planche de découpe, écrit dans la 3D (bouton N°) ; le même pour les pièces identiques">{code}</span>}
-        <NameEdit value={p.name} active={p.id === selectedId && !groupSel} onSelect={pickPlank} onRename={(v) => update(p.id, { name: v }, 'Nom')} />
+        <NameEdit value={p.name} active={p.id === selectedId && !groupSel} onSelect={pickPlank} />
         <IconButton dim={isHidden} onClick={() => toggleHidden([p.id])} title={isHidden ? 'Afficher' : 'Cacher'}><Eye off={isHidden} /></IconButton>
-        <IconButton onClick={() => duplicate(p)} title="Dupliquer">⧉</IconButton>
         <IconButton size="sm" onClick={() => remove(p.id)} title="Supprimer">×</IconButton>
       </div>
       {p.url && <a href={p.url} target="_blank" rel="noreferrer" className="mb-1 block truncate text-[11px] text-sky-700 underline" title={p.url}>🔗 Fiche du composant</a>}

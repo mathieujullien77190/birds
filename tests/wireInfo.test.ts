@@ -94,12 +94,12 @@ describe('wireInfo sur des fils connus', () => {
     expect(i.cordCm).toBeNull();
     expect(i.cordNote).toContain('rien à acheter');
   });
-  it('deux fils « Fil masse (noir) » : capteur (broche 9) et LED du nid (module OUT1)', () => {
+  it('deux fils « Fil masse (noir) » : capteur (broche 9) et LED du nid (module LOAD)', () => {
     const grounds = nest.filter((p) => p.name === 'Fil masse (noir)');
     expect(grounds).toHaveLength(2);
     const infos = grounds.map((g) => wireInfo(g, nest)!);
     expect(infos.map((i) => i.pins)).toEqual([[9], []]);
-    expect(infos[1].from).toContain('OUT1');
+    expect(infos[1].from).toContain('LOAD');
     expect(wireInfo(grounds[1])!.pins).toEqual([9]); // sans contexte : le capteur
   });
   it('fil inconnu : fiche non reconnue, longueur quand même calculée', () => {
