@@ -34,8 +34,8 @@ def test_consommation(m):
     m.etat.update(cam1=False, led_nid=True, led_ext=True)
     m.etat["ventilo"]["pourcent"] = 100
     c = m.consommation()
-    assert c["detail"] == {"pi": 5.5, "cameras": 0.7, "led": 2.4, "ventilo": 0.6}
-    assert c["total_w"] == 9.2
+    assert c["detail"] == {"pi": 5.5, "cameras": 0.7, "led": 0.66, "ventilo": 0.6}
+    assert c["total_w"] == 7.5
 
 
 # ------------------------------------------------------------------ ventilo()

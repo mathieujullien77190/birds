@@ -22,7 +22,21 @@ export const LENS_HOLE = 10;
 /** Carte caméra Raspberry Pi (Module 3) : 25 × 24 mm. */
 export const CAM_W = 25, CAM_H = 24;
 /** Petite carte de 4 LED infrarouges 850 nm, posée à côté de la caméra : 12 × 24 mm. */
-export const IR_W = 12, IR_H = 24;
+// Carte de 4 LED infrarouges FAITE MAISON : une plaque de prototypage 2 × 8 cm (pas de 2,54 mm, trous de Ø 1 mm) coupée à 3 colonnes × 12 rangées ; 4 LED de 3 mm 850 nm (YIXISI : corps de 5,3 mm, 1,3-1,5 V, 50 mA max)
+// en 2 branches de 2 LED en série (colonnes 1 et 3, la colonne 2 reste vide entre elles), chacune avec une résistance de 68 Ω. Repère de la carte : colonnes 1 à 3 de gauche à droite, rangées 1 à 12 de haut en bas, vue de la face où l'on soude (dessus).
+export const IR_PITCH = 2.54, IR_W = 7.7, IR_H = 30.5, IR_ROWS = 12, IR_LED_LEN = 5.3, IR_LIFT = 3; // pas, largeur (2 pas + 2,6 de bord), longueur (11 pas + 2,6), rangées, longueur du corps d'une LED, hauteur des deux cales sous la carte (le bout des LED arrive à 0,7 mm sous un bois de 3 mm)
+/** Centre (mm, repère de la carte, origine au milieu) du trou de colonne `col` (1 à 3) et de rangée `row` (1 à 12). */
+export const irHole = (col: number, row: number): [number, number] => [Math.round((col - 2) * IR_PITCH * 100) / 100, Math.round((row - (IR_ROWS + 1) / 2) * IR_PITCH * 100) / 100];
+/** Les 4 LED : [colonne, rangée de l'anode] ; la cathode est dans la rangée suivante, de la même colonne. LED 1 et 2 : branche de la colonne 1 ; LED 3 et 4 : branche de la colonne 3. */
+export const IR_LED_HOLES: [number, number][] = [[1, 7], [1, 9], [3, 7], [3, 9]];
+/** Centre d'une LED (milieu de ses deux pattes). */
+export const irLedCenter = ([col, row]: [number, number]): [number, number] => { const [x, y] = irHole(col, row), [, y2] = irHole(col, row + 1); return [x, Math.round(((y + y2) / 2) * 100) / 100]; };
+/** Les 2 résistances de 68 Ω : sous la carte, couchées le long des colonnes 1 et 3, pattes dans les rangées 3 et 6. */
+export const IR_R_COLS = [1, 3], IR_R_ROWS = [3, 6];
+/** Les deux cales de 3 mm sous les bouts de la carte : ordonnées de leur centre (5 mm de profondeur chacune). */
+export const IR_SHIM_Y = [-13.25, 12.5];
+/** Fenêtre à percer dans le bois pour les 4 LED (centrée sur le groupe de LED, 0,4 mm de jeu autour des corps de 3 mm) : largeur (colonnes), longueur (rangées), centre. */
+export const IR_WIN = { w: 8.9, h: 8.9, cx: 0, cy: 5.08 };
 /** Abscisses (centre) de la caméra et de la carte IR dans le compartiment : l'ensemble de 37 mm est centré. */
 export const CAM_X = 0, IR_X = 18.5; // objectif centré à droite / gauche sur le plafond (x = 0), carte des LED 18,5 mm à sa droite
 /** Épaisseur du contreplaqué okoumé extérieur peint en blanc (habillage), en mm. */

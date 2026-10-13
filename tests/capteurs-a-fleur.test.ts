@@ -13,12 +13,12 @@ const sc = buildNest({}), t = sc.t;
 const find = (re: RegExp) => sc.planks.find((p) => re.test(p.name))!;
 const geoOf = (p: Plank) => (p.special === 'camera' ? cameraBoardGeometry(p) : p.special === 'ir' ? irBoardGeometry(p) : sensorGeometry(p)).geo;
 
-interface Item { name: string; el: Plank; host: Plank; out: Vector3; body: (z: number) => boolean }
+interface Item { name: string; el: Plank; host: Plank; out: Vector3; body: (z: number) => boolean; lift?: number; tipAt?: number } // lift : hauteur des baguettes de cale sous la carte ; tipAt : position attendue du bout (mm, négatif = en retrait)
 const roofOut = new Vector3(0, 0, -1);
 const below = (z: number) => z < -0.8 - 1e-6, above = (z: number) => z > 0.8 + 1e-6;
 const items: Item[] = [
   { name: 'caméra 1', el: find(/^Caméra$/), host: find(/^Dessous toit/), out: roofOut, body: below },
-  { name: 'LED infrarouges (nid)', el: find(/^LED infrarouges$/), host: find(/^Dessous toit/), out: roofOut, body: below },
+  { name: 'LED infrarouges (nid)', el: find(/^LED infrarouges$/), host: find(/^Dessous toit/), out: roofOut, body: (z: number) => z < -4, lift: 3, tipAt: -0.7 }, // le bas des LED seulement (z < −4) : les deux cales de 3 mm sont sous la carte, hors du trou // carte sur deux baguettes de 3 mm : LED de 5,3 mm, bout à 0,7 mm sous le bois
   { name: 'capteur BME280', el: find(/^Capteur/), host: find(/^Dessous toit/), out: roofOut, body: above },
 ];
 
@@ -42,7 +42,7 @@ function measure(it: Item) {
   // la carte s'appuie contre la face intérieure du bois : écart entre cette face et la face de la carte tournée vers le bois (la carte fait 1,6 mm d'épaisseur)
   const innerD = outerD - (it.host.depth ?? t), cardFace = new Vector3(...it.el.pos).dot(it.out) + 0.8;
   if (process.env.SHOW_FLUSH) console.log(`${it.name} : bout ${tip.toFixed(2)} mm, jeu ${clearance.toFixed(2)} mm, carte à ${(innerD - cardFace).toFixed(2)} mm du bois`);
-  return { tip, clearance, gap: innerD - cardFace };
+  return { tip: tip - (it.tipAt ?? 0), clearance, gap: innerD - cardFace - (it.lift ?? 0) };
 }
 
 describe('capteurs et caméras à fleur du bois', () => {

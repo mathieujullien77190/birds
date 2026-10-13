@@ -36,7 +36,7 @@ interface Desc { ribbonCm?: number; from: string; to: string; role: string; volt
 const DUPONT = 'cordon Dupont femelle-femelle (côté Pi : picot du GPIO, aucune soudure)';
 const SCREW = 'borne à vis du module (fil dénudé de 6 mm)';
 const WAGO = 'Wago 221, sans outil (fil dénudé de 11 mm, levier)';
-const IR_I = 'quelques centaines de mA selon la carte (à déterminer, jamais par un GPIO)';
+const IR_I = 'environ 66 mA par carte (2 branches de 2 LED à ≈ 33 mA, 68 Ω) ; jamais par un GPIO';
 const FAN_PLUG = 'prise 4 broches d\'origine du ventilateur + rallonge 4 broches (emboîtées, aucune soudure)';
 const SIG = 'quelques mA';
 

@@ -19,9 +19,10 @@ describe('baguettes de cale (à couper au montage) à la place des cales de bois
         expect(p.holes).toEqual([]); expect(p.notches).toEqual([]);
         expect(p.group).toBeDefined(); expect(sc.groupNames?.[p.group!]).toBe('Baguettes de cale (à couper)');
       }
-      // le triple du besoin : le besoin (somme des anciennes cales : Pi 96, convertisseur 204, interrupteur 96 : 396 mm, la batterie est sous le nichoir dans des étriers) donne 4 baguettes
-      expect(list.length).toBeGreaterThanOrEqual(Math.ceil((3 * 396) / STRIP.length));
-      expect(list.length).toBeLessThanOrEqual(Math.ceil((3 * 420) / STRIP.length));
+      // le triple du besoin : le besoin (somme des anciennes cales : Pi 96, convertisseur 204, interrupteur 96 : 396 mm, plus deux cales de 8 mm sous chacune des deux cartes de LED : 32 mm ; la batterie est sous le nichoir dans des étriers) donne 4 baguettes
+      const need = 396 + 16 + (sc.planks.some((p) => /^LED infrarouges extérieures/.test(p.name)) ? 16 : 0); // + deux cales de 8 mm sous la carte de LED du nid, et sous celle de l'extérieur s'il y en a une
+      expect(list.length).toBeGreaterThanOrEqual(Math.ceil((3 * need) / STRIP.length));
+      expect(list.length).toBeLessThanOrEqual(Math.ceil((3 * (need + 20)) / STRIP.length));
       expect(new Set(list.map((p) => p.group)).size).toBe(1);
     });
     it(`posées au sol à l'écart du nichoir, sans recouvrement entre elles ni avec les autres pièces (${name})`, () => {

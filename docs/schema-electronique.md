@@ -167,9 +167,9 @@ Couleur des blocs = couleur des composants dans la 3D (panneau bleu nuit, régul
 - **Lecture** : le noyau lit la sonde par le 1-Wire dans `/sys/bus/w1/devices/28-*/w1_slave`. Le programme refuse un CRC mauvais, la valeur d'erreur 85,0 °C du DS18B20 et toute valeur hors −40 à 60 °C.
 - **Ventilation automatique** : la comparaison nid / dehors utilise cette mesure. Sans mesure valable de dehors (sonde absente, muette ou hors plage), l'automatique ne démarre pas, la page l'indique (état « sécurité », avertissement) ; l'alerte à 35 °C du nid ne dépend pas de la sonde.
 
-**Cales.** Le Pi, le convertisseur et l'interrupteur du ventilateur se calent avec des morceaux de baguette (14 morceaux, 396 mm en tout).
+**Cales.** Le Pi, le convertisseur et l'interrupteur du ventilateur se calent avec des morceaux de baguette (14 morceaux, 396 mm en tout) ; chaque carte de LED infrarouges est posée sur deux morceaux de 8 mm (4 morceaux de plus, 428 mm en tout).
 
-- Le groupe « Baguettes de cale (à couper) » contient **4 baguettes** de contreplaqué de 3 mm : 384 mm de long (la plus grande longueur qui tient sur une planche de 410 × 400 mm comme sur une planche de 400 × 400 mm, avec 8 mm de marge) et 5 mm de large, soit le triple du besoin pour garder de la marge.
+- Le groupe « Baguettes de cale (à couper) » contient **5 baguettes** de contreplaqué de 3 mm : 384 mm de long (la plus grande longueur qui tient sur une planche de 410 × 400 mm comme sur une planche de 400 × 400 mm, avec 8 mm de marge) et 5 mm de large, soit le triple du besoin pour garder de la marge.
 - Elles sont découpées au laser avec le reste du contreplaqué (elles se rangent dans les creux des planches) et posées dans la 3D au sol, à gauche des pièces d'hiver, hors du nichoir.
 - Posée à plat, une baguette fait 3 mm de haut et 5 mm de large.
 - **Mode d'emploi : au montage, on coupe un morceau de baguette à la longueur voulue et on le colle contre le composant, une fois celui-ci posé à sa place.**
@@ -250,7 +250,7 @@ Les prises sont détrompées : la rallonge ne s'enfiche que dans le bon sens sur
 
 - **Caméra 1** : elle regarde dans le nid, éclairée par 4 LED infrarouges.
 - **Caméra 2** : dehors, pile au-dessus du trou d'envol, au centre de la façade, sous le débord du toit en okoumé, regardant droit vers le bas. Une seconde carte de 4 LED infrarouges, devant elle, éclaire la zone la nuit.
-- **Plaque de la caméra extérieure (« Plaque caméra extérieure »)** : plaque de contreplaqué 3 mm, horizontale et perpendiculaire à la façade, au centre, collée au toit : le module (plaque, caméra, carte de LED) est monté le plus haut possible, à 1 mm sous le dessous du pan en okoumé, en tenant compte de la descente du pan vers l'avant (chaque bord est vérifié). Elle fait la largeur de la lame d'entrée (44 mm) et dépasse de 42 mm devant l'habillage, sous le débord du toit. Elle est trouée : un grand trou de 21 × 20 mm, presque la taille de la carte caméra (25 × 24), et une fenêtre de 20 × 10 pour les LED, la caméra et la carte de LED posées dessus avec l'objectif et les LED à fleur du dessous. Elle est crénelée à l'arrière (5 segments, deux dents) dans « Face avant toit » (T-04) et traverse l'habillage par une fenêtre pleine largeur de la lame d'entrée : la lame d'entrée s'arrête sous elle : il n'y a pas d'habillage au-dessus de la plaque. Ses quatre cure-dents restent dans le morceau du bas (deux en bas, deux en haut descendus sous la plaque).
+- **Plaque de la caméra extérieure (« Plaque caméra extérieure »)** : plaque de contreplaqué 3 mm, horizontale et perpendiculaire à la façade, au centre, collée au toit : le module (plaque, caméra, carte de LED) est monté le plus haut possible, à 1 mm sous le dessous du pan en okoumé, en tenant compte de la descente du pan vers l'avant (chaque bord est vérifié). Elle fait la largeur de la lame d'entrée (44 mm) et dépasse de 42 mm devant l'habillage, sous le débord du toit. Elle est trouée : un grand trou de 21 × 20 mm, presque la taille de la carte caméra (25 × 24), et une fenêtre de 8,9 × 8,9 mm pour les LED (carte de 7,7 × 30,5 mm, posée sur deux cales de 3 mm), la caméra et la carte de LED posées dessus avec l'objectif et les LED à fleur du dessous. Elle est crénelée à l'arrière (5 segments, deux dents) dans « Face avant toit » (T-04) et traverse l'habillage par une fenêtre pleine largeur de la lame d'entrée : la lame d'entrée s'arrête sous elle : il n'y a pas d'habillage au-dessus de la plaque. Ses quatre cure-dents restent dans le morceau du bas (deux en bas, deux en haut descendus sous la plaque).
 - **Montage de la caméra 2** : sans boîte, sur sa plaque ; l'objectif et les LED regardent droit vers le bas ; la nappe et les fils passent par le canal du pan.
 - **Nappe** : la longue nappe part du Pi, passe au-dessus de tout, monte dans le **canal du toit** (le grand trou oblong de la plaque crénelée, fermé par la plaque pleine) par son bout arrière, juste derrière la plaque avant, court dans le canal et en ressort par son bout avant, dans le débord, à l'aplomb de la caméra, puis pend jusqu'au connecteur de la caméra.
 - **Fils des LED** : à gauche de la nappe, ils suivent le même chemin. La plaque avant du toit et le lambris n'ont ni fente ni fenêtre pour elle.
@@ -404,12 +404,16 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Paramètre | Valeur à viser | Dans le modèle |
 | --- | --- | --- |
 | Longueur d'onde | 850 nm (compatible avec la caméra NoIR) | — |
-| Fils | modèle à fils pré-soudés ou à bornier à vis (aucune soudure à faire) | — |
+| Fils | fils soudés sur la carte (carte faite à la main, voir « Fabrication des cartes de LED infrarouges ») | — |
 | Alimentation | 5 V depuis le Pi | broche 4 |
-| Courant | à déterminer selon la carte (plus que la limite d'une broche GPIO : ne jamais l'alimenter par un GPIO) | — |
+| Courant | environ 66 mA par carte : 2 branches de 2 LED à ≈ 33 mA (résistance de 68 Ω, LED à 1,3 à 1,5 V, 50 mA maximum) ; bien plus que la limite d'une broche GPIO : ne jamais l'alimenter par un GPIO | 0,33 W par carte |
 | Commande | module 2 × MOSFET (niveau logique 3,3 V, ex. IRLZ44N ou module « 2 channel MOSFET »), coupure côté masse | module MOSFET, GPIO23 / GPIO24 |
-| Dimensions | 12 × 24 mm | 12 × 24 mm ; les 4 LED (3,2 × 3,2) ont la hauteur du bois traversé : carte contre le bois, bout des LED à fleur de l'autre face. Fenêtre de 10 × 20 dans le plafond du nid (jeu 0,4 mm) ; la carte extérieure, nue, n'a pas de bois |
-| Modèle exact / lien | lien à trouver — référence exacte : carte de 4 LED infrarouges 850 nm, 5 V, environ 12 × 24 mm, fils pré-soudés | — |
+| Dimensions | carte maison de 3 colonnes × 12 rangées (pas de 2,54 mm), 7,7 × 30,5 mm, carte de 1,6 mm | 7,7 × 30,5 mm ; 4 LED de 3 mm (corps de 5,3 mm) en 2 branches de 2 (colonnes 1 et 3). La carte est posée sur deux cales de 3 mm (morceaux de baguette de 8 mm) sous ses deux bouts : le bout des LED arrive à 0,7 mm sous le dessous du bois de 3 mm. Fenêtre de 8,9 × 8,9 mm dans le plafond du nid et dans la plaque extérieure |
+| Modèle exact / lien | [YIXISI 40 LED infrarouges 3 mm 850 nm (Amazon)](https://www.amazon.fr/dp/B0GKFSSZ4X) : 1,3 à 1,5 V, 50 mA, 20 à 30 mW/sr, angle de 45° ; [kit de 10 cartes PCB prototype double face 2 × 8 cm (Amazon)](https://www.amazon.fr/dp/B0B87NGPR3) | — |
+
+La fabrication pas à pas est dans la section « Fabrication des cartes de LED infrarouges (pas à pas) » ci-dessous.
+
+Sur une LED de 850 nm, l'œil humain voit une faible lueur rouge ; pour les oiseaux, la lumière est a priori invisible. Règle le courant au plus bas qui donne une image correcte (68 Ω au départ ; 100 Ω pour baisser à ≈ 22 mA).
 
 ### Capteur de température et d'humidité (BME280)
 
@@ -471,6 +475,101 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | Panneau vers régulateur | environ 4 mm² (tirage d'environ 70 cm à plusieurs mètres) |
 | Signaux (PWM, tachymètre, commande de l'interrupteur, I2C) | 0,25 mm² environ |
 | Masse | commune entre le Pi, le ventilateur (broche 14) et le rail 12 V |
+
+## Fabrication des cartes de LED infrarouges (pas à pas)
+
+Les deux cartes de LED (une dans le plafond du nid, une sur la plaque de la caméra extérieure) se font à la main : un petit morceau de plaque de prototypage, 4 LED infrarouges et 2 résistances, reliés à l'étain. Ce guide suppose que tu n'as jamais soudé : lis-le en entier avant de commencer, fais la première carte lentement, la seconde ira vite. Le modèle 3D du nichoir montre exactement cette carte (LED, pattes rouge et noire, résistances, cales).
+
+### 1. Ce qu'il faut
+
+| Pour les 2 cartes | Quantité | Détail |
+| --- | --- | --- |
+| Plaque de prototypage 2 × 8 cm | 2 morceaux (1 plaque du kit suffit) | pas de 2,54 mm, trous de Ø 1 mm, étamée |
+| LED infrarouges 3 mm, 850 nm | 8 (40 dans le lot) | 1,3 à 1,5 V, 50 mA maximum |
+| Résistances 68 Ω, 1/4 W | 4 | bandes bleu, gris, noir, doré |
+| Fil souple fin rouge et noir | 2 fils par carte | longueur exacte : fiche de chaque fil (clic sur le fil dans la 3D) |
+| Baguette de contreplaqué 3 mm × 5 mm | 4 petits morceaux de 8 mm | les « cales », prises dans les baguettes de cale du nichoir |
+
+| Outils | Détail |
+| --- | --- |
+| Fer à souder | 30 à 60 W, pointe fine, avec son support |
+| Étain pour l'électronique | Ø 0,8 mm, avec flux (marqué « flux » ou « rosin core ») |
+| Pince coupante fine, pince à bec fin | pour couper et plier les pattes |
+| Scie à métaux fine ou cutter, lime fine | pour couper la plaque |
+| Étau ou serre-joint, 2 cales de bois | pour tenir la plaque |
+| Feutre indélébile, ruban de masquage | pour tracer les repères et tenir les LED |
+| Lunettes, masque FFP2, chiffon humide | la poussière de fibre de verre irrite |
+| Alimentation 5 V (celle du Pi) et un téléphone | pour tester |
+
+### 2. Les mots à connaître
+
+- **Pastille** : le rond de cuivre autour d'un trou. **Souder** : faire fondre l'étain pour relier une patte à sa pastille.
+- **Face DESSUS** : celle où l'on soude, qui regardera le toit une fois la carte montée. **Face DESSOUS** : celle qui regardera le bois ; les LED et les résistances sont de ce côté.
+- **Colonne** : un alignement de trous dans le sens de la largeur de la carte (1 à 3, de gauche à droite). **Rangée** : un alignement dans le sens de la longueur (1 à 12, de haut en bas). Un trou se note (colonne, rangée), par exemple (1,7).
+- **LED** : la patte **longue** est le **+** (anode), la patte **courte** est le **−** (cathode, côté du méplat du boîtier). Une LED ne marche que dans un sens.
+- **Pont d'étain** : une goutte d'étain posée sur deux pastilles voisines pour les relier.
+
+### 3. Découper la carte (7,7 × 30,5 mm)
+
+1. La plaque de 20 × 80 mm a 5 colonnes de trous. Choisis, au milieu, une zone de **12 rangées de trous ronds** de suite (évite les pastilles ovales des deux bouts) et **3 colonnes** adjacentes.
+2. Au feutre, trace **4 traits** à **1,3 mm** (la moitié d'un pas) des trous du bord : 2 dans le sens de la longueur (de chaque côté des 3 colonnes), 2 en travers (au-dessus de la rangée 1 et sous la rangée 12). Le morceau mesure alors environ 7,7 × 30,5 mm.
+3. Serre la plaque dans l'étau entre deux cales de bois, le trait au ras des mâchoires. Scie lentement, sans appuyer, trait après trait. Au cutter : rainure 10 fois le trait, puis casse le long d'un bord de table.
+4. Lime les bords, passe un chiffon humide, lave-toi les mains. Ne coupe jamais la plaque au laser (fumées toxiques).
+5. Écris au feutre sur la face qui sera le DESSUS : « 1 » à côté de la rangée du haut, et « + » au-dessus de la colonne 2 (le fil rouge).
+
+### 4. Le plan de la carte (vue de dessus, rangée 1 en haut)
+
+```
+5 V ─┬─ R1 (68 Ω) ─ LED 1 ─ LED 2 ─┬─ masse (−)    colonne 1
+     └─ R2 (68 Ω) ─ LED 3 ─ LED 4 ─┘               colonne 3
+```
+
+| Rangée | Colonne 1 | Colonne 2 | Colonne 3 |
+| --- | --- | --- | --- |
+| 1 | libre | libre | libre |
+| 2 | libre | libre | libre |
+| 3 | R1, patte 1 | **fil rouge (5 V)** | R2, patte 1 |
+| 4 | (corps de R1, dessous) | libre | (corps de R2, dessous) |
+| 5 | (corps de R1, dessous) | libre | (corps de R2, dessous) |
+| 6 | R1, patte 2 | libre | R2, patte 2 |
+| 7 | LED 1, patte **+** | libre | LED 3, patte **+** |
+| 8 | LED 1, patte **−** | libre | LED 3, patte **−** |
+| 9 | LED 2, patte **+** | libre | LED 4, patte **+** |
+| 10 | LED 2, patte **−** | **fil noir (masse)** | LED 4, patte **−** |
+| 11 | libre | libre | libre |
+| 12 | libre | libre | libre |
+
+Ponts d'étain à faire (8 en tout) : **(1,3)–(2,3)** et **(2,3)–(3,3)** (le 5 V réunit les deux branches) ; **(1,6)–(1,7)**, **(1,8)–(1,9)**, **(3,6)–(3,7)**, **(3,8)–(3,9)** (chaque résistance et chaque LED à la suivante) ; **(1,10)–(2,10)** et **(2,10)–(3,10)** (la masse réunit les deux branches). **Aucun autre pont**, surtout pas entre la colonne 1 et la colonne 3 : la colonne 2 reste vide entre elles, sauf aux rangées 3 et 10. Les rangées 1, 2, 11 et 12 restent libres : ce sont les bouts, qui reposent sur les cales.
+
+### 5. Souder : la technique
+
+1. Fer allumé, 2 minutes avant : il doit être chaud (environ 330 °C) mais pas rouge. Nettoie la pointe sur l'éponge humide ou la laine : elle doit être brillante.
+2. Pose la pointe sur la **patte ET la pastille en même temps**, 1 à 2 secondes. Amène alors l'étain **au contact de la patte et de la pastille, pas du fer** : il fond et coule autour. Retire l'étain, puis le fer. Compte **3 à 4 secondes** au total : la fiche des LED limite à 260 °C pendant 5 secondes, ne dépasse jamais 4 secondes sur une LED, et attends 10 secondes avant de souder la seconde patte de la même LED.
+3. Une bonne soudure est **brillante**, en petit cône qui épouse la patte. Une boule terne ou une soudure qui ne mouille pas la pastille : chauffe de nouveau et ajoute un peu d'étain.
+4. **Pont d'étain** : pose la pointe sur les deux pastilles voisines en même temps, ajoute un peu d'étain jusqu'à ce qu'il les relie, retire. Trop d'étain : repose la pointe propre pour en reprendre.
+5. Fer au support dès que tu ne soudes pas. Fenêtre ouverte, lunettes, cheveux attachés. Ne touche jamais la pointe.
+
+### 6. L'ordre de montage
+
+1. **Les 4 LED, côté DESSOUS.** Pour chacune : repère la patte longue (+). Introduis les pattes **par le dessous** dans les deux trous du tableau (par exemple LED 1 : patte longue en (1,7), patte courte en (1,8)), enfonce la LED jusqu'à ce que son épaulement touche la carte (le corps de 5,3 mm dépasse alors sous la carte), tiens-la d'un bout de ruban. Retourne la carte, soude les deux pattes **sur le dessus**, puis coupe les pattes qui dépassent à 1 mm de la soudure. Les 4 LED ont leur patte longue du côté du haut de la carte : LED 1 (1,7), LED 2 (1,9), LED 3 (3,7), LED 4 (3,9).
+2. **Les 2 résistances, côté DESSOUS.** Plie chaque patte à angle droit à 2 mm du corps : l'écart entre les deux pattes doit être de 7,62 mm (3 trous). R1 : pattes dans (1,3) et (1,6). R2 : pattes dans (3,3) et (3,6). Elles sont introduites par le dessous (le corps est sous la carte, le long de la colonne), soudées sur le dessus, pattes coupées à 1 mm. Le sens des bandes n'a pas d'importance.
+3. **Les 8 ponts d'étain** du chapitre 4, un par un, en vérifiant à la lampe que rien d'autre n'est relié.
+4. **Les 2 fils.** Dénude 4 mm. Fil rouge : introduis-le par le **dessus** dans (2,3), soude-le sur le dessus, coupe le bout qui dépasse dessous. Fil noir : pareil dans (2,10). Fais un nœud à 2 cm de la carte pour que le fil ne tire pas sur la soudure.
+
+### 7. Tester avant de monter
+
+1. **Regarde** : toutes les soudures brillantes ; aucune goutte entre colonne 1 et colonne 3 ; aucune patte qui touche une autre pastille. Les LED sont toutes tournées dans le même sens (patte longue en haut).
+2. **Alimente** la carte en 5 V : fil rouge au 5 V du Pi, fil noir à la masse (broche 6, ou le module MOSFET). Elle ne chauffe pas.
+3. **Filme-la avec l'appareil photo d'un téléphone** : les 4 LED apparaissent en violet clair ou blanc (l'œil ne voit presque rien). Si une branche reste éteinte : une LED à l'envers (inverse-la), une soudure froide, ou un pont manquant.
+4. Courant attendu : environ 33 mA par branche, 66 mA en tout.
+
+### 8. Monter dans le nichoir
+
+1. **Les cales** : colle sous les deux bouts de la carte (sous les rangées 1-2 et 11-12, qui n'ont aucune soudure dessous) deux morceaux de baguette de cale de 8 mm de long (3 mm de haut, 5 mm de large) : ils sont posés sur le bois de chaque côté de la fenêtre, et la carte repose dessus par ses deux bouts, les LED vers le bas, le bout des LED à 0,7 mm sous le dessous du bois (pas de LED qui dépasse).
+2. **Carte du nid** (dans le compartiment de la caméra, à droite de l'objectif, la rangée 1 vers l'avant du nichoir, le fil rouge du côté avant). **Carte extérieure** (sur la plaque, devant la caméra, la rangée 1 à droite quand on regarde la façade, le fil rouge de ce côté).
+3. Les fils rejoignent le Pi (5 V, broche 4 pour le nid, broche 2 pour l'extérieur) et le module 2 × MOSFET (masse) : voir la fiche de chaque fil.
+4. **Dehors** : vernis ou silicone sur la carte et les soudures, sans toucher le dessous des LED.
+5. **Réglage** : si l'image est trop sombre, tu peux descendre à 56 Ω au minimum (jamais en dessous : 50 mA maximum par LED) ; trop lumineuse ou LED qui chauffent : 100 Ω.
 
 ## Montage sans soudure
 
@@ -548,7 +647,7 @@ Contrôle des fils : les fils du ventilateur côté 12 V ne traversent ni nappe 
 | --- | --- | --- | --- |
 | Pi au repos, caméras éteintes | 3 W | environ 3,3 W | environ 19 h |
 | Jour, deux caméras en flux (Pi 5,5 W + caméras 1,4 W) | 6,9 W | environ 7,7 W | environ 8,5 h |
-| Nuit, deux caméras + deux cartes de LED (2 × 1,2 W) | 9,3 W | environ 10,3 W | environ 6,3 h |
+| Nuit, deux caméras + deux cartes de LED (2 × 0,33 W) | 7,6 W | environ 8,4 W | environ 7,7 h |
 
 Le ventilateur ajoute au plus 0,6 W, directement sur le 12 V, seulement quand il tourne.
 
@@ -629,7 +728,9 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Active Cooler officiel Raspberry Pi 5 (ventilateur + dissipateur) | 6 € | [Kubii, ventilateur + dissipateur pour Raspberry Pi 5](https://www.kubii.com/fr/ventilateurs-dissipateurs-thermiques/4109-ventilateur-dissipateur-pour-raspberry-pi-5-5056561803357.html) | [x] |
 | Électronique | Nappe caméra 1 (courte) : câble caméra pour Raspberry Pi 5, 22 → 15 broches, 200 mm × 16 mm | 1,32 € | [Kubii, nappe CSI / MIPI caméra pour Raspberry Pi 5, 200 mm](https://www.kubii.com/fr/nappes-cables-adaptateurs/4116-1859-nappe-csi-mipi-camera-pour-raspberry-pi-5-3272496316669.html#/dimensions-200mm_x_16mm_8_x_06) ; câble adaptateur Raspberry Pi (référence fabricant SC1130 sur la fiche) ; trajet dessiné 14,4 cm | [x] |
 | Électronique | Nappe caméra 2 (longue) : même câble, 500 mm × 16 mm | 3,72 € | [Kubii, nappe CSI / MIPI caméra pour Raspberry Pi 5, 500 mm](https://www.kubii.com/fr/nappes-cables-adaptateurs/4116-1861-nappe-csi-mipi-camera-pour-raspberry-pi-5-3272496316669.html#/dimensions-500mm_x_16mm_8_x_06) ; trajet dessiné 22,8 cm (existe aussi en 300 mm) ; câble réservé aux caméras, pas aux écrans | [x] |
-| Électronique | 2 × carte 4 LED infrarouges 850 nm (fils pré-soudés) | 10 € | lien à trouver — référence exacte : carte de 4 LED infrarouges 850 nm, 5 V, environ 12 × 24 mm, fils pré-soudés | [ ] |
+| Électronique | 40 LED infrarouges 3 mm, 850 nm (YIXISI) pour les 2 cartes de LED (8 en usage, les autres de rechange) | 7,99 € | [YIXISI 40 LED infrarouges 3 mm 850 nm (Amazon)](https://www.amazon.fr/dp/B0GKFSSZ4X) | [ ] |
+| Électronique | Kit de 10 cartes PCB prototype double face 2 × 8 cm, pas de 2,54 mm, étamées (2 cartes de LED, le reste en réserve) | 9,95 € | [Kit de 10 cartes PCB 2 × 8 cm (Amazon)](https://www.amazon.fr/dp/B0B87NGPR3) | [ ] |
+| Électronique | Résistances 68 Ω, 1/4 W, 5 % (4 nécessaires pour les 2 cartes de LED ; un lot ou un assortiment en donne bien plus, avec quelques 100 Ω en réserve pour baisser le courant) : prix estimé, à confirmer | 3 € | lien à trouver — référence exacte : résistances 68 Ω 1/4 W 5 % (ou assortiment de résistances de 10 Ω à 1 MΩ) | [ ] |
 | Électronique | Capteur BME280 Pimoroni PIM472 (Kubii) + cordons Dupont | 15,88 € | [Pimoroni BME280 Breakout (PIM472), Kubii, 15,88 €, 16 en stock](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html) : I2C, 19 × 19 × 2,75 mm, brochage fait pour les broches 1, 3, 5, 7, 9 du Pi ; puce : [Bosch BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) | [x] |
 | Électronique | Sonde de température extérieure DS18B20 étanche (câble 1 à 3 m) + module 3 broches avec résistance 4,7 kΩ (prix estimé, à confirmer) | 5 € | lien à trouver — référence exacte : sonde DS18B20 étanche câble 1 m ou 3 m + module adaptateur 3 broches résistance 4,7 kΩ | [ ] |
 | Électronique | Ventilateur Noctua NF-A6x25 PWM (avec ses plots en caoutchouc) | 17 € | [Noctua NF-A6x25 PWM](https://noctua.at/en/nf-a6x25-pwm) (60 × 60 × 25 mm, 12 V, 4 broches) ; en France : [Amazon.fr, NF-A6x25 PWM marron](https://www.amazon.fr/dp/B00VXTANZ4) | [x] |

@@ -1,6 +1,6 @@
 import { type Vec3, type Pt, type Edge, type Notch, type Hole, type Plank, type PlankScene, type NestParams } from '../types';
 import { r2, uid } from '../util';
-import { SENSOR_CHIP_DX, SENSOR_X, LENS_HOLE, CAM_W, IR_W, CAM_X, PI_CSI2, PI_W, PI_CSI, PI_PIN_Y, PI_PIN_X0, CAM_Y, SENSOR_Y, CAM_H, IR_H, IR_X, OKOUME_T, OKOUME_COLOR, OKOUME_NATURAL, PI_H, FAN, FAN_T, FAN_OPEN, FAN_PLOT, STRIP } from '../constants';
+import { SENSOR_CHIP_DX, SENSOR_X, LENS_HOLE, CAM_W, IR_W, IR_LIFT, IR_WIN, irHole, CAM_X, PI_CSI2, PI_W, PI_CSI, PI_PIN_Y, PI_PIN_X0, CAM_Y, SENSOR_Y, CAM_H, IR_H, IR_X, OKOUME_T, OKOUME_COLOR, OKOUME_NATURAL, PI_H, FAN, FAN_T, FAN_OPEN, FAN_PLOT, STRIP } from '../constants';
 import { fitHole, rectUnion } from '../geometry/holes';
 import { teethFor, recastAll } from '../geometry/castellation';
 import { outline } from '../geometry/outline';
@@ -152,14 +152,14 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const panUnder = (y: number): number => bodyH + Hf + ((y + D / 2) * (Hb - Hf)) / D; // dessous du pan à l'ordonnée y : plus bas vers l'avant (la pente descend)
   const plateTop = r2(Math.min(
     panUnder(plateY0) - PLATE_GAP, // bout avant de la plaque
-    panUnder(irY - IR_W / 2) - PLATE_GAP - 1.6, // dessus de la carte des LED (0,8 + 0,8 au-dessus de la plaque), bord avant
+    panUnder(irY - IR_W / 2) - PLATE_GAP - IR_LIFT - 1.6 - 1.5, // dessus de la carte des LED (sur ses deux baguettes de 3 mm, + 1,6 de carte) et passage des fils au-dessus, bord avant
     panUnder(cam2Y + CAM_H / 2 - 4.5 - 2.75) - PLATE_GAP - 4.2, // dessus du connecteur de la nappe, bord avant
   )), plateZ = r2(plateTop - t / 2), plateW = r2(lamSx); // largeur = celle de la lame d'entrée (la lame s'arrête sous la plaque : rien au-dessus)
   const cam2Cz = r2(plateTop + 0.8); // centre de la carte caméra posée sur la plaque
   const camCon: Vec3 = [cam2X, r2(cam2Y + CAM_H / 2 - 4.5), r2(plateTop + 4.2)]; // connecteur de la nappe, côté façade (+y), au-dessus de la carte
   const cam2Plate: Plank | null = n.cam2 ? (() => {
     const base: Plank = recastAll({ id: uid(), name: 'Plaque caméra extérieure', w: plateW, h: r2(plateY1 - plateY0), pos: [0, r2((plateY0 + plateY1) / 2), plateZ] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: roofGroup, cast: { top: { n: PLATE_TEETH, phase: 0 } } }, t, fit);
-    return { ...base, holes: [fitHole(base, { id: uid(), shape: 'square' as const, x: 0, y: r2(cam2Y - base.pos[1]), size: CAM_W - 4, sh: CAM_H - 4 }), fitHole(base, { id: uid(), shape: 'square' as const, x: 0, y: r2(irY - base.pos[1]), size: 20, sh: 10 })] };
+    return { ...base, holes: [fitHole(base, { id: uid(), shape: 'square' as const, x: 0, y: r2(cam2Y - base.pos[1]), size: CAM_W - 4, sh: CAM_H - 4 }), fitHole(base, { id: uid(), shape: 'square' as const, x: r2(-IR_WIN.cy), y: r2(irY + IR_WIN.cx - base.pos[1]), size: IR_WIN.h, sh: IR_WIN.w })] };
   })() : null;
   const cam2SX = r2(cam2X - 10); // abscisse de la nappe et des deux fils des LED extérieures de la caméra 2, au milieu de leur fente (28 mm) dans le pan du toit, au-dessus de la caméra
   // PAN DU TOIT (« Toit en okoumé ») : géométrie partagée par le pan, ses baguettes, ses fentes et le trajet de la nappe / des fils de la caméra 2. `s` = abscisse le long de la pente depuis le milieu du pan (sens +s = vers l'arrière), `h` = hauteur au-dessus de son dessous (le pan occupe 0 à OKOUME_T).
@@ -245,7 +245,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       fitHole(q, { id: uid(), shape: 'square' as const, x: FANX, y: FOP_YC, size: FAN_OPEN, sh: FOP_H })]; // ouverture du ventilateur dans le plafond du nid (56 de large)
     if (n.cam <= 0) return q;
     if (/^Dessus/.test(p.name)) return { ...q, holes: [...q.holes, fitHole(q, { id: uid(), shape: 'square' as const, x: CAMCX, y: CAM_Y, size: CAMW, sh: n.cam })] }; // on accède au compartiment par le haut
-    if (/^Dessous/.test(p.name)) return { ...q, holes: [...q.holes, fitHole(q, { id: uid(), shape: 'round' as const, x: CAM_X, y: CAM_Y, size: LENS_HOLE }), fitHole(q, { id: uid(), shape: 'square' as const, x: IR_X, y: CAM_Y, size: 10, sh: 20 })] };
+    if (/^Dessous/.test(p.name)) return { ...q, holes: [...q.holes, fitHole(q, { id: uid(), shape: 'round' as const, x: CAM_X, y: CAM_Y, size: LENS_HOLE }), fitHole(q, { id: uid(), shape: 'square' as const, x: r2(IR_X + IR_WIN.cx), y: r2(CAM_Y + IR_WIN.cy), size: IR_WIN.w, sh: IR_WIN.h })] };
     return q;
   });
   const roofParts = (() => {
@@ -290,7 +290,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     : [];
   const camBox: Plank[] = n.cam2 ? [ // caméra 2 et carte de LED extérieures posées sur la plaque, objectif et LED vers le bas, à fleur du dessous (`wood`)
     { id: uid(), name: CAMERA_NAMES[1], w: CAM_W, h: CAM_H, pos: [cam2X, cam2Y, cam2Cz] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'camera', wood: t },
-    { id: uid(), name: 'LED infrarouges extérieures', w: IR_W, h: IR_H, pos: [0, irY, cam2Cz] as Vec3, rot: [0, 0, 90] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir', wood: t }, // devant la caméra, tournée de 90° (24 mm en travers)
+    { id: uid(), name: 'LED infrarouges extérieures', w: IR_W, h: IR_H, pos: [0, irY, r2(cam2Cz + IR_LIFT)] as Vec3, rot: [0, 0, 90] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir', wood: t }, // devant la caméra, tournée de 90° (24 mm en travers)
   ] : [];
   const brackets: Plank[] = n.solar ? U_YS.map((y, k): Plank => ({ id: uid(), name: `Étrier régulateur ${k + 1}`, w: U_W, h: U_H, pos: [RGX, r2(y), r2(U_TEN - U_H / 2)] as Vec3, rot: rotFromBasis([1, 0, 0], [0, 0, 1]), notches: [{ id: uid(), edge: 'top' as const, pos: U_W / 2, width: U_W - 2 * U_ARM, depth: U_H - 9 }], holes: [], group })) : []; // les tenons (3 mm du haut des bras) affleurent le dessus du fond (z = +3), le fond de l'encoche est 1 mm sous le régulateur
   const batBrackets: Plank[] = BAT_XS.map((x, k): Plank => ({ id: uid(), name: `Étrier batterie ${k + 1}`, w: U_WB, h: U_HB, pos: [r2(x), BAT_Y, r2(U_TEN - U_HB / 2)] as Vec3, rot: rotFromBasis([0, 1, 0], [0, 0, 1]), notches: [{ id: uid(), edge: 'top' as const, pos: U_WB / 2, width: U_WB - 2 * U_ARM, depth: U_HB - 9 }], holes: [], group }));
@@ -313,7 +313,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const keys: Plank[] = RIB_XS.flatMap((x, k) => RIB_TEETH_Z.slice(0, 2).map(([za, zb], j): Plank => ({ id: uid(), name: `Clavette fixation ${k + 1}.${j + 1}`, w: r2(RIB_T + 6), h: r2(zb - za - 12 - 0.5), pos: [x, r2(D / 2 - t - RIB_KEY / 2), r2((za + zb) / 2)] as Vec3, rot: rotFromBasis([1, 0, 0], [0, 0, 1]), notches: [], holes: [], group }))); // clavette de 3, contre la face intérieure du mur : traverse les trois plaques par leur trou, dépasse de 3 de chaque côté seulement, contre la face intérieure du mur
   const camera: Plank[] = n.cam > 0 ? [
     { id: uid(), name: CAMERA_NAMES[0], w: CAM_W, h: CAM_H, pos: [CAM_X, CAM_Y, floorTop + 0.8] as Vec3, rot: [0, 0, 180] as Vec3, notches: [], holes: [], group: elecGroup, special: 'camera', wood: t }, // carte posée sur le plafond, l'objectif traverse le trou et affleure le dessous
-    { id: uid(), name: 'LED infrarouges', w: IR_W, h: IR_H, pos: [IR_X, CAM_Y, floorTop + 0.8] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir', wood: t },
+    { id: uid(), name: 'LED infrarouges', w: IR_W, h: IR_H, pos: [IR_X, CAM_Y, r2(floorTop + 0.8 + IR_LIFT)] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'ir', wood: t }, // sur deux baguettes de cale de 3 mm de chaque côté de la fenêtre : le bout des LED affleure (0,7 mm sous le bois)
   ] : [];
   // cadre sous le toit, en trois planches collées (le toit n'est plus verrouillé par des barres : il tient avec l'habillage collé au corps) ;
   // en descendant dans l'isolant entre murs extérieur et intérieur, le cadre cale en plus le toit sur le corps
@@ -353,6 +353,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const OAK = n.chene ? 18 : 0, topZ = roofTop + OAK; // dessus de la planche de chêne : tout ce qui est « sur le toit » (Pi, boîtier, toit en pente) se pose dessus
   const piZ = topZ + 7; // centre de la carte : sur des entretoises de 6 mm au-dessus du dessus du toit (les composants du dessous dépassent de 2,9)
   const wedgeNeed: number[] = []; // longueurs (mm) des cales de bois d'autrefois, une par côté de composant : le besoin que les baguettes de cale (3 × ce besoin) doivent couvrir
+  if (n.cam > 0) wedgeNeed.push(8, 8); // deux cales de 3 mm (morceaux de baguette de 8 mm) sous les bouts de la carte de LED du plafond du nid
+  if (n.cam2) wedgeNeed.push(8, 8); // idem sous la carte de LED de la caméra extérieure
   if (n.cam > 0) wedgeNeed.push(16, 16, 16, 16, 16, 16); // Pi : six cales de 16 mm, deux par grand côté et une à chaque bout
   const pi: Plank[] = n.cam > 0 ? [
     { id: uid(), name: 'Raspberry Pi', w: PI_W, h: PI_H, pos: [piX, piY, piZ] as Vec3, rot: [0, 0, 90] as Vec3, notches: [], holes: [], group: elecGroup, special: 'pi' as const },
@@ -381,10 +383,12 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     : [panPt(x, PAN_SB + 45, -9), panPt(x, PAN_SB + 14, -9), panPt(x, PAN_SB + 4, -5), panPt(x, PAN_SB, -1), panPt(x, PAN_SB - 1, 1.5), panPt(x, PAN_SB - 5, 2.5), panPt(x, (PAN_SA + PAN_SB) / 2, 2.5), panPt(x, PAN_SA + 5, 2.5), panPt(x, PAN_SA + 1, 1.5), panPt(x, PAN_SA, -1)];
   const wires2: Plank[] = n.cam2 ? ([['Fil 5 V LED extérieures (rouge)', '#dc2626', 0, 0, -10.5], ['Fil masse LED extérieures (noir)', '#111827', 9, 0, -13]] as const).map(([nm, color, pinIdx, _r, dx]): Plank => {
     const [xt, yt] = pw(PI_PIN_X0 + pinIdx * 2.54, PI_PIN_Y), sx = cam2SX + dx; // tous les deux à GAUCHE de la nappe (à 10,5 et 13 mm de son axe ; elle fait 16 de large, la fente 28) : jamais dessus, jamais croisée
-    const end: Vec3 = [r2(dx / 4), r2(irY + IR_W / 2 - 1), r2(plateTop + 2.4)]; // sur la carte des LED, du côté de la caméra
-    const hw = r2(plateTop + 2.8); // les fils redescendent à gauche de la nappe, restent au-dessus de la caméra, puis plongent sur la carte des LED
+    const [padLx, padLy] = pinIdx === 0 ? irHole(2, 3) : irHole(2, 10); // pastilles de la carte (5 V : colonne 2 rangée 3 ; masse : colonne 2 rangée 10)
+    const end: Vec3 = [r2(-padLy), r2(irY + padLx), r2(plateTop + IR_LIFT + 1.6 + 0.4)]; // la carte est tournée de 90° : (x, y) devient (−y, x)
+    const yGap = r2(irY + IR_W / 2 + 1.5); // couloir entre la carte et la caméra
+    const hw = r2(plateTop + IR_LIFT + 1.6 + 1); // les fils redescendent à gauche de la nappe, restent au-dessus de la caméra, puis plongent sur la carte des LED
     return { id: uid(), name: nm, w: 1.2, h: 1.2, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'wire' as const, color,
-      path: [...(pinIdx === 9 ? [[MX + 4, MY - 7, MZ + 4], [MX + 4, MY - 12, MZ + 10], [sx + 10, -34, topZ + 24]] as Vec3[] : [[xt, yt, piZ + 3.5], [xt, yt, piZ + 10], [xt + dx, yt - 10, topZ + 27]] as Vec3[]), ...panRoute(sx, true), [sx, camCon[1], hw], [sx, r2(irY + IR_W / 2 + 4), hw], [end[0], r2(irY + IR_W / 2 + 4), hw], end] as Vec3[] };
+      path: [...(pinIdx === 9 ? [[MX + 4, MY - 7, MZ + 4], [MX + 4, MY - 12, MZ + 10], [sx + 10, -34, topZ + 24]] as Vec3[] : [[xt, yt, piZ + 3.5], [xt, yt, piZ + 10], [xt + dx, yt - 10, topZ + 27]] as Vec3[]), ...panRoute(sx, true), [sx, camCon[1], hw], [sx, yGap, hw], [end[0], yGap, hw], [end[0], end[1], hw], end] as Vec3[] };
   }) : [];
   const cable2: Plank[] = n.cam2 ? [{
     id: uid(), name: "Nappe caméra 2 (longue, vers l'extérieur)", w: 16, h: 0.3, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'cable' as const,
@@ -402,9 +406,10 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   }] : [];
   // l'alimentation des LED infrarouges : deux fils de la carte IR au GPIO du Pi, 5 V (broche 4, rouge) et masse (broche 6, noir)
   const wires: Plank[] = n.cam > 0 ? ([['Fil 5 V (rouge)', '#dc2626', -2, 1], ['Fil masse (noir)', '#111827', 2, 2]] as const).map(([nm, color, dx, pinIdx]): Plank => {
-    const sx = IR_X + dx, px = PI_PIN_X0 + pinIdx * 2.54, top = topZ + 19.5 + dx * 0.4; // au-dessus de la carte du Pi (haut à topZ + 15,5)
+    const [padX, padY] = pinIdx === 1 ? irHole(2, 3) : irHole(2, 10); // pastilles de la carte de LED : 5 V en colonne 2 rangée 3, masse en colonne 2 rangée 10
+    const sx = r2(IR_X + padX), sy = r2(CAM_Y + padY), zPad = r2(floorTop + 0.8 + IR_LIFT + 0.8 + 0.4), px = PI_PIN_X0 + pinIdx * 2.54, top = topZ + 19.5 + dx * 0.4; // au-dessus de la carte du Pi (haut à topZ + 15,5)
     return { id: uid(), name: nm, w: 1.2, h: 1.2, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'wire' as const, color,
-      path: [[sx, CAM_Y + 6, floorTop + 2], [sx, CAM_Y + 6, floorTop + 14], [sx, CAM_Y + 9, roofTop - 8], [sx, CAM_Y + 14, top], ...(pinIdx === 2 ? [[MX + 16, MY - 2, top], [MX + 10, MY - 2, MZ + 4]] as Vec3[] : [[...pw(px, 20), top], [...pw(px, PI_PIN_Y), piZ + 8], [...pw(px, PI_PIN_Y), piZ + 3.5]] as Vec3[])] as Vec3[] }; // la masse des LED passe par le module (OUT1) : le Pi peut les éteindre
+      path: [[sx, sy, zPad], [sx, sy, floorTop + 14], [sx, CAM_Y + 6, floorTop + 14], [sx, CAM_Y + 9, roofTop - 8], [sx, CAM_Y + 14, top], ...(pinIdx === 2 ? [[MX + 16, MY - 2, top], [MX + 10, MY - 2, MZ + 4]] as Vec3[] : [[...pw(px, 20), top], [...pw(px, PI_PIN_Y), piZ + 8], [...pw(px, PI_PIN_Y), piZ + 3.5]] as Vec3[])] as Vec3[] }; // la masse des LED passe par le module (OUT1) : le Pi peut les éteindre
   }) : [];
   // bloc d'entrée : carrés de OPEN × OPEN percés du trou d'envol, empilés sur toute l'épaisseur de la double paroi (de la face extérieure à la face intérieure),
   // avec un surplus (+12) : une collerette derrière le trou, à l'extérieur du mur extérieur, et tous les carrés qui sont dans l'isolant, entre les deux murs ; seuls les carrés qui traversent les murs restent à OPEN ;

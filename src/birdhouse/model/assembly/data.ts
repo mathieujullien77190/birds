@@ -1,5 +1,5 @@
 import type { AssemblyBlock, AssemblyKind } from './types';
-import { PAINT_DRY, PAINT_TEXT, SAND_TEXT, SAT_DRY, SAT_TEXT, TEST_BATTERY, TEST_MULTIMETER } from './texts';
+import { FAB_IR, PAINT_DRY, PAINT_TEXT, SAND_TEXT, SAT_DRY, SAT_TEXT, TEST_BATTERY, TEST_MULTIMETER } from './texts';
 
 /** Blocs du montage, dans l'ordre. */
 export const ASSEMBLY_BLOCKS: AssemblyBlock[] = [
@@ -182,7 +182,8 @@ export const SEQ: Rule[] = [
   // ---- g. Électronique : installation dans le nichoir ----
   P('elec-pi', 'elec', 'installer', /^Raspberry Pi/, { text: "Posé sur des entretoises de 6 mm dans le coin arrière gauche du toit, calé par des morceaux de baguette collés sur tous les côtés. Ses prises USB et Ethernet regardent la fenêtre de 60 × 24 mm de la plaque arrière ; son USB-C et ses micro-HDMI sont tournés vers le centre du toit." }),
   P('elec-camera', 'elec', 'installer', /^Caméra$/, { text: "À fleur du bois : la carte s'appuie contre la face intérieure, l'objectif traverse le trou de Ø 10 mm et affleure la face extérieure." }),
-  P('elec-led-nid', 'elec', 'installer', /^LED infrarouges$/),
+  N('elec-led-fab', 'elec', 'installer', 'Fabriquer les deux cartes de LED infrarouges', FAB_IR, [/^LED infrarouges/]),
+  P('elec-led-nid', 'elec', 'installer', /^LED infrarouges$/, { text: 'Carte de LED faite maison, sur deux cales de 3 mm (morceaux de baguette de 8 mm) sous ses deux bouts, les LED vers le bas dans leur fenêtre, à 0,7 mm sous le dessous du bois.' }),
   P('elec-nappe', 'elec', 'cabler', /^Nappe caméra$/, { text: 'Nappe adaptatrice 22 → 15 broches : elle s\'enfiche dans le connecteur à levier du Pi, sans outil. Elle sort à l\'horizontale du connecteur de la caméra et passe au-dessus du siège du ventilateur.' }),
   P('elec-capteur', 'elec', 'installer', /^Capteur température/, { text: 'Incrusté à fleur dans le plafond, dans le compartiment de la caméra : la puce dans son logement de 9 × 9 mm, la carte contre la face intérieure.' }),
   P('elec-capteur-33', 'elec', 'cabler', /^Fil 3,3 V \(rouge\)$/),
@@ -201,8 +202,8 @@ export const SEQ: Rule[] = [
   P('elec-mosfet-masse', 'elec', 'cabler', /^Fil masse module LED/),
   P('elec-mosfet-in1', 'elec', 'cabler', /^Fil IN1/),
   P('elec-mosfet-in2', 'elec', 'cabler', /^Fil IN2/),
-  P('elec-cam2', 'elec', 'installer', /^Caméra 2$/, { text: "Dehors, nue, sans boîte : caméra et carte de LED debout, tournées vers le trou d'envol (environ 50° vers le bas), accrochées sous le pan en okoumé." }),
-  P('elec-led-ext', 'elec', 'installer', /^LED infrarouges extérieures/, { text: 'À 20 mm à gauche de la caméra, même orientation.' }),
+  P('elec-cam2', 'elec', 'installer', /^Caméra 2$/, { text: "Sur la plaque de la caméra extérieure, au centre au-dessus du trou d'envol : l'objectif regarde droit vers le bas, à travers le grand trou de la plaque, à fleur du dessous." }),
+  P('elec-led-ext', 'elec', 'installer', /^LED infrarouges extérieures/, { text: 'Carte de LED faite maison, devant la caméra, sur deux cales de 3 mm (morceaux de baguette de 8 mm) sous ses deux bouts : les LED vers le bas dans leur fenêtre, à 0,7 mm sous le dessous de la plaque.' }),
   P('elec-nappe2', 'elec', 'cabler', /^Nappe caméra 2/, { text: 'La longue nappe monte dans le canal du toit (le grand trou oblong de la plaque crénelée) par son bout arrière, en ressort par son bout avant et pend jusqu\'à la caméra. Au-delà d\'environ 30 cm le signal peut devenir instable : à valider.' }),
   P('elec-led-ext-5v', 'elec', 'cabler', /^Fil 5 V LED extérieures/, { text: 'Les fils des LED suivent la nappe, à sa gauche, dans le même canal.' }),
   P('elec-led-ext-masse', 'elec', 'cabler', /^Fil masse LED extérieures/),

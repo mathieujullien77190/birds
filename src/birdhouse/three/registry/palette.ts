@@ -42,6 +42,14 @@ export const PALETTE = {
   driverRed: '#b91c1c',
   irBoard: '#3f1d1d',
   irLed: '#f87171',
+  resistorBody: '#d6b98c', // résistance 68 Ω : corps beige, bagues bleu, gris, noir, or
+  resistorBlue: '#1d4ed8',
+  resistorGrey: '#6b7280',
+  resistorBlack: '#111827',
+  resistorGold: '#ca8a04',
+  solder: '#cbd5e1',
+  irAnode: '#dc2626', // patte longue (anode, +) des LED infrarouges
+  irCathode: '#111827', // patte courte (cathode, −)
   sensorBlue: '#1d4ed8',
   terminalBlue: '#2563eb',
   ledGreen: '#22c55e',

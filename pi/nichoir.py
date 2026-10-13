@@ -68,7 +68,7 @@ BATTERIE_CRITIQUE = 10   # % : en dessous, les caméras et les LED infrarouges s
 CAPACITE_WH = 76.8  # batterie LiFePO4 12,8 V × 6 Ah
 # Consommation estimée (W) de chaque élément quand il est allumé : valeurs usuelles, à remplacer par des mesures (INA219) dès que possible.
 # Pi 5 : ≈ 3 W au repos, ≈ 5-6 W avec deux flux caméra (on garde 5,5 W : le programme sert les flux en continu) ; ancienne valeur du Pi 4 : 3,5 W.
-CONSO_W = {"pi": 5.5, "camera": 0.7, "led": 1.2, "ventilo_max": 0.6}  # ventilateur : 0,6 W à 100 %, proportionnel au cube de la vitesse (loi des ventilateurs)
+CONSO_W = {"pi": 5.5, "camera": 0.7, "led": 0.33, "ventilo_max": 0.6}  # ventilateur : 0,6 W à 100 %, proportionnel au cube de la vitesse (loi des ventilateurs)
 # Tension au repos d'une batterie LiFePO4 12,8 V (4 cellules) selon sa charge : (pourcentage, volts). Sous charge la tension chute : l'estimation est grossière.
 COURBE_LIFEPO4 = [(0, 10.0), (10, 12.0), (20, 12.8), (30, 12.9), (40, 13.0), (70, 13.1), (90, 13.2), (100, 13.4)]
 
