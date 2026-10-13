@@ -16,7 +16,7 @@ Vite + React 19 + TypeScript + Tailwind v4 + Three.js. Alias `@/` → `src/`, `@
 | `src/features/laser/` | Adaptateur vers `laser-control/` (pilotage Sculpfun S30 Ultra 22 W) |
 | `src/features/docs/`, `schema/` | Documents, schéma mermaid, code |
 | `src/ui/`, `hooks/`, `lib/` | Briques UI et utilitaires sans logique métier |
-| `pi/` | Programme du Raspberry (`nichoir.py`) et site `pi/site/` (compilé dans `pi/web/`, committé) |
+| `pi/` | Programme du Raspberry (`pi/nichoir/`, un dossier de chapitres) et site `pi/site/` (compilé dans `pi/web/`, committé) |
 | `laser-control/` | Projet autonome de pilotage laser |
 | `docs/` | `docs/schema-electronique.md` (dossier du nichoir), `docs/logiciel.md`, `docs/laser.md`, `docs/architecture-3d.md`, `docs/checklist-changements.md` |
 | `tests/` | vitest, goldens dans `tests/golden/` |

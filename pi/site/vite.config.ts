@@ -21,7 +21,7 @@ export default defineConfig({
   base: './',
   plugins: [react(), classicScript()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
-  // `npm run dev` : l'API et les flux sont ceux de pi/nichoir.py (NICHOIR_MOCK=1 python nichoir.py, port 8080)
+  // `npm run dev` : l'API et les flux sont ceux de pi/nichoir/ (NICHOIR_MOCK=1 python -m nichoir, port 8080)
   server: { port: 5175, proxy: { '/api': 'http://localhost:8080', '/video': 'http://localhost:8080' } },
   build: {
     outDir: '../web',

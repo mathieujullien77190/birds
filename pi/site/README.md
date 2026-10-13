@@ -7,7 +7,7 @@ Projet **autonome**, séparé de l'app de conception (`src/` à la racine) : son
 ## Commandes (depuis `pi/site/`)
 ```sh
 npm install
-npm run dev        # http://localhost:5175, l'API est relayée vers le Python (NICHOIR_MOCK=1 python nichoir.py, port 8080)
+npm run dev        # http://localhost:5175, l'API est relayée vers le Python (NICHOIR_MOCK=1 python -m nichoir, port 8080)
 npm run typecheck
 npm run build      # écrit ../web/index.html, app.js, app.css
 ```

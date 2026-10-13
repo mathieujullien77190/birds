@@ -10,7 +10,7 @@ import type { Node } from './types';
 export function CodeBrowser() {
   const files = useMemo(() => Object.fromEntries(Object.entries(SOURCES).map(([k, v]) => [k.replace(/^\//, ''), v])), []);
   const tree = useMemo(() => buildTree(Object.keys(files)), [files]);
-  const [sel, setSel] = useState('pi/nichoir.py');
+  const [sel, setSel] = useState('pi/nichoir/__init__.py');
   const [open, setOpen] = useState<Set<string>>(new Set(['pi', 'pi/site', 'pi/site/src', 'pi/site/src/components']));
   const text = files[sel] ?? '';
   const ext = sel.split('.').pop() ?? '';

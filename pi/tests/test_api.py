@@ -1,4 +1,5 @@
 """Routes Flask, flux vidéo, point d'entrée (`__main__`) et arrêt propre."""
+import importlib.util
 import json
 import runpy
 import sys
@@ -29,13 +30,13 @@ def test_index_serves_page(client):
 
 def test_api_etat(client, m):
     d = client.get("/api/etat").get_json()
-    assert d == json.loads(json.dumps(m.etat))
-    assert d["ventilo"]["mode"] == "arret" and d["auto"]["etat"] == "inactif" and d["erreurs"] == {"mock": m.etat["erreurs"]["mock"]}
+    assert d == json.loads(json.dumps(m.state))
+    assert d["ventilo"]["mode"] == "arret" and d["auto"]["etat"] == "inactif" and d["erreurs"] == {"mock": m.state["erreurs"]["mock"]}
 
 
 def test_api_historique(client, m):
     assert client.get("/api/historique").get_json() == []
-    m.historique.append({"t": "10:00", "nid": 1.0, "ext": None, "hum": None, "ventilo": 0})
+    m.history.append({"t": "10:00", "nid": 1.0, "ext": None, "hum": None, "ventilo": 0})
     assert client.get("/api/historique").get_json() == [{"t": "10:00", "nid": 1.0, "ext": None, "hum": None, "ventilo": 0}]
 
 
@@ -51,16 +52,16 @@ def test_api_ventilo_manual(client, m):
 
 @pytest.mark.parametrize("corps", ["null", "{}"])
 def test_api_ventilo_empty_body_means_stop(client, m, corps):
-    m.ventilo(60)
+    m.fan(60)
     r = client.post("/api/ventilo", data=corps, content_type="application/json")
     assert r.status_code == 200 and r.get_json()["ventilo"]["pourcent"] == 0
 
 
 def test_api_ventilo_manual_disables_auto_and_saves(client, m):
-    m.etat["auto"]["actif"] = True
+    m.state["auto"]["actif"] = True
     d = post(client, "/api/ventilo", {"pourcent": 50}).get_json()
     assert d["auto"]["actif"] is False
-    with open(m.FICHIER_REGLAGES, encoding="utf-8") as f:
+    with open(m.SETTINGS_FILE, encoding="utf-8") as f:
         assert json.load(f)["actif"] is False
 
 
@@ -89,15 +90,15 @@ def test_api_auto_vitesse_max_follows_min(client, m):
 def test_api_auto_ignores_unknown_keys_and_persists(client, m):
     d = post(client, "/api/auto", {"n_importe": 1, "hiver": 1}).get_json()["auto"]
     assert "n_importe" not in d and d["hiver"] is True
-    with open(m.FICHIER_REGLAGES, encoding="utf-8") as f:
+    with open(m.SETTINGS_FILE, encoding="utf-8") as f:
         assert json.load(f)["hiver"] is True
     assert post(client, "/api/auto", {"hiver": False}).get_json()["auto"]["hiver"] is False
 
 
 def test_api_auto_enable_resets_fan_then_regulates(client, m):
-    m.ventilo(70, "manuel")
-    m.etat["t_nid"] = 33.0
-    m.etat["ext"]["t"] = 10.0
+    m.fan(70, "manuel")
+    m.state["t_nid"] = 33.0
+    m.state["ext"]["t"] = 10.0
     d = post(client, "/api/auto", {"actif": True}).get_json()
     assert d["auto"]["actif"] is True
     assert d["ventilo"]["mode"] == "auto" and d["ventilo"]["pourcent"] == 100 and d["auto"]["etat"] == "ventile"
@@ -109,16 +110,16 @@ def test_api_auto_enable_cool_nest_waits(client, m):
 
 
 def test_api_auto_disable_stops_auto_fan_only(client, m):
-    m.etat["t_nid"] = 33.0
-    m.etat["ext"]["t"] = 10.0
+    m.state["t_nid"] = 33.0
+    m.state["ext"]["t"] = 10.0
     post(client, "/api/auto", {"actif": True})
-    assert m.etat["ventilo"]["pourcent"] > 0
+    assert m.state["ventilo"]["pourcent"] > 0
     d = post(client, "/api/auto", {"actif": False}).get_json()
     assert d["auto"]["actif"] is False and d["ventilo"]["pourcent"] == 0 and d["auto"]["etat"] == "inactif"
     # le ventilateur manuel n'est pas touché quand on désactive l'automatique
     post(client, "/api/auto", {"actif": True})
-    m.etat["auto"]["actif"] = True
-    m.ventilo(60, "manuel", silencieux=True)
+    m.state["auto"]["actif"] = True
+    m.fan(60, "manuel", silent=True)
     d = post(client, "/api/auto", {"actif": False}).get_json()
     assert d["ventilo"]["pourcent"] == 60
 
@@ -126,14 +127,14 @@ def test_api_auto_disable_stops_auto_fan_only(client, m):
 def test_api_auto_same_state_is_noop(client, m, capsys):
     post(client, "/api/auto", {"actif": False})
     assert "Ventilation automatique" not in capsys.readouterr().out
-    m.etat["auto"]["actif"] = True
-    m.etat["t_nid"] = 33.0
-    m.etat["ext"]["t"] = 10.0
-    m.regler_auto()
-    p = m.etat["ventilo"]["pourcent"]
+    m.state["auto"]["actif"] = True
+    m.state["t_nid"] = 33.0
+    m.state["ext"]["t"] = 10.0
+    m.run_auto()
+    p = m.state["ventilo"]["pourcent"]
     capsys.readouterr()
     post(client, "/api/auto", {"actif": True})
-    assert "activée" not in capsys.readouterr().out and m.etat["ventilo"]["pourcent"] == p
+    assert "activée" not in capsys.readouterr().out and m.state["ventilo"]["pourcent"] == p
 
 
 def test_api_camera(client, m):
@@ -153,8 +154,8 @@ def test_api_camera(client, m):
 
 
 def test_api_camera_refused_on_critical_battery(client, m):
-    m.etat["batterie"]["pourcent"] = 3
-    m.etat["cam1"] = False
+    m.state["batterie"]["pourcent"] = 3
+    m.state["cam1"] = False
     assert post(client, "/api/camera", {"num": 0, "on": True}).get_json()["cam1"] is False
 
 
@@ -165,7 +166,7 @@ def test_api_led(client, m):
     assert d["led_nid"] is True and d["led_ext"] is True
     d = post(client, "/api/led", {"nid": False, "ext": False}).get_json()
     assert d["led_nid"] is False and d["led_ext"] is False
-    assert m.led_nid.value == 0 and m.led_ext.value == 0
+    assert m.led_nest.value == 0 and m.led_outside.value == 0
 
 
 # ------------------------------------------------------------------ flux vidéo
@@ -187,31 +188,31 @@ def test_video_routes_unavailable_or_off(client, m):
     m.cameras.pop(0)
     r = client.get("/video/1")
     assert r.status_code == 503 and r.data == "caméra indisponible".encode()
-    m.etat["cam2"] = False
+    m.state["cam2"] = False
     r = client.get("/video/2")
     assert r.status_code == 503 and r.data == "caméra éteinte".encode()
 
 
 def test_video_stream_frames(m):
-    flux = types.SimpleNamespace(cond=Cond(), frame=b"IMG")
-    m.cameras[0] = flux
+    stream = types.SimpleNamespace(cond=Cond(), frame=b"IMG")
+    m.cameras[0] = stream
     resp = m.mjpeg(0)
     assert resp.mimetype == "multipart/x-mixed-replace" and "boundary=frame" in resp.headers["Content-Type"]
     part = next(iter(resp.response))
-    assert part == b"--frame\r\nContent-Type: image/jpeg\r\nContent-Length: 3\r\n\r\nIMG\r\n" and flux.cond.n == 1
-    flux.frame = b"PNGDATA"
-    flux.mime = "image/png"
+    assert part == b"--frame\r\nContent-Type: image/jpeg\r\nContent-Length: 3\r\n\r\nIMG\r\n" and stream.cond.n == 1
+    stream.frame = b"PNGDATA"
+    stream.mime = "image/png"
     assert b"Content-Type: image/png\r\nContent-Length: 7\r\n\r\nPNGDATA" in next(iter(m.mjpeg(0).response))
 
 
 def test_video_route_serves_stream(client, m):
-    flux = types.SimpleNamespace(cond=Cond(), frame=b"X")
-    m.cameras[1] = flux
+    stream = types.SimpleNamespace(cond=Cond(), frame=b"X")
+    m.cameras[1] = stream
     r = client.get("/video/2", buffered=False)
     assert r.status_code == 200 and r.mimetype == "multipart/x-mixed-replace"
     assert b"Content-Length: 1" in next(iter(r.response))
     r.close()
-    m.cameras[0] = flux
+    m.cameras[0] = stream
     r = client.get("/video/1", buffered=False)
     assert r.status_code == 200
     r.close()
@@ -220,10 +221,10 @@ def test_video_route_serves_stream(client, m):
 # ------------------------------------------------------------------ arrêt et point d'entrée
 def test_atexit_cuts_the_fan(load, capsys):
     m = load(mock=False, hw=True)
-    m.ventilo(80)
+    m.fan(80)
     capsys.readouterr()
     m.atexit_hooks[-1]()
-    assert m.etat["ventilo"]["pourcent"] == 0 and m.ventilo_12v.value == 0 and capsys.readouterr().out == ""
+    assert m.state["ventilo"]["pourcent"] == 0 and m.fan_12v.value == 0 and capsys.readouterr().out == ""
 
 
 class FakeThread:
@@ -250,21 +251,43 @@ def run_main(monkeypatch, tmp_path, mock):
     else:
         monkeypatch.delenv("NICHOIR_MOCK", raising=False)
     monkeypatch.chdir(tmp_path)
-    g = runpy.run_path(str(PI / "nichoir.py"), run_name="__main__")
-    return g, runs
+    spec = importlib.util.spec_from_file_location("nichoir", PI / "nichoir" / "__init__.py", submodule_search_locations=[str(PI / "nichoir")])
+    mod = importlib.util.module_from_spec(spec)
+    monkeypatch.setitem(sys.modules, "nichoir", mod)
+    spec.loader.exec_module(mod)   # charge les chapitres (comme `import nichoir`)
+    mod.main()                     # ce que fait `python -m nichoir`
+    return vars(mod), runs
+
+
+def test_python_m_nichoir(monkeypatch, tmp_path, capsys):
+    """`python -m nichoir` : __main__.py importe le paquet puis appelle main() (même résultat que run_main)."""
+    FakeThread.started = []
+    runs = []
+    monkeypatch.setattr(threading, "Thread", FakeThread)
+    monkeypatch.setattr(flask.Flask, "run", lambda self, **kw: runs.append(kw))
+    monkeypatch.setattr("atexit.register", lambda f, *a, **k: f)
+    monkeypatch.setattr(sys, "argv", ["nichoir"])
+    for n in ("gpiozero", "bme280", "smbus2", "ina219", "picamera2", "picamera2.encoders", "picamera2.outputs"):
+        monkeypatch.setitem(sys.modules, n, None)
+    monkeypatch.setenv("NICHOIR_MOCK", "1")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.syspath_prepend(str(PI))
+    monkeypatch.delitem(sys.modules, "nichoir", raising=False)
+    runpy.run_module("nichoir", run_name="__main__")
+    assert runs == [{"host": "0.0.0.0", "port": 8080, "threaded": True}] and "(mode simulé)" in capsys.readouterr().out
 
 
 def test_main_mock(monkeypatch, tmp_path, capsys):
     g, runs = run_main(monkeypatch, tmp_path, True)
     assert runs == [{"host": "0.0.0.0", "port": 8080, "threaded": True}]
     names = [getattr(t, "__name__", "") for t in FakeThread.started]
-    assert names.count("tourne") == 2 and "boucle" in names and len(names) == 3
+    assert names.count("run") == 2 and "loop" in names and len(names) == 3
     out = capsys.readouterr().out
-    assert "(mode simulé)" in out and "! MODE SIMULÉ" in out and g["etat"]["ventilo"]["pourcent"] == 0
+    assert "(mode simulé)" in out and "! MODE SIMULÉ" in out and g["state"]["ventilo"]["pourcent"] == 0
 
 
 def test_main_real_lists_missing_hardware(monkeypatch, tmp_path, capsys):
     g, runs = run_main(monkeypatch, tmp_path, False)
-    assert runs and [getattr(t, "__name__", "") for t in FakeThread.started] == ["boucle"]
+    assert runs and [getattr(t, "__name__", "") for t in FakeThread.started] == ["loop"]
     out = capsys.readouterr().out
     assert "(mode simulé)" not in out and "! GPIO indisponible" in out and "! capteur du nid indisponible" in out

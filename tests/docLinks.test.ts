@@ -38,3 +38,15 @@ describe('camembert des prix', () => {
     expect(md).toContain(`lots entiers : ${lots.toFixed(2).replace('.', ',')} €`);
   });
 });
+
+describe('Où acheter (par magasin)', () => {
+  it('les totaux par magasin retombent exactement sur le total du tableau des prix (besoin exact et lots entiers)', () => {
+    const eur = (x: string) => parseFloat(x.replace(/[^0-9,]/g, '').replace(',', '.'));
+    const start = md.indexOf('| Groupe | Désignation | Quantité | Prix |'), rows = md.slice(start, md.indexOf('\n\n', start)).split('\n').slice(2).map((r) => r.split('|').slice(1, -1));
+    const p = rows.reduce((t, c) => t + eur(c[3]), 0), l = rows.reduce((t, c) => t + eur(c[4]), 0);
+    const sec = md.slice(md.indexOf('### Où acheter (par magasin)')), tab = sec.slice(0, sec.indexOf('\n\n', sec.indexOf('| Magasin'))).split('\n').slice(4).map((r) => r.split('|').slice(1, -1)).filter((c) => !/Total/.test(c[0]));
+    expect(tab.length).toBeGreaterThanOrEqual(5);
+    expect(tab.reduce((t, c) => t + eur(c[2]), 0)).toBeCloseTo(p, 2);
+    expect(tab.reduce((t, c) => t + eur(c[3]), 0)).toBeCloseTo(l, 2);
+  });
+});

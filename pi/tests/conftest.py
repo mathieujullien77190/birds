@@ -1,4 +1,4 @@
-"""Outils communs : charge pi/nichoir.py à neuf (mode simulé ou « vrai » avec matériel factice), horloge contrôlée."""
+"""Outils communs : charge le paquet pi/nichoir/ à neuf (mode simulé ou « vrai » avec matériel factice), horloge contrôlée."""
 import importlib.util
 import itertools
 import sys
@@ -153,12 +153,12 @@ def load(monkeypatch, tmp_path):
             for k, v in _picam(o).items():
                 monkeypatch.setitem(sys.modules, k, v)
         name = "nichoir"   # même nom que --cov=nichoir, sinon coverage ignore le fichier
-        spec = importlib.util.spec_from_file_location(name, PI / "nichoir.py")
+        spec = importlib.util.spec_from_file_location(name, PI / "nichoir" / "__init__.py", submodule_search_locations=[str(PI / "nichoir")])
         mod = importlib.util.module_from_spec(spec)
         monkeypatch.setitem(sys.modules, name, mod)
         spec.loader.exec_module(mod)
-        mod.FICHIER_REGLAGES = str(tmp_path / "reglages.json")
-        mod.FICHIER_HISTO = str(tmp_path / "historique.json")
+        mod.SETTINGS_FILE = str(tmp_path / "reglages.json")
+        mod.HISTORY_FILE = str(tmp_path / "historique.json")
         mod.time = FakeTime()
         mod.atexit_hooks = captured
         return mod

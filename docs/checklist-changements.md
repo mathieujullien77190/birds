@@ -42,23 +42,23 @@ Déclencheur : une plaque, un composant, un fil, une nappe, un pavé ou un group
 | Tableau « Branchements, fil par fil » (broche physique, GPIO, couleur) | `docs/schema-electronique.md` | à la main |
 | Fiche du fil (de → vers, rôle, tension, courant, raccord, broches) : `TABLE` de `wireInfo` | `src/birdhouse/model/wires/wireInfo.ts` | **auto** : `tests/wireInfo.test.ts` (aucun fil sans fiche, broches du tableau « Branchements ») |
 | Nom du fil dans le schéma : `MAP` (et `schemaKeys`) | `src/features/schema/SchemaPanel/constants.ts` | **auto** : `tests/coherence.test.ts` |
-| GPIO côté Pi : constantes et docstring | `pi/nichoir.py` | `npm run check` (pytest) |
+| GPIO côté Pi : constantes et docstring | `pi/nichoir/` (le chapitre concerné) | `npm run check` (pytest) |
 | Brochage résumé | `pi/README.md`, `docs/logiciel.md` | à la main |
 | « Vérification que rien ne coince » du document | `docs/schema-electronique.md` | à la main |
 
-## 3. Le programme du Pi (`pi/nichoir.py`)
+## 3. Le programme du Pi (`pi/nichoir/` (le chapitre concerné))
 
-Déclencheur : une clé de `etat`, un comportement, une sécurité, un réglage change.
+Déclencheur : une clé de `state`, un comportement, une sécurité, un réglage change.
 
 | À mettre à jour | Fichier | Vérifie |
 | --- | --- | --- |
-| Le programme et ses constantes | `pi/nichoir.py` | `pytest pi/tests` (via `npm run check`) |
+| Le programme et ses constantes | `pi/nichoir/` (le chapitre concerné) | `pytest pi/tests` (via `npm run check`) |
 | Tests Python (mode simulé `NICHOIR_MOCK=1`) | `pi/tests/` | `pytest` ; couverture ligne et branche à 100 % |
-| Types du site : `DeviceState` (miroir de `etat`) | `pi/site/src/types/device.ts` | **auto** : `pi/tests` compare les clés de `/api/etat` au type |
+| Types du site : `DeviceState` (miroir de `state`) | `pi/site/src/types/device.ts` | **auto** : `pi/tests` compare les clés de `/api/etat` au type |
 | Client de l'API, hooks, composants du site | `pi/site/src/api/index.ts`, `pi/site/src/hooks/`, `pi/site/src/components/` | `npm --prefix pi/site test` |
 | **Recompiler et committer le site compilé** | `npm run build:pi` puis `pi/web/` | `npm run check` (avertit si `pi/web` diffère des sources) |
 | Simulateur : le code Python lancé dans le navigateur (`BOOT`), l'appel des routes, les essais `PI_TESTS`, le type `PiState` | `src/birdhouse/PiSimulator.tsx` | à la main (dans le navigateur, bouton « 🐍 Pi ») |
-| Pannes et temps simulés (`MOCK_FORCE`, `MOCK_PANNES`, `MOCK_NUIT`, `SIM_ACCEL`) | `pi/nichoir.py` et `BOOT` de `PiSimulator.tsx` | `pytest` |
+| Pannes et temps simulés (`MOCK_FORCE`, `MOCK_FAULTS`, `MOCK_NIGHT`, `SIM_ACCEL`) | `pi/nichoir/` (le chapitre concerné) et `BOOT` de `PiSimulator.tsx` | `pytest` |
 | Documents | `docs/logiciel.md`, `pi/README.md`, `CLAUDE.md` | à la main |
 | Dépendances Python | `pi/requirements.txt` (Pi), `pi/requirements-dev.txt` (tests) | `npm run check` |
 
@@ -66,7 +66,7 @@ Déclencheur : une clé de `etat`, un comportement, une sécurité, un réglage 
 
 | À mettre à jour | Fichier | Vérifie |
 | --- | --- | --- |
-| La route Flask | `pi/nichoir.py` | `pytest pi/tests` |
+| La route Flask | `pi/nichoir/` (le chapitre concerné) | `pytest pi/tests` |
 | Sa fonction dans le client | `pi/site/src/api/index.ts` | **auto** : `pi/tests` (chaque route `/api/…` existe côté client) ; `pi/site/tests/` |
 | Le simulateur appelle les routes directement : l'ajouter à la doublure de Flask | `BOOT` de `src/birdhouse/PiSimulator.tsx` | à la main |
 | Documents : liste des routes | `docs/logiciel.md`, `pi/README.md` | à la main |
@@ -76,10 +76,10 @@ Déclencheur : une clé de `etat`, un comportement, une sécurité, un réglage 
 
 | À mettre à jour | Fichier | Vérifie |
 | --- | --- | --- |
-| Valeur par défaut et bornes : `AUTO_DEFAUT` et `AUTO_LIMITES` (même liste de clés) | `pi/nichoir.py` | `pytest pi/tests` |
-| Relecture de `reglages.json` (et ancienne clé `bouche`) | `pi/nichoir.py` | `pytest pi/tests` |
+| Valeur par défaut et bornes : `AUTO_DEFAULTS` et `AUTO_LIMITS` (même liste de clés) | `pi/nichoir/` (le chapitre concerné) | `pytest pi/tests` |
+| Relecture de `reglages.json` (et ancienne clé `bouche`) | `pi/nichoir/` (le chapitre concerné) | `pytest pi/tests` |
 | Type `AutoSettingKey` | `pi/site/src/types/device.ts` | `tsc` du site |
-| Champ du formulaire : `AUTO_FIELDS` (clé, libellé, unité, min, max, pas : mêmes bornes que `AUTO_LIMITES`) | `pi/site/src/components/AutoFan/constants.ts` | `npm --prefix pi/site test` |
+| Champ du formulaire : `AUTO_FIELDS` (clé, libellé, unité, min, max, pas : mêmes bornes que `AUTO_LIMITS`) | `pi/site/src/components/AutoFan/constants.ts` | `npm --prefix pi/site test` |
 | Essai du simulateur qui l'exerce | `PI_TESTS` de `src/birdhouse/PiSimulator.tsx` | à la main |
 | Documents : tableau des réglages | `docs/logiciel.md`, `pi/README.md` | à la main |
 
@@ -103,8 +103,7 @@ Déclencheur : une clé de `etat`, un comportement, une sécurité, un réglage 
 | Ligne du tableau « Prix » (groupe, élément, prix, lien **vérifié** ou référence exacte) | `docs/schema-electronique.md` | **auto** : `tests/docLinks.test.ts` |
 | Le tableau interactif (cases à cocher, totaux) est fabriqué par `enhancePrices` : le format « Groupe \| Élément \| Prix \| Modèle exact / lien » ne doit pas changer | `src/features/docs/DocModal/helpers.ts` | `tests/docModal.test.ts` |
 | Lien du composant dans « Pièces » | tableau `LINKS` de `makeNest.ts` | **auto** : `tests/coherence.test.ts` |
-| Section « Montage sans soudure » (cordons Dupont, borniers, Wago) | `docs/schema-electronique.md` | à la main |
-| Section « Liens des composants » | `docs/schema-electronique.md` | à la main |
+| Section « Raccordements et soudures » (cordons Dupont, borniers, Wago, soudures) | `docs/schema-electronique.md` | à la main |
 | Poids | section « Poids » du même document | à la main |
 
 Les liens doivent être **vérifiés** (ouvrir la page) : un lien mort connu est refusé par le test, mais un lien qui pointe vers un autre produit ne l'est pas.

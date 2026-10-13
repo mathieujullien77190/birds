@@ -1,4 +1,4 @@
-"""Cohérence entre pi/nichoir.py et le site (pi/site) : champs de /api/etat et routes /api/*."""
+"""Cohérence entre le programme pi/nichoir/ et le site (pi/site) : champs de /api/etat et routes /api/*."""
 import re
 
 import pytest
@@ -7,7 +7,7 @@ from conftest import PI
 
 TYPES = PI / "site" / "src" / "types" / "device.ts"
 API = PI / "site" / "src" / "api" / "index.ts"
-SOURCE = PI / "nichoir.py"
+SOURCE = PI / "nichoir"   # le dossier : tous les chapitres .py
 
 
 def ts_fields(texte):
@@ -29,7 +29,7 @@ def interface(texte, nom):
 
 def test_etat_keys_exist_in_device_ts(client, m):
     ts = ts_fields(TYPES.read_text(encoding="utf-8"))
-    m.lecture()
+    m.read_sensors()
     manquants = sorted({k.split(".")[-1] for k in cles(client.get("/api/etat").get_json())
                         if not k.startswith("erreurs.")} - ts)
     assert manquants == [], f"champs de /api/etat absents de DeviceState : {manquants}"
@@ -37,7 +37,7 @@ def test_etat_keys_exist_in_device_ts(client, m):
 
 def test_each_nested_interface_matches_runtime_keys(client, m):
     texte = TYPES.read_text(encoding="utf-8")
-    m.lecture()
+    m.read_sensors()
     d = client.get("/api/etat").get_json()
     for nom, obj in [("DeviceState", d), ("Fan", d["ventilo"]), ("Battery", d["batterie"]), ("Outside", d["ext"]), ("AutoState", d["auto"]),
                      ("Consumption", d["conso"])]:
@@ -51,7 +51,7 @@ def test_each_nested_interface_matches_runtime_keys(client, m):
 def test_typescript_fields_are_all_sent_by_the_pi(client, m):
     """Sens inverse : un champ requis du type (sans `?`) doit exister dans la réponse."""
     texte = TYPES.read_text(encoding="utf-8")
-    m.lecture()
+    m.read_sensors()
     d = client.get("/api/etat").get_json()
     requis = re.findall(r"^\s*(\w+):", re.search(r"interface DeviceState \{(.*?)\n\}", texte, re.S).group(1), re.M)
     assert set(requis) <= set(d), sorted(set(requis) - set(d))
@@ -62,10 +62,10 @@ def test_typescript_fields_are_all_sent_by_the_pi(client, m):
 def test_error_keys_of_the_code_are_declared_in_device_ts():
     texte = TYPES.read_text(encoding="utf-8")
     declarees = interface(texte, "DeviceErrors")
-    code = SOURCE.read_text(encoding="utf-8")
+    code = ("\n").join(f.read_text(encoding="utf-8") for f in sorted(SOURCE.glob("*.py")))
     utilisees = set(re.findall(r'erreurs"\]\["(\w+)"\]', code))
     utilisees |= set(re.findall(r'erreurs"\]\.(?:get|pop)\("(\w+)"', code))
-    utilisees |= set(re.findall(r'\be\["(\w+)"\]', code))          # `e = etat["erreurs"]` dans verifier_ventilo / regler_auto
+    utilisees |= set(re.findall(r'\be\["(\w+)"\]', code))          # `e = state["erreurs"]` dans check_fan / run_auto
     utilisees |= set(re.findall(r'\be\.pop\("(\w+)"', code))
     utilisees |= {f"camera{n}" for n in (1, 2)} if 'f"camera{' in code else set()
     utilisees -= {"gpio_"}
@@ -75,7 +75,7 @@ def test_error_keys_of_the_code_are_declared_in_device_ts():
 
 def test_enum_values_are_declared_in_device_ts():
     texte = TYPES.read_text(encoding="utf-8")
-    code = SOURCE.read_text(encoding="utf-8")
+    code = ("\n").join(f.read_text(encoding="utf-8") for f in sorted(SOURCE.glob("*.py")))
     for m_ in ("arret", "manuel", "auto"):
         assert f"'{m_}'" in texte
     for e in ("inactif", "veille", "ventile", "securite"):
@@ -111,3 +111,14 @@ def test_site_http_methods_match_flask(m):
 @pytest.mark.parametrize("fichier", [TYPES, API])
 def test_site_files_exist(fichier):
     assert fichier.is_file()
+
+
+def test_chapitres_de_nichoir_sont_tous_listes_dans_init_et_existent():
+    """La liste CHAPTERS de nichoir/__init__.py (l'ordre d'exécution) doit nommer exactement les fichiers du dossier : un chapitre oublié ne serait jamais chargé."""
+    init = (PI / "nichoir" / "__init__.py").read_text(encoding="utf-8")
+    liste = re.search(r"CHAPTERS\s*=\s*\[(.*?)\]", init, re.S).group(1)
+    nommes = re.findall(r'"(\w+)"', liste)
+    files = sorted(p.stem for p in (PI / "nichoir").glob("*.py") if p.stem not in ("__init__", "__main__"))
+    assert sorted(nommes) == files and len(set(nommes)) == len(nommes)
+    for nom in nommes:   # chaque chapitre commence par son cadre d'explication
+        assert (PI / "nichoir" / f"{nom}.py").read_text(encoding="utf-8").startswith("# ====")

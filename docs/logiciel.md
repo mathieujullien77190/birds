@@ -1,6 +1,6 @@
 # Logiciel du nichoir
 
-**Le programme de test est prêt dans le dossier `pi/` du dépôt** : `pi/nichoir.py` (capteurs, caméras, ventilateur, LED, page web), `pi/web/` (la page compilée) et `pi/site/` (ses sources : site React + TypeScript autonome, avec `ui/` pour les briques et `components/` pour les cartes : Nid (avec l'écart avec dehors), Dehors (sonde), Ventilateur (+ ventilation automatique), Batterie, Consommation, graphique des températures sur 24 h, Caméras ; `npm run build:pi` régénère `pi/web/`, sortie committée car le Pi n'a pas Node ; `pi/` = ce qui tourne sur le Raspberry, `src/` = l'app de conception et de simulation), `pi/nichoir.service`, `pi/requirements.txt` et un `pi/README.md` qui explique l'installation. Il lit les capteurs, montre les caméras, pilote le ventilateur et les LED, et **enregistre les températures** : juste de quoi vérifier que tout marche et mesurer.
+**Le programme de test est prêt dans le dossier `pi/` du dépôt** : le dossier `pi/nichoir/` (capteurs, caméras, ventilateur, LED, page web ; un fichier commenté par sujet), `pi/web/` (la page compilée) et `pi/site/` (ses sources : site React + TypeScript autonome, avec `ui/` pour les briques et `components/` pour les cartes : Nid (avec l'écart avec dehors), Dehors (sonde), Ventilateur (+ ventilation automatique), Batterie, Consommation, graphique des températures sur 24 h, Caméras ; `npm run build:pi` régénère `pi/web/`, sortie committée car le Pi n'a pas Node ; `pi/` = ce qui tourne sur le Raspberry, `src/` = l'app de conception et de simulation), `pi/nichoir.service`, `pi/requirements.txt` et un `pi/README.md` qui explique l'installation. Il lit les capteurs, montre les caméras, pilote le ventilateur et les LED, et **enregistre les températures** : juste de quoi vérifier que tout marche et mesurer.
 
 Tout tourne sur le Raspberry Pi 5, dans le grenier du nichoir : un programme Python lit les capteurs, pilote le ventilateur et les LED et sert une page web. Rien n'est hébergé ailleurs : la page web est servie par le Pi lui-même, sur le Wi-Fi de la maison.
 
@@ -12,7 +12,7 @@ Tout tourne sur le Raspberry Pi 5, dans le grenier du nichoir : un programme Pyt
 flowchart LR
   subgraph PI["Raspberry Pi 5 (Raspberry Pi OS)"]
     SVC["Service systemd<br/>nichoir.service"]
-    APP["Programme Python<br/>nichoir.py"]
+    APP["Programme Python<br/>nichoir/"]
     HIS[("historique.json<br/>24 h de températures")]
     WEB["Serveur web Flask<br/>port 8080"]
     CAM["Flux caméras<br/>Picamera2 (MJPEG)"]
@@ -38,7 +38,7 @@ flowchart LR
 
 ## Où il est et comment il se lance
 
-- Le code vit dans `/home/pi/nichoir/` sur la carte microSD du Pi : `nichoir.py`, `web/` (la page), et deux fichiers créés tout seuls : `reglages.json` (réglages de la ventilation automatique) et `historique.json` (les températures).
+- Le code vit dans `/home/pi/nichoir/` sur la carte microSD du Pi : le dossier `nichoir/`, `web/` (la page), et deux fichiers créés tout seuls : `reglages.json` (réglages de la ventilation automatique) et `historique.json` (les températures).
 - Il démarre tout seul à l'allumage grâce à un **service systemd** (`pi/nichoir.service`) : si le Pi redémarre après une panne de batterie, tout repart sans rien toucher.
 
 ```sh
@@ -100,7 +100,7 @@ Le programme **enregistre les températures avant de décider d'autre chose** : 
 Contenu de `/api/etat` : `t_nid`, `hum_nid`, `ventilo` (`pourcent`, `rpm`, `mode` arret / manuel / auto, `raison`), `led_nid`, `led_ext`, `cam1`, `cam2`, `batterie`, `conso`, `ext` (`t`, `source`, `maj`), `auto` (réglages + `etat` inactif / veille / ventile / securite, `raison`, `avertissements`), `erreurs`, `derniere_lecture`. Commandes : `POST /api/ventilo` (`{pourcent}` ou `{mode:"arret"}`), `/api/auto`, `/api/led`, `/api/camera`.
 
 ## Essayer sans matériel (mode simulé)
-`NICHOIR_MOCK=1 python nichoir.py` sur un ordinateur : le programme invente des mesures plausibles (le nid suit dehors + un excès de ≈ 4 °C le jour et 2 °C la nuit, **réduit par le ventilateur jusqu'à −3 °C à 100 %**, avec de l'inertie ; humidité 60–80 %), accepte les commandes sans toucher de GPIO, simule le tachymètre (≈ 300 + 27 × vitesse tr/min) et sert deux flux vidéo animés. Un bandeau « MODE SIMULÉ » prévient sur la page.
+`NICHOIR_MOCK=1 python -m nichoir` sur un ordinateur : le programme invente des mesures plausibles (le nid suit dehors + un excès de ≈ 4 °C le jour et 2 °C la nuit, **réduit par le ventilateur jusqu'à −3 °C à 100 %**, avec de l'inertie ; humidité 60–80 %), accepte les commandes sans toucher de GPIO, simule le tachymètre (≈ 300 + 27 × vitesse tr/min) et sert deux flux vidéo animés. Un bandeau « MODE SIMULÉ » prévient sur la page.
 
 Chaque caméra a son bouton marche / arrêt (route `/api/camera` : le flux est arrêté pour économiser l'énergie) et, juste à côté, le bouton de sa carte de LED infrarouges (nid pour la caméra 1, extérieures pour la 2).
 
@@ -135,7 +135,7 @@ Le menu « 🧪 Tests » du simulateur provoque chaque cas dans le Python simul�
 Le bouton « Jour / Nuit » de la vue 3D assombrit la scène (fond sombre, lumière de lune). Les caméras du simulateur voient cette scène : la nuit elles sont presque noires ; quand les LED infrarouges d'une caméra sont allumées, l'image devient **noir et blanc**, éclairée par ces LED et granuleuse. Caméra éteinte : écran noir « éteinte ». Le même bouton est dans l'en-tête du simulateur, à côté de « 🧪 Tests ».
 
 ## Simulateur dans l'app (bouton « 🐍 Pi »)
-Le bouton « 🐍 Pi » en haut à droite de la vue 3D ouvre un écran qui simule le Pi **sans rien installer** : le vrai `nichoir.py` (mode simulé) est exécuté dans le navigateur par Pyodide (Python en WebAssembly, ≈ 10 Mo téléchargés à la première ouverture), la vraie page compilée `web/index.html` (+ `app.css`, `app.js`) s'affiche à gauche et un **terminal** à droite montre la sortie du programme comme `journalctl -u nichoir -f` (situation toutes les 10 lectures, démarrages et arrêts du ventilateur, sécurités, requêtes façon Flask). Les **flux vidéo sont la scène 3D vue depuis l'objectif des caméras** : caméra 1 dans le nid (niveaux de gris, comme la NoIR sous infrarouge), caméra 2 dehors (horizon redressé). Seul Flask est remplacé par une doublure : les routes (`/api/etat`, `/api/ventilo`, `/api/auto`, `/api/historique`, `/api/led`, `/api/camera`) sont appelées directement. Le graphique des 24 h se remplit toutes les 5 s.
+Le bouton « 🐍 Pi » en haut à droite de la vue 3D ouvre un écran qui simule le Pi **sans rien installer** : le vrai programme `nichoir/` (mode simulé) est exécuté dans le navigateur par Pyodide (Python en WebAssembly, ≈ 10 Mo téléchargés à la première ouverture), la vraie page compilée `web/index.html` (+ `app.css`, `app.js`) s'affiche à gauche et un **terminal** à droite montre la sortie du programme comme `journalctl -u nichoir -f` (situation toutes les 10 lectures, démarrages et arrêts du ventilateur, sécurités, requêtes façon Flask). Les **flux vidéo sont la scène 3D vue depuis l'objectif des caméras** : caméra 1 dans le nid (niveaux de gris, comme la NoIR sous infrarouge), caméra 2 dehors (horizon redressé). Seul Flask est remplacé par une doublure : les routes (`/api/etat`, `/api/ventilo`, `/api/auto`, `/api/historique`, `/api/led`, `/api/camera`) sont appelées directement. Le graphique des 24 h se remplit toutes les 5 s.
 
 ## Hébergé où ?
 

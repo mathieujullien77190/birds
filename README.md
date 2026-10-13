@@ -59,7 +59,7 @@ Le dépôt contient le workflow `.github/workflows/pages.yml` : à chaque push s
 | `src/app/`, `src/features/` | L'application : `features/viewer` (vue 3D, interface, historique), `features/schema` (schéma à côté de la 3D), `features/docs` (documents, code), `features/laser` (découpe laser) ; `src/birdhouse/` garde le modèle du nichoir (`model.ts`), la géométrie Three (`three/`) et le simulateur du Pi.
 | `src/ui/`, `src/hooks/`, `src/lib/` | Briques d'interface partagées (un dossier par brique), hooks et utilitaires communs. |
 | `docs/` | Les documents Markdown affichés dans l'application. |
-| `pi/` | Ce qui tourne sur le Raspberry Pi : programme Python (`nichoir.py`), site React + TypeScript (`pi/site/`, projet autonome, compilé dans `pi/web/`) et installation. |
+| `pi/` | Ce qui tourne sur le Raspberry Pi : programme Python (dossier `nichoir/`), site React + TypeScript (`pi/site/`, projet autonome, compilé dans `pi/web/`) et installation. |
 | `public/models/` | Le modèle 3D du Raspberry Pi. |
 | `laser-control/` | Logiciel autonome de pilotage de la laser (GRBL), exportable seul. |
 | `archives/` | Anciens projets et outils, gardés pour mémoire. |

@@ -4,7 +4,7 @@ Version minimale pour vérifier que le matériel marche : lecture du capteur du 
 
 | Fichier | Rôle |
 | --- | --- |
-| `nichoir.py` | Le programme Python : capteurs, caméras, commandes, serveur web (port 8080). |
+| `nichoir/` | Le programme Python, en un dossier de « chapitres » (un fichier par sujet, très commentés) : capteurs, caméras, commandes, serveur web (port 8080). Lire d'abord `nichoir/__init__.py`. |
 | `web/` | La page, **compilée** (`index.html`, `app.js`, `app.css`, committés : le Pi n'a pas Node). |
 | `site/` | Les sources de la page : projet React + TypeScript **autonome** (voir `site/README.md`). Rebuild : `npm run build` dans `pi/site` ou `npm run build:pi` à la racine. |
 | `nichoir.service` | Démarrage automatique au boot (systemd). |
@@ -16,10 +16,10 @@ Version minimale pour vérifier que le matériel marche : lecture du capteur du 
 sudo raspi-config                # Interface Options : activer I2C et les caméras ; 1-Wire : ligne dtoverlay=w1-gpio dans /boot/firmware/config.txt
 sudo apt install -y python3-picamera2 git
 mkdir -p /home/pi/nichoir && cd /home/pi/nichoir
-# copier ici nichoir.py, web/, nichoir.service, requirements.txt (scp, clé USB ou git)
+# copier ici le dossier nichoir/, web/, nichoir.service, requirements.txt (scp, clé USB ou git)
 python3 -m venv --system-site-packages venv
 venv/bin/pip install -r requirements.txt
-venv/bin/python nichoir.py       # premier essai à la main : http://<ip-du-pi>:8080
+venv/bin/python -m nichoir       # premier essai à la main : http://<ip-du-pi>:8080
 ```
 
 Pour que ça démarre tout seul :
@@ -34,7 +34,7 @@ journalctl -u nichoir -f         # voir ce qu'il raconte
 Sur un ordinateur, sans rien de branché : capteurs, GPIO et caméras sont remplacés par des valeurs fausses mais plausibles (le nid suit dehors + 2 à 4 °C, refroidi par le ventilateur, deux flux vidéo animés, tachymètre simulé). Un bandeau « MODE SIMULÉ » s'affiche en haut de la page.
 ```sh
 pip install flask
-NICHOIR_MOCK=1 python nichoir.py          # Windows PowerShell : $env:NICHOIR_MOCK=1; python nichoir.py
+NICHOIR_MOCK=1 python -m nichoir          # Windows PowerShell : $env:NICHOIR_MOCK=1; python -m nichoir
 # puis http://localhost:8080
 ```
 Pour voir la ventilation : dans la page, « Ventilation automatique », ou dans l'app 3D le menu « 🧪 Tests ». L'historique se remplit toutes les 5 s (300 s sur le Pi) et s'écrit dans `historique-simule.json`.

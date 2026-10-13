@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import nichoirPy from '../../pi/nichoir.py?raw';
+import { nichoirPy } from './piSource';
 import indexHtml from '../../pi/web/index.html?raw';
 import appJs from '../../pi/web/app.js?raw';
 import appCss from '../../pi/web/app.css?raw';
 
-/** Simulateur de l'interface web du Pi : le VRAI `pi/nichoir.py` (mode simulé) tourne dans le navigateur grâce à Pyodide (Python compilé en WebAssembly),
+/** Simulateur de l'interface web du Pi : le VRAI programme `pi/nichoir/` (mode simulé) tourne dans le navigateur grâce à Pyodide (Python compilé en WebAssembly),
  *  et la VRAIE page `pi/web/index.html` + `app.js` s'affiche dans un cadre. Seul Flask est remplacé par une petite doublure : les appels de la page
  *  (`fetch('/api/…')`) sont envoyés directement aux fonctions de routes du programme Python, sans réseau. Pyodide est téléchargé à l'ouverture (≈ 10 Mo). */
 const PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
@@ -32,7 +32,7 @@ let pyPromise: Promise<Pyodide> | null = null;
 /** Où va la sortie standard de Python (print, erreurs) : le terminal du simulateur, rebranché à chaque ouverture. */
 let sink: (line: string) => void = () => {};
 
-/** Python exécuté une fois Pyodide chargé : doublure de Flask, exécution de nichoir.py, et trois petites fonctions appelées par la page React. */
+/** Python exécuté une fois Pyodide chargé : doublure de Flask, exécution des chapitres de nichoir/, et trois petites fonctions appelées par la page React. */
 const BOOT = `
 import sys, types, os, json, base64
 os.environ["NICHOIR_MOCK"] = "1"
@@ -51,9 +51,9 @@ nichoir = types.ModuleType("nichoir")
 exec(SRC, nichoir.__dict__)
 
 def api(url, body):
-    if url == "/api/etat": r = nichoir.api_etat()
-    elif url == "/api/historique": r = nichoir.api_historique()
-    elif url == "/api/ventilo": fl.request.payload = json.loads(body or "{}"); r = nichoir.api_ventilo()
+    if url == "/api/etat": r = nichoir.api_state()
+    elif url == "/api/historique": r = nichoir.api_history()
+    elif url == "/api/ventilo": fl.request.payload = json.loads(body or "{}"); r = nichoir.api_fan()
     elif url == "/api/led": fl.request.payload = json.loads(body or "{}"); r = nichoir.api_led()
     elif url == "/api/auto": fl.request.payload = json.loads(body or "{}"); r = nichoir.api_auto()
     elif url == "/api/camera": fl.request.payload = json.loads(body or "{}"); r = nichoir.api_camera()
@@ -61,25 +61,25 @@ def api(url, body):
     return json.dumps(r)
 
 def tick():
-    nichoir.lecture()
+    nichoir.read_sensors()
 
 def frame(num, n):
     return base64.b64encode(nichoir.cameras[num].image(n, 160, 120)).decode()
 
 def led_on(num):
-    return bool(nichoir.etat["led_nid" if num == 0 else "led_ext"])
+    return bool(nichoir.state["led_nid" if num == 0 else "led_ext"])
 
 def cam_on(num):
-    return bool(nichoir.etat["cam" + str(num + 1)])
+    return bool(nichoir.state["cam" + str(num + 1)])
 
 def panne(nom, on):
-    nichoir.MOCK_PANNES[nom] = bool(on)
+    nichoir.MOCK_FAULTS[nom] = bool(on)
 
 def batterie(pct):
-    nichoir.sim["wh"] = pct / 100 * nichoir.CAPACITE_WH
+    nichoir.sim["wh"] = pct / 100 * nichoir.CAPACITY_WH
 
 def etat_json():
-    return json.dumps(nichoir.etat)
+    return json.dumps(nichoir.state)
 
 def forcer(nid, ext):
     nichoir.MOCK_FORCE["nid"] = None if nid is None else float(nid)
@@ -89,24 +89,24 @@ def forcer(nid, ext):
 def restaurer():
     nichoir.MOCK_FORCE["nid"] = nichoir.MOCK_FORCE["ext"] = None
     nichoir.sim["effet"] = 0.0
-    nichoir.MOCK_PANNES["bme"] = nichoir.MOCK_PANNES["ventilo"] = nichoir.MOCK_PANNES["sonde"] = False
-    nichoir.etat["auto"].update({k: v for k, v in nichoir.AUTO_DEFAUT.items()})
-    nichoir.etat["auto"]["avertissements"] = []
-    nichoir.ventilo(0)
-    nichoir.sim["wh"] = 0.8 * nichoir.CAPACITE_WH
-    nichoir.etat["batterie"]["pourcent"] = 80.0  # sinon les caméras seraient encore refusées (batterie lue avant la remise)
+    nichoir.MOCK_FAULTS["bme"] = nichoir.MOCK_FAULTS["ventilo"] = nichoir.MOCK_FAULTS["sonde"] = False
+    nichoir.state["auto"].update({k: v for k, v in nichoir.AUTO_DEFAULTS.items()})
+    nichoir.state["auto"]["avertissements"] = []
+    nichoir.fan(0)
+    nichoir.sim["wh"] = 0.8 * nichoir.CAPACITY_WH
+    nichoir.state["batterie"]["pourcent"] = 80.0  # sinon les caméras seraient encore refusées (batterie lue avant la remise)
     nichoir.leds(False, False)
     nichoir.camera(0, True)
     nichoir.camera(1, True)
     for k in ("ventilo", "alerte_chaleur", "delestage", "bme280", "sonde_ext"):
-        nichoir.etat["erreurs"].pop(k, None)
-    nichoir.lecture()
+        nichoir.state["erreurs"].pop(k, None)
+    nichoir.read_sensors()
 
 def acceleration(v):
     nichoir.SIM_ACCEL = float(v)
 
 def nuit(v):
-    nichoir.MOCK_NUIT = bool(v)
+    nichoir.MOCK_NIGHT = bool(v)
 `;
 
 function loadPy(): Promise<Pyodide> {
@@ -212,7 +212,7 @@ export function PiSimulator({ open = true, onClose, shoot, night = false, onTogg
     const timers: number[] = [];
     const say = (l: string) => setLog((a) => [...a, l].slice(-400));
     sink = say;
-    setLog(['$ python nichoir.py   (Pyodide : Python 3 dans le navigateur, chargement…)']); // remplace : le mode strict de React lance l'effet deux fois en dev
+    setLog(['$ python -m nichoir   (Pyodide : Python 3 dans le navigateur, chargement…)']); // remplace : le mode strict de React lance l'effet deux fois en dev
     loadPy().then((py) => {
       if (dead) return;
       pyRef.current = py;
@@ -294,7 +294,7 @@ export function PiSimulator({ open = true, onClose, shoot, night = false, onTogg
           <span aria-hidden className="text-lg">🐍</span>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-semibold text-stone-800">Interface web du Pi — simulateur</div>
-            <div className="truncate text-[11px] text-stone-500">Le vrai <code>pi/nichoir.py</code> (mode simulé) tourne dans ton navigateur (Pyodide) ; la page est le vrai <code>pi/web/index.html</code>.</div>
+            <div className="truncate text-[11px] text-stone-500">Le vrai <code>pi/nichoir/</code> (mode simulé) tourne dans ton navigateur (Pyodide) ; la page est le vrai <code>pi/web/index.html</code>.</div>
           </div>
           <div className="flex items-center overflow-hidden rounded bg-stone-100 text-xs font-semibold" title="Vitesse du temps pour la batterie simulée : ×1 = temps réel, ×10 / ×60 pour voir le niveau bouger plus vite" role="group" aria-label="Vitesse du temps">
             {[1, 10, 60].map((a) => (

@@ -1,4 +1,4 @@
-# FACULTATIF : sert seulement à lancer le programme tout seul au démarrage du Pi. Sans lui : `venv/bin/python nichoir.py` à la main.
+# FACULTATIF : sert seulement à lancer le programme tout seul au démarrage du Pi. Sans lui : `venv/bin/python -m nichoir` à la main.
 [Unit]
 Description=Nichoir mésange (capteurs, ventilateur, LED, page web de test)
 After=network-online.target
@@ -6,7 +6,7 @@ After=network-online.target
 [Service]
 User=pi
 WorkingDirectory=/home/pi/nichoir
-ExecStart=/home/pi/nichoir/venv/bin/python nichoir.py
+ExecStart=/home/pi/nichoir/venv/bin/python -m nichoir
 Restart=always
 RestartSec=5
 

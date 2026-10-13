@@ -1,4 +1,4 @@
-/** Miroir du dictionnaire `etat` de pi/nichoir.py (réponse de GET /api/etat). */
+/** Miroir du dictionnaire `state` de pi/nichoir/state.py (réponse de GET /api/etat). */
 
 /** Messages d'erreur par matériel (clés présentes seulement quand quelque chose manque). */
 export interface DeviceErrors {
