@@ -671,9 +671,9 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // point du panneau incliné : (lx, ly, lz) dans son repère (lz < 0 = derrière) → monde ; la boîte de jonction (120 × 70 × 26) est au dos, en ly = 212,5, lz = −28 (voir `cameraGeometry`)
   const jb = (lx: number, ly: number, lz: number): Vec3 => { const a = (TILT_P * Math.PI) / 180; return [SX + lx, r2(ly * Math.cos(a) - lz * Math.sin(a)), r2(195 + ly * Math.sin(a) + lz * Math.cos(a))]; };
   const solar: Plank[] = n.solar ? [
-    { ...sp('Panneau solaire 100 W (97 × 58,5)', 970, 585, 30, SX, 0, 195, '#1e3a8a', [TILT_P, 0, 0]), special: 'solar' as const }, // posé sur un support métallique (pas dessiné : aucun piquet en bois), bord bas près du sol
+    { ...sp('Panneau solaire 100 W enjoy solar (92,5 × 58)', 925, 580, 35, SX, 0, 195, '#1e3a8a', [TILT_P, 0, 0]), special: 'solar' as const }, // posé sur un support métallique (pas dessiné : aucun piquet en bois), bord bas près du sol
     { id: uid(), name: 'Câble 12 V vers le toit', w: 7, h: 7, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: solGroup, special: 'wire' as const, color: '#111827',
-      path: [jb(30, 177.5, -28), [SX + 38, 170, 235], [SX + 55, 120, 140], [SX + 60, 70, 60], [SX + 60, 40, 15], [300, 40, 6], [W / 2 + 95, RGY + 10, 4], [W / 2 + 55, RGY - 30, -14], [W / 2 + 30, RGY - 20, -50], [W / 2 + 10, RGY - 20, -68], [W / 2 - 2, RGY - 20, -68], [W / 2 - 8, RGY - 20, -40], [RT_X, r2(RGY - 20), RT_Z]] as Vec3[] },
+      path: [jb(30, 175, -28), [SX + 38, 170, 235], [SX + 55, 120, 140], [SX + 60, 70, 60], [SX + 60, 40, 15], [300, 40, 6], [W / 2 + 95, RGY + 10, 4], [W / 2 + 55, RGY - 30, -14], [W / 2 + 30, RGY - 20, -50], [W / 2 + 10, RGY - 20, -68], [W / 2 - 2, RGY - 20, -68], [W / 2 - 8, RGY - 20, -40], [RT_X, r2(RGY - 20), RT_Z]] as Vec3[] },
   ] : [];
   // habillage (groupe spécial « Habillage ») : un pourtour en lambris de 10 mm d'épaisseur qui descend de 10 mm sous le nichoir, et un toit en okoumé qui déborde
 
@@ -919,7 +919,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     [/^Batterie/, 'https://robu.in/?p=2024523'],
     [/^Régulateur/, 'https://www.amazon.fr/dp/B075NTT8GH'],
     [/^Capteur/, 'https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html'],
-    [/^Panneau solaire/, 'https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html'],
+    [/^Panneau solaire/, 'https://www.amazon.fr/dp/B085ZFJ943'],
   ];
   const underRoof = (pt: Vec3): Vec3 => (Math.abs(pt[0]) < W / 2 - t && Math.abs(pt[1]) < D / 2 - t ? [pt[0], pt[1], r2(Math.min(pt[2], bodyH + Hf + ((pt[1] + D / 2) * (Hb - Hf)) / D - 2))] : pt); // fils et nappes restent sous la pente du toit
   const unnumber = (nm: string) => (start === 1 ? nm.replace(/^((?:Face avant|Face arrière|Côté droit|Côté gauche|Dessus|Dessous)(?: (?:ext|int|toit|compartiment))?|Grille anti-insectes) 1$/, "$1") : nm); // un seul nichoir : plus de « 1 » derrière les plaques des boîtes (les numéros des séries — lambris, cales, isolant… — restent)

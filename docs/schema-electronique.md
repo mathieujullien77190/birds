@@ -266,14 +266,16 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs (liens en bas) 
 | --- | --- | --- |
 | Type | 12 V nominal, monocristallin, cadre alu | Oui |
 | Puissance | 100 W | 100 W |
-| Tension à puissance max (Vmp) | 17 V (fiche AST100-17M) | — |
-| Courant à puissance max (Imp) | 5,8 A (fiche AST100-17M) | — |
-| Tension à vide (Voc) | 20,5 V (fiche AST100-17M) : reste sous la limite d'entrée du régulateur | — |
-| Courant de court-circuit (Isc) | 6,2 A (fiche AST100-17M) | — |
+| Tension à puissance max (Vmp) | **36,0 V** (étiquette du panneau, 66 cellules ; l'annonce dit 18 V à tort) | — |
+| Courant à puissance max (Imp) | 2,78 A (étiquette) | — |
+| Tension à vide (Voc) | 44,4 V à 25 °C, ≈ 52 V à −10 °C (courbes du fabricant) : reste sous la limite d'entrée du régulateur | — |
+| Courant de court-circuit (Isc) | 3,03 A (étiquette) | — |
+| Compatibilité avec le Victron 75/10 | oui : Voc ≤ 75 V et courant de charge ≈ 100 W ÷ 13 V ≈ 7,7 A, sous les 10 A du régulateur ; un régulateur PWM serait à éviter avec ce panneau 36 V | — |
+| Câble | 90 cm de câble rouge et noir de 4 mm² avec connecteurs MC4, boîte de jonction en haut du panneau (plan du fabricant) | — |
 | Température nominale des cellules (NOCT) | 45 ± 2 °C | — |
-| Dimensions et poids | 970 × 585 × 30 mm, 8 kg (fiche AST100-17M) | 970 × 585 × 30 mm |
-| Connecteurs et câble | MC4, 2 fils de 4 mm² environ, boîte de jonction étanche | câble Ø 7 mm |
-| Modèle exact / lien | [Panneau 100 Wc monocristallin AST100-17M, 970 × 585 × 30 mm (Wattuneed)](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html) | — |
+| Dimensions et poids | 925 × 580 × 35 mm, 6,3 kg (fiche enjoy solar) | 925 × 580 × 35 mm |
+| Connecteurs et câble | connecteur solaire (type MC4), câble double isolation de 4 mm² et **90 cm** de long, boîte de jonction IP65 : une rallonge est presque toujours nécessaire (voir la rallonge solaire 4 mm² de 2 × 12 m du tableau des prix) | câble Ø 7 mm |
+| Modèle exact / lien | [enjoy solar panneau monocristallin 100 W 12 V, 925 × 580 × 35 mm, 6,3 kg (Amazon)](https://www.amazon.fr/dp/B085ZFJ943) | — |
 
 ### Régulateur de charge solaire
 
@@ -684,7 +686,7 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 | Câbles, gaine, nappes | 0,15 kg |
 | Morceaux de baguette de cale, étriers, clavettes | 0,1 kg |
 | **Total accroché à l'arbre** | **≈ 4,1 kg** |
-| Panneau solaire 100 W (au sol, à part) | 8 kg |
+| Panneau solaire 100 W (au sol, à part) | 6,3 kg |
 
 **Répartition.** Le total est de 4,1 kg ; la batterie (0,6 kg) et le régulateur (0,25 kg) sont sous le nichoir, ce qui descend le centre de gravité de l'ensemble.
 
@@ -739,7 +741,7 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Grille de protection Noctua NA-FG1-6 Sx2 (lot de 2, métal, pour ventilateurs de 60 mm ; une seule est utilisée, sur la cassette) | 15 € | [Amazon.fr, Noctua NA-FG1-6 Sx2](https://www.amazon.fr/dp/B0B1QRWHW3) : le titre annonce 2 grilles métal pour ventilateurs de 60 mm ; prix 15,06 € lu sur la page ; épaisseur, entraxe (50 mm attendus) et vis fournies ou non : à vérifier sur la page | [x] |
 | Électronique | Module interrupteur 12 V côté + (P-MOSFET, commande 3,3 V) | 4 € | lien à trouver — référence exacte : module « high side switch » à P-MOSFET, 12 V, commande logique 3,3 V, borniers à vis | [ ] |
 | Électronique | 2 modules MOSFET à 1 canal LR7843, un par carte de LED (7,85 € le module, un par carte) | 15,70 € | [GERUI module de commande MOSFET LR7843 (Amazon, variante LR7843)](https://www.amazon.fr/dp/B0DG8KH7HQ) : 30 V, 161 A, signal 3 V ou 5 V | [x] |
-| Électronique | Convertisseur 12 V → USB-C PD Konnected, entrée 10-30 V, 65 W, coudé (Raspberry Pi 5) | 25,14 € | [Konnected convertisseur DC vers USB-C PD, entrée 10-30 V, 65 W, coudé (Amazon)](https://www.amazon.fr/dp/B0GX7ZXRXQ) | [ ] |
+| Électronique | Convertisseur 12 V → USB-C PD Konnected, entrée 10-30 V, 65 W, coudé (Raspberry Pi 5) | 25,14 € | [Konnected convertisseur DC vers USB-C PD, entrée 10-30 V, 65 W, coudé (Amazon)](https://www.amazon.fr/dp/B0GX7ZXRXQ) | [x] |
 | Électronique | 4 cellules LiFePO4 32700 + BMS 4S + support | 40 € | [Cellule HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523) ; BMS 4S LiFePO4 et support : lien à trouver | [ ] |
 | Électronique | Fusible + porte-fusible (lot de 5 porte-fusibles avec 14 fusibles, + pack de 5 fusibles 15 A de rechange) | 15 € | [Amazon.fr, JOREST, 5 porte-fusibles étanches en ligne ATC/ATO dont 1 à fils de 12 AWG et 4 de 16 AWG, avec 14 fusibles standard de 2 à 35 A](https://www.amazon.fr/dp/B0DBPQBGBQ) : on utilise le porte-fusible à fils de **12 AWG** avec le fusible de **15 A** du lot ; [Amazon.fr, SeKi, 5 fusibles à lame ATO standard 15 A bleu, 19 mm, 32 V DC](https://www.amazon.fr/dp/B0CVQGRH7L) en rechange (prix non lisibles en ligne, à confirmer) ; un seul fusible sur le rail, on garde le plan de base | [x] |
 | Électronique | 16 cordons Dupont 40 cm pris dans un lot de 120 (40 M/M, 40 M/F, 40 F/F ; 8,79 € le lot : 16 / 120 × 8,79 €) | 1,17 € | [Cordons Dupont Heevhas 40 cm, lot de 120 (Amazon)](https://www.amazon.fr/dp/B0D91BZT76) | [x] |
@@ -747,8 +749,10 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Wago 221-413 (3 entrées) pour le + du rail 12 V | 1 € | [WAGO 221-413, borne à levier 3 conducteurs](https://www.wago.com/221-413) ; en magasin : [Leroy Merlin, lot de 10 bornes automatiques 3 fils WAGO, 6,69 €](https://www.leroymerlin.fr/produits/lot-de-10-bornes-automatiques-3-fils-wago-88899414.html) (fiche annoncée : 32 A, fils rigides et souples = série 221 ; la page n'était pas lisible en ligne, vérifier la référence 221-413 sur l'emballage) | [x] |
 | Électronique | Wago 221-415 (5 entrées) pour le − du rail 12 V | 1,5 € | [WAGO 221-415, borne à levier 5 conducteurs](https://www.wago.com/221-415) | [x] |
 | Électronique | Gaine ICTA Ø 16 mm, rouleau de 100 m (il en faut environ 30 cm : le rouleau est 100 fois trop long, mais c'est le conditionnement vendu) | 25 € | [Leroy Merlin, gaine ICTA Ø 16 mm, 100 m (réf. 62900236)](https://www.leroymerlin.fr/produits/gaine-icta-diam-16-mm-l-100-m-62900236.html) ; prix estimé d'après d'autres revendeurs (≈ 25 € la couronne), page non lisible en ligne : à confirmer | [x] |
-| Électronique | Câbles (2,5 mm², 4 mm², signaux), presse-étoupe, cosses | 20 € | lien à trouver — référence exacte : fil souple 2,5 mm² et 4 mm² (rouge / noir), fil de signal 0,25 mm², cosses isolées | [ ] |
-| Solaire | Panneau solaire 100 W | 90 € | [Panneau 100 Wc monocristallin AST100-17M, 970 × 585 × 30 mm (Wattuneed)](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html) | [x] |
+| Électronique | Fil souple 2,5 mm² FLRY-B rouge et noir pour les fils de puissance (≈ 2,5 m utilisés sur 10 m : 5 m de chaque couleur, 18,90 € le lot, 1,89 € le mètre : 2,5 × 1,89 €) | 4,73 € | [DCSk câble FLRY-B 2,5 mm², rouge et noir, 5 m de chaque (Amazon)](https://www.amazon.fr/dp/B07RV3L427) | [x] |
+| Solaire | Rallonge solaire 4 mm² rouge et noir, 2 × 12 m, connecteurs solaires (type MC4) aux deux bouts : se branche sur le câble de 90 cm du panneau, côté régulateur on coupe le connecteur et on met des embouts de 4 mm² | 35,05 € | [Câble d'extension solaire 4 mm² rouge / noir, 2 × 12 m, avec connecteurs (Amazon)](https://www.amazon.fr/dp/B08L6KMZWL) | [ ] |
+| Électronique | Fil de signal 0,25 mm², presse-étoupe, cosses (prix estimé, à confirmer) | 10 € | lien à trouver — référence exacte : fil de signal 0,25 mm², presse-étoupe, cosses isolées | [ ] |
+| Solaire | Panneau solaire 100 W enjoy solar, monocristallin 12 V, câble 4 mm² de 90 cm | 60,95 € | [enjoy solar panneau monocristallin 100 W 12 V, 925 × 580 × 35 mm, 6,3 kg (Amazon)](https://www.amazon.fr/dp/B085ZFJ943) | [x] |
 | Solaire | Régulateur de charge Victron SmartSolar MPPT 75/10 | 55,13 € | [Victron Energy SmartSolar MPPT 75/10 (Amazon, boutique Victron Energy)](https://www.amazon.fr/dp/B075NTT8GH) : bornier à vis, Bluetooth, 75 V / 10 A | [x] |
 | Corps | Contreplaqué 3 mm : 10 planches de 40 × 40 cm nécessaires (baguettes de cale et pièces fines de rechange comprises : elles se rangent dans les creux des planches), prises sur un lot de 25 planches de 400 × 400 × 3 mm à 79,99 € (3,20 € la planche) : 10 × 3,20 € | 32 € | [Lot de 25 contreplaqués 3 mm, planches de 400 × 400 mm, 79,99 € (Amazon)](https://www.amazon.fr/dp/B0D3D4B85P) ; colle à vérifier pour l'extérieur | [x] |
 | Corps | Panneau isolant en fibre de bois Soprema 122 × 60 cm, 40 mm (1 panneau ; vendu en lot de 10 sur la page, un seul suffit : ≈ 0,73 m² pour ≈ 0,18 m² utiles) | 2,80 € | [Leroy Merlin, 10 panneaux isolants en fibre de bois Soprema 122 × 60 cm, ép. 4 cm, R 1,05 (réf. 80145323)](https://www.leroymerlin.fr/produits/10-panneaux-isolants-en-fibre-de-bois-soprema-122x60cm-ep-4-cm-r-1-05-80145323.html) : le lot de 10 (7,32 m², 19 kg, 3,82 € le m²) est la seule référence de la page, le magasin peut le vendre à l'unité ; λ 0,038 W/mK, R 1,05 pour 40 mm, densité 50 kg/m³, fabrication française ; panneau semi-rigide de 40 mm pour une cavité de 39 mm : on le comprime de 1 mm ou on le ponce ; prix d'un panneau = 0,732 m² × 3,82 € | [x] |
@@ -789,4 +793,4 @@ Les liens des composants sont ceux des fiches ci-dessus ; la colonne « Vérifi�
 - [Capteur BME280 Pimoroni PIM472, I2C (Kubii)](https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html)
 - [Capteur BME280, page Bosch Sensortec](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/)
 - [Cellule LiFePO4 HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523)
-- [Panneau 100 Wc AST100-17M (Wattuneed)](https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html)
+- [Panneau solaire enjoy solar 100 W (Amazon)](https://www.amazon.fr/dp/B085ZFJ943)

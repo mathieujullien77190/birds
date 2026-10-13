@@ -1273,11 +1273,11 @@
    "col": null
   }
  },
- "091 Panneau solaire 100 W (97 × 58,5)": {
+ "091 Panneau solaire 100 W enjoy solar (92,5 × 58)": {
   "geo": {
    "n": 8928,
    "idx": 0,
-   "pos": "486636c1004c201e",
+   "pos": "c75af59d00f9486d",
    "col": "1be57b8e67bf9bf0"
   },
   "edges": {
@@ -1291,7 +1291,7 @@
   "geo": {
    "n": 2817,
    "idx": 14976,
-   "pos": "8b284ebed2d23393",
+   "pos": "f261c19ca3d34710",
    "col": "0b93822b9205aee6"
   },
   "edges": {

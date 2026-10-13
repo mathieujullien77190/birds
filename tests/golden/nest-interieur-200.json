@@ -4025,10 +4025,10 @@
   },
   {
    "id": "id217",
-   "name": "Panneau solaire 100 W (97 × 58,5)",
-   "w": 970,
-   "h": 585,
-   "depth": 30,
+   "name": "Panneau solaire 100 W enjoy solar (92,5 × 58)",
+   "w": 925,
+   "h": 580,
+   "depth": 35,
    "pos": [
     700,
     0,
@@ -4044,7 +4044,7 @@
    "group": "id3",
    "special": "solar",
    "color": "#1e3a8a",
-   "url": "https://www.wattuneed.com/fr/panneaux-solaires/8120-panneau-solaire-12v-100wc-monocristallin-0712971138629.html"
+   "url": "https://www.amazon.fr/dp/B085ZFJ943"
   },
   {
    "id": "id218",
@@ -4069,8 +4069,8 @@
    "path": [
     [
      730,
-     161.46,
-     273.87
+     159.41,
+     272.44
     ],
     [
      738,
