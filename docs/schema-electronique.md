@@ -299,13 +299,16 @@ Les valeurs viennent de fiches de revendeurs et de constructeurs ; la dernière 
 | Tension de charge max | 14,6 V (3,65 V par cellule) | — |
 | Tension de coupure basse | environ 10 à 10,5 V (2,5 V par cellule ; certaines fiches annoncent 2 V) | — |
 | Capacité | 6 Ah, soit environ 77 Wh | 6 Ah |
-| Courant de décharge continu du BMS | au moins 5 A (Pi, caméras, ventilateur et marge) | — |
-| BMS | obligatoire : équilibrage, coupure haute et basse, court-circuit | — |
-| Température de charge | pas de charge sous 0 °C : BMS avec protection basse température (important pour un nichoir dehors) | — |
+| Courant de décharge continu du BMS | au moins 5 A (Pi, caméras, ventilateur et marge) ; le Daly 4S choisi fait 40 A en charge comme en décharge (coupure à 60 A) | 40 A |
+| BMS | obligatoire : équilibrage, coupure haute et basse, court-circuit. **Daly Smart BMS 4S 40 A LiFePO4** (123 × 65 × 14 mm, 170 à 210 g, sortie 10 AWG), « port commun » : le − de la charge et celui de la décharge passent tous deux par sa borne P− ; le + du pack va directement au fusible. Livré avec sa sonde de température NTC, son câble d'équilibrage, le câble CAN/RS485 et une clé Bluetooth / Wi-Fi | bloc de 123 × 65 × 14 mm, collé à plat sous le fond, à l'avant gauche ; **emplacement provisoire** : il chevauche de 12 mm les étriers du régulateur (pas de place libre de 123 × 65 mm sous le fond) ; ses fils ne sont pas encore dessinés |
+| Température de charge | pas de charge sous 0 °C : **la sonde NTC du BMS, collée contre les cellules**, et le réglage de la coupure de charge basse température dans l'application (à faire sur l'établi avant le montage) | — |
+| Réglages du BMS | à faire une fois, avant de monter le pack : type LiFePO4, 4 cellules, **surcharge 3,65 V** et **décharge 2,8 V** par cellule (les valeurs d'usine, 3,75 V et 2,2 V, sont trop larges), coupure de charge basse température 0 °C ; la clé Bluetooth / Wi-Fi est capricieuse d'après plusieurs avis : prévoir le **câble USB-UART Daly** et le logiciel PC, puis retirer la clé (elle consomme ≈ 15 mA) | — |
+| Soudures du pack | 5 fils d'équilibrage soudés sur les fils ou languettes du **support de cellules 32700 à 4 logements**, jamais sur les cellules (la chaleur les abîme) ; contrôle au multimètre : 3,2 V entre deux fils voisins avant de brancher le BMS | — |
+| Capacité annoncée | cellules LiitoKala Lii-70A de 7 000 mAh annoncés (≈ 90 Wh pour 4) ; **on garde 6 Ah (77 Wh) dans les calculs** : la capacité réelle de ces cellules est souvent inférieure à l'annonce | 6 Ah |
 | Dimensions du pack | environ 70 × 128 × 32 mm pour 4 cellules côte à côte | 128 × 70 × 32 mm (vraie taille), sous le nichoir, à plat, à l'arrière gauche, tournée de 90°, tenue par quatre étriers |
 | Position | à l'abri du soleil direct et loin de la laine de bois et du nid ; fils de charge courts | sous le fond, dans la jupe de l'habillage (50 mm), bornes côté est, 5 mm de jeu avec les étriers du régulateur, plus de 25 mm avec le conduit d'air basse |
 | Froid et humidité | la charge est interdite sous 0 °C ; ni coffret ni vernis ne sont prévus | voir « Points à vérifier » |
-| Modèle exact / lien | [Cellule HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523) ; BMS 4S LiFePO4 et support : lien à trouver | — |
+| Modèle exact / lien | [Cellules LiitoKala Lii-70A 32700 (Robu)](https://robu.in/?p=2024523) pour les cellules ; [BMS Daly Smart 4S 40 A (Amazon)](https://www.amazon.fr/dp/B0CY23WLX9) ; support 32700 à 4 logements et câble USB-UART Daly : lien à trouver | — |
 
 ### Fusible
 
@@ -649,7 +652,7 @@ Contrôle des fils : les fils du ventilateur côté 12 V ne traversent ni nappe 
 - Batterie de 6 Ah (4 cellules 32700, 77 Wh) pour le premier montage, à mesurer avant de conclure.
 - Consommation du Pi 5 : environ 3 W au repos, environ 5 à 6 W avec deux flux caméra (5,5 W retenus). Toutes les valeurs de ce paragraphe sont des **estimations** à remplacer par des mesures (INA219).
 
-**Calcul.** Convertisseur 12 → 5 V supposé à 90 % de rendement (estimation) ; énergie utilisable de la batterie 65 Wh, soit environ 85 % des 77 Wh (marge du BMS et réserve, estimation).
+**Calcul.** Convertisseur 12 → 5 V supposé à 90 % de rendement (estimation) ; énergie utilisable de la batterie 65 Wh, soit environ 85 % des 77 Wh (6 Ah retenus ; les cellules annoncent 7 Ah, soit 90 Wh, marge non comptée) (marge du BMS et réserve, estimation).
 
 | Cas | Charge côté 5 V | Tirée sur la batterie (÷ 0,9) | Autonomie (65 Wh ÷ puissance) |
 | --- | --- | --- | --- |
@@ -682,19 +685,19 @@ Masses calculées d'après les surfaces du modèle (contreplaqué peuplier 3 mm 
 | Habillage : okoumé extérieur 5 mm peint en blanc (22 pièces, 0,30 m²) | 0,65 kg |
 | Toit en okoumé 2 × 5 mm (2 plaques de 0,082 m²) + 4 baguettes de 3 mm | 0,4 kg |
 | Isolant fibre de bois 39 mm, 50 kg/m³ (murs, fond, toit : 6,95 L) | 0,35 kg |
-| Batterie 4 × 32700 + BMS + support (sous le nichoir, avec le régulateur) | 0,6 kg |
+| Batterie 4 × 32700 + BMS (0,2 kg) + support (sous le nichoir, avec le régulateur) | 0,8 kg |
 | Régulateur de charge Victron SmartSolar 75/10 | 0,5 kg |
 | Raspberry Pi 5 + carte microSD | 0,05 kg |
 | Caméras, LED, capteurs (nid et dehors), convertisseur, modules, fusible | 0,15 kg |
 | Ventilateur, prise et rallonge, relais, plots, mousse, bloc d'hiver | 0,15 kg |
 | Câbles, gaine, nappes | 0,15 kg |
 | Morceaux de baguette de cale, étriers, clavettes | 0,1 kg |
-| **Total accroché à l'arbre** | **≈ 4,1 kg** |
+| **Total accroché à l'arbre** | **≈ 4,3 kg** |
 | Panneau solaire 100 W (au sol, à part) | 6,3 kg |
 
-**Répartition.** Le total est de 4,1 kg ; la batterie (0,6 kg) et le régulateur (0,25 kg) sont sous le nichoir, ce qui descend le centre de gravité de l'ensemble.
+**Répartition.** Le total est de 4,3 kg ; la batterie (0,8 kg) et le régulateur (0,25 kg) sont sous le nichoir, ce qui descend le centre de gravité de l'ensemble.
 
-**Tenue de la fixation.** 4,1 kg font 40 N. Ils sont repris par 4 dents de 9 × 32 mm dans du contreplaqué de 3 mm : la pression sur le bois reste sous 1 MPa, pour une résistance d'au moins 20 MPa. Le centre de gravité est à environ 11 cm du dos, ce qui ajoute un couple de 4,5 N·m, soit un effort d'environ 45 N sur la dent du haut : toujours loin de la limite. Les 4 vis Ø 5 dans le tronc (ou une sangle) tiennent cela sans difficulté. Les points à soigner : le collage des 3 plaques de chaque nervure, et des vis inox de 5 × 60 dans du bois sain.
+**Tenue de la fixation.** 4,3 kg font 42 N. Ils sont repris par 4 dents de 9 × 32 mm dans du contreplaqué de 3 mm : la pression sur le bois reste sous 1 MPa, pour une résistance d'au moins 20 MPa. Le centre de gravité est à environ 11 cm du dos, ce qui ajoute un couple de 4,5 N·m, soit un effort d'environ 45 N sur la dent du haut : toujours loin de la limite. Les 4 vis Ø 5 dans le tronc (ou une sangle) tiennent cela sans difficulté. Les points à soigner : le collage des 3 plaques de chaque nervure, et des vis inox de 5 × 60 dans du bois sain.
 
 ## Finition du bois (saturateur, peinture)
 
@@ -746,7 +749,10 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Électronique | Module relais 1 canal 3 V à optocoupleur (SRD-03VDC-SL-C), déclenchement niveau haut | 1 sur 5 | 2,28 € | 11,39 € | [Module relais 1 canal 3 V, lot de 5 (Amazon)](https://www.amazon.fr/dp/B0FN6PLQ47) | [x] |
 | Électronique | Modules MOSFET à 1 canal LR7843 (un par carte de LED) | 2 | 15,70 € | 15,70 € | [GERUI module de commande MOSFET LR7843 (Amazon, variante LR7843)](https://www.amazon.fr/dp/B0DG8KH7HQ) | [x] |
 | Électronique | Convertisseur 12 V → USB-C PD Konnected, entrée 10-30 V, 65 W, coudé (Raspberry Pi 5) | 1 | 25,14 € | 25,14 € | [Konnected convertisseur DC vers USB-C PD, entrée 10-30 V, 65 W, coudé (Amazon)](https://www.amazon.fr/dp/B0GX7ZXRXQ) | [x] |
-| Électronique | Cellules LiFePO4 32700 + BMS 4S + support | 4 cellules, 1 BMS, 1 support | 40 € | 40 € | [Cellule HX IFR32700 3,2 V 6000 mAh (Robu)](https://robu.in/?p=2024523) | [ ] |
+| Électronique | Cellules LiFePO4 32700 LiitoKala Lii-70A (7 000 mAh annoncés), pour le pack 4S | 4 | 24 € | 24 € | [Cellules LiitoKala Lii-70A 32700 (Robu)](https://robu.in/?p=2024523) | [ ] |
+| Électronique | BMS Daly Smart 4S 40 A LiFePO4, avec sonde NTC, câble d'équilibrage et clé Bluetooth / Wi-Fi | 1 | 59,28 € | 59,28 € | [BMS Daly Smart 4S 40 A (Amazon)](https://www.amazon.fr/dp/B0CY23WLX9) | [ ] |
+| Électronique | Support de cellules 32700 à 4 logements | 1 | 6 € | 6 € | lien à trouver — référence exacte : support de piles 32700 à 4 logements, avec fils | [ ] |
+| Électronique | Câble USB-UART Daly (réglage du BMS par le logiciel PC) | 1 | 10 € | 10 € | lien à trouver — référence exacte : câble USB-UART Daly BMS (adaptateur USB vers UART) | [ ] |
 | Électronique | Fusible + porte-fusible (JOREST, lot de 5 porte-fusibles avec 14 fusibles, + pack de 5 fusibles 15 A de rechange) | 1 lot | 15 € | 15 € | [Amazon.fr, JOREST, 5 porte-fusibles étanches en ligne ATC/ATO dont 1 à fils de 12 AWG et 4 de 16 AWG, avec 14 fusibles standard de 2 à 35 A](https://www.amazon.fr/dp/B0DBPQBGBQ) ; [Amazon.fr, SeKi, 5 fusibles à lame ATO standard 15 A bleu, 19 mm, 32 V DC](https://www.amazon.fr/dp/B0CVQGRH7L) | [x] |
 | Électronique | Cordons Dupont 40 cm (40 M/M, 40 M/F, 40 F/F) | 16 sur 120 | 1,17 € | 8,79 € | [Cordons Dupont Heevhas 40 cm, lot de 120 (Amazon)](https://www.amazon.fr/dp/B0D91BZT76) | [x] |
 | Électronique | Embouts de câble assortis (kit) | 1 kit | 8 € | 8 € | lien à trouver — référence exacte : kit d'embouts de câble isolés 0,25 à 4 mm² | [ ] |
@@ -765,13 +771,13 @@ Prix moyens constatés chez les revendeurs cités en bas, hors port ; à vérifi
 | Finition | Peinture extérieure bois / MDF / OSB Luxens « Conditions extrêmes », blanc satiné 2,5 L (RAL 9016) | 1 pot | 34,90 € | 34,90 € | [Leroy Merlin, peinture extérieure bois, MDF, OSB Luxens « Conditions extrêmes », blanc satiné 2,5 L](https://www.leroymerlin.fr/produits/peinture-exterieure-bois-mdf-osb-conditions-extremes-luxens-blanc-satine-2-5l-82396898.html) | [x] |
 | Finition | Saturateur pour bois extérieur Luxens teck mat, 1 L | 1 pot | 21,90 € | 21,90 € | [Leroy Merlin, saturateur pour bois extérieur Luxens teck mat 1 L](https://www.leroymerlin.fr/produits/saturateur-pour-bois-exterieur-luxens-teck-mat-1-l-88692969.html) | [x] |
 
-**Répartition du coût** (colonne « Prix », besoin exact : 666,98 € ; en achetant les lots entiers : 838,03 €).
+**Répartition du coût** (colonne « Prix », besoin exact : 726,26 € ; en achetant les lots entiers : 897,31 €).
 
 ```mermaid
 pie showData title Répartition du coût du nichoir (€)
     "Raspberry Pi, caméras et carte SD" : 204.74
+    "Alimentation (batterie, convertisseur, câblage)" : 181.94
     "Solaire" : 151.13
-    "Alimentation (batterie, convertisseur, câblage)" : 122.66
     "Bois, isolant et colle" : 79.26
     "Finition (peinture, saturateur)" : 56.8
     "Ventilation" : 26.78
@@ -782,12 +788,12 @@ pie showData title Répartition du coût du nichoir (€)
 
 | Magasin | Ce qu'on y achète | Besoin exact | Lots entiers |
 | --- | --- | --- | --- |
-| Amazon.fr | caméras NoIR, LED infrarouges, cartes PCB, résistances, sonde DS18B20, ventilateur et grille Noctua, relais, modules MOSFET, convertisseur USB-C PD, fusibles, cordons Dupont, fil 2,5 mm², rallonge solaire, panneau solaire, régulateur Victron, contreplaqué 3 mm, colle | 363,84 € | 479,42 € |
+| Amazon.fr | caméras NoIR, LED infrarouges, cartes PCB, résistances, sonde DS18B20, ventilateur et grille Noctua, relais, modules MOSFET, convertisseur USB-C PD, fusibles, cordons Dupont, fil 2,5 mm², rallonge solaire, panneau solaire, régulateur Victron, contreplaqué 3 mm, colle | 423,12 € | 538,70 € |
 | Kubii | Raspberry Pi 5, carte microSD, alimentation 27 W, Active Cooler, nappes caméra, capteur BME280 | 150,82 € | 150,82 € |
 | Leroy Merlin | contreplaqué okoumé, isolant fibre de bois, peinture, saturateur, gaine ICTA, Wago 221-413, Wago 221-415 | 94,32 € | 149,79 € |
-| Robu | cellules LiFePO4 32700 (le BMS et le support sont encore à trouver) | 40,00 € | 40,00 € |
-| Sans lien (à trouver) | embouts de câble, fil de signal, presse-étoupe et cosses | 18,00 € | 18,00 € |
-| **Total** | | **666,98 €** | **838,03 €** |
+| Robu | cellules LiFePO4 32700 LiitoKala | 24,00 € | 24,00 € |
+| Sans lien (à trouver) | embouts de câble, fil de signal, presse-étoupe et cosses, support de cellules 32700, câble USB-UART Daly | 34,00 € | 34,00 € |
+| **Total** | | **726,26 €** | **897,31 €** |
 
 ## Points à vérifier avant de construire
 

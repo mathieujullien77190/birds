@@ -482,6 +482,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // avec le panneau solaire : le régulateur sous le nichoir, ses deux fils vers la batterie et la gaine qui les porte
   const solarElec: Plank[] = n.solar ? [
     part('Régulateur de charge Victron SmartSolar MPPT 75/10 (100 × 113 × 40, sous le nichoir)', 100, 113, 40, RGX, RGY, RGZ, 'block', '#1d4ed8'), // à plat sous le plancher, le lambris descend autour pour le protéger
+    part('BMS Daly 4S 40 A LiFePO4 (123 × 65 × 14, collé à plat sous le fond)', 65, 123, 14, -30, -52, -7, 'block', '#b91c1c'), // protège le pack : coupe la charge sous 0 °C avec sa sonde NTC (à coller contre les cellules) ; ses fils (équilibrage, B−, P−) ne sont pas encore dessinés ; EMPLACEMENT PROVISOIRE : il chevauche de 12 mm les étriers du régulateur, faute de place libre de 123 × 65 mm sous le fond
     part('Batterie LiFePO4 12,8 V 6 Ah (4 × 32700, 128 × 70 × 32)', 128, 70, 32, BAT_X, BAT_Y, BAT_Z, 'block', '#047857'), // sous le nichoir, à plat, à gauche du régulateur, tenue par quatre étriers ; bornes côté régulateur
     wire('Fil fusible → batterie + (rouge)', '#dc2626', [[BTX, BTP_Y, BT_Z], [r2(BTX + 6), r2(BTP_Y - 1), -10], [r2(FAX - 4), r2(FUY + 4), -6], [FAX, FUY, -2.5]] as Vec3[], 3.6), // borne + de la batterie (face nord) → lame A du fusible : une vingtaine de centimètres sous le fond
     wire('Fil régulateur → batterie + (rouge, 2,5 mm²)', '#dc2626', [[RT_X, RTP_Y, RT_Z], [r2(RT_X + 4), r2(RTP_Y + 4), -13], [r2(RT_X + 3), r2(RTP_Y + 14), -11], [r2(FAX + 10), r2(FUY - 14), -8], [FAX, r2(FUY - 14), -7], [FAX, FUY, -2.5]] as Vec3[], 3.6), // sortie + du régulateur (bout nord) → lame A du fusible (la charge ne passe pas par la lame B)
@@ -933,6 +934,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
     [/^Wago 221-413/, 'https://www.wago.com/221-413'],
     [/^Wago 221-415/, 'https://www.wago.com/221-415'],
     [/^Batterie/, 'https://robu.in/?p=2024523'],
+    [/^BMS Daly/, 'https://www.amazon.fr/dp/B0CY23WLX9'],
     [/^Régulateur/, 'https://www.amazon.fr/dp/B075NTT8GH'],
     [/^Capteur/, 'https://www.kubii.com/fr/modules-capteurs/2858-capteur-de-pression-temperature-et-humidite-bme280-breakout-0606034879638.html'],
     [/^Panneau solaire/, 'https://www.amazon.fr/dp/B085ZFJ943'],

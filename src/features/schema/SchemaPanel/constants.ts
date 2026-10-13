@@ -21,7 +21,7 @@ export const MAP: [RegExp, Keys][] = [
   [/^Module relais 3 V/, { nodes: ['SWF'], edges: [] }],
   [/^Modules MOSFET/, { nodes: ['SW'], edges: [] }],
   [/^Convertisseur/, { nodes: ['BUCK'], edges: [] }],
-  [/^Batterie/, { nodes: ['BAT'], edges: [] }],
+  [/^(Batterie|BMS Daly)/, { nodes: ['BAT'], edges: [] }],
   [/^Fusible/, { nodes: ['FUSE'], edges: [] }],
   [/^Régulateur/, { nodes: ['MPPT'], edges: [] }],
   [/^Panneau solaire/, { nodes: ['PV'], edges: [] }],
