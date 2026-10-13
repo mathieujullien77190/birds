@@ -44,13 +44,13 @@ export function DocModal({ doc: first, onClose }: { doc: DocDef; onClose: () => 
           )}
           <div ref={scroller} className="overflow-y-auto">
             <div ref={ref} className="doc-md px-6 py-5" onClick={onLinkClick} dangerouslySetInnerHTML={{ __html: html }} />
-            {toc && current !== ALL_SECTIONS && (
-              <div className="flex items-center justify-between gap-3 border-t border-stone-200 px-6 py-3">
-                <button type="button" className={nav} disabled={!prev} onClick={() => prev && select(prev)}>◀ précédente</button>
-                <button type="button" className={nav} disabled={!next} onClick={() => next && select(next)}>suivante ▶</button>
-              </div>
-            )}
           </div>
+          {toc && current !== ALL_SECTIONS && ( // toujours affiché, hors de la zone qui défile : « précédente / suivante » reste sous les yeux
+            <div className="flex shrink-0 items-center justify-between gap-3 border-t border-stone-200 bg-white px-6 py-3">
+              <button type="button" className={nav} disabled={!prev} onClick={() => prev && select(prev)}>◀ précédente</button>
+              <button type="button" className={nav} disabled={!next} onClick={() => next && select(next)}>suivante ▶</button>
+            </div>
+          )}
         </>
       )}
     </Modal>

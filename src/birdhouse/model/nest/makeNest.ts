@@ -145,15 +145,21 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // CAMÉRA 2 + LED infrarouges extérieures : sur une PLAQUE horizontale (« Plaque caméra extérieure », contreplaqué 3 mm), perpendiculaire à la façade, juste au-dessus du trou d'envol, au centre.
   // La plaque est trouée (objectif Ø 10, fenêtre des LED 20 × 10), crénelée dans « Face avant toit » (dents de 3 mm dans des fentes de cette plaque) et traverse l'habillage par une fenêtre pleine largeur de la lame d'entrée ;
   // objectif et LED regardent droit vers le bas, à fleur du dessous de la plaque (comme la caméra du plafond du nid). Sous le débord de 60 mm du toit.
-  const PLATE_DZ = 18, PLATE_TEETH = 5; // hauteur du centre de la plaque au-dessus du haut du corps (saillie : jusqu'au bout des LED), nombre de segments de dents
+  const PLATE_GAP = 1, PLATE_TEETH = 5; // le module (plaque, caméra, LED) est collé au toit : 1 mm sous le dessous du pan en okoumé, qui DESCEND vers l'avant (on en tient compte pour chaque bord) ; nombre de segments de dents
   const lamSpan = W + 2 * OKOUME_T, lamK0 = Math.max(1, Math.round(lamSpan / LAM_W)), lamK = lamK0 % 2 ? lamK0 : (lamK0 > 1 && Math.abs(lamSpan / (lamK0 - 1) - LAM_W) < Math.abs(lamSpan / (lamK0 + 1) - LAM_W) ? lamK0 - 1 : lamK0 + 1), lamSx = lamSpan / lamK; // largeur d'une lame de façade (même calcul que l'habillage)
-  const plateW = r2(lamSx), plateZ = r2(bodyH + PLATE_DZ), plateTop = r2(plateZ + t / 2); // largeur = celle de la lame d'entrée (fenêtre pleine largeur : la lame est coupée en deux)
-  const cam2Y = r2(-D / 2 - lamT - 14), irY = r2(cam2Y - 20), plateY1 = r2(-D / 2 + t), plateY0 = r2(irY - IR_W / 2 - 2); // centre de la caméra (24 de profondeur, 2 mm devant la lame), carte des LED devant elle, bouts arrière (dents) et avant de la plaque
+  const cam2Y = r2(-D / 2 - lamT - 14), irY = r2(cam2Y - 20);
+  const plateY1 = r2(-D / 2 + t), plateY0 = r2(irY - IR_W / 2 - 2); // centre de la caméra (24 de profondeur, 2 mm devant la lame), carte des LED devant elle, bouts arrière (dents) et avant de la plaque
+  const panUnder = (y: number): number => bodyH + Hf + ((y + D / 2) * (Hb - Hf)) / D; // dessous du pan à l'ordonnée y : plus bas vers l'avant (la pente descend)
+  const plateTop = r2(Math.min(
+    panUnder(plateY0) - PLATE_GAP, // bout avant de la plaque
+    panUnder(irY - IR_W / 2) - PLATE_GAP - 1.6, // dessus de la carte des LED (0,8 + 0,8 au-dessus de la plaque), bord avant
+    panUnder(cam2Y + CAM_H / 2 - 4.5 - 2.75) - PLATE_GAP - 4.2, // dessus du connecteur de la nappe, bord avant
+  )), plateZ = r2(plateTop - t / 2), plateW = r2(lamSx); // largeur = celle de la lame d'entrée (la lame s'arrête sous la plaque : rien au-dessus)
   const cam2Cz = r2(plateTop + 0.8); // centre de la carte caméra posée sur la plaque
   const camCon: Vec3 = [cam2X, r2(cam2Y + CAM_H / 2 - 4.5), r2(plateTop + 4.2)]; // connecteur de la nappe, côté façade (+y), au-dessus de la carte
   const cam2Plate: Plank | null = n.cam2 ? (() => {
     const base: Plank = recastAll({ id: uid(), name: 'Plaque caméra extérieure', w: plateW, h: r2(plateY1 - plateY0), pos: [0, r2((plateY0 + plateY1) / 2), plateZ] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: roofGroup, cast: { top: { n: PLATE_TEETH, phase: 0 } } }, t, fit);
-    return { ...base, holes: [fitHole(base, { id: uid(), shape: 'round' as const, x: 0, y: r2(cam2Y - base.pos[1]), size: LENS_HOLE }), fitHole(base, { id: uid(), shape: 'square' as const, x: 0, y: r2(irY - base.pos[1]), size: 20, sh: 10 })] };
+    return { ...base, holes: [fitHole(base, { id: uid(), shape: 'square' as const, x: 0, y: r2(cam2Y - base.pos[1]), size: CAM_W - 4, sh: CAM_H - 4 }), fitHole(base, { id: uid(), shape: 'square' as const, x: 0, y: r2(irY - base.pos[1]), size: 20, sh: 10 })] };
   })() : null;
   const cam2SX = r2(cam2X - 10); // abscisse de la nappe et des deux fils des LED extérieures de la caméra 2, au milieu de leur fente (28 mm) dans le pan du toit, au-dessus de la caméra
   // PAN DU TOIT (« Toit en okoumé ») : géométrie partagée par le pan, ses baguettes, ses fentes et le trajet de la nappe / des fils de la caméra 2. `s` = abscisse le long de la pente depuis le milieu du pan (sens +s = vers l'arrière), `h` = hauteur au-dessus de son dessous (le pan occupe 0 à OKOUME_T).
@@ -162,7 +168,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   const panPt = (x: number, s: number, h: number): Vec3 => [r2(x), r2(PAN_YMID + s * PAN_COS - h * PAN_SIN), r2(panZl(PAN_YMID) + s * PAN_SIN + h * PAN_COS)];
   const PAN_S0 = (-D / 2 + t - PAN_YMID) / PAN_COS; // face intérieure de la plaque avant du toit, mesurée le long de la pente
   // UN CANAL oblong dans la plaque crénelée du pan (la plaque pleine collée dessus le ferme : conduit étanche DANS le toit) pour la nappe de la caméra 2 et les deux fils des LED extérieures : il part de l'à-plomb de la caméra (A, dans le débord avant gauche) et finit dans l'ouverture du caisson, juste derrière la plaque avant (B) ; ouvert vers le bas aux deux bouts
-  const PAN_SA = r2((camCon[1] - PAN_YMID) / PAN_COS), PAN_SB = r2(PAN_S0 + t + 6), CHAN_W = 28, CHAN_END = 5;
+  const PAN_SA = r2((camCon[1] - PAN_YMID) / PAN_COS), PAN_SB = r2(PAN_S0 + t + 6), CHAN_W = 50, CHAN_END = 5, CHAN_CX = cam2X; // canal agrandi : 50 mm de large, centré sur la caméra, il va vers l'avant jusqu'au bout de la plaque du module (la plaque et son électronique sont juste en dessous)
+  const CHAN_S0 = r2((plateY0 - PAN_YMID) / PAN_COS); // bout avant du canal, mesuré le long de la pente : à l'aplomb du bout avant de la plaque
   const verticalTeeth = (edge: Edge, len: number, phase: 0 | 1): Notch[] => {
     const out: Notch[] = [];
     for (let i = 0; i * 16 < len; i++) { const a = i * 16, b = Math.min((i + 1) * 16, len); if (i % 2 === phase && b - a > 0.5) out.push({ id: uid(), edge, pos: r2((a + b) / 2), width: r2(b - a + fit), depth: t }); }
@@ -370,14 +377,14 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // trajet commun (de l'intérieur vers la caméra 2) : sous le pan à l'avant du caisson, MONTE par l'extrémité arrière (B) du canal, court DANS le canal (h = 2,5 : au milieu de la plaque crénelée de 5 mm, sous la plaque pleine), redescend par l'extrémité avant (A), dans le débord, jusqu'au-dessus de la caméra ; perpendiculaire au pan aux deux bouts
   // les FILS (coudes arrondis de 10 mm par `roundPath`) : segments droits de 10 mm au moins sous le pan ; la NAPPE (courbe lisse sans arrondi de coins) : points rapprochés aux deux bouts du canal
   const panRoute = (x: number, wireRoute: boolean): Vec3[] => wireRoute
-    ? [panPt(x, PAN_SB + 30, -14), panPt(x, PAN_SB, -14), panPt(x, PAN_SB, 2.5), panPt(x, PAN_SA, 2.5), panPt(x, PAN_SA, -14)]
-    : [panPt(x, PAN_SB + 45, -9), panPt(x, PAN_SB + 14, -9), panPt(x, PAN_SB + 4, -5), panPt(x, PAN_SB, -1), panPt(x, PAN_SB - 1, 1.5), panPt(x, PAN_SB - 5, 2.5), panPt(x, (PAN_SA + PAN_SB) / 2, 2.5), panPt(x, PAN_SA + 5, 2.5), panPt(x, PAN_SA + 1, 1.5), panPt(x, PAN_SA, -1), panPt(x, PAN_SA - 1, -6)];
+    ? [panPt(x, PAN_SB + 30, -14), panPt(x, PAN_SB, -14), panPt(x, PAN_SB, 2.5), panPt(x, PAN_SA, 2.5), panPt(x, PAN_SA, -4)]
+    : [panPt(x, PAN_SB + 45, -9), panPt(x, PAN_SB + 14, -9), panPt(x, PAN_SB + 4, -5), panPt(x, PAN_SB, -1), panPt(x, PAN_SB - 1, 1.5), panPt(x, PAN_SB - 5, 2.5), panPt(x, (PAN_SA + PAN_SB) / 2, 2.5), panPt(x, PAN_SA + 5, 2.5), panPt(x, PAN_SA + 1, 1.5), panPt(x, PAN_SA, -1)];
   const wires2: Plank[] = n.cam2 ? ([['Fil 5 V LED extérieures (rouge)', '#dc2626', 0, 0, -10.5], ['Fil masse LED extérieures (noir)', '#111827', 9, 0, -13]] as const).map(([nm, color, pinIdx, _r, dx]): Plank => {
     const [xt, yt] = pw(PI_PIN_X0 + pinIdx * 2.54, PI_PIN_Y), sx = cam2SX + dx; // tous les deux à GAUCHE de la nappe (à 10,5 et 13 mm de son axe ; elle fait 16 de large, la fente 28) : jamais dessus, jamais croisée
     const end: Vec3 = [r2(dx / 4), r2(irY + IR_W / 2 - 1), r2(plateTop + 2.4)]; // sur la carte des LED, du côté de la caméra
-    const hw = r2(plateTop + 12); // les fils redescendent à gauche de la nappe, restent au-dessus de la caméra, puis plongent sur la carte des LED
+    const hw = r2(plateTop + 2.8); // les fils redescendent à gauche de la nappe, restent au-dessus de la caméra, puis plongent sur la carte des LED
     return { id: uid(), name: nm, w: 1.2, h: 1.2, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'wire' as const, color,
-      path: [...(pinIdx === 9 ? [[MX + 4, MY - 7, MZ + 4], [MX + 4, MY - 12, MZ + 10], [sx + 10, -34, topZ + 24]] as Vec3[] : [[xt, yt, piZ + 3.5], [xt, yt, piZ + 10], [xt + dx, yt - 10, topZ + 27]] as Vec3[]), ...panRoute(sx, true), [sx, camCon[1], hw], [sx, r2(irY + IR_W / 2 + 4), hw], [end[0], r2(irY + IR_W / 2 + 4), hw], [end[0], end[1], end[2] + 6], end] as Vec3[] };
+      path: [...(pinIdx === 9 ? [[MX + 4, MY - 7, MZ + 4], [MX + 4, MY - 12, MZ + 10], [sx + 10, -34, topZ + 24]] as Vec3[] : [[xt, yt, piZ + 3.5], [xt, yt, piZ + 10], [xt + dx, yt - 10, topZ + 27]] as Vec3[]), ...panRoute(sx, true), [sx, camCon[1], hw], [sx, r2(irY + IR_W / 2 + 4), hw], [end[0], r2(irY + IR_W / 2 + 4), hw], end] as Vec3[] };
   }) : [];
   const cable2: Plank[] = n.cam2 ? [{
     id: uid(), name: "Nappe caméra 2 (longue, vers l'extérieur)", w: 16, h: 0.3, pos: [0, 0, 0] as Vec3, rot: [0, 0, 0] as Vec3, notches: [], holes: [], group: elecGroup, special: 'cable' as const,
@@ -725,7 +732,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
           poly: poly.map(([x, y]) => [r2(x - cx), r2(y - cz)] as [number, number]) });
       });
     };
-    const plateWin: R[] = cam2Plate ? [[-plateW / 2, plateZ - t / 2, plateW / 2, plateZ + t / 2]] : []; // la plaque traverse l'habillage : fenêtre sur toute la largeur de la lame d'entrée (la lame est coupée en deux)
+    const plateWin: R[] = cam2Plate ? [[-plateW / 2, plateZ - t / 2, plateW / 2, 1000]] : []; // la plaque traverse l'habillage : fenêtre sur toute la largeur de la lame d'entrée, de dessous la plaque jusqu'en haut : la lame s'arrête sous la plaque, pas d'habillage au-dessus
     for (let i = 0; i < k; i++) {
       const x0 = fx0 + i * sx, x1 = fx0 + (i + 1) * sx, centre = x0 < 0 && x1 > 0; // façade : la lame qui porte le centre de l'entrée est percée du trou d'envol
       const bx0i = bx0l + i * sx, bx1i = bx0l + (i + 1) * sx; // arrière : décalé d'une épaisseur (recouvre le coin droit)
@@ -737,7 +744,8 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       const pieces = out.filter((p) => /^Lambris avant \d+ \(percé\)(\.\d)?$/.test(p.name));
       const l = pieces[0];
       if (l) {
-        const zTopPin = r2(frontTop - 6 - 10), zLowPin = LOW_PIN_Z, dx = r2(l.w / 2 - 6), cxl = l.pos[0]; // les deux trous du haut sont descendus de 10 mm
+        const upper = pieces.length > 1 ? pieces[pieces.length - 1] : null; // morceau du haut de la lame (au-dessus de la plaque), s'il y en a un
+        const zTopPin = upper ? r2(Math.min(frontTop - 16, upper.pos[2] + upper.h / 2 - 5)) : cam2Plate ? r2(plateZ - t / 2 - 8) : r2(frontTop - 16), zLowPin = LOW_PIN_Z, dx = r2(l.w / 2 - 6), cxl = l.pos[0]; // les deux trous du haut sont descendus de 10 mm
         frontPins = [[-dx, zLowPin], [dx, zLowPin], [-dx, zTopPin], [dx, zTopPin]].map(([x, z]) => ({ x: r2(cxl + x), z }));
         for (const q of frontPins) { const pc = pieces.find((p) => q.z > p.pos[2] - p.h / 2 && q.z < p.pos[2] + p.h / 2) ?? l; pc.holes = [...pc.holes, { id: uid(), shape: 'round' as const, x: r2(q.x - cxl), y: r2(q.z - pc.pos[2]), size: PIN_D }]; }
         frontPins.forEach((q, k) => out.push({ id: uid(), name: `Cure-dent lame d'entrée ${k + 1}`, w: 2, h: 2, depth: PIN_LEN, pos: [q.x, r2(-ye - LAM_T + PIN_LEN / 2), q.z] as Vec3, rot: rotFromBasis([1, 0, 0], [0, 0, 1]), notches: [], holes: [], group: lamGroup, special: 'pin' as const, color: '#d9b779' }));
@@ -786,7 +794,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       const s0 = PAN_S0, s1 = (D / 2 - t - BG_BODY * sinA - yMid) / cosA;
       const hMid = (BG_TOOTH - BG_BODY) / 2;
       const slots: Hole[] = [];
-      const chanX0 = cam2SX - CHAN_W / 2 - 3, chanX1 = cam2SX + CHAN_W / 2 + 3; // zone du canal + 3 mm de ligament : aucune dent de la baguette avant dedans
+      const chanX0 = CHAN_CX - CHAN_W / 2 - 3, chanX1 = CHAN_CX + CHAN_W / 2 + 3; // zone du canal + 3 mm de ligament : aucune dent de la baguette avant dedans
       const strip = (name: string, len: number, teethAt: 0 | 1, skip: [number, number] | null, rot: Vec3, centre: Vec3, slot: (i: number, seg: number, nSeg: number) => Hole): void => {
         const nSeg = teethFor(len), seg = len / nSeg, xs = (i: number) => -len / 2 + i * seg, top = BG_TOOTH - hMid, bottom = -BG_BODY - hMid, shoulder = -hMid; // contour dans le repère de la plaque (y vers le pan)
         const poly: [number, number][] = [[-len / 2, bottom], [len / 2, bottom], [len / 2, shoulder]];
@@ -805,7 +813,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       strip('Baguette couvercle arrière', RW, 0, null, rotFB, under(0, sB, hMid), slotFB(sB));
       strip('Baguette couvercle gauche', lenSide, 1, [SONDE_SC - SONDE_CH_W / 2 - 3 - sMid, SONDE_SC + SONDE_CH_W / 2 + 3 - sMid], rotLR, under(-xSide, sMid, hMid), slotLR(-xSide));
       strip('Baguette couvercle droite', lenSide, 1, null, rotLR, under(xSide, sMid, hMid), slotLR(xSide));
-      const chan: Hole[] = n.cam2 ? [{ id: uid(), shape: 'square', x: cam2SX, y: r2((PAN_SA + PAN_SB) / 2), size: CHAN_W, sh: r2(PAN_SB - PAN_SA + 2 * CHAN_END), r: 8 }] : []; // canal oblong : de l'à-plomb de la caméra 2 jusque dans le caisson
+      const chan: Hole[] = n.cam2 ? [{ id: uid(), shape: 'square', x: CHAN_CX, y: r2((CHAN_S0 + PAN_SB + CHAN_END) / 2), size: CHAN_W, sh: r2(PAN_SB + CHAN_END - CHAN_S0), r: 8 }] : []; // canal oblong : de l'à-plomb de la caméra 2 jusque dans le caisson
       const pan = (name: string, h: number, holes: Hole[]): Plank => ({ id: uid(), name, w: r2(W + 2 * OVS), h: r2((D + OVF + OVB) / cosA), depth: OKOUME_T, material: 'okoume' as const, color: OKOUME_NATURAL, pos: [0, r2(yMid - sinA * h), r2(zl(yMid) + cosA * h)] as Vec3, rot: rotA, notches: [], holes, group: coverGroup }); // h = hauteur du milieu de la plaque au-dessus du dessous du pan
       const chanSonde: Hole = { id: uid(), shape: 'square', x: r2((SONDE_XA + SONDE_XB) / 2), y: SONDE_SC, size: r2(SONDE_XB - SONDE_XA), sh: SONDE_CH_W, r: SONDE_CH_W / 2 }; // canal oblong du câble de la sonde (bouts ronds), de l'à-plomb de la sonde jusque dans le caisson
       out.push(pan('Toit en okoumé (plaque crénelée)', OKOUME_T / 2, [...slots, ...chan, chanSonde]), pan('Toit en okoumé (plaque pleine)', OKOUME_T * 1.5, []));
