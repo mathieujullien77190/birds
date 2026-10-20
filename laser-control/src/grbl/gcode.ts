@@ -7,8 +7,8 @@
  * Ymachine = H − ySVG (fait à l'import, `job/svg.ts`). Le G-code est l'image du SVG « posé tel quel » sur le plateau, la façade de la machine vers le bas de l'écran.
  */
 
-/** Zone de travail de la Sculpfun S30 Ultra 22 W (mm). */
-export const MACHINE_AREA = { W: 590, H: 595 } as const;
+/** Zone de travail de la Sculpfun E1 Pro 21 W (mm). */
+export const MACHINE_AREA = { W: 400, H: 320 } as const;
 
 export type PassMode = 'all' | 'contour';
 
@@ -27,7 +27,7 @@ export interface CutOptions {
   capPct: number;
   /** Vitesse des déplacements rapides, pour l'estimation du temps (mm/min). */
   rapidFeed?: number;
-  /** Assistance d'air : `M8` avant la coupe, `M9` après (pompe commandée par la carte de la S30 Ultra). */
+  /** Assistance d'air : `M8` avant la coupe, `M9` après (pompe commandée par la carte de la E1 Pro). */
   air?: boolean;
   /** Gravure (couche `engrave` du travail) : vitesse (mm/min), puissance (%, soumise au même plafond) et passes. Une passe légère par défaut. */
   engraveFeed?: number;

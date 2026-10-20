@@ -52,7 +52,7 @@ describe('cohérence : schéma mermaid de docs/schema-electronique.md', () => {
       for (const [a, b] of k.edges) expect(edges, `${re} : flèche ${a} → ${b}`).toContain(`${a}>${b}`);
     }
   });
-  it('les blocs des options (2ᵉ caméra, solaire) existent dans le schéma', () => {
+  it('les blocs des options (2ᵉ caméra) existent dans le schéma', () => {
     for (const ids of Object.values(OPTION_NODES)) for (const id of ids) expect(nodeIds).toContain(id);
   });
 });

@@ -1,5 +1,5 @@
 import type { AssemblyBlock, AssemblyKind } from './types';
-import { FAB_IR, PAINT_DRY, PAINT_TEXT, SAND_TEXT, SAT_DRY, SAT_TEXT, TEST_BATTERY, TEST_MULTIMETER } from './texts';
+import { FAB_IR, PAINT_DRY, PAINT_TEXT, SAND_TEXT, SAT_DRY, SAT_TEXT, TEST_POE, TEST_MULTIMETER } from './texts';
 
 /** Blocs du montage, dans l'ordre. */
 export const ASSEMBLY_BLOCKS: AssemblyBlock[] = [
@@ -16,8 +16,8 @@ export const ASSEMBLY_BLOCKS: AssemblyBlock[] = [
   { id: 'couvercle', title: 'Couvercle' },
   { id: 'baguettes', title: 'Baguettes de cale' },
   { id: 'elec', title: 'Électronique : composants et fils' },
-  { id: 'essais', title: 'Électronique : essais avec la batterie' },
-  { id: 'solaire', title: 'Panneau solaire' },
+  { id: 'essais', title: 'Électronique : essais avec le câble PoE' },
+  { id: 'reseau', title: 'Réseau : switch et Pi serveur (hors nichoir)' },
   { id: 'divers', title: 'Autres pièces' },
 ];
 
@@ -79,15 +79,15 @@ export const SEQ: Rule[] = [
   // ---- a'. Nid : les 4 parois intérieures, montées à part sur l'établi, puis posées d'un bloc dans le corps ----
   P('nid-c', 'nid', 'placer', /^Pièce en C sous le cadre/, { title: 'Pièce en C (base du nid)', text: (r) => [
     `Le nid se monte à part, sur l'établi, en commençant par ${r(/^Pièce en C sous le cadre/)} : posée à plat, c'est la base sur laquelle les quatre parois intérieures s'emboîtent une à une.`,
-    "Pièce en C crénelée de 3 mm : ses dents reçoivent les parois du nid (et celles des quatre parois extérieures, plus tard) ; elle enferme l'isolant sous le cadre du toit. Elle revient vers l'entrée des deux côtés et ne laisse que l'ouverture du bloc d'entrée, qui reste enlevable par le haut. La gaine la traverse par un trou de Ø 18 mm.",
+    "Pièce en C crénelée de 3 mm : ses dents reçoivent les parois du nid (et celles des quatre parois extérieures, plus tard) ; elle enferme l'isolant sous le cadre du toit. Elle revient vers l'entrée des deux côtés et ne laisse que l'ouverture du bloc d'entrée, qui reste enlevable par le haut.",
     "Le nid terminé (pièce en C + 4 parois) se pose ensuite d'un bloc dans le corps (étape « Poser le nid dans le corps »).",
   ].join('\n') }),
   P('nid-droit', 'nid', 'emboiter', /^Côté droit int$/, { text: (r) => `Première paroi : ses dents du haut entrent dans les fentes de ${r(/^Pièce en C sous le cadre/)}. Ses dents du bas serviront plus tard à s'enfoncer dans ${r(/^Plancher int$/)}.` }),
   P('nid-gauche', 'nid', 'emboiter', /^Côté gauche int$/, { text: (r) => `Deuxième paroi, en face de la première : dents du haut dans la pièce en C. La grille de ${r(/^Côté gauche int$/)} (six fentes de 4 mm) est tournée vers le nid ; le module d'aération se colle contre sa face extérieure.` }),
   P('nid-arriere', 'nid', 'emboiter', /^Face arrière int$/, { text: 'Emboîter les dents des angles avec les deux côtés, dents du haut dans la pièce en C.' }),
   P('nid-avant', 'nid', 'emboiter', /^Face avant int$/, { text: 'Dernière paroi : elle ferme la boîte. Emboîter les dents des angles avec les deux côtés, dents du haut dans la pièce en C ; son encoche reste ouverte vers le haut pour le bloc d\'entrée.' }),
-  P('nid-liner', 'nid', 'emboiter', /^Plaque isolant entrée (gauche|droite)$/, { all: true, title: "Plaques qui cachent l'isolant, de chaque côté du bloc d'entrée", text: (r) => `Les deux plaques debout (COR-16) bordent le puits du bloc d'entrée, juste après ${r(/^Face avant int$/)} : crénelées aux deux bouts, leurs dents du côté du nid entrent dans les fentes de cette paroi et le plat du bout se colle contre elle ; leur haut se colle à plat sous la pièce en C, alignées sur les flancs de son ouverture, sans y entrer. Leurs dents côté extérieur recevront ${r(/^Face avant ext$/)} plus tard.` }),
-  P('nid-liner-dessous', 'nid', 'emboiter', /^Plaque isolant entrée dessous$/, { text: (r) => `À plat entre les deux plaques, sous le bloc d'entrée (COR-17), crénelée aux deux bouts : ses dents entrent dans ${r(/^Face avant int$/)} et le plat se colle contre elle ; ${r(/^Face avant ext$/)} se pose plus tard sur ses dents extérieures. Le nid est alors terminé.` }),
+  P('nid-liner', 'nid', 'emboiter', /^Plaque isolant entrée (gauche|droite)$/, { all: true, title: "Plaques qui cachent l'isolant, de chaque côté du bloc d'entrée", text: (r) => `Les deux plaques debout bordent le puits du bloc d'entrée, juste après ${r(/^Face avant int$/)} : crénelées aux deux bouts, leurs dents du côté du nid entrent dans les fentes de cette paroi et le plat du bout se colle contre elle ; leur haut se colle à plat sous la pièce en C, alignées sur les flancs de son ouverture, sans y entrer. Leurs dents côté extérieur recevront ${r(/^Face avant ext$/)} plus tard.` }),
+  P('nid-liner-dessous', 'nid', 'emboiter', /^Plaque isolant entrée dessous$/, { text: (r) => `À plat entre les deux plaques, sous le bloc d'entrée, crénelée aux deux bouts : ses dents entrent dans ${r(/^Face avant int$/)} et le plat se colle contre elle ; ${r(/^Face avant ext$/)} se pose plus tard sur ses dents extérieures. Le nid est alors terminé.` }),
 
   // ---- c. Corps ----
   P('corps-dessous', 'corps', 'placer', /^Dessous ext$/, { text: "À plat. Son ouverture rectangulaire laisse passer plus tard le module d'aération." }),
@@ -95,19 +95,17 @@ export const SEQ: Rule[] = [
   N('corps-module-air', 'corps', 'installer', "Poser le module d'aération (déjà monté)", "Le module est monté à part (bloc « Aération du corps ») : on le pose d'un bloc, déjà assemblé, après l'isolant du plancher.", [/^Conduit d'air/]),
   P('corps-plancher', 'corps', 'emboiter', /^Plancher int$/, { text: "Ses dents traversent les fentes des murs extérieurs. Il n'a que le passage du conduit d'air." }),
   N('corps-nid-pose', 'corps', 'installer', 'Poser le nid dans le corps (déjà monté)', "Le nid se monte à part (bloc « Nid ») : on le pose d'un bloc (pièce en C, quatre parois et plaques de l'entrée, déjà assemblées), sur le plancher intérieur ; les dents du bas des quatre parois entrent dans les fentes du plancher.", [/^(Face avant|Face arrière|Côté droit|Côté gauche) int$|^Pièce en C sous le cadre|^Plaque isolant entrée/]),
-  P('corps-iso-nid', 'corps', 'isoler', /^Isolant (gauche|droite$|arrière$|avant gauche$|avant droite$|sous le bloc d'entrée$)/, { all: true, title: "Isolant autour du nid et du bloc d'entrée", text: "Tous les isolants du corps se posent d'un coup : ceux qui entourent le nid et ceux qui entourent le bloc d'entrée (sous le bloc, avant gauche et avant droite). APRÈS le module d'aération et AVANT toutes les parois extérieures (COR-04 à COR-07) : on pose d'abord tout l'isolant. La gaine des fils se poussera dans la laine plus tard, après la paroi arrière. Le bloc d'entrée lui-même se pose plus tard." }),
-  P('corps-avant-ext', 'corps', 'emboiter', /^Face avant ext$/, { text: (r) => `Ne pas monter ${r(/^Côté gauche ext$/)} maintenant : c'est la dernière paroi du corps, après toutes les autres. L'isolant est déjà en place : les parois extérieures se posent ensuite, COR-04 puis COR-05, la gaine, COR-06.` }),
+  P('corps-iso-nid', 'corps', 'isoler', /^Isolant (gauche|droite$|arrière$|avant gauche$|avant droite$|sous le bloc d'entrée$)/, { all: true, title: "Isolant autour du nid et du bloc d'entrée", text: "Tous les isolants du corps se posent d'un coup : ceux qui entourent le nid et ceux qui entourent le bloc d'entrée (sous le bloc, avant gauche et avant droite). APRÈS le module d'aération et AVANT toutes les parois extérieures : on pose d'abord tout l'isolant. Le bloc d'entrée lui-même se pose plus tard." }),
+  P('corps-avant-ext', 'corps', 'emboiter', /^Face avant ext$/, { text: (r) => `Ne pas monter ${r(/^Côté gauche ext$/)} maintenant : c'est la dernière paroi du corps, après toutes les autres. L'isolant est déjà en place : les parois extérieures se posent ensuite : la face avant, la face arrière, puis le côté droit.` }),
   P('corps-arriere-ext', 'corps', 'emboiter', /^Face arrière ext$/),
-  P('corps-gaine', 'corps', 'installer', /^Gaine des fils/, { text: [
-    "À passer APRÈS la paroi arrière (COR-05) et AVANT la paroi du côté droit (COR-06), entre l'isolant déjà posé. Elle monte dans le coin arrière droit, à 1 cm du mur arrière, et traverse des trous de Ø 16 mm, serrés, dans le fond et le plancher intérieur, puis plus tard des trous de Ø 18 mm dans les trois planches du cadre du toit, le dessous et le dessus du toit.",
+  P('corps-gaine', 'corps', 'installer', /^Gaine du câble Ethernet/, { text: [
+    "À passer APRÈS la paroi arrière et AVANT la paroi du côté gauche, entre l'isolant déjà posé. Elle monte dans le coin arrière gauche, à 5 mm des murs, et traverse des trous de Ø 16 mm, serrés, dans le fond et le plancher intérieur, puis plus tard des trous de Ø 18 mm dans les trois planches du cadre du toit, le dessous et le dessus du toit. Le câble Ethernet entre ainsi par le dessous du nichoir.",
     "L'isolant n'est pas découpé autour : on pousse la gaine dans la laine.",
   ].join('\n') }),
   P('corps-droit-ext', 'corps', 'emboiter', /^Côté droit ext$/),
   P('corps-nervures', 'corps', 'coller', /^Fixation arbre/, { text: 'Chaque nervure est faite de trois plaques collées face à face. Les dents traversent les fentes du mur arrière extérieur et ressortent de 6 mm dans l\'isolant, avec un trou de 3 × 20 mm pour la clavette. Soigner le collage.' }),
   P('corps-clavettes', 'corps', 'coller', /^Clavette fixation/, { text: 'Chaque clavette traverse les trois plaques de sa nervure par le trou de 3 × 20 mm et les verrouille contre la face intérieure du mur, sans espace.' }),
   P('corps-gauche-ext', 'corps', 'emboiter', /^Côté gauche ext$/, { text: "Dernière paroi du corps : le module d'aération et l'isolation sont en place." }),
-  P('corps-etriers', 'corps', 'coller', /^Étrier régulateur/, { text: 'Les tenons des bras traversent le fond par des fentes de 8 × 3 mm et affleurent son dessus : ils tiendront le régulateur sous le nichoir. Le régulateur se fixe dessous après le montage du corps.' }),
-  P('corps-etriers-bat', 'corps', 'coller', /^Étrier batterie/, { text: 'Quatre étriers identiques, à l\'arrière gauche, plaques debout dans le sens de la largeur de la batterie (elle est tournée de 90° : ses 128 mm vont de gauche à droite) : leurs tenons traversent le fond par des fentes de 5 × 3 mm et affleurent son dessus ; ils tiendront la batterie sous le nichoir, à plat. Dernières pièces du corps.' }),
 
   // ---- d. Entrée et isolant restant ----
   P('ent-bloc', 'entree', 'placer', /^Entrée \d+$/, { all: true, title: "Empiler le bloc d'entrée", text: (r) => [
@@ -131,7 +129,7 @@ export const SEQ: Rule[] = [
   P('cass-grille', 'cassette', 'placer', /^Grille de protection ventilateur/, { text: 'Sur le cadre du bas, entre le cadre et le ventilateur : elle sort avec la cassette.' }),
   P('cass-plots', 'cassette', 'placer', /^Plot caoutchouc ventilateur/, { all: true, text: 'Quatre plots en caoutchouc de 12 × 2 × 3 mm posés sur le cadre : les vibrations ne passent que par eux.' }),
   P('cass-ventilateur', 'cassette', 'placer', /^Ventilateur Noctua/),
-  P('cass-fils', 'cassette', 'cabler', /^Câble d'origine du ventilateur/, { text: "Le câble noir vendu avec le ventilateur (quatre fils dans une gaine, déjà fixé au ventilateur) se pose d'abord, AVANT le couvercle et la poignée : il sort vers le haut et traversera le passage de 12 × 6 mm du couvercle. Il finit par une prise 4 broches femelle (broche 1 masse, broche 2 +12 V, broche 3 tachymètre, broche 4 PWM), collée sur la tranche avant du couvercle." }),
+  P('cass-fils', 'cassette', 'cabler', /^Câble d'origine du ventilateur/, { text: "Le câble noir vendu avec le ventilateur (quatre fils dans une gaine, déjà fixé au ventilateur) se pose d'abord, AVANT le couvercle et la poignée : il sort vers le haut et traversera le passage de 12 × 6 mm du couvercle. Il finit par une prise 4 broches femelle (broche 1 masse, broche 2 +5 V, broche 3 tachymètre, broche 4 PWM), collée sur la tranche avant du couvercle." }),
   P('cass-couvercle', 'cassette', 'emboiter', /^Cassette ventilateur couvercle/),
   P('cass-poignee', 'cassette', 'coller', /^Poignée cassette/, { text: 'U de contreplaqué : trois couches de 3 mm collées face à face (9 mm), pieds dans deux fentes du couvercle.' }),
   P('cass-prise', 'cassette', 'placer', /^Prise 4 broches du ventilateur/, { text: "Le câble d'origine du ventilateur monte dans la cassette, traverse le couvercle par un passage de 12 × 6 mm et finit par cette prise femelle, collée sur la tranche avant du couvercle." }),
@@ -143,9 +141,8 @@ export const SEQ: Rule[] = [
   P('toit-avant', 'toit', 'emboiter', /^Face avant toit$/),
   P('toit-plaque-camera', 'toit', 'emboiter', /^Plaque caméra extérieure$/, { text: (r) => `Plaque horizontale, perpendiculaire à la façade, au-dessus du trou d'envol, au centre : ses dents entrent dans les fentes de ${r(/^Face avant toit$/)} et elle dépasse devant, sous le débord du toit. Elle porte, dans un grand trou presque de la taille de la carte, l'objectif de la caméra extérieure et, dans une fenêtre, les LED (à fleur). Elle est collée au toit (1 mm sous le pan) et traverse l'habillage : la lame d'entrée s'arrête sous elle, sans habillage au-dessus.` }),
   P('toit-arriere', 'toit', 'emboiter', /^Face arrière toit$/),
-  P('toit-cote-droit', 'toit', 'emboiter', /^Côté droit toit$/),
-  P('toit-fourreau', 'toit', 'coller', /^Fourreau gaine toit/, { all: true, title: 'Fourreau de la gaine dans le toit', text: "Treize petits carrés percés de Ø 18 mm, empilés et collés sur le dessous du toit autour du trou de la gaine, dans le coin arrière droit, juste après la plaque du côté droit du toit (T-06) : ils tiennent la gaine à travers l'isolant jusqu'au dessus du toit." }),
-  P('toit-cote-gauche', 'toit', 'emboiter', /^Côté gauche toit$/),
+  P('toit-cotes', 'toit', 'emboiter', /^Côté (droit|gauche) toit$/),
+  P('toit-fourreau', 'toit', 'coller', /^Fourreau gaine toit/, { all: true, title: 'Fourreau de la gaine dans le toit', text: "Treize petits carrés percés de Ø 18 mm, empilés et collés sur le dessous du toit autour du trou de la gaine, dans le coin arrière gauche, après les plaques du côté du toit : ils tiennent la gaine à travers l'isolant jusqu'au dessus du toit." }),
   N('toit-zone-camera', 'toit', 'installer', 'Poser la zone caméra (déjà montée)', "La zone caméra se monte à part (bloc « Zone caméra ») : on la pose d'un bloc dans les fentes du plancher du toit.", [/^(Face (avant|arrière)|Côté (droit|gauche)) caméra 1$/]),
   N('toit-goulotte', 'toit', 'installer', 'Poser la goulotte du ventilateur (déjà montée)', "La goulotte se monte à part (bloc « Goulotte ventilateur ») : ses dents du bas se posent d'un bloc dans les fentes du plancher du toit ; la plaque arrière du toit fait la quatrième paroi.", [/^Goulotte ventilateur (gauche|droite|avant)$/]),
   N('toit-cassette', 'toit', 'installer', 'Glisser la cassette dans la goulotte', "La cassette se monte à part (bloc « Cassette du ventilateur ») ; elle se glisse par le haut dans la goulotte. Elle est taillée pile, sans jeu : si elle passe mal, la poncer légèrement (papier de verre grain 120 puis 180, sur les faces qui frottent) jusqu'à ce qu'elle coulisse sans forcer ; la prise d'origine (femelle) s'emboîte sur la prise mâle collée sur la face avant de la goulotte ; la rallonge se branche ensuite. On la retire à la main par le haut, après avoir débranché la prise 4 broches.", [/^Cassette ventilateur/]),
@@ -175,12 +172,12 @@ export const SEQ: Rule[] = [
   P('couv-pleine', 'couvercle', 'coller', /^Toit en okoumé \(plaque pleine\)/, { text: 'Collée à plat par-dessus : elle cache toutes les fentes et ferme le canal de la caméra 2, qui devient un conduit dans le toit.' }),
   N('couv-saturateur', 'couvercle', 'peindre', 'Saturer le toit en okoumé', SAT_TEXT, [LID_RE]),
   N('couv-sechage', 'couvercle', 'attendre', 'Séchage du saturateur du toit', SAT_DRY, [LID_RE]),
-  P('bag-cale', 'baguettes', 'placer', /^Baguette de cale/, { all: true, title: 'Couper les baguettes de cale à la demande', text: 'Baguettes de contreplaqué de 3 mm, 5 mm de large, trois fois plus qu\'il n\'en faut : au montage, couper un morceau à la longueur voulue et le coller contre le composant (Pi, convertisseur, batterie, interrupteur du ventilateur), une fois celui-ci posé à sa place.' }),
+  P('bag-cale', 'baguettes', 'placer', /^Baguette de cale/, { all: true, title: 'Couper les baguettes de cale à la demande', text: 'Baguettes de contreplaqué de 3 mm, 5 mm de large, trois fois plus qu\'il n\'en faut : au montage, couper un morceau à la longueur voulue et le coller contre le composant (Pi, splitter, interrupteur du ventilateur), une fois celui-ci posé à sa place.' }),
 
   // ---- g. Électronique : Pi, essais sur l'établi ----
 
   // ---- g. Électronique : installation dans le nichoir ----
-  P('elec-pi', 'elec', 'installer', /^Raspberry Pi/, { text: "Posé sur des entretoises de 6 mm dans le coin arrière gauche du toit, calé par des morceaux de baguette collés sur tous les côtés. Ses prises USB et Ethernet regardent la fenêtre de 60 × 24 mm de la plaque arrière ; son USB-C et ses micro-HDMI sont tournés vers le centre du toit." }),
+  P('elec-pi', 'elec', 'installer', /^Raspberry Pi/, { text: "Posé sur des entretoises de 6 mm dans le coin arrière gauche du toit, calé par des morceaux de baguette collés sur tous les côtés. Ses prises USB et Ethernet regardent la fenêtre de 60 × 35,5 mm de la plaque arrière ; son USB-C et ses micro-HDMI sont tournés vers le centre du toit." }),
   P('elec-camera', 'elec', 'installer', /^Caméra$/, { text: "À fleur du bois : la carte s'appuie contre la face intérieure, l'objectif traverse le trou de Ø 10 mm et affleure la face extérieure." }),
   N('elec-led-fab', 'elec', 'installer', 'Fabriquer les deux cartes de LED infrarouges', FAB_IR, [/^LED infrarouges/]),
   P('elec-led-nid', 'elec', 'installer', /^LED infrarouges$/, { text: 'Carte de LED faite maison, sur deux cales de 3 mm (morceaux de baguette de 8 mm) sous ses deux bouts, les LED vers le bas dans leur fenêtre, à 0,7 mm sous le dessous du bois.' }),
@@ -207,41 +204,29 @@ export const SEQ: Rule[] = [
   P('elec-nappe2', 'elec', 'cabler', /^Nappe caméra 2/, { text: 'La longue nappe monte dans le canal du toit (le grand trou oblong de la plaque crénelée) par son bout arrière, en ressort par son bout avant et pend jusqu\'à la caméra. Au-delà d\'environ 30 cm le signal peut devenir instable : à valider.' }),
   P('elec-led-ext-5v', 'elec', 'cabler', /^Fil 5 V LED extérieures/, { text: 'Les fils des LED suivent la nappe, à sa gauche, dans le même canal.' }),
   P('elec-led-ext-masse', 'elec', 'cabler', /^Fil masse LED extérieures/),
-  P('elec-convertisseur', 'elec', 'installer', /^Convertisseur/, { text: 'Sortie USB-C directement dans le Pi : pas de câble à confectionner. Taille estimée dans le modèle, à confirmer avec le module acheté.' }),
-  P('elec-wago-plus', 'elec', 'installer', /^Wago 221-413/, { text: 'Wago : lever le levier, glisser le fil dénudé de 11 mm, rabattre le levier. Aucune soudure.' }),
-  P('elec-wago-moins', 'elec', 'installer', /^Wago 221-415/),
-  P('elec-interrupteur', 'elec', 'installer', /^Module relais 3 V ventilateur/, { text: 'Côté +12 V, près du Wago + : couper la masse ferait remonter 12 V dans les fils PWM et tachymètre, vers les GPIO du Pi (3,3 V seulement).' }),
+  P('elec-splitter', 'elec', 'installer', /^Splitter PoE/, { text: 'Sortie USB-C vers le Pi par un câble court ; entrée PoE reliée au Cat6 qui arrive du switch par le passe-câble. Taille estimée dans le modèle, à confirmer avec le module acheté ; vérifier qu\'il fournit au moins 4,5 A en 5 V.' }),
+  P('elec-wago-plus', 'elec', 'installer', /^Wago 221-413/, { text: 'Rail 5 V : lever le levier, glisser le fil dénudé de 11 mm, rabattre le levier. Aucune soudure.' }),
+  P('elec-interrupteur', 'elec', 'installer', /^Module relais 3 V ventilateur/, { text: 'Côté +5 V, près du Wago : couper la masse ferait remonter du 5 V dans les fils PWM et tachymètre, vers les GPIO du Pi (3,3 V seulement).' }),
   P('elec-rallonge', 'elec', 'installer', /^Rallonge ventilateur/, { text: 'Prise mâle collée sur la face avant du siège, contre son haut ; la prise femelle de la cassette s\'y emboîte à la verticale.' }),
   P('elec-fil-wago-interrupteur', 'elec', 'cabler', /^Fil Wago \+ → interrupteur/),
   P('elec-fil-interrupteur-ventilateur', 'elec', 'cabler', /^Fil interrupteur → ventilateur/),
-  P('elec-fil-ventilateur-moins', 'elec', 'cabler', /^Fil ventilateur /),
   P('elec-fil-alim-relais', 'elec', 'cabler', /^Fil (3,3 V|masse) relais/, { all: true, text: 'La bobine du relais est en 3 V : son VCC va sur le 3,3 V du Pi (broche 17, partagée avec la sonde par un Wago 221-413) et son GND sur la masse (broche 25). Ne jamais le brancher sur le 5 V.' }),
   P('elec-fil-pwm', 'elec', 'cabler', /^Fil PWM ventilateur/),
   P('elec-fil-tacho', 'elec', 'cabler', /^Fil tachymètre ventilateur/),
   P('elec-fil-masse-commune', 'elec', 'cabler', /^Fil masse commune/),
   P('elec-fil-commande', 'elec', 'cabler', /^Fil commande interrupteur/),
-  P('elec-fusible', 'elec', 'installer', /^Fusible/, { text: 'Porte-fusible à fils tout faits, collé contre le dessous du nichoir, dans le couloir entre la batterie et le mur droit, au plus près du + de la batterie : la lame A reçoit le + de la batterie et le + du régulateur, la lame B part vers le rail 12 V par la gaine.' }),
-  P('elec-bms', 'elec', 'installer', /^BMS Daly/, { text: 'Avant de le coller sous le fond : souder les 5 fils d\'équilibrage (sur les fils ou languettes du support, jamais sur les cellules), mesurer 3,2 V entre deux fils voisins, brancher B−, puis régler dans l\'application (ou par le câble USB-UART) LiFePO4, 4 cellules, surcharge 3,65 V, décharge 2,8 V, et la coupure de charge sous 0 °C avec la sonde NTC, collée contre les cellules. Retirer ensuite la clé Bluetooth / Wi-Fi.' }),
-  P('elec-batterie', 'elec', 'installer', /^Batterie/, { text: 'Sous le nichoir, à plat, à l\'arrière gauche et tournée de 90°, tenue par les quatre étriers « Étrier batterie » : ses bornes + et − regardent l\'est, vers le régulateur. Le pack doit avoir un BMS qui coupe la charge sous 0 °C ; le lambris qui descend de 50 mm la protège du soleil direct.' }),
-  P('elec-fil-fusible-batterie', 'elec', 'cabler', /^Fil fusible → batterie/),
-  P('elec-fil-fusible-wago', 'elec', 'cabler', /^Fil fusible → Wago/, { text: 'Enfiler les deux fils qui montent (fusible → Wago + et batterie − → Wago −) dans la gaine de Ø 16 mm avant de brancher : elle porte deux fils de Ø 3,6 mm.' }),
-  P('elec-fil-batterie-wago', 'elec', 'cabler', /^Fil batterie [^+]* → Wago/),
-  P('elec-fil-rail-conv-plus', 'elec', 'cabler', /^Fil rail → convertisseur \+/),
-  P('elec-cable-usbc', 'elec', 'cabler', /^Câble USB-C convertisseur/, { text: 'Câble USB-C vers USB-C court, à acheter (non fourni avec le convertisseur) : de la sortie du convertisseur à la prise USB-C du Pi.' }),
-  P('elec-fil-rail-conv-moins', 'elec', 'cabler', /^Fil rail → convertisseur [^+]/),
-  P('elec-regulateur', 'elec', 'installer', /^Régulateur de charge/, { text: "Victron SmartSolar MPPT 75/10 (100 × 113 × 40 mm), à plat sous le nichoir à l'avant droit, tenu par les quatre étriers, bornes à vis sur la face est ; le lambris descend de 50 mm pour le protéger. Il chauffe de 2 à 5 W : ne pas le noyer dans l'isolant." }),
-  P('elec-fil-reg-plus', 'elec', 'cabler', /^Fil régulateur → batterie \+/, { text: 'Fils courts sous le nichoir : le + va sur la lame A du fusible, le − sur la borne − de la batterie.' }),
-  P('elec-fil-reg-moins', 'elec', 'cabler', /^Fil régulateur → batterie [^+]/),
+  P('elec-cable-usbc', 'elec', 'cabler', /^Câble USB-C splitter/, { text: 'Câble USB-C vers USB-C court, à acheter (non fourni avec le splitter) : de la sortie du splitter à la prise USB-C du Pi.' }),
+  P('elec-cat6', 'elec', 'cabler', /^Câble Ethernet Cat6/, { text: "Tirer le câble Cat6 depuis le dessous du nichoir, dans la gaine du coin arrière gauche, puis sertir la fiche RJ45 (elle ne passe pas dans la gaine) et la brancher sur l\'entrée PoE du splitter. Le câble longe ensuite le dessus du Pi, en l\'air." }),
+  P('elec-rj45', 'elec', 'cabler', /^Cordon RJ45 splitter/, { text: 'Cordon Cat6 court de la sortie de données du splitter à la prise Ethernet du Pi. Le Cat6 extérieur arrive sur l\'entrée PoE du splitter, par un passe-câble étanche.' }),
+  P('elec-fil-5v', 'elec', 'cabler', /^Fil 5 V broche 4/, { text: 'Deuxième fil sur la broche 4 du Pi (la première sert aux LED du nid) : 5 V du rail du ventilateur.' }),
 
-  // ---- g. Électronique : essais avec la batterie, avant le panneau solaire ----
+  // ---- g. Électronique : essais avec le câble PoE ----
   N('essai-multimetre', 'essais', 'tester', 'Mesures au multimètre avant la mise sous tension', TEST_MULTIMETER),
-  N('essai-batterie', 'essais', 'tester', 'Essai avec la batterie, le fusible et le régulateur', TEST_BATTERY),
+  N('essai-poe', 'essais', 'tester', 'Essai avec le câble PoE', TEST_POE),
   N(LID_BACK, 'essais', 'installer', 'Poser le toit en okoumé', "Il tient seul, posé sur le cadre et retenu par l'habillage collé au corps. Pour accéder de nouveau au grenier, on le soulève.", [LID_RE]),
 
-  // ---- g. Panneau solaire, tout dernier ----
-  P('sol-panneau', 'solaire', 'installer', /^Panneau solaire/, { text: 'Déporté à environ 70 cm à droite du nichoir, incliné de 35° vers l\'avant, son bord bas près du sol.' }),
-  P('sol-cable', 'solaire', 'cabler', /^(Câble 12 V|Connecteurs MC4)/, { all: true, text: [
-    'Il part de la boîte de jonction au dos du panneau, longe le sol, remonte contre l\'habillage et passe sous l\'habillage, sans le percer, jusqu\'au régulateur sous le nichoir. Le panneau se branche en dernier, une fois les essais validés.',
-    "Ensuite, suivre le niveau de la batterie sur la page du Pi : la stratégie d'énergie prévoit de mesurer plusieurs jours avant de décider de passer de 6 Ah à 12 Ah.",
-  ].join('\n') }),
+  // ---- h. Réseau : hors du nichoir ----
+  P('res-switch', 'reseau', 'installer', /^Switch PoE\+/, { text: "Hors du nichoir, au sol ou au pied de l\'arbre, à l\'abri de l\'eau : il alimente le splitter du nichoir par le câble Cat6 (PoE+ 802.3at, 30 W par port) et relie le nichoir au Pi serveur. Modèle et taille à confirmer à l\'achat." }),
+  P('res-serveur', 'reseau', 'installer', /^Serveur Pi 5/, { text: "Un second Raspberry Pi 5, dans la maison : il héberge le site web (nginx, voir pi/README.md) et relaie /api/ et /video/ vers le Pi du nichoir." }),
+  P('res-cordon', 'reseau', 'cabler', /^Cordon RJ45 switch/),
 ];

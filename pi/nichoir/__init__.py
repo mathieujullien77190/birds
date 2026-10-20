@@ -1,7 +1,7 @@
 """Nichoir high tech — programme de test sur le Raspberry Pi 5.
 
 Version volontairement minimale pour vérifier le matériel :
-- lit le capteur du nid (BME280, I2C), la batterie (INA219, facultatif) et la sonde de température extérieure (DS18B20 étanche, 1-Wire) ;
+- lit le capteur du nid (BME280, I2C) et la sonde de température extérieure (DS18B20 étanche, 1-Wire) ;
 - montre les deux caméras en direct (flux MJPEG) ;
 - pilote le ventilateur de 60 mm (PWM gpiozero / lgpio : 25 kHz visé, repli à 10 kHz ; tachymètre) et les deux cartes de LED infrarouges ;
 - ventilation automatique : le ventilateur n'aspire l'air chaud du nid que quand il fait trop chaud (désactivée au départ) ;
@@ -15,10 +15,10 @@ pour essayer la page sur un ordinateur sans rien de branché (voir README).
 Lancer : `python -m nichoir` depuis le dossier pi/ (ou /home/pi/nichoir sur le Pi).
 
 Brochage (voir docs/schema-electronique.md) :
-  Ventilateur (Noctua NF-A6x25 PWM, 12 V) : relais 3 V du 12 V côté + commandé par GPIO27 (broche 13), PWM GPIO18 (broche 12), tachymètre GPIO17 (broche 11, pull-up), masse commune broche 14
+  Ventilateur (Noctua NF-A6x25 PWM, 5 V) : relais 3 V sur le 5 V, commandé par GPIO27 (broche 13), PWM GPIO18 (broche 12), tachymètre GPIO17 (broche 11, pull-up), masse commune broche 14
   Relais du ventilateur : bobine alimentée en 3,3 V (broche 17, partagée avec la sonde) et masse (broche 25)
   LED du nid : GPIO23 (module MOSFET du nid, PWM)   LED extérieures : GPIO24 (module MOSFET extérieur, PWM)
-  BME280 : I2C adresse 0x76 (ou 0x77)        INA219 (batterie) : I2C adresse 0x41
+  BME280 : I2C adresse 0x76 (ou 0x77)
   Sonde extérieure DS18B20 : 3,3 V broche 17, masse broche 20, donnée GPIO4 (broche 7, 1-Wire, résistance de rappel 4,7 kΩ sur le module) ;
     activer le 1-Wire : `dtoverlay=w1-gpio` dans /boot/firmware/config.txt (puis redémarrer) ; lecture : /sys/bus/w1/devices/28-*/w1_slave
 
@@ -41,8 +41,8 @@ import os as _os
 CHAPTERS = [
     "config",       # 1  bibliothèques, journal, toutes les constantes
     "state",         # 2  le dictionnaire `state` affiché par la page
-    "hardware",     # 3  GPIO, ventilateur, tachymètre, capteur du nid, batterie, caméras
-    "battery",     # 4  calculs : niveau de la batterie, consommation
+    "hardware",     # 3  GPIO, ventilateur, tachymètre, capteur du nid, caméras
+    "power",       # 4  calcul : consommation estimée
     "simulation",       # 5  le mode simulé (faux matériel)
     "commands",    # 6  fan(), camera(), leds()
     "settings",     # 7  réglages gardés dans reglages.json

@@ -39,7 +39,7 @@ export default function Planks() {
   const [leftOpen, setLeftOpen] = usePersistentFlag(STORAGE.leftOpen); // panneau de gauche replié ou non
   const [rightOpen, setRightOpen] = usePersistentFlag(STORAGE.rightOpen); // panneau de droite (« Pièces ») replié ou non
   const [piOpen, setPiOpen] = useState(false); // simulateur de la page web du Pi (Python exécuté dans le navigateur) : fenêtre affichée
-  const [piMounted, setPiMounted] = useState(false); // le simulateur reste monté une fois ouvert : fermer la fenêtre ne fait que la cacher, le Python continue (ventilateur, LED, batterie)
+  const [piMounted, setPiMounted] = useState(false); // le simulateur reste monté une fois ouvert : fermer la fenêtre ne fait que la cacher, le Python continue (ventilateur, LED)
   const [night, setNight] = usePersistentFlag(STORAGE.night, false); // vue 3D de nuit (la clé n'est pas ouverte par défaut)
   const [schemaOn, setSchemaOn] = usePersistentFlag(STORAGE.schema); // ouvert par défaut ; schéma électrique à côté de la 3D
   const { cut, setCut, cutRef, midOf } = useCutPlane(scRef);

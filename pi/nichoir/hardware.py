@@ -1,6 +1,6 @@
 # ======================================================================================================
 # hardware.py — CHAPITRE 3 : le MATÉRIEL réel branché sur le Pi (GPIO, ventilateur, tachymètre,
-# capteur du nid, mesure de la batterie, caméras).
+# capteur du nid, caméras).
 #
 # Chaque bloc est entouré d'un `try / except` : si un composant manque (ou si on tourne sur un
 # ordinateur), le programme ne plante pas, il note le problème dans `state["erreurs"]` et continue.
@@ -8,11 +8,11 @@
 # ======================================================================================================
 
 # FACULTATIF : sans les GPIO (ordinateur, Pi non câblé) le programme tourne quand même, la page signale seulement « GPIO indisponible ».
-# REQUIS pour piloter les LED : le module MOSFET sur GPIO23 / 24 ; pour couper vraiment le ventilateur : le relais 12 V sur GPIO27.
+# REQUIS pour piloter les LED : le module MOSFET sur GPIO23 / 24 ; pour couper vraiment le ventilateur : le relais 5 V sur GPIO27.
 try:
     from gpiozero import DigitalInputDevice, DigitalOutputDevice, PWMOutputDevice  # bibliothèque des broches du Pi
     led_nest, led_outside = DigitalOutputDevice(23), DigitalOutputDevice(24)   # LED infrarouges : GPIO23 (nid) et GPIO24 (extérieur)
-    fan_12v = DigitalOutputDevice(27)   # relais du 12 V du ventilateur : bas au démarrage = ventilateur coupé
+    fan_12v = DigitalOutputDevice(27)   # relais du 5 V du ventilateur : bas au démarrage = ventilateur coupé
     LED_OK = True   # les sorties tout-ou-rien existent : on peut commander LED et relais
 except Exception as e:  # pas sur un Pi, ou gpiozero absent
     state["erreurs"]["gpio"] = f"GPIO indisponible : {e}"
@@ -53,16 +53,6 @@ except Exception as e:
     state["erreurs"]["bme280"] = f"capteur du nid indisponible : {e}"
 
 # FACULTATIF : la sonde extérieure DS18B20 n'a pas de bibliothèque à installer : le noyau (1-Wire) la présente comme un fichier (voir read_outside_probe dans probe.py).
-
-# FACULTATIF : mesure de la batterie par un module INA219 (I2C 0x41, shunt de 10 mΩ). Sans lui, la page affiche « — » pour le niveau mais la consommation estimée reste visible.
-try:
-    from ina219 import INA219
-    ina_bat = INA219(0.01, 10, address=0x41)   # shunt de 0,01 Ω, courant max 10 A, adresse I2C 0x41
-    ina_bat.configure()
-    BAT_OK = True
-except Exception as e:
-    BAT_OK = False
-    state["erreurs"]["batterie"] = f"mesure de la batterie indisponible : {e}"
 
 cameras = {}        # numéro de caméra (0 ou 1) → flux d'images à servir à la page
 camera_devices = {}   # numéro → objet Picamera2, pour pouvoir arrêter / relancer le flux

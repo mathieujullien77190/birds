@@ -60,8 +60,8 @@ describe('MockGrbl : réponses', () => {
     expect(all.endsWith('\r\nok\r\n')).toBe(true);
     expect(all).toContain('$30=1000');
     expect(all).toContain('$32=1');
-    expect(all).toContain('$130=590');
-    expect(all).toContain('$131=595');
+    expect(all).toContain('$130=400');
+    expect(all).toContain('$131=320');
     expect(tx('$I')).toBe('[VER:1.1h.20190825:Mock]\r\n[OPT:V,15,128]\r\nok\r\n');
     expect(tx('$G')).toBe('[GC:G0 G54 G17 G21 G90 G94 M5 T0 F0 S0]\r\nok\r\n');
     tx('G91'); tx('M4 S300'); tx('G1 X0 F250');

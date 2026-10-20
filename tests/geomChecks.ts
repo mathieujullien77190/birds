@@ -60,7 +60,7 @@ export function roundPath(pts: Vector3[], r: number): Vector3[] {
 export interface PathItem { name: string; r: number; pts: Vector3[]; kind?: string; ends: Vector3[] }
 /** Courbes réelles (échantillonnées) des fils (tube de rayon w/2) et des nappes (prises comme un tube de rayon 8 : prudent). */
 export function pathItems(planks: Plank[]): PathItem[] {
-  return planks.filter((p) => p.path && p.special !== 'solar' && !/^Câble 12 V/.test(p.name) && p.special !== 'conduit').map((p) => {
+  return planks.filter((p) => p.path && p.special !== 'conduit').map((p) => {
     const raw = p.path!.map((q) => new Vector3(...q));
     const curve = p.special === 'wire' ? new CatmullRomCurve3(roundPath(raw, Math.max(10, 4 * p.w)), false, 'centripetal') : new CatmullRomCurve3(raw, false, 'centripetal');
     const N = Math.max(200, raw.length * 60);

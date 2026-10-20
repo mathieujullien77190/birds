@@ -22,12 +22,12 @@ describe('le Peltier est parti', () => {
       expect(Object.values(sc.groupNames ?? {})).not.toContain('Évacuation');
     });
   }
-  it('le capteur BME280 et ses quatre fils sont toujours là, les deux Wago aussi', () => {
+  it('le capteur BME280 et ses quatre fils sont toujours là, le Wago du rail 5 V aussi', () => {
     for (const over of [{}, { cam2: false }]) {
       const sc = buildNest(over);
       expect(by(sc, /^Capteur température/)).toHaveLength(1);
       expect(by(sc, /^Fil (3,3 V|SDA|SCL|masse) \(/).filter((p) => /^Fil (3,3 V \(rouge\)|SDA|SCL|masse \(noir\))/.test(p.name)).length).toBeGreaterThanOrEqual(4);
-      expect(by(sc, /^Wago 221/)).toHaveLength(2);
+      expect(by(sc, /^Wago 221/)).toHaveLength(1);
     }
   });
 });
@@ -59,18 +59,12 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(Math.abs(open!.x - fan.pos[0])).toBeLessThan(0.1);
     expect(top.notches.some((n) => n.edge === 'top' && n.width > 66)).toBe(true);
   });
-  it('le siège, la cassette et le ventilateur restent dans le toit, loin de la batterie, à environ 1 cm de la gaine, ', () => {
+  it('le siège, la cassette et le ventilateur restent dans le toit, dans la boîte du nichoir', () => {
     const seat = union([...by(sc0, /^Goulotte ventilateur/), ...by(sc0, /^Cassette ventilateur/), one(sc0, /^Ventilateur Noctua/)], t);
     const W = 2 * (one(sc0, /^Face droite|^Côté droit toit/).pos[0] + t / 2), roofBack = one(sc0, /^Face arrière toit/), roofFloor = one(sc0, /^Dessous toit/);
     expect(seat.min.x).toBeGreaterThan(-W / 2); expect(seat.max.x).toBeLessThan(W / 2);
     expect(seat.max.y).toBeLessThanOrEqual(roofBack.pos[1] - t / 2 + 0.01); // contre la plaque arrière, jamais au travers
     expect(seat.min.z).toBeGreaterThanOrEqual(roofFloor.pos[2] - t / 2 - 0.01);
-    const gaine = aabb(one(sc0, /^Gaine des fils/), t);
-    const gaineBox = { min: new Vector3(55, 76, 0), max: new Vector3(71, 92, 400) }; // le chemin de la gaine est un fil : boîte du tube Ø 16 posée sur son axe
-    void gaine;
-    expect(gap(seat, gaineBox)).toBeGreaterThan(7);
-    for (const p of by(sc0, /^Batterie LiFePO4/)) expect(gap(seat, aabb(p, t)), p.name).toBeGreaterThan(30);
-    for (const p of by(sc0, /^Fusible/)) expect(gap(seat, aabb(p, t)), p.name).toBeGreaterThan(9);
   });
   it('aucun fil du ventilateur ne traverse le siège, la cassette ou une nappe (les quatre fils vers le Pi sont exemptés des croisements avec les nappes et les autres fils)', () => {
     const fanNames = /ventilateur|cassette|interrupteur/i, toPi = /^Fil (PWM ventilateur|tachymètre ventilateur|masse commune ventilateur|commande interrupteur ventilateur)/;
@@ -89,7 +83,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     const front = one(sc0, /^Face avant toit/), back = one(sc0, /^Face arrière toit/), top = one(sc0, /^Dessus toit/);
     const roofTop = top.pos[2] + t / 2, base = front.pos[2] - front.h / 2;
     const plane = (y: number) => base + front.h + ((y - front.pos[1]) * (back.h - front.h)) / (back.pos[1] - front.pos[1]);
-    const solids = sc0.planks.filter((p) => !p.path && p.special !== 'doc' && p.special !== 'solar' && !/^(Dessus toit|Dessous toit|Face|Côté|Cadre|Isolant|Tasseau|Lambris|Toit en okoumé|Grille de protection|Grille anti|Grillage|Clapet|Entrée|Fixation|Clavette|Barre)/.test(p.name) && !/^Bloc isolant d'hiver|^Isolant bloc|^Poignée bloc/.test(p.name) && !/^Dessous ext|^Plancher int|^Conduit d.air|^Auvent|^Cale auvent|^Bouchon/.test(p.name) && p.pos[2] > roofTop - 20 && p.pos[2] < roofTop + 120);
+    const solids = sc0.planks.filter((p) => !p.path && p.special !== 'doc' && !/^(Dessus toit|Dessous toit|Face|Côté|Cadre|Isolant|Tasseau|Lambris|Toit en okoumé|Grille de protection|Grille anti|Grillage|Clapet|Entrée|Fixation|Clavette|Barre)/.test(p.name) && !/^Bloc isolant d'hiver|^Isolant bloc|^Poignée bloc/.test(p.name) && !/^Dessous ext|^Plancher int|^Conduit d.air|^Auvent|^Cale auvent|^Bouchon/.test(p.name) && p.pos[2] > roofTop - 20 && p.pos[2] < roofTop + 120);
     for (const w of toPi) {
       const pts = pathItems([w])[0].pts, end = new Vector3(...w.path![w.path!.length - 1]), start = new Vector3(...w.path![0]);
       for (const pt of pts) {
@@ -124,7 +118,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     expect(plane(handle.pos[1]) - (handle.pos[2] + t / 2)).toBeGreaterThanOrEqual(2);
     // les fils de la rallonge (et la commande de l'interrupteur) partent de la prise mâle et CONTOURNENT le siège : aucun point au-dessus de la cassette, du siège ni de l'ouverture du plafond, ni derrière le siège
     const roofTopZ = one(sc0, /^Dessus toit/).pos[2] + t / 2, cb = aabb(one(sc0, /^Cassette ventilateur 2$/), t), duct = by(sc0, /^Conduit de sortie/);
-    const names = ['Fil interrupteur → ventilateur + (rouge)', 'Fil ventilateur − (noir)', 'Fil PWM ventilateur (bleu)', 'Fil tachymètre ventilateur (jaune)', 'Fil masse commune ventilateur (noir)', 'Fil commande interrupteur ventilateur (orange)'];
+    const names = ['Fil interrupteur → ventilateur + (rouge)', 'Fil PWM ventilateur (bleu)', 'Fil tachymètre ventilateur (jaune)', 'Fil masse commune ventilateur (noir)', 'Fil commande interrupteur ventilateur (orange)'];
     for (const n of names) {
       const w = one(sc0, new RegExp('^' + n.replace(/[()+−→]/g, '.') + '$')), pts = pathItems([w])[0].pts;
       for (const p of pts) {
@@ -132,7 +126,7 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
         expect(over && !(p.y < sb.min.y), w.name + ' par-dessus la cassette').toBe(false);
         for (const d of duct) expect(inside(p, obb(d, t), 0), w.name + ' dans le conduit de sortie').toBe(false);
       }
-      if (n !== names[5]) { const near = Math.min(...pts.map((p) => Math.hypot(p.x - plug.pos[0], p.y - plug.pos[1], p.z - plug.pos[2]))); expect(near, n + ' part de la prise mâle').toBeLessThan(8); }
+      if (n !== names[4]) { const near = Math.min(...pts.map((p) => Math.hypot(p.x - plug.pos[0], p.y - plug.pos[1], p.z - plug.pos[2]))); expect(near, n + ' part de la prise mâle').toBeLessThan(8); }
     }
   });
   it('cassette sortie : la prise mâle et ses fils restent en place, la prise femelle et son câble partent avec la cassette (on la débranche à la main)', () => {
@@ -184,18 +178,17 @@ describe('ventilateur : cassette amovible, siège, grille, sortie', () => {
     const ends = names.map((n) => { const p = one(sc0, new RegExp('^' + n.replace(/[()]/g, '\\$&') + '$')); return p.path![p.path!.length - 1]; });
     for (let i = 0; i < ends.length; i++) for (let j = i + 1; j < ends.length; j++) expect(new Vector3(...ends[i]).distanceTo(new Vector3(...ends[j]))).toBeGreaterThan(2);
     for (const q of sc0.planks.filter((x) => x.special === 'wire' && !names.includes(x.name) && x.path)) { const e = q.path![q.path!.length - 1]; for (const f of ends) if (Math.hypot(e[0] - f[0], e[1] - f[1]) < 1.5) throw new Error(`${q.name} arrive sur la même broche que ${f}`); }
-    expect(by(sc0, /^Fil .*(ventilateur|cassette|interrupteur)/)).toHaveLength(7); // plus de fil de masse d'interrupteur (le relais coupe le +), les quatre fils du ventilateur ne forment plus qu'un câble noir
+    expect(by(sc0, /^Fil .*(ventilateur|cassette|interrupteur)/)).toHaveLength(6); // plus de fil de masse d'interrupteur (le relais coupe le +), plus de fil de masse du ventilateur vers le rail (la masse commune suffit en 5 V), les quatre fils du ventilateur ne forment plus qu'un câble noir
     expect(by(sc0, /^Câble d'origine du ventilateur/)).toHaveLength(1);
   });
-  it('la sortie : fenêtre de la plaque arrière en face de celle de la cassette, jamais dans la zone du Pi ni de la batterie', () => {
+  it('la sortie : fenêtre de la plaque arrière en face de celle de la cassette, jamais dans la zone du Pi', () => {
     const back = one(sc0, /^Face arrière toit/), cass = one(sc0, /^Cassette ventilateur 2$/);
     const slots = back.holes.filter((h) => h.shape === 'square' && h.size <= 5 && (h.sh ?? 0) >= 35 && (h.sh ?? 0) <= 46); // les fentes de la grille de sortie (la grande aération de l'électronique a été supprimée : la fenêtre des prises du Pi suffit)
     expect(slots.length).toBeGreaterThanOrEqual(6);
     const exit = { x: (Math.min(...slots.map((h) => h.x - h.size / 2)) + Math.max(...slots.map((h) => h.x + h.size / 2))) / 2, size: Math.max(...slots.map((h) => h.x + h.size / 2)) - Math.min(...slots.map((h) => h.x - h.size / 2)) };
     expect(Math.abs(exit.x - (cass.pos[0] - back.pos[0]))).toBeLessThan(0.1); // centrée sur la cassette
-    const pi = one(sc0, /^Raspberry Pi/), bat = one(sc0, /^Batterie LiFePO4/);
+    const pi = one(sc0, /^Raspberry Pi/);
     expect(exit.x - exit.size / 2).toBeGreaterThan(pi.pos[0] + 30); // à droite de la fenêtre des prises du Pi
-    expect(Math.abs(exit.x) - exit.size / 2).toBeLessThan(bat.pos[0] + 64);
     const cassWin = cass.holes.find((h) => h.shape === 'square' && (h.sh ?? 0) >= 35 && (h.sh ?? 0) <= 46);
     expect(cassWin).toBeTruthy();
     expect(exit.size).toBeLessThan(cassWin!.size); expect(exit.size).toBeGreaterThan(cassWin!.size - 8); // les fentes tiennent dans l'ouverture intérieure du conduit (même largeur que la fenêtre de la cassette) avec des barreaux pleins de chaque côté
@@ -269,13 +262,13 @@ describe('poignées en U : sens de pose', () => {
   });
 });
 
-describe('Wago du rail 12 V : pavés aux cotes officielles, fils alignés', () => {
-  const plus = () => one(sc0, /^Wago 221-413 .3 entrées. rail 12 V .$/), minus = () => one(sc0, /^Wago 221-415 .5 entrées. rail 12 V −$/);
-  const WIRES: [() => Plank, string[]][] = [[plus, ['Fil Wago + → interrupteur ventilateur (rouge)', 'Fil fusible → Wago + (rouge)', 'Fil rail → convertisseur + (rouge)']], [minus, ['Fil ventilateur − (noir)', 'Fil rail → convertisseur − (noir)', 'Fil batterie − → Wago − (noir)']]];
+describe('Wago du rail 5 V : pavé aux cotes officielles, fils alignés', () => {
+  const plus = () => one(sc0, /^Wago 221-413 .3 entrées. rail 5 V .$/);
+  const WIRES: [() => Plank, string[]][] = [[plus, ['Fil Wago + → interrupteur ventilateur (rouge)', 'Fil 5 V broche 4 → Wago + (rouge)']]];
   const wire = (nm: string) => one(sc0, new RegExp('^' + nm.replace(/[()+→−]/g, '.') + '$'));
-  it('simples pavés (special block), cotes WAGO : 221-413 = 18,8 × 8,4 × 18,8 mm, 221-415 = 30 × 8,4 × 18,8 mm', () => {
-    for (const [w, len] of [[plus(), 18.8], [minus(), 30]] as [Plank, number][]) { expect(w.special).toBe('block'); expect([w.w, w.h, w.depth]).toEqual([18.8, len, 8.4]); expect(w.holes).toEqual([]); expect(w.poly).toBeUndefined(); } // w : profondeur (sens des fils), h : largeur de la rangée, depth : hauteur
-    expect(plus().color).toBe('#f97316'); expect(minus().color).toBe('#9ca3af');
+  it('simple pavé (special block), cotes WAGO : 221-413 = 18,8 × 8,4 × 18,8 mm', () => {
+    for (const [w, len] of [[plus(), 18.8]] as [Plank, number][]) { expect(w.special).toBe('block'); expect([w.w, w.h, w.depth]).toEqual([18.8, len, 8.4]); expect(w.holes).toEqual([]); expect(w.poly).toBeUndefined(); } // w : profondeur (sens des fils), h : largeur de la rangée, depth : hauteur
+    expect(plus().color).toBe('#f97316');
     expect(sc0.planks.filter((p) => p.special === ('wago' as never))).toEqual([]);
   });
   it('tous les fils d un même Wago arrivent du même côté (ouest), perpendiculairement à la face, parallèles, à l entraxe de 6 mm, au même niveau : ≥ 12 mm rectilignes avant la face, une entrée par fil', () => {
@@ -294,15 +287,14 @@ describe('Wago du rail 12 V : pavés aux cotes officielles, fils alignés', () =
       expect(new Set(used).size).toBe(used.length); expect(names.length).toBeLessThanOrEqual(n); // la 5e entrée du 221-415 reste libre
       expect(used.slice().sort((p, q) => p - q), 'ordre des ports du nord au sud').toEqual(used.slice().sort((p, q) => p - q));
     }
-    expect(WIRES[1][1].length).toBe(3); // le − : 3 fils sur 5 entrées (plus de masse d'interrupteur : le relais coupe le +)
   });
   it('ordre des fils = ordre des ports : aucun fil du même Wago n en croise ou n en touche un autre', () => {
     for (const [get, names] of WIRES) { get(); const items = pathItems(names.map(wire)); expect(pathContacts(items, 0.3).filter((c) => !c.shared).map((c) => c.A + ' / ' + c.B)).toEqual([]); }
     const ys = (wago: Plank, names: string[]) => names.map((nm) => { const q = pathItems([wire(nm)])[0].pts; return q.reduce((b, p) => (Math.hypot(p.x - wago.pos[0], p.y - wago.pos[1]) < Math.hypot(b.x - wago.pos[0], b.y - wago.pos[1]) ? p : b)).y; }); // l'entrée du fil dans son Wago : le point du trajet le plus proche du bornier
     for (const [get, names] of WIRES) { const v = ys(get(), names); expect(v.slice().sort((p, q) => q - p), 'du nord au sud').toEqual(v); } // les fils sont rangés dans l ordre des ports, du nord au sud
   });
-  it('les deux Wago ne chevauchent ni leurs voisins ni l un l autre', () => {
-    const w = by(sc0, /^Wago 221/); expect(w).toHaveLength(2);
+  it('le Wago ne chevauche pas ses voisins', () => {
+    const w = by(sc0, /^Wago 221/); expect(w).toHaveLength(1);
     for (const a of w) for (const b of sc0.planks) { if (a === b || b.path || b.special === 'doc' || /^(Face|Côté|Dessus toit|Dessous|Cadre|Isolant|Tasseau|Toit en okoumé|Lambris|Plancher|Habillage|Barre)/.test(b.name)) continue; expect(gap(aabb(a, t), aabb(b, t)), a.name + ' / ' + b.name).toBeGreaterThan(0.2); }
   });
 });
@@ -396,8 +388,6 @@ describe("prise d'air basse", () => {
     const box = { min: new Vector3(opening.x - opening.size / 2, bottom.pos[1] + opening.y - (opening.sh ?? 0) / 2, -400), max: new Vector3(opening.x + opening.size / 2, bottom.pos[1] + opening.y + (opening.sh ?? 0) / 2, 0) };
     const mine = /^(Bouchon-boîte prise d'air|Laine bouchon|Poignée bouchon|Conduit d'air)/;
     for (const p of sc0.planks) { if (mine.test(p.name) || p.special === 'doc' || p.path) continue; const b = aabb(p, t); if (b.max.z > 0.01) continue; expect(gap(box, b), p.name).toBeGreaterThan(0.5); }
-    const reg = aabb(one(sc0, /^Régulateur de charge/), t);
-    expect(gap(box, reg)).toBeGreaterThan(20);
     expect(one(sc0, /^Plancher int/).holes.some((h) => h.size > 29 && h.sh! > 46)).toBe(true);
   });
   it("la sous-boîte isolante est pleine hauteur, fermée, à fleur du dessous, tient en force : elle passe pile dans le conduit, couvre la fente, aucun verrou, poignée de 5 mm au plus sous le fond", () => {
@@ -537,11 +527,11 @@ describe("pièces d'hiver : exposées à côté du nichoir, échange exact par l
     expect(winterState(sans)).toEqual({ cassette: null, plug: null });
     expect(setWinterCassette(sans, true)).toBe(sans); expect(setAirPlug(sans, true)).toBe(sans);
   });
-  it("les pièces rangées sont hors du nichoir, du lambris, du toit en chêne et du panneau solaire, posées sur le sol, et restent découpées", () => {
+  it("les pièces rangées sont hors du nichoir, du lambris, du toit en chêne, posées sur le sol, et restent découpées", () => {
     const spares = by(sc0, /^(Bloc isolant d'hiver|Isolant bloc d'hiver|Poignée bloc d'hiver|Bouchon-boîte prise d'air|Laine bouchon prise d'air)/);
     expect(spares.length).toBeGreaterThanOrEqual(13);
-    const house = union([...by(sc0, /^(Lambris|Toit en okoumé)/), one(sc0, /^Côté gauche ext/)], t), sp = union(spares, t), solar = aabb(one(sc0, /^Panneau solaire/), t);
-    expect(sp.max.x).toBeLessThan(house.min.x - 50); expect(gap(sp, solar)).toBeGreaterThan(300); // à gauche, loin du panneau (à droite)
+    const house = union([...by(sc0, /^(Lambris|Toit en okoumé)/), one(sc0, /^Côté gauche ext/)], t), sp = union(spares, t);
+    expect(sp.max.x).toBeLessThan(house.min.x - 50); // à gauche du nichoir
     expect(sp.min.z).toBeCloseTo(0, 1); // à plat sur le sol (z = 0)
     expect(spares.filter((p) => !p.special).length).toBeGreaterThanOrEqual(10); // plaques de contreplaqué : découpées comme les autres
     for (const p of spares) expect(HIDDEN_AT_CREATION.some((re) => re.test(p.name)), p.name).toBe(false);

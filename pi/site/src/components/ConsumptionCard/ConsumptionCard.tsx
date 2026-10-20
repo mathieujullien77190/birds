@@ -1,5 +1,4 @@
 import { Card, Gauge, Stat } from '@/ui';
-import { autonomyHours, formatHours } from './helpers';
 import { ITEMS } from './constants';
 import type { ConsumptionCardProps } from './types';
 import './ConsumptionCard.css';
@@ -7,7 +6,6 @@ import './ConsumptionCard.css';
 export function ConsumptionCard({ state }: ConsumptionCardProps) {
   const total = state?.conso.total_w ?? null;
   const detail = state?.conso.detail ?? {};
-  const hours = autonomyHours(state?.batterie.pourcent ?? null, total);
   return (
     <Card title="Consommation">
       <Stat id="conso_w" value={total === null ? '—' : String(total)} unit="W" />
@@ -21,7 +19,6 @@ export function ConsumptionCard({ state }: ConsumptionCardProps) {
           </div>
         );
       })}
-      {hours !== null && <div className="muted" id="autonomie">Autonomie estimée : {formatHours(hours)}</div>}
     </Card>
   );
 }

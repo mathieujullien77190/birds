@@ -35,18 +35,6 @@
    "col": null
   }
  },
- "solar": {
-  "geo": {
-   "n": 8928,
-   "pos": "12dfc417a24e13e1",
-   "col": "1be57b8e67bf9bf0"
-  },
-  "edges": {
-   "n": 0,
-   "pos": "da39a3ee5e6b4b0d",
-   "col": null
-  }
- },
  "fan": {
   "geo": {
    "n": 828,

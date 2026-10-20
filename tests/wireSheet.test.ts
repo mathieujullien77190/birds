@@ -31,7 +31,7 @@ describe('fiche du fil affichée sur la vue', () => {
   });
   it('nappe : largeur ; fil sans broche : pas de ligne « Broches du Pi »', () => {
     expect(label(wireSheetRows(wireInfo(wire(/^Nappe caméra$/), nest)!), 'Largeur')).toBe('16 mm');
-    expect(label(wireSheetRows(wireInfo(wire(/^Fil fusible → Wago/), nest)!), 'Broches du Pi')).toBeUndefined();
+    expect(label(wireSheetRows(wireInfo(wire(/^Fil Wago \+ → interrupteur/), nest)!), 'Broches du Pi')).toBeUndefined();
   });
   it('résumé dans « Pièces »', () => {
     expect(wireSummary(wire(/^Fil SDA/), nest)).toMatch(/^Raspberry Pi, GPIO2 SDA \(broche 3\) → Capteur BME280 \(SDA\) · [\d,]+ cm$/);

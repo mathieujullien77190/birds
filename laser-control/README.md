@@ -1,6 +1,6 @@
 # Laser Control
 
-Pilotage d'une laser **Sculpfun S30 Ultra 22 W** (contrôleur GRBL 1.1 ; assistance d'air `M8` / `M9` activée par défaut) depuis le navigateur, par l'API Web Serial : connexion USB, déplacements, origine, cadre à vide, planche d'essai, aperçu du trajet, envoi en flux avec Pause / Reprise / Arrêt, et une **machine simulée** pour s'entraîner sans laser. Projet autonome : ce dossier se copie seul, il ne dépend de rien d'autre.
+Pilotage d'une laser **Sculpfun E1 Pro 21 W** (contrôleur GRBL 1.1 ; assistance d'air `M8` / `M9` activée par défaut) depuis le navigateur, par l'API Web Serial : connexion USB, déplacements, origine, cadre à vide, planche d'essai, aperçu du trajet, envoi en flux avec Pause / Reprise / Arrêt, et une **machine simulée** pour s'entraîner sans laser. Projet autonome : ce dossier se copie seul, il ne dépend de rien d'autre.
 
 ## Démarrer
 

@@ -47,11 +47,11 @@ describe('buildSchema : cas limites', () => {
 
   it('sans option absente le schéma est rendu tel quel', async () => {
     const { buildSchema } = await load();
-    expect(buildSchema({ cam2: true, solar: true })).toBe(SRC);
+    expect(buildSchema({ cam2: true })).toBe(SRC);
   });
   it('retire blocs, flèches (avec étiquette), classes et zones vides de la 2ᵉ caméra, et refait les couleurs des traits', async () => {
     const { buildSchema } = await load();
-    expect(buildSchema({ cam2: false, solar: true }).split('\n')).toEqual([
+    expect(buildSchema({ cam2: false }).split('\n')).toEqual([
       'flowchart TB',
       '  A[a]',
       '  A --> B',

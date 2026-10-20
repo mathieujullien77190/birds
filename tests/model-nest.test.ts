@@ -56,9 +56,9 @@ describe('makeNest : dimensions déduites des réglages', () => {
       expect(n[0].depth).toBeGreaterThan(0);
     }
   });
-  it('réglages ramenés dans leurs bornes : intérieur ≥ 120 et carré, trou ≤ l − 26, isolant 39, caméra 38, toit en pente, habillage, solaire', () => {
+  it('réglages ramenés dans leurs bornes : intérieur ≥ 120 et carré, trou ≤ l − 26, isolant 39, caméra 38, toit en pente, habillage', () => {
     const ref = normalizeIds(buildNest({}));
-    expect(normalizeIds(buildNest({ ins: 5, cam: 0, pente: false, lambris: false, solar: false }))).toEqual(ref);
+    expect(normalizeIds(buildNest({ ins: 5, cam: 0, pente: false, lambris: false }))).toEqual(ref);
     expect(normalizeIds(buildNest({ l: 10, L: 400 }))).toEqual(ref);
     const big = normalizeIds(buildNest({ l: 120, hole: 94 }));
     expect(normalizeIds(buildNest({ l: 120, hole: 5000 }))).toEqual(big);
@@ -118,7 +118,7 @@ describe('makeNest : pièces présentes / absentes selon les options', () => {
   });
   it('groupes : les pièces ont un groupe connu et nommé ; l\'habillage et l\'électronique existent', () => {
     const { planks, groupNames } = build();
-    expect(Object.values(groupNames).sort()).toEqual(['Aération du corps', 'Baguettes de cale (à couper)', 'Corps', 'Couvercle', 'Entrée', 'Habillage', 'Isolant', 'Pièces d\'hiver (rechange)', 'Pièces fines de rechange', 'Toit', 'Ventilation', 'Électronique'].sort());
+    expect(Object.values(groupNames).sort()).toEqual(['Aération du corps', 'Baguettes de cale (à couper)', 'Corps', 'Couvercle', 'Entrée', 'Habillage', 'Isolant', 'Pièces d\'hiver (rechange)', 'Pièces fines de rechange', 'Réseau (hors nichoir)', 'Toit', 'Ventilation', 'Électronique'].sort());
     for (const p of planks) if (p.group) expect(groupNames[p.group], p.name).toBeDefined();
     expect(planks.some((p) => /^Lambris/.test(p.name))).toBe(true);
     expect(planks.some((p) => p.special === 'doc')).toBe(false); // le dossier est ouvert par le bouton « Dossier » de la barre du haut, plus par une pièce de « Pièces »

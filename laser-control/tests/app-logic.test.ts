@@ -38,7 +38,7 @@ describe('parseMachineSettings', () => {
     expect(parseMachineSettings(JSON.stringify(custom))).toEqual(custom);
   });
   it('assistance d air : cochée par défaut, décochée seulement si le texte stocké dit exactement false', () => {
-    expect(D.air).toBe(true); // cochée par défaut (S30 Ultra : pompe commandée par la carte)
+    expect(D.air).toBe(true); // cochée par défaut (E1 Pro : pompe commandée par la carte)
     expect(parseMachineSettings('{"air":false}').air).toBe(false);
     expect(parseMachineSettings('{"air":true}').air).toBe(true);
     for (const v of ['1', '"false"', 'null', '0']) expect(parseMachineSettings(`{"air":${v}}`).air, v).toBe(true); // valeur qui n'est pas un booléen : la valeur par défaut

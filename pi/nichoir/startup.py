@@ -1,19 +1,19 @@
 # ======================================================================================================
 # startup.py — CHAPITRE 14 : le DÉMARRAGE et l'ARRÊT du programme.
 #
-# main() est appelée par `python -m nichoir` (voir __main__.py) : elle coupe le 12 V du ventilateur,
+# main() est appelée par `python -m nichoir` (voir __main__.py) : elle coupe le 5 V du ventilateur,
 # relit les réglages et l'historique, lance la boucle de lecture, puis le serveur web.
-# À l'arrêt du programme (même par une erreur), le 12 V du ventilateur est coupé aussi.
+# À l'arrêt du programme (même par une erreur), le 5 V du ventilateur est coupé aussi.
 # ======================================================================================================
 
 import atexit   # permet d'exécuter une fonction à la fin du programme
-# Quand le programme s'arrête, on coupe le 12 V du ventilateur (silencieux : pas de ligne dans le journal).
-atexit.register(lambda: fan(0, "arret", "arrêt du programme", silent=True))   # le 12 V du ventilateur est coupé quand le programme s'arrête
+# Quand le programme s'arrête, on coupe le 5 V du ventilateur (silencieux : pas de ligne dans le journal).
+atexit.register(lambda: fan(0, "arret", "arrêt du programme", silent=True))   # le 5 V du ventilateur est coupé quand le programme s'arrête
 
 
 def main():
     """Lance le nichoir : réglages, historique, boucle de lecture en tâche de fond, puis le serveur web sur le port 8080 (bloquant)."""
-    fan(0, "arret", "démarrage du programme", silent=True)   # 12 V coupé au démarrage
+    fan(0, "arret", "démarrage du programme", silent=True)   # 5 V coupé au démarrage
     load_settings()    # réglages de la ventilation automatique gardés d'une fois sur l'autre
     load_history()  # courbe des températures gardée d'une fois sur l'autre
     log("Nichoir high tech : page sur http://0.0.0.0:8080" + (" (mode simulé)" if MOCK else ""))

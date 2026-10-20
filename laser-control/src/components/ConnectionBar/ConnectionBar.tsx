@@ -23,7 +23,7 @@ export function ConnectionBar({ m }: { m: LaserMachine }) {
       )}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <StatusDot tone={ind.tone} pulse={ind.pulse}>{ind.label}</StatusDot>
-        {grbl.connected && <span className="text-[11px] text-stone-500">{grbl.kind === 'mock' ? 'Machine simulée' : 'Sculpfun S30 Ultra 22 W'}</span>}
+        {grbl.connected && <span className="text-[11px] text-stone-500">{grbl.kind === 'mock' ? 'Machine simulée' : 'Sculpfun E1 Pro 21 W'}</span>}
       </div>
 
       {!grbl.connected && (

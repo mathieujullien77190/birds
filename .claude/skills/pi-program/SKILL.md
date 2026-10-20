@@ -17,4 +17,4 @@ Lire les **sections 3, 4 et 5** de `docs/checklist-changements.md` (programme, r
 6. Documents : `docs/logiciel.md`, `pi/README.md`, `CLAUDE.md` (remplacement ciblé). Si un fil ou une broche change : skill `nichoir-piece` (section 2).
 7. `npm run check`.
 
-Rappels : chaque matériel du Pi reste facultatif (une erreur s'affiche, le reste tourne) ; le ventilateur n'est jamais coupé par le délestage de batterie ; ne pas toucher à `reglages.json` ni `historique*.json` du dossier pi (ignorés par git).
+Rappels : chaque matériel du Pi reste facultatif (une erreur s'affiche, le reste tourne) ; ne pas toucher à `reglages.json` ni `historique*.json` du dossier pi (ignorés par git).

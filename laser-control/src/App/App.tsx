@@ -51,7 +51,7 @@ export function App() {
   return (
     <div className="flex h-full flex-col">
       <header className="flex items-center gap-4 border-b border-stone-200 bg-white px-4 py-2">
-        <h1 className="text-sm font-semibold text-stone-800">Laser Control — Sculpfun S30 Ultra 22 W</h1>
+        <h1 className="text-sm font-semibold text-stone-800">Laser Control — Sculpfun E1 Pro 21 W</h1>
         <StatusDot tone={ind.tone} pulse={ind.pulse}>{ind.label}</StatusDot>
         {m.job.running && <StopButton onStop={() => void m.job.stop()} />}
       </header>

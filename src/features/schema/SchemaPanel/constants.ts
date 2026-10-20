@@ -5,7 +5,7 @@ import type { Keys } from './types';
 export const MERMAID_SRC = (/```mermaid\n([\s\S]*?)```/.exec(schemaMd)?.[1] ?? 'flowchart TB\n  X["schéma introuvable"]').trim();
 
 /** Options du nichoir dont les blocs disparaissent du schéma quand elles sont absentes. */
-export const OPTION_NODES = { cam2: ['CAM2', 'IR2'], solar: ['PV', 'MPPT'] } as const;
+export const OPTION_NODES = { cam2: ['CAM2', 'IR2'] } as const;
 
 /** Pièce (nom) → nœuds et flèches du schéma. Les flèches sont [de, vers] comme dans la source mermaid. */
 export const MAP: [RegExp, Keys][] = [
@@ -19,26 +19,21 @@ export const MAP: [RegExp, Keys][] = [
   [/^(Câble sonde extérieure|Fil sonde)/, { nodes: [], edges: [['PI', 'SONDE']] }],
   [/^(Ventilateur|Cassette ventilateur|Goulotte ventilateur|Grille ventilateur|Plot caoutchouc|Poignée cassette|Connecteur ventilateur|Grillage inox maille 5 mm|Bloc isolant d'hiver|Isolant bloc d'hiver|Oreille bloc d'hiver)/, { nodes: ['FAN'], edges: [] }],
   [/^Module relais 3 V/, { nodes: ['SWF'], edges: [] }],
+  [/^Splitter PoE/, { nodes: ['POE'], edges: [] }],
+  [/^Switch PoE/, { nodes: ['SWT'], edges: [] }],
+  [/^Serveur Pi 5/, { nodes: ['SRV'], edges: [] }],
+  [/^(Câble Ethernet Cat6|Gaine du câble Ethernet)/, { nodes: [], edges: [['SWT', 'POE']] }],
+  [/^Cordon RJ45 switch/, { nodes: [], edges: [['SWT', 'SRV']] }],
+  [/^(Câble USB-C splitter|Cordon RJ45 splitter)/, { nodes: [], edges: [['POE', 'PI']] }],
+  [/^Wago 221-413/, { nodes: ['RAIL'], edges: [] }],
+  [/^Fil 5 V broche 4/, { nodes: [], edges: [['PI', 'RAIL']] }],
   [/^Modules MOSFET/, { nodes: ['SW'], edges: [] }],
-  [/^Convertisseur/, { nodes: ['BUCK'], edges: [] }],
-  [/^(Batterie|BMS Daly)/, { nodes: ['BAT'], edges: [] }],
-  [/^Fusible/, { nodes: ['FUSE'], edges: [] }],
-  [/^Régulateur/, { nodes: ['MPPT'], edges: [] }],
-  [/^Panneau solaire/, { nodes: ['PV'], edges: [] }],
-  [/^(Câble 12 V|Connecteurs MC4)/, { nodes: [], edges: [['PV', 'MPPT']] }],
-  [/^Fil régulateur → batterie/, { nodes: [], edges: [['MPPT', 'FUSE']] }],
-  [/^Gaine des fils/, { nodes: [], edges: [['FUSE', 'RAIL']] }],
-  [/^Fil fusible → batterie/, { nodes: [], edges: [['FUSE', 'BAT']] }],
-  [/^Fil (fusible|batterie −) → Wago/, { nodes: [], edges: [['FUSE', 'RAIL']] }],
   [/^Fil Wago \+ → interrupteur/, { nodes: [], edges: [['RAIL', 'SWF']] }],
   [/^Fil (3,3 V|masse) relais/, { nodes: [], edges: [['PI', 'SWF']] }],
-  [/^Câble d'origine du ventilateur/, { nodes: [], edges: [['SWF', 'FAN'], ['RAIL', 'FAN'], ['PI', 'FAN']] }],
+  [/^Câble d'origine du ventilateur/, { nodes: [], edges: [['SWF', 'FAN'], ['PI', 'FAN']] }],
   [/^Fil interrupteur → ventilateur/, { nodes: [], edges: [['SWF', 'FAN']] }],
-  [/^Fil ventilateur −/, { nodes: [], edges: [['RAIL', 'FAN']] }],
   [/^Fil commande interrupteur/, { nodes: [], edges: [['PI', 'SWF']] }],
   [/^Fil (PWM ventilateur|tachymètre ventilateur|masse commune ventilateur)/, { nodes: [], edges: [['PI', 'FAN']] }],
-  [/^Câble USB-C convertisseur/, { nodes: [], edges: [['BUCK', 'PI']] }],
-  [/^Fil rail → convertisseur/, { nodes: [], edges: [['RAIL', 'BUCK']] }],
   [/^Nappe caméra 2/, { nodes: [], edges: [['PI', 'CAM2']] }],
   [/^Nappe caméra$/, { nodes: [], edges: [['PI', 'CAM1']] }],
   [/^Fil 5 V LED extérieures/, { nodes: [], edges: [['PI', 'IR2']] }],
@@ -50,7 +45,7 @@ export const MAP: [RegExp, Keys][] = [
 ];
 /** Fiches des composants : les sections « ### … » du document (tableaux de paramètres), repérées par le début de leur titre. */
 export const FICHES: Record<string, string> = {
-  PV: 'Panneau solaire', MPPT: 'Régulateur de charge', BAT: 'Batterie', FUSE: 'Fusible', BUCK: 'Convertisseur', PI: 'Raspberry Pi', FAN: 'Ventilateur', SWF: 'Relais 3 V du ventilateur',
+  SWT: 'Switch PoE+', SRV: 'Serveur Pi 5', POE: 'Splitter PoE+', PI: 'Raspberry Pi', FAN: 'Ventilateur', SWF: 'Relais 3 V du ventilateur',
   CAM1: 'Caméras', CAM2: 'Caméras', IR: 'Carte de 4 LED', IR2: 'Carte de 4 LED', SENS: 'Capteur de température', SONDE: 'Sonde de température extérieure', SW: 'Modules MOSFET', RAIL: 'Wago 221',
 };
 export const SECTIONS = (() => {

@@ -1,4 +1,4 @@
-# Pilotage de la laser (Sculpfun S30 Ultra 22 W)
+# Pilotage de la laser (Sculpfun E1 Pro 21 W)
 
 > Le logiciel de pilotage est un **projet autonome** : le dossier `laser-control/` (son `README.md` décrit l'installation, l'export et le format `LaserJob`). Il tourne seul (`npm install && npm run dev`, SVG ou G-code déposé sur la page) et l'app du nichoir l'utilise via l'alias `@laser` ; le mode d'emploi ci-dessous est le même dans les deux.
 
@@ -7,9 +7,9 @@ L'app pilote la découpeuse directement depuis le navigateur (API **Web Serial**
 ## Matériel et branchement
 | Élément | Valeur |
 |---|---|
-| Machine | Sculpfun S30 Ultra 22 W (la seule machine prise en charge), diode de 22 W (puissance lumineuse annoncée), assistance d'air commandée par la carte |
+| Machine | Sculpfun E1 Pro 21 W (la seule machine prise en charge), caisson fermé classe 1, diode bleue de 21 W (455 nm), assistance d'air fournie ; la variante Dual ajoute un module infrarouge 3 W (1064 nm), non piloté par l'app ; prix relevé sur fr.sculpfun.com le 19/10/2026 : 799 € (21 W) et 1 049 € (Dual), expédition annoncée mi-juillet sur la fiche (à revérifier) |
 | Contrôleur | GRBL 1.1, USB série 115200 bauds 8N1 |
-| Zone | 590 × 595 mm (zone de gravure de la machine) ; la planche par défaut de l'app est de 400 × 400 mm (le contreplaqué du commerce), réglable par les curseurs de « Découpe laser » |
+| Zone | 400 × 320 mm (zone de gravure ; le matériau posé peut faire 450 × 350 mm, épaisseur 30 mm sur le nid d'abeille) ; la planche par défaut de l'app est de 400 × 320 mm : le contreplaqué du commerce de 400 × 400 mm doit être recoupé à 400 × 320 (ou 400 × 350 au plus), réglable par les curseurs de « Découpe laser » |
 | Navigateur | Chrome ou Edge, page en HTTPS ou sur `localhost` (Firefox et Safari : pas de Web Serial) |
 
 1. Brancher le câble USB, allumer la machine.
@@ -17,8 +17,8 @@ L'app pilote la découpeuse directement depuis le navigateur (API **Web Serial**
 3. Fermer tout autre logiciel connecté au port (LaserGRBL, LightBurn, autre onglet).
 4. « Connecter la laser » : le navigateur demande de choisir le port (clic obligatoire).
 
-## La machine : Sculpfun S30 Ultra 22 W
-Fiche du vendeur : diode de 22 W (puissance lumineuse annoncée), zone de gravure de 590 × 595 mm (600 × 600 sur certaines fiches), carte 32 bits avec assistance d'air commandée par la carte (pompe 24 V, 30 L/min), USB ou Bluetooth, logiciels LightBurn et LaserGRBL, environ 114 W. **À confirmer à la réception** : la version de GRBL (`$I`) et le 115200 bauds en USB ; le guide de démarrage du constructeur ne cite que LightBurn. La case **« Assistance d'air (M8 / M9) »** des réglages de coupe est cochée par défaut : le programme envoie `M8` avant la coupe et `M9` après. Le Web Serial réel reste non testé faute de machine.
+## La machine : Sculpfun E1 Pro 21 W
+Fiche du vendeur : caisson fermé classe 1, diode bleue de 21 W (455 nm, spot 0,06 × 0,08 mm), zone de gravure 400 × 320 mm, CoreXY jusqu à 600 mm/s, caméra intégrée, pompe d assistance d air fournie, alimentation 24 V 6 A, USB ou WiFi (via application), logiciels Sculpfun Space, LightBurn et LaserGRBL. **À confirmer à la réception** : la version de GRBL (`$I`) et le 115200 bauds en USB ; le guide de démarrage du constructeur ne cite que LightBurn. La case **« Assistance d'air (M8 / M9) »** des réglages de coupe est cochée par défaut : le programme envoie `M8` avant la coupe et `M9` après. Le Web Serial réel reste non testé faute de machine.
 
 ## Mise en place d'une découpe
 1. Connexion ; vérifier `$32 = 1` (mode laser). Sinon l'app avertit, verrouille la découpe et propose `$32=1` après confirmation.
@@ -52,24 +52,25 @@ Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la sc
 | H-03 | Lambris droite 3, Lambris gauche 3 | Habillage | okoumé | 2 |
 | H-04 | Lambris droite 4, Lambris gauche 4 | Habillage | okoumé | 2 |
 | H-05 | Lambris droite 5, Lambris gauche 5 | Habillage | okoumé | 2 |
-| H-06 | Lambris avant 1, Lambris avant 2… (4 noms) | Habillage | okoumé | 4 |
+| H-06 | Lambris avant 1 | Habillage | okoumé | 1 |
 | H-07 | Lambris arrière 1 | Habillage | okoumé | 1 |
-| H-08 | Lambris arrière 2.1 | Habillage | okoumé | 1 |
-| H-09 | Lambris arrière 2.2, Lambris arrière 3.2 | Habillage | okoumé | 2 |
-| H-10 | Lambris avant 3 (percé) | Habillage | okoumé | 1 |
-| H-11 | Lambris arrière 3.1 | Habillage | okoumé | 1 |
-| H-12 | Lambris arrière 4 | Habillage | okoumé | 1 |
-| H-13 | Lambris arrière 5 | Habillage | okoumé | 1 |
-| H-14 | Plaque de ventilation arrière | Habillage | okoumé | 1 |
+| H-08 | Lambris avant 2, Lambris avant 4 | Habillage | okoumé | 2 |
+| H-09 | Lambris arrière 2.1 | Habillage | okoumé | 1 |
+| H-10 | Lambris arrière 2.2, Lambris arrière 3.2 | Habillage | okoumé | 2 |
+| H-11 | Lambris avant 3 (percé) | Habillage | okoumé | 1 |
+| H-12 | Lambris arrière 3.1 | Habillage | okoumé | 1 |
+| H-13 | Lambris arrière 4 | Habillage | okoumé | 1 |
+| H-14 | Lambris avant 5 | Habillage | okoumé | 1 |
+| H-15 | Lambris arrière 5 | Habillage | okoumé | 1 |
+| H-16 | Plaque de ventilation arrière | Habillage | okoumé | 1 |
 | COU-01 | Baguette couvercle avant | Couvercle | contreplaqué | 4 |
 | COU-02 | Baguette couvercle arrière | Couvercle | contreplaqué | 4 |
 | COU-03 | Baguette couvercle gauche | Couvercle | contreplaqué | 4 |
 | COU-04 | Baguette couvercle droite | Couvercle | contreplaqué | 4 |
 | COU-05 | Toit en okoumé (plaque crénelée) | Couvercle | okoumé | 1 |
 | COU-06 | Toit en okoumé (plaque pleine) | Couvercle | okoumé | 1 |
-| COR-01 | Étrier régulateur 1, Étrier régulateur 2… (4 noms) | Corps | contreplaqué | 16 |
-| COR-02 | Fixation arbre 1.1, Fixation arbre 1.2… (6 noms) | Corps | contreplaqué | 6 |
-| COR-03 | Clavette fixation 1.1, Clavette fixation 1.2… (4 noms) | Corps | contreplaqué | 16 |
+| COR-01 | Fixation arbre 1.1, Fixation arbre 1.2… (6 noms) | Corps | contreplaqué | 6 |
+| COR-02 | Clavette fixation 1.1, Clavette fixation 1.2… (4 noms) | Corps | contreplaqué | 16 |
 | V-01 | Cassette ventilateur 1 | Ventilation | contreplaqué | 1 |
 | V-02 | Cassette ventilateur 2 | Ventilation | contreplaqué | 1 |
 | V-03 | Cassette ventilateur 4, Cassette ventilateur 3 | Ventilation | contreplaqué | 2 |
@@ -96,19 +97,20 @@ Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la sc
 | P-10 | Poignée bouchon prise d'air 1, Poignée bouchon prise d'air 2, Poignée bouchon prise d'air 3 | Pièces d'hiver (rechange) | contreplaqué | 12 |
 | E-01 | Entrée 1, Entrée 15 | Entrée | contreplaqué | 2 |
 | E-02 | Entrée 2, Entrée 3… (13 noms) | Entrée | contreplaqué | 13 |
-| B-01 | Baguette de cale 1, Baguette de cale 2… (4 noms) | Baguettes de cale (à couper) | contreplaqué | 4 |
-| COR-04 | Face avant ext | Corps | contreplaqué | 1 |
-| COR-05 | Face arrière ext | Corps | contreplaqué | 1 |
-| COR-06 | Côté droit ext | Corps | contreplaqué | 1 |
-| COR-07 | Côté gauche ext | Corps | contreplaqué | 1 |
-| COR-08 | Dessous ext | Corps | contreplaqué | 1 |
-| COR-09 | Plancher int | Corps | contreplaqué | 1 |
-| COR-10 | Face avant int | Corps | contreplaqué | 1 |
-| COR-11 | Face arrière int | Corps | contreplaqué | 1 |
-| COR-12 | Côté droit int | Corps | contreplaqué | 1 |
-| COR-13 | Côté gauche int | Corps | contreplaqué | 1 |
-| COR-14 | Étrier batterie 1, Étrier batterie 2… (4 noms) | Corps | contreplaqué | 16 |
-| COR-15 | Pièce en C sous le cadre | Corps | contreplaqué | 1 |
+| B-01 | Baguette de cale 1, Baguette de cale 2 | Baguettes de cale (à couper) | contreplaqué | 2 |
+| COR-03 | Face avant ext | Corps | contreplaqué | 1 |
+| COR-04 | Face arrière ext | Corps | contreplaqué | 1 |
+| COR-05 | Côté droit ext | Corps | contreplaqué | 1 |
+| COR-06 | Côté gauche ext | Corps | contreplaqué | 1 |
+| COR-07 | Dessous ext | Corps | contreplaqué | 1 |
+| COR-08 | Plancher int | Corps | contreplaqué | 1 |
+| COR-09 | Face avant int | Corps | contreplaqué | 1 |
+| COR-10 | Face arrière int | Corps | contreplaqué | 1 |
+| COR-11 | Côté droit int | Corps | contreplaqué | 1 |
+| COR-12 | Côté gauche int | Corps | contreplaqué | 1 |
+| COR-13 | Pièce en C sous le cadre | Corps | contreplaqué | 1 |
+| COR-14 | Plaque isolant entrée gauche, Plaque isolant entrée droite | Corps | contreplaqué | 2 |
+| COR-15 | Plaque isolant entrée dessous | Corps | contreplaqué | 1 |
 | T-03 | Fourreau gaine toit 1, Fourreau gaine toit 2… (13 noms) | Toit | contreplaqué | 13 |
 | T-04 | Face avant toit | Toit | contreplaqué | 1 |
 | T-05 | Face arrière toit | Toit | contreplaqué | 1 |
@@ -121,11 +123,12 @@ Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la sc
 | T-12 | Baguette dessus toit avant | Toit | contreplaqué | 4 |
 | T-13 | Baguette dessus toit arrière 1 | Toit | contreplaqué | 4 |
 | T-14 | Baguette dessus toit arrière 2 | Toit | contreplaqué | 4 |
-| T-15 | Cadre toit haut, Cadre toit milieu, Cadre toit bas | Toit | contreplaqué | 3 |
-| T-16 | Face avant caméra 1, Face arrière caméra 1 | Toit | contreplaqué | 2 |
-| T-17 | Côté droit caméra 1, Côté gauche caméra 1 | Toit | contreplaqué | 2 |
+| T-15 | Plaque caméra extérieure | Toit | contreplaqué | 1 |
+| T-16 | Cadre toit haut, Cadre toit milieu, Cadre toit bas | Toit | contreplaqué | 3 |
+| T-17 | Face avant caméra 1, Face arrière caméra 1 | Toit | contreplaqué | 2 |
+| T-18 | Côté droit caméra 1, Côté gauche caméra 1 | Toit | contreplaqué | 2 |
 
-Total : 249 plaques, 77 codes.
+Total : 219 plaques, 80 codes (sur la planche par défaut de 400 × 320 mm les 219 pièces tiennent sur 16 planches : 11 de contreplaqué 3 mm et 5 d'okoumé 5 mm ; sur 400 × 400, 14 planches).
 
 ## Réglages à calibrer
 Valeurs de départ prudentes : 300 mm/min, 60 %, 3 passes, plafond de puissance 80 %. Elles dépendent du contreplaqué, de la focale et de l'air assist : la **planche d'essai** découpe une grille de petits carrés (colonnes = vitesses, lignes = puissances) ; le tableau à l'écran donne la position de chaque carré. Retenir le couple qui détache le carré proprement avec le moins de brûlure.

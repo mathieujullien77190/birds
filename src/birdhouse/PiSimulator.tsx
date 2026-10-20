@@ -75,9 +75,6 @@ def cam_on(num):
 def panne(nom, on):
     nichoir.MOCK_FAULTS[nom] = bool(on)
 
-def batterie(pct):
-    nichoir.sim["wh"] = pct / 100 * nichoir.CAPACITY_WH
-
 def etat_json():
     return json.dumps(nichoir.state)
 
@@ -93,17 +90,12 @@ def restaurer():
     nichoir.state["auto"].update({k: v for k, v in nichoir.AUTO_DEFAULTS.items()})
     nichoir.state["auto"]["avertissements"] = []
     nichoir.fan(0)
-    nichoir.sim["wh"] = 0.8 * nichoir.CAPACITY_WH
-    nichoir.state["batterie"]["pourcent"] = 80.0  # sinon les caméras seraient encore refusées (batterie lue avant la remise)
     nichoir.leds(False, False)
     nichoir.camera(0, True)
     nichoir.camera(1, True)
-    for k in ("ventilo", "alerte_chaleur", "delestage", "bme280", "sonde_ext"):
+    for k in ("ventilo", "alerte_chaleur", "bme280", "sonde_ext"):
         nichoir.state["erreurs"].pop(k, None)
     nichoir.read_sensors()
-
-def acceleration(v):
-    nichoir.SIM_ACCEL = float(v)
 
 def nuit(v):
     nichoir.MOCK_NIGHT = bool(v)
@@ -144,8 +136,8 @@ const PAGE = indexHtml
   );
 
 /** État renvoyé par `/api/etat` (seulement ce que les essais lisent). */
-interface PiState { t_nid: number | null; ext: { t: number | null }; ventilo: { pourcent: number; rpm: number | null; mode: string; raison: string; alimente: boolean }; led_nid: boolean; led_ext: boolean; cam1: boolean; cam2: boolean; erreurs: Record<string, string>; batterie: { pourcent: number | null }; auto: { actif: boolean; etat: string; raison: string } }
-type PyFns = Record<'restaurer' | 'panne' | 'batterie' | 'forcer', (...a: unknown[]) => unknown>;
+interface PiState { t_nid: number | null; ext: { t: number | null }; ventilo: { pourcent: number; rpm: number | null; mode: string; raison: string; alimente: boolean }; led_nid: boolean; led_ext: boolean; cam1: boolean; cam2: boolean; erreurs: Record<string, string>; auto: { actif: boolean; etat: string; raison: string } }
+type PyFns = Record<'restaurer' | 'panne' | 'forcer', (...a: unknown[]) => unknown>;
 
 /** Essais automatiques : on provoque un cas limite dans le Python simulé, puis on attend que le programme réagisse comme prévu (sinon l'essai échoue au bout de `timeout` secondes). */
 interface PiTest { id: string; label: string; hint: string; timeout: number; setup: (f: PyFns, cmd: (url: string, body: object) => void) => void; expect: (e: PiState) => boolean; ok: (e: PiState) => string }
@@ -162,9 +154,9 @@ const PI_TESTS: PiTest[] = [
   { id: 'panne-ventilo', label: 'Ventilateur en panne', hint: 'Ventilateur commandé à 60 % mais le tachymètre compte 0 tr/min : après 10 s une erreur doit apparaître', timeout: 25,
     setup: (f, cmd) => { f.restaurer(); f.panne('ventilo', true); cmd('/api/ventilo', { pourcent: 60 }); },
     expect: (e) => !!e.erreurs.ventilo && e.ventilo.alimente, ok: (e) => e.erreurs.ventilo },
-  { id: 'arret-12v', label: 'Arrêt = 12 V coupé', hint: "Ventilateur lancé à 80 % avec une panne de tachymètre simulée, puis « Arrêt » : le 12 V doit être coupé (alimente faux, 0 tr/min) et aucune panne ne doit être signalée", timeout: 8,
+  { id: 'arret-5v', label: 'Arrêt = 5 V coupé', hint: "Ventilateur lancé à 80 % avec une panne de tachymètre simulée, puis « Arrêt » : le 5 V doit être coupé (alimente faux, 0 tr/min) et aucune panne ne doit être signalée", timeout: 8,
     setup: (f, cmd) => { f.restaurer(); f.panne('ventilo', true); cmd('/api/ventilo', { pourcent: 80 }); cmd('/api/ventilo', { mode: 'arret' }); },
-    expect: (e) => !e.ventilo.alimente && e.ventilo.rpm === 0 && e.ventilo.pourcent === 0 && !e.erreurs.ventilo, ok: () => 'ventilateur coupé (12 V), pas de fausse panne' },
+    expect: (e) => !e.ventilo.alimente && e.ventilo.rpm === 0 && e.ventilo.pourcent === 0 && !e.erreurs.ventilo, ok: () => 'ventilateur coupé (5 V), pas de fausse panne' },
   { id: 'hiver', label: 'Mode hiver', hint: "Nid à 33 °C, dehors 26 °C, automatique activé mais mode hiver (ventilateur retiré, bloc isolant) : le ventilateur ne doit pas démarrer", timeout: 8,
     setup: (f, cmd) => { f.restaurer(); f.forcer(33, 26); cmd('/api/auto', { actif: true, hiver: true }); },
     expect: (e) => e.ventilo.pourcent === 0 && !e.ventilo.alimente && e.auto.raison.includes('hiver'), ok: (e) => e.auto.raison },
@@ -180,19 +172,15 @@ const PI_TESTS: PiTest[] = [
   { id: 'alerte', label: 'Alerte : nid au-dessus de 35 °C', hint: 'Nid à 37 °C malgré tout : une alerte doit apparaître (notification si configurée)', timeout: 10,
     setup: (f, cmd) => { f.restaurer(); f.forcer(37, 33); cmd('/api/auto', { actif: true }); },
     expect: (e) => !!e.erreurs.alerte_chaleur, ok: (e) => e.erreurs.alerte_chaleur },
-  { id: 'batterie', label: 'Batterie presque vide (8 %)', hint: 'Nid chaud, automatique activé, LED allumées, batterie à 8 % : caméras et LED coupées (sous 10 %), mais le ventilateur reste actif (sécurité du nid)', timeout: 12,
-    setup: (f, cmd) => { f.restaurer(); f.forcer(33, 26); cmd('/api/auto', { actif: true }); cmd('/api/led', { nid: true }); f.batterie(8); },
-    expect: (e) => !e.led_nid && !e.cam1 && !e.cam2 && !!e.erreurs.delestage && e.ventilo.mode === 'auto' && e.ventilo.pourcent >= 30, ok: (e) => `${e.erreurs.delestage} — ventilateur à ${e.ventilo.pourcent} %` },
 ];
 
-export function PiSimulator({ open = true, onClose, shoot, night = false, onToggleNight, onFanSpeed, onLeds }: { /** Fenêtre affichée ou seulement cachée : cachée, le programme Python continue de tourner (le ventilateur, les LED et la batterie simulée ne s'arrêtent pas). */ open?: boolean; onClose: () => void; shoot?: (num: number, led?: boolean) => string | null; night?: boolean; onToggleNight?: () => void; /** Vitesse du ventilateur (0–100 %, 0 s'il est éteint ou coupé), à chaque seconde et à la fermeture. */ onFanSpeed?: (pct: number) => void; /** LED infrarouges allumées (nid, extérieur), à chaque seconde et à la fermeture (éteintes). */ onLeds?: (s: { nid: boolean; ext: boolean }) => void }) {
+export function PiSimulator({ open = true, onClose, shoot, night = false, onToggleNight, onFanSpeed, onLeds }: { /** Fenêtre affichée ou seulement cachée : cachée, le programme Python continue de tourner (le ventilateur et les LED ne s'arrêtent pas). */ open?: boolean; onClose: () => void; shoot?: (num: number, led?: boolean) => string | null; night?: boolean; onToggleNight?: () => void; /** Vitesse du ventilateur (0–100 %, 0 s'il est éteint ou coupé), à chaque seconde et à la fermeture. */ onFanSpeed?: (pct: number) => void; /** LED infrarouges allumées (nid, extérieur), à chaque seconde et à la fermeture (éteintes). */ onLeds?: (s: { nid: boolean; ext: boolean }) => void }) {
   const [state, setState] = useState<'chargement' | 'prêt' | 'erreur'>('chargement');
   const [err, setErr] = useState('');
   const [log, setLog] = useState<string[]>([]); // lignes du terminal, dans l'ordre d'arrivée
   const termRef = useRef<HTMLPreElement>(null);
   const [running, setRunning] = useState<string | null>(null); // essai en cours
   const [menu, setMenu] = useState(false);
-  const [accel, setAccel] = useState(1); // vitesse du temps de la batterie simulée (×1 = temps réel)
   const frameRef = useRef<HTMLIFrameElement>(null);
   const pyRef = useRef<Pyodide | null>(null);
   const openRef = useRef(open);
@@ -250,15 +238,13 @@ export function PiSimulator({ open = true, onClose, shoot, night = false, onTogg
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- volontaire : le simulateur garde la PREMIÈRE fonction `shoot` (elle lit l'état courant par une ref) ; la relancer redémarrerait Python
 
-  useEffect(() => { // la scène 3D de nuit : le panneau solaire ne charge plus ; de jour, il recharge la batterie simulée
+  useEffect(() => { // la scène 3D de nuit : la température simulée suit le jour / la nuit
     if (state !== 'prêt') return;
     pyRef.current?.globals.get('nuit')(night);
-    sink(night ? '# nuit : le panneau solaire ne charge plus, la batterie se décharge' : '# jour : le panneau solaire recharge la batterie (≈ 55 W)');
+    sink(night ? '# nuit : dehors plus frais (9 °C), le nid chauffe moins' : '# jour : dehors plus chaud (16 °C), le nid chauffe davantage');
   }, [night, state]);
 
   useEffect(() => { const el = termRef.current; if (el) el.scrollTop = el.scrollHeight; }, [log]);
-
-  useEffect(() => { if (state === 'prêt') pyRef.current?.globals.get('acceleration')(accel); }, [accel, state]);
 
   const fn = (name: string): PyFn => {
     const py = pyRef.current;
@@ -268,13 +254,13 @@ export function PiSimulator({ open = true, onClose, shoot, night = false, onTogg
   const read = (): PiState => JSON.parse(String(fn('etat_json')())) as PiState;
   const cmd = (url: string, body: object) => { fn('api')(url, JSON.stringify(body)); };
 
-  const reset = () => { fn('restaurer')(); sink('# tout remis à zéro (pannes retirées, ventilateur et LED éteints, ventilation automatique désactivée, batterie à 80 %)'); };
+  const reset = () => { fn('restaurer')(); sink('# tout remis à zéro (pannes retirées, ventilateur et LED éteints, ventilation automatique désactivée)'); };
 
   const runTest = async (t: PiTest) => {
     if (running || state !== 'prêt') return;
     setMenu(false); setRunning(t.id);
     sink(`# ESSAI : ${t.label}`); sink(`# ${t.hint}`);
-    const f: PyFns = { restaurer: fn('restaurer'), panne: fn('panne'), batterie: fn('batterie'), forcer: fn('forcer') };
+    const f: PyFns = { restaurer: fn('restaurer'), panne: fn('panne'), forcer: fn('forcer') };
     t.setup(f, cmd);
     let verdict = '';
     for (let i = 0; i < t.timeout * 4 && !verdict; i++) {
@@ -295,11 +281,6 @@ export function PiSimulator({ open = true, onClose, shoot, night = false, onTogg
           <div className="min-w-0 flex-1">
             <div className="text-sm font-semibold text-stone-800">Interface web du Pi — simulateur</div>
             <div className="truncate text-[11px] text-stone-500">Le vrai <code>pi/nichoir/</code> (mode simulé) tourne dans ton navigateur (Pyodide) ; la page est le vrai <code>pi/web/index.html</code>.</div>
-          </div>
-          <div className="flex items-center overflow-hidden rounded bg-stone-100 text-xs font-semibold" title="Vitesse du temps pour la batterie simulée : ×1 = temps réel, ×10 / ×60 pour voir le niveau bouger plus vite" role="group" aria-label="Vitesse du temps">
-            {[1, 10, 60].map((a) => (
-              <button key={a} onClick={() => setAccel(a)} aria-pressed={accel === a} className={`px-2 py-1 ${accel === a ? 'bg-stone-700 text-white' : 'text-stone-700 hover:bg-stone-200'}`}>×{a}</button>
-            ))}
           </div>
           {onToggleNight && (
             <button onClick={onToggleNight} aria-pressed={night} title="Jour / nuit de la scène : les caméras voient la même scène que la vue 3D (la nuit elles sont sombres, les LED infrarouges les éclairent)" className={`rounded px-2.5 py-1 text-xs font-semibold ${night ? 'bg-indigo-900 text-indigo-100 hover:bg-indigo-800' : 'bg-amber-100 text-amber-900 hover:bg-amber-200'}`}>{night ? '🌙 Nuit' : '☀ Jour'}</button>

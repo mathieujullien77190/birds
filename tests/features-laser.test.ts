@@ -42,13 +42,13 @@ describe('useLaser', () => {
     const r = result.current;
     expect(r.cutCfg).toEqual(DEFAULT_CUT_CFG);
     expect(r.cutView).toBe(false);
-    expect(r.sheets).toEqual(nestSheets(sc, 400, 400, 5));
-    expect(r.preview).toBe(sheetsPreviewSvg(r.sheets, 400, 400));
+    expect(r.sheets).toEqual(nestSheets(sc, 400, 320, 5));
+    expect(r.preview).toBe(sheetsPreviewSvg(r.sheets, 400, 320));
     expect(r.preview).toContain('<svg');
     expect(r.machine).toBe(machine);
     const [items, size] = useLaserMachine.mock.calls[useLaserMachine.mock.calls.length - 1] as [{ fileName: string }[], { W: number; H: number }];
     expect(items.map((i) => i.fileName)).toEqual(r.sheets.map((_, i) => `planche-${i + 1}`));
-    expect(size).toEqual({ W: 400, H: 400 });
+    expect(size).toEqual({ W: 400, H: 320 });
   });
   it('lit les réglages enregistrés, les enregistre à chaque changement et refait le rangement', () => {
     localStorage.setItem(CUT_CFG_KEY, JSON.stringify({ W: 300, H: 250, gap: 4 }));

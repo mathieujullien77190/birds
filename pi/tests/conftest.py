@@ -77,24 +77,6 @@ def _bme(o):
     return m, s
 
 
-def _ina(o):
-    m = types.ModuleType("ina219")
-
-    class INA219:
-        def __init__(self, shunt, maxa, address=0):
-            self.address = address
-
-        def configure(self):
-            if o.get("ina") == "fail":
-                raise RuntimeError("ina absent")
-
-        def voltage(self):
-            return 13.1
-
-    m.INA219 = INA219
-    return m
-
-
 def _picam(o):
     m = types.ModuleType("picamera2")
     enc = types.ModuleType("picamera2.encoders")
@@ -131,7 +113,7 @@ def _picam(o):
 @pytest.fixture
 def load(monkeypatch, tmp_path):
     """load(mock=True, hw=False, argv=None, **options) -> module nichoir neuf, fichiers dans tmp_path, horloge factice.
-    hw=True installe un matériel factice qui marche (options : gpio, pwm, tacho, bme, ina, cam_fail pour le casser)."""
+    hw=True installe un matériel factice qui marche (options : gpio, pwm, tacho, bme, cam_fail pour le casser)."""
     captured = []
     monkeypatch.setattr("atexit.register", lambda f, *a, **k: captured.append(f) or f)
 
@@ -141,7 +123,7 @@ def load(monkeypatch, tmp_path):
         else:
             monkeypatch.delenv("NICHOIR_MOCK", raising=False)
         monkeypatch.setattr(sys, "argv", argv or ["nichoir.py"])
-        names = ["gpiozero", "bme280", "smbus2", "ina219", "picamera2", "picamera2.encoders", "picamera2.outputs"]
+        names = ["gpiozero", "bme280", "smbus2", "picamera2", "picamera2.encoders", "picamera2.outputs"]
         for n in names:
             monkeypatch.setitem(sys.modules, n, None)   # None = ImportError
         if hw:
@@ -149,7 +131,6 @@ def load(monkeypatch, tmp_path):
             b, s = _bme(o)
             monkeypatch.setitem(sys.modules, "bme280", b)
             monkeypatch.setitem(sys.modules, "smbus2", s)
-            monkeypatch.setitem(sys.modules, "ina219", _ina(o))
             for k, v in _picam(o).items():
                 monkeypatch.setitem(sys.modules, k, v)
         name = "nichoir"   # même nom que --cov=nichoir, sinon coverage ignore le fichier

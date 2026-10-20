@@ -9,7 +9,6 @@ import { shapedBlockGeometry } from '@/birdhouse/three/factories/part/blockShape
 import { driverGeometry } from '@/birdhouse/three/factories/part/driver';
 import { fanGeometry } from '@/birdhouse/three/factories/part/fan';
 import { simplePiGeometry, piGeometry } from '@/birdhouse/three/factories/part/pi';
-import { solarGeometry } from '@/birdhouse/three/factories/part/solar';
 import { cameraBoardGeometry } from '@/birdhouse/three/factories/part/camera';
 import { partGeometry } from '@/birdhouse/three/factories/part';
 import { createPlankMesh, isRawWood, plankGeometry, plankShapeKey } from '@/birdhouse/three/factories/plank';
@@ -107,7 +106,7 @@ describe('fils, gaine et nappe', () => {
   });
 });
 
-describe('driver, ventilateur, panneau solaire', () => {
+describe('driver, ventilateur', () => {
   it("driverGeometry : une carte plate par tranche de 19 mm de p.h, de la couleur p.color sinon rouge, puce et optocoupleur de la palette, dessous à −depth/2", () => {
     const a = driverGeometry(P({ w: 23, h: 17, depth: 30 })), b = driverGeometry(P({ w: 23, h: 36, color: '#00ff88' }));
     expect(hasColor(a.geo, PALETTE.driverRed)).toBe(true);
@@ -131,15 +130,6 @@ describe('driver, ventilateur, panneau solaire', () => {
     expect(hasColor(a.rotor!.geo, PALETTE.slate600)).toBe(true); // moyeu
     const [rx, ry] = size(a.rotor!.geo);
     expect(rx).toBeLessThan(60 * 0.46 * 2 + 1); expect(ry).toBeLessThan(60 * 0.46 * 2 + 1); // le rotor tient dans l'alésage
-  });
-  it("solarGeometry : encombrement W × H × (depth ou 35) plus les rails et la boîte de jonction au dos ; palette du panneau", () => {
-    const a = solarGeometry(P({ w: 1000, h: 600 })), b = solarGeometry(P({ w: 1000, h: 600, depth: 50 }));
-    const sa = size(a.geo), sb = size(b.geo);
-    expect(sa[0]).toBeCloseTo(1000, 3); expect(sa[1]).toBeCloseTo(600, 3);
-    expect(sa[2]).toBeCloseTo(35 + 26, 3); // 35 de cadre + la boîte de jonction de 26 au dos
-    expect(sb[2]).toBeCloseTo(50 + 26, 3);
-    for (const c of [PALETTE.aluminiumFrame, PALETTE.solarGlass, PALETTE.solarCell, PALETTE.solarBusbar, PALETTE.steel, PALETTE.nearBlack]) expect(hasColor(a.geo, c)).toBe(true);
-    expect(a.edges.attributes.position.count).toBe(0);
   });
 });
 
@@ -177,7 +167,6 @@ describe('partGeometry : aiguillage par type', () => {
     near(size(partGeometry(P({ special: 'block', w: 5, h: 5 })).geo), [5, 5, 3]);
   });
   it("les types de la table donnent les mêmes sommets que leur fabrique", () => {
-    expect(partGeometry(P({ special: 'solar', w: 100, h: 60 }), 3).geo.attributes.position.count).toBe(solarGeometry(P({ w: 100, h: 60 })).geo.attributes.position.count);
     expect(partGeometry(P({ special: 'fan', w: 60, h: 60 }), 3).rotor).toBeDefined();
     expect(partGeometry(P({ special: 'driver', w: 40, h: 30 }), 3).geo.attributes.color).toBeDefined();
     expect(partGeometry(P({ special: 'wire', w: 2, path: [[0, 0, 0], [10, 0, 0]] }), 3).geo.attributes.color).toBeDefined();

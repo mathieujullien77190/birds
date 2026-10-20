@@ -7,7 +7,7 @@ import { obb, pathItems, thick } from './geomChecks';
 const inPoly = (pt: [number, number], poly: [number, number][]): boolean => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
 
 /** Pièces qu'un fil peut légitimement traverser : isolant (laine), habillage, gaine, documents, panneau solaire, grillages. */
-const OK = /^(Isolant|Lambris|Gaine des fils|Panneau solaire|Dossier du nichoir|Grillage|Laine)/;
+const OK = /^(Isolant|Lambris|Dossier du nichoir|Grillage|Laine)/;
 
 export function materialAt(p: Plank, pt: Vector3, t: number, margin: number): boolean {
   const b = obb(p, t), d = pt.clone().sub(b.c), lx = d.dot(b.ax[0]), ly = d.dot(b.ax[1]), lz = d.dot(b.ax[2]), h = thick(p, t) / 2 - margin;

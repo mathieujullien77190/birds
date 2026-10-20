@@ -56,9 +56,6 @@ export const PALETTE = {
   relayBlue: '#1d4ed8',
   ledGreen: '#22c55e',
   // panneau solaire
-  solarGlass: '#0b1b4a',
-  solarCell: '#1d3f9c',
-  solarBusbar: '#b8c4d8',
   // fils, nappe
   conduit: '#1c1917',
   ribbon: '#e08a1e',

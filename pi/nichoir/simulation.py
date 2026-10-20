@@ -3,7 +3,7 @@
 #
 # Quand il est actif, ce chapitre REMPLACE le matériel : fausses sorties GPIO, fausses caméras
 # (petites images animées), faux capteurs qui varient comme dans la vraie vie (jour/nuit, nuages,
-# chaleur du nid, batterie qui se vide et que le panneau solaire recharge).
+# chaleur du nid).
 # Sert à essayer toute la page web sur un ordinateur, et à lancer les essais automatiques du
 # simulateur de l'application. Si MOCK est faux, tout ce chapitre est ignoré.
 # ======================================================================================================
@@ -15,7 +15,7 @@ if MOCK:
         value = 0
 
     fan_pwm, fan_12v, led_nest, led_outside = Fake(), Fake(), Fake(), Fake()   # quatre fausses sorties à la place des vraies
-    LED_OK = FAN_OK = TACH_OK = BME_OK = BAT_OK = True   # tout « marche » en simulation
+    LED_OK = FAN_OK = TACH_OK = BME_OK = True   # tout « marche » en simulation
     _fan["tacho_vu"] = True   # le tachymètre simulé « est branché » : une panne simulée est donc détectée
     state["erreurs"].clear()    # on oublie les erreurs de matériel absent (on est sur un ordinateur)
     state["erreurs"]["mock"] = "MODE SIMULÉ : valeurs fausses, rien n'est branché"   # bandeau affiché sur la page
@@ -67,7 +67,7 @@ if MOCK:
         cameras[num] = FakeStream(tint)
 
     # exces : de combien le nid dépasse dehors (soleil + couvée) ; effet : refroidissement apporté par le ventilateur (≤ 0) ; les deux avec de l'inertie
-    sim = {"exces": 3.0, "effet": 0.0, "wh": 0.8 * CAPACITY_WH, "nuage": 0.9, "nuage_cible": 0.9}  # la batterie simulée part à 80 %
+    sim = {"exces": 3.0, "effet": 0.0}
 
     def simulate():
         """Un pas de simulation : le nid suit dehors + un excès (≈ 4 °C le jour, 2 °C la nuit) réduit par le ventilateur (jusqu'à −3 °C à 100 %), avec de l'inertie."""
@@ -86,22 +86,9 @@ if MOCK:
             base = MOCK_FORCE["nid"] if MOCK_FORCE["nid"] is not None else t_out + sim["exces"]   # température du nid : imposée, ou dehors + excès
             state["t_nid"] = round(base + sim["effet"] + random.uniform(-0.2, 0.2), 1)   # moins l'effet du ventilateur, plus un petit bruit de mesure
             state["hum_nid"] = round(70 + 10 * math.sin(time.time() / 900 * 2 * math.pi) + random.uniform(-1, 1), 0)   # humidité autour de 70 %
-        # batterie simulée : décharge de la consommation, recharge par le panneau solaire le jour (≈ 55 W), rien la nuit
-        if random.random() < 0.02:
-            sim["nuage_cible"] = random.uniform(0.2, 1.0)  # un nuage passe (0,2 = très couvert) ou le ciel se dégage
-        sim["nuage"] += (sim["nuage_cible"] - sim["nuage"]) * 0.1   # la couverture nuageuse change en douceur
-        solar = 0.0 if night else round(60 * sim["nuage"], 1)  # le jour le panneau de 100 W donne jusqu'à ≈ 60 W selon les nuages
-        pc = 100 * sim["wh"] / CAPACITY_WH   # niveau actuel de la batterie simulée (%)
-        power_w = consumption()["total_w"]   # ce que le nichoir consomme en ce moment (W)
-        net_power = solar - power_w   # puissance nette : positive = la batterie se charge
-        if net_power > 0 and pc > 90:  # fin de charge : comme un vrai régulateur, le courant diminue en approchant de 100 %
-            net_power = max(0.05 * net_power, net_power * (100 - pc) / 10)
-        sim["wh"] = min(CAPACITY_WH, max(0.0, sim["wh"] + net_power * PERIOD / 3600 * SIM_ACCEL))   # énergie en Wh : puissance × temps, bornée entre 0 et la capacité
-        pc = 100 * sim["wh"] / CAPACITY_WH   # nouveau niveau (%)
         if MOCK_FAULTS["sonde"]:   # sonde de dehors simulée : plausible jour / nuit, ou muette en cas de panne simulée
             state["ext"] = {"t": None, "source": None, "maj": None}
             state["erreurs"]["sonde_ext"] = "sonde extérieure : pas de réponse (panne simulée)"
         else:
             state["ext"] = {"t": round(t_out, 1), "source": "simulée", "maj": time.strftime("%H:%M:%S")}
             state["erreurs"].pop("sonde_ext", None)
-        state["batterie"] = {"pourcent": round(pc, 1), "tension": round(voltage_from_percent(pc), 2), "source": "simulée", "solaire_w": round(solar, 1)}

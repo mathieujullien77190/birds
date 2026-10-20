@@ -6,7 +6,7 @@ import { aabb, overlap, obb } from './geomChecks';
 const by = (planks: Plank[], re: RegExp): Plank[] => planks.filter((p) => re.test(p.name));
 const one = (planks: Plank[], re: RegExp): Plank => { const l = by(planks, re); expect(l, String(re)).toHaveLength(1); return l[0]; };
 
-describe('pièce en C crénelée sous le cadre, fourreau de la gaine, gaine dans le coin', () => {
+describe('pièce en C crénelée sous le cadre', () => {
   for (const [name, over] of Object.entries(VARIANTS)) {
     const sc = buildNest(over), t = sc.t, planks = sc.planks;
     const wall = one(planks, /^Face avant ext$/), bodyH = wall.pos[2] + wall.h / 2; // les parois montent jusqu'à bodyH
@@ -54,20 +54,6 @@ describe('pièce en C crénelée sous le cadre, fourreau de la gaine, gaine dans
       expect(rib.length).toBeGreaterThanOrEqual(4); expect(cs.length).toBeGreaterThan(0);
       expect(Math.max(...rib.map((h) => cz(h) + (h.sh ?? 0) / 2))).toBeCloseTo(bodyH - 20, 1);
       expect(Math.min(...cs.map((h) => cz(h) - (h.sh ?? 0) / 2)) - Math.max(...rib.map((h) => cz(h) + (h.sh ?? 0) / 2))).toBeGreaterThanOrEqual(4.5);
-    });
-
-    it(`fourreau de la gaine : carrés de 26 mm percés de Ø 18, empilés dans le toit, gaine dans le coin à 5 mm des murs arrière et droit (${name})`, () => {
-      const sleeve = by(planks, /^Fourreau gaine toit/), floor = one(planks, /^Dessous toit$/), top = one(planks, /^Dessus toit$/);
-      expect(sleeve).toHaveLength(13);
-      const zs = sleeve.map((p) => aabb(p, t)).sort((a, b) => a.min.z - b.min.z);
-      expect(zs[0].min.z).toBeCloseTo(aabb(floor, t).max.z, 5); expect(zs[zs.length - 1].max.z).toBeCloseTo(aabb(top, t).min.z, 5);
-      for (const p of sleeve) { expect(group(p)).toBe('Toit'); expect(p.holes).toHaveLength(1); expect(p.holes[0]).toMatchObject({ shape: 'round', size: 18, x: 0, y: 0 }); expect(p.w).toBe(26); }
-      for (const sp of sleeve) for (const p of planks) {
-        if (p === sp || /^Fourreau/.test(p.name) || /^(Dessous|Dessus) toit$/.test(p.name) || p.special === 'doc' || p.path || p.special === 'conduit' || p.special === 'solar' || /rechange/.test(p.name)) continue;
-        expect(overlap(obb(sp, t), obb(p, t)), `${sp.name} / ${p.name}`).toBeLessThan(0.01);
-      }
-      const W = wall.w;
-      expect(sleeve[0].pos[0]).toBeCloseTo(W / 2 - t - 5 - 8, 5); expect(sleeve[0].pos[1]).toBeCloseTo(W / 2 - t - 5 - 8, 5);
     });
 
     it(`la goulotte du ventilateur est dans le groupe Toit (${name})`, () => {

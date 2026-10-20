@@ -2,4 +2,4 @@
 export type Keys = { nodes: string[]; edges: [string, string][] };
 
 /** Options présentes dans la scène : seules leurs parties du schéma sont affichées. */
-export interface SchemaOptions { cam2: boolean; solar: boolean }
+export interface SchemaOptions { cam2: boolean }

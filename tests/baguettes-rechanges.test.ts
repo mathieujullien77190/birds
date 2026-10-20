@@ -60,17 +60,17 @@ describe('baguettes qui portent le dessus du toit (contreplaqué 3 mm, dents dan
     it(`aucun recouvrement des baguettes avec les autres pièces (hors plaques porteuses, où seules les dents entrent) (${name})`, () => {
       const carrier = /^(Côté gauche toit|Côté droit toit|Face avant toit|Face arrière toit)/;
       for (const p of bag) for (const q of sc.planks) {
-        if (q === p || q.path || q.special === 'doc' || q.special === 'solar' || carrier.test(q.name) || /^Baguette dessus toit/.test(q.name) || /^Baguette de cale/.test(q.name) || /^Isolant/.test(q.name)) continue; // la laine d'isolant n'est pas une pièce solide
+        if (q === p || q.path || q.special === 'doc' || carrier.test(q.name) || /^Baguette dessus toit/.test(q.name) || /^Baguette de cale/.test(q.name) || /^Isolant/.test(q.name)) continue; // la laine d'isolant n'est pas une pièce solide
         expect(apart(aabb(p, t), aabb(q, t)), `${p.name} / ${q.name}`).toBe(true);
       }
     });
   }
-  it('elles se rangent sur les planches de contreplaqué ; la baguette droite est raccourcie autour du fourreau de la gaine (donc plus identique à la gauche)', () => {
+  it('elles se rangent sur les planches de contreplaqué ; la baguette gauche est raccourcie autour du fourreau de la gaine (donc différente de la droite)', () => {
     const sc = buildNest({}), codes = plankCodes(sc);
     const items = nestSheets(sc, 410, 400).flatMap((s) => s.items.filter((i) => /^Baguette dessus toit/.test(i.plank.name)));
     expect(items).toHaveLength(5);
     expect(codes.get(one(sc, /^Baguette dessus toit gauche$/).id)).not.toBe(codes.get(one(sc, /^Baguette dessus toit droite$/).id));
-    expect(one(sc, /^Baguette dessus toit droite$/).w).toBeLessThan(one(sc, /^Baguette dessus toit gauche$/).w);
+    expect(one(sc, /^Baguette dessus toit gauche$/).w).toBeLessThan(one(sc, /^Baguette dessus toit droite$/).w);
   });
 });
 
@@ -84,7 +84,7 @@ describe('pièces fines de rechange', () => {
     expect(spares).toHaveLength(thin.length * THIN.copies);
     for (const p of thin) { expect(p.special).toBeUndefined(); expect(p.name).not.toMatch(/^Baguette de cale/); const m = shapeMeasure(p); expect(Math.min(m.w, m.h) <= 12 || m.mean <= 12, p.name).toBe(true); }
     expect(base.planks.filter((p) => !isThin(p) && !p.special && !/^Baguette de cale/.test(p.name)).every((p) => { const m = shapeMeasure(p); return Math.min(m.w, m.h) > 12 && m.mean > 12; })).toBe(true);
-    for (const n of ['Poignée cassette 1', 'Conduit de sortie 3', 'Étrier régulateur 1', 'Clavette fixation 1.1', 'Baguette couvercle avant', 'Baguette dessus toit gauche']) expect(thin.some((p) => p.name === n), n).toBe(true);
+    for (const n of ['Poignée cassette 1', 'Conduit de sortie 3', 'Clavette fixation 1.1', 'Baguette couvercle avant', 'Baguette dessus toit gauche']) expect(thin.some((p) => p.name === n), n).toBe(true);
     expect(sc.planks.filter((p) => /^Baguette de cale \d+ \(rechange/.test(p.name))).toEqual([]);
   });
   it("noms uniques « … (rechange k) », groupe « Pièces fines de rechange » visible, identiques à l'original (contour, trous, dents, matériau)", () => {
@@ -106,7 +106,7 @@ describe('pièces fines de rechange', () => {
     expect(row.qty).toBeGreaterThanOrEqual(1 + 3); expect(row.names.some((n) => /rechange/.test(n))).toBe(false);
   });
   it("à plat sur le sol, à l'écart du nichoir, des pièces d'hiver et des baguettes de cale, sans recouvrement entre elles", () => {
-    const others = sc.planks.filter((p) => !p.spareOf && !p.path && p.special !== 'doc' && p.special !== 'solar');
+    const others = sc.planks.filter((p) => !p.spareOf && !p.path && p.special !== 'doc');
     for (const p of spares) { const b = aabb(p, t); expect(b.min.z, p.name).toBeCloseTo(0, 5); expect(b.max.z - b.min.z).toBeCloseTo(p.material ? p.depth! : t, 5); }
     for (let i = 0; i < spares.length; i++) {
       const a = aabb(spares[i], t);

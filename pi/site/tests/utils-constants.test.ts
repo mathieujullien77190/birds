@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { fmt } from '@/utils';
-import { CAPACITE_WH, INJOIGNABLE, PERIODE, VITESSE_DEFAUT, VITESSE_MIN } from '@/constants';
+import { INJOIGNABLE, PERIODE, VITESSE_DEFAUT, VITESSE_MIN } from '@/constants';
 
 describe('fmt', () => {
   it('affiche le nombre', () => { expect(fmt(24.5)).toBe('24.5'); });
@@ -18,6 +18,5 @@ describe('constantes', () => {
     expect(VITESSE_DEFAUT).toBe(60);
     expect(VITESSE_DEFAUT).toBeGreaterThanOrEqual(VITESSE_MIN);
     expect(INJOIGNABLE).toBe('programme injoignable');
-    expect(CAPACITE_WH).toBe(76.8);
   });
 });

@@ -1,7 +1,7 @@
 import type { GrblState, GrblTransport } from './types';
 
 /** Zone de la machine simulée (mm). */
-const AREA = { x: 590, y: 595 };
+const AREA = { x: 400, y: 320 };
 /** Blocs de mouvement que le planificateur de GRBL garde en avance. */
 const PLANNER = 15;
 const RX = 127;

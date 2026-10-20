@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { describeAuto, isDirty, AUTO_LABELS } from '@/components/AutoFan/helpers';
 import { AUTO_FIELDS } from '@/components/AutoFan/constants';
-import { levelColor, remainingWh } from '@/components/BatteryCard/helpers';
-import { LEVEL_COLORS } from '@/components/BatteryCard/constants';
 import { cameraError } from '@/components/CameraCard/helpers';
-import { autonomyHours, formatHours } from '@/components/ConsumptionCard/helpers';
 import { ITEMS } from '@/components/ConsumptionCard/constants';
 import { describeFan } from '@/components/FanCard/helpers';
 import { lastReading } from '@/components/Header/helpers';
@@ -37,20 +34,6 @@ describe('AutoFan helpers', () => {
   });
 });
 
-describe('BatteryCard helpers', () => {
-  it.each([[null, LEVEL_COLORS.unknown], [100, LEVEL_COLORS.high], [51, LEVEL_COLORS.high], [50, LEVEL_COLORS.mid], [20, LEVEL_COLORS.mid], [19.9, LEVEL_COLORS.low], [0, LEVEL_COLORS.low]])(
-    'levelColor(%s)', (pct, color) => { expect(levelColor(pct)).toBe(color); });
-  it('les trois couleurs sont distinctes', () => {
-    expect(new Set(Object.values(LEVEL_COLORS)).size).toBe(4);
-  });
-  it('remainingWh arrondit au dixième', () => {
-    expect(remainingWh(100)).toBe(76.8);
-    expect(remainingWh(50)).toBe(38.4);
-    expect(remainingWh(33)).toBe(25.3);
-    expect(remainingWh(0)).toBe(0);
-  });
-});
-
 describe('cameraError', () => {
   it('picamera2 prime sur la caméra', () => {
     expect(cameraError({ picamera2: 'P', camera1: 'C1', camera2: 'C2' }, 1)).toBe('P');
@@ -67,22 +50,6 @@ describe('cameraError', () => {
 });
 
 describe('ConsumptionCard helpers', () => {
-  it('autonomyHours = Wh restants / W', () => {
-    expect(autonomyHours(100, 7.68)).toBeCloseTo(10, 10);
-    expect(autonomyHours(50, 7.68)).toBeCloseTo(5, 10);
-  });
-  it.each([[null, 10], [80, null], [80, 0], [80, -2]])('autonomyHours(%s, %s) = null', (p, w) => {
-    expect(autonomyHours(p, w)).toBeNull();
-  });
-  it('autonomyHours accepte 0 % (0 h)', () => { expect(autonomyHours(0, 10)).toBe(0); });
-  it('formatHours : heures-minutes, zéro de remplissage, jours au-delà de 48 h', () => {
-    expect(formatHours(7.5)).toBe('7 h 30');
-    expect(formatHours(2 + 5 / 60)).toBe('2 h 05');
-    expect(formatHours(0)).toBe('0 h 00');
-    expect(formatHours(47.99)).toBe('47 h 59');
-    expect(formatHours(48)).toBe('2 jours');
-    expect(formatHours(100)).toBe('4 jours');
-  });
   it('ITEMS liste les quatre postes', () => {
     expect(ITEMS.map((i) => i.key)).toEqual(['pi', 'cameras', 'led', 'ventilo']);
   });
@@ -91,7 +58,7 @@ describe('ConsumptionCard helpers', () => {
 describe('describeFan', () => {
   const fan = makeState().ventilo;
   it('— sans ventilateur', () => { expect(describeFan(undefined)).toBe('—'); });
-  it('coupé quand non alimenté', () => { expect(describeFan({ ...fan, alimente: false, pourcent: 50 })).toBe('coupé (12 V)'); });
+  it('coupé quand non alimenté', () => { expect(describeFan({ ...fan, alimente: false, pourcent: 50 })).toBe('coupé (5 V)'); });
   it('avec tachymètre', () => { expect(describeFan({ ...fan, pourcent: 60, rpm: 1920, mode: 'auto' })).toBe('60 % · 1920 tr/min · automatique'); });
   it('sans tachymètre', () => { expect(describeFan({ ...fan, pourcent: 40, rpm: null, mode: 'manuel' })).toBe('40 % · à la main'); });
   it('arrêté', () => { expect(describeFan(fan)).toBe('0 % · arrêté'); });

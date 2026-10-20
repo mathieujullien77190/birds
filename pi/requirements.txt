@@ -1,9 +1,8 @@
-# REQUIS : flask, gpiozero, lgpio.  FACULTATIF : smbus2 + RPi.bme280 (capteur du nid), pi-ina219 (batterie) — à installer seulement si le module est branché.
+# REQUIS : flask, gpiozero, lgpio.  FACULTATIF : smbus2 + RPi.bme280 (capteur du nid) — à installer seulement si le module est branché.
 # Le tachymètre et le PWM du ventilateur passent par gpiozero / lgpio (rien d'autre à installer).
 flask>=3.0
 gpiozero>=2.0
 lgpio>=0.2
 smbus2>=0.4
 RPi.bme280>=0.2
-pi-ina219>=1.4
 # picamera2 vient du paquet système : sudo apt install python3-picamera2 (le venv est créé avec --system-site-packages)

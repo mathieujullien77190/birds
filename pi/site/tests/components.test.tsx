@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { Header } from '@/components/Header';
 import { NestCard } from '@/components/NestCard';
 import { OutsideCard } from '@/components/OutsideCard';
-import { BatteryCard } from '@/components/BatteryCard';
 import { ConsumptionCard } from '@/components/ConsumptionCard';
 import { CameraCard } from '@/components/CameraCard';
 import { FanCard } from '@/components/FanCard';
@@ -108,59 +107,14 @@ describe('OutsideCard', () => {
   });
 });
 
-describe('BatteryCard', () => {
-  it('niveau, tension, source, Wh restants, solaire', () => {
-    const { container } = render(<BatteryCard state={makeState()} />);
-    expect(text(container, '#batt_pct')).toBe('80');
-    expect(text(container, '#batt_v')).toBe('13.1 V');
-    const t = container.textContent!;
-    expect(t).toContain('· mesurée');
-    expect(t).toContain('≈ 61.4 Wh sur 76.8');
-    expect(t).toContain('solaire 12 W');
-    expect((container.querySelector('.gauge-fill') as HTMLElement).style.width).toBe('80%');
-    expect((container.querySelector('.gauge-fill') as HTMLElement).style.background).toBe('rgb(5, 150, 105)');
-    expect(t).not.toContain('Niveau inconnu');
-  });
-  it('batterie faible : jauge rouge, erreurs de batterie et de délestage', () => {
-    const batterie = { pourcent: 12, tension: 11.8, source: 'simulée' as const };
-    const { container } = render(<BatteryCard state={makeState({ batterie, erreurs: { batterie: 'batterie faible', delestage: 'ventilateur délesté' } })} />);
-    expect((container.querySelector('.gauge-fill') as HTMLElement).style.background).toBe('rgb(220, 38, 38)');
-    expect((container.querySelector('.gauge-fill') as HTMLElement).style.width).toBe('12%');
-    expect([...container.querySelectorAll('.err')].map((e) => e.textContent)).toEqual(['batterie faible', 'ventilateur délesté']);
-    expect(container.textContent).toContain('· simulée');
-    expect(container.textContent).not.toContain('solaire');
-  });
-  it('niveau moyen : jauge orange', () => {
-    const { container } = render(<BatteryCard state={makeState({ batterie: { pourcent: 35, tension: 12.5, source: null } })} />);
-    expect((container.querySelector('.gauge-fill') as HTMLElement).style.background).toBe('rgb(217, 119, 6)');
-  });
-  it('mesure absente : tirets, message « Niveau inconnu », jauge vide grise', () => {
-    const { container } = render(<BatteryCard state={makeState({ batterie: { pourcent: null, tension: null, source: null } })} />);
-    expect(text(container, '#batt_pct')).toBe('—');
-    expect(text(container, '#batt_v')).toBe('— V');
-    expect(container.textContent).toContain('Niveau inconnu : pas de mesure de batterie.');
-    expect(container.textContent).not.toContain('Wh');
-    expect((container.querySelector('.gauge-fill') as HTMLElement).style.width).toBe('0%');
-    expect((container.querySelector('.gauge-fill') as HTMLElement).style.background).toBe('rgb(168, 162, 158)');
-  });
-  it('sans état', () => {
-    const { container } = render(<BatteryCard state={null} />);
-    expect(text(container, '#batt_pct')).toBe('—');
-    expect(text(container, '#batt_v')).toBe('— V');
-    expect(container.textContent).toContain('Niveau inconnu');
-  });
-});
-
 describe('ConsumptionCard', () => {
-  it('total, une ligne par poste, autonomie', () => {
+  it('total, une ligne par poste', () => {
     const { container } = render(<ConsumptionCard state={makeState()} />);
     expect(text(container, '#conso_w')).toBe('10');
     const lines = [...container.querySelectorAll('.conso-line')];
     expect(lines.map((l) => l.textContent)).toEqual(['Raspberry Pi5 W', 'Caméras3 W', 'LED infrarouges2 W', 'Ventilateur0 W']);
     expect(lines.map((l) => l.className)).toEqual(['conso-line', 'conso-line', 'conso-line', 'conso-line off']);
     expect(lines.map((l) => (l.querySelector('.gauge-fill') as HTMLElement).style.width)).toEqual(['50%', '30%', '20%', '0%']);
-    // 80 % de 76,8 Wh = 61,44 Wh / 10 W = 6,144 h = 6 h 09
-    expect(text(container, '#autonomie')).toBe('Autonomie estimée : 6 h 09');
   });
   it('détail partiel : les postes manquants valent 0 W', () => {
     const { container } = render(<ConsumptionCard state={makeState({ conso: { total_w: 4, detail: { pi: 4 } } })} />);
@@ -169,32 +123,20 @@ describe('ConsumptionCard', () => {
     expect(lines[0].className).toBe('conso-line');
     expect(lines[1].className).toBe('conso-line off');
   });
-  it('total inconnu : tiret, jauges vides, pas d\'autonomie', () => {
+  it('total inconnu : tiret, jauges vides', () => {
     const { container } = render(<ConsumptionCard state={makeState({ conso: { total_w: null, detail: {} } })} />);
     expect(text(container, '#conso_w')).toBe('—');
-    expect(container.querySelector('#autonomie')).toBeNull();
     for (const g of container.querySelectorAll('.gauge-fill')) expect((g as HTMLElement).style.width).toBe('0%');
   });
-  it('total à 0 W : affiché « 0 », pas d\'autonomie, pas de division par zéro', () => {
+  it('total à 0 W : affiché « 0 », pas de division par zéro', () => {
     const { container } = render(<ConsumptionCard state={makeState({ conso: { total_w: 0, detail: { pi: 0 } } })} />);
     expect(text(container, '#conso_w')).toBe('0');
-    expect(container.querySelector('#autonomie')).toBeNull();
     for (const g of container.querySelectorAll('.gauge-fill')) expect((g as HTMLElement).style.width).toBe('0%');
-  });
-  it('batterie inconnue : pas d\'autonomie', () => {
-    const { container } = render(<ConsumptionCard state={makeState({ batterie: { pourcent: null, tension: null, source: null } })} />);
-    expect(container.querySelector('#autonomie')).toBeNull();
-  });
-  it('plusieurs jours', () => {
-    const { container } = render(<ConsumptionCard state={makeState({ conso: { total_w: 0.5, detail: { pi: 0.5 } } })} />);
-    // 61,44 / 0,5 = 122,9 h -> 5 jours
-    expect(text(container, '#autonomie')).toBe('Autonomie estimée : 5 jours');
   });
   it('sans état', () => {
     const { container } = render(<ConsumptionCard state={null} />);
     expect(text(container, '#conso_w')).toBe('—');
     expect(container.querySelectorAll('.conso-line.off')).toHaveLength(4);
-    expect(container.querySelector('#autonomie')).toBeNull();
   });
 });
 
@@ -412,9 +354,9 @@ describe('FanCard', () => {
     expect(container.querySelector('#v_marche')?.hasAttribute('class')).toBe(false);
     expect(container.querySelector('#v_auto')).toBeNull();
   });
-  it('ventilateur coupé (12 V) : texte dédié', () => {
+  it('ventilateur coupé (5 V) : texte dédié', () => {
     const { container } = setup(fanState({ alimente: false, pourcent: 0 }));
-    expect(text(container, '#ventilo_etat')).toBe('coupé (12 V)');
+    expect(text(container, '#ventilo_etat')).toBe('coupé (5 V)');
   });
   it('ventilateur en panne : toutes les erreurs affichées', () => {
     const { container } = setup(makeState({ erreurs: {

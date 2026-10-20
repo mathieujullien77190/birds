@@ -35,7 +35,6 @@ describe('diamètre, section, couleur', () => {
     expect(sectionFor(3.6)).toBe('2,5 mm²');
     expect(sectionFor(1.2)).toBe('≈ 0,25 mm²');
     expect(sectionFor(1.6)).toBe('≈ 0,25 mm²');
-    expect(sectionFor(4.8)).toContain('4 mm²');
   });
   it('nom de couleur', () => {
     expect(colorName('#DC2626')).toBe('rouge');
@@ -64,15 +63,13 @@ describe('wireInfo sur des fils connus', () => {
     expect(i.cordCm).toBeGreaterThanOrEqual(40);
     expect(i.lengthCm).toBeGreaterThan(5);
   });
-  it('gros fil de puissance : 2,5 mm², Ø 3,6, fil libre avec marge', () => {
-    const i = wireInfo(find(/^Fil fusible → Wago/), nest)!;
-    expect(i.section).toBe('2,5 mm²');
-    expect(i.diameter).toBe(3.6);
-    expect(i.connector).toContain('Wago');
-    expect(i.cordCm! % 5).toBe(0);
-    expect(i.cordNote).toContain('marge');
+  it('cordon RJ45 du splitter : cordon du commerce, rien à couper', () => {
+    const i = wireInfo(find(/^Cordon RJ45 splitter/), nest)!;
+    expect(i.kind).toBe('wire');
+    expect(i.cordCm).toBeNull();
+    expect(i.cordNote).toContain('RJ45');
+    expect(i.pins).toEqual([]);
   });
-  it('câble du panneau : Ø 4,8, 4 mm²', () => expect(wireInfo(find(/^Câble 12 V/), nest)!.section).toContain('4 mm²'));
   it('nappes : largeur 16, longueur du commerce', () => {
     for (const re of [/^Nappe caméra$/, /^Nappe caméra 2/]) {
       const i = wireInfo(find(re), nest)!;
@@ -84,7 +81,7 @@ describe('wireInfo sur des fils connus', () => {
     expect(wireInfo({ ...find(/^Nappe caméra$/), path: [[0, 0, 0], [0, 0, 1500]] })!.cordCm).toBe(160); // plus longue que toutes les nappes courantes
   });
   it('gaine : Ø 16, longueur de gaine', () => {
-    const i = wireInfo(find(/^Gaine des fils/), nest)!;
+    const i = wireInfo({ ...find(/^Fil SDA/), special: 'conduit', name: 'Gaine d\'essai', w: 16 }, nest)!;
     expect(i.kind).toBe('conduit');
     expect(i.cordNote).toContain('gaine');
     expect(i.section).toContain('pas de cuivre');
@@ -146,6 +143,6 @@ describe('une fiche complète pour chaque fil de la scène par défaut', () => {
   it('les fils vers les GPIO du Pi n\'utilisent jamais la même broche', () => {
     const nest = buildNest({}).planks;
     const all = nest.filter(isWirePlank).flatMap((w) => wireInfo(w, nest)!.pins);
-    expect(new Set(all.filter((n) => n !== 17)).size).toBe(all.filter((n) => n !== 17).length); // la broche 17 (3,3 V) est partagée par la sonde et le relais, par un Wago 221-413
+    expect(new Set(all.filter((n) => n !== 17 && n !== 4)).size).toBe(all.filter((n) => n !== 17 && n !== 4).length); // la broche 17 (3,3 V) est partagée par la sonde et le relais, par un Wago 221-413 ; la broche 4 (5 V) par les LED du nid et le rail du ventilateur
   });
 });

@@ -39,7 +39,7 @@ def test_each_nested_interface_matches_runtime_keys(client, m):
     texte = TYPES.read_text(encoding="utf-8")
     m.read_sensors()
     d = client.get("/api/etat").get_json()
-    for nom, obj in [("DeviceState", d), ("Fan", d["ventilo"]), ("Battery", d["batterie"]), ("Outside", d["ext"]), ("AutoState", d["auto"]),
+    for nom, obj in [("DeviceState", d), ("Fan", d["ventilo"]), ("Outside", d["ext"]), ("AutoState", d["auto"]),
                      ("Consumption", d["conso"])]:
         extra = set(obj) - interface(texte, nom)
         if nom == "AutoState":   # AutoState étend AutoSettings : ses champs sont dans l'autre interface
@@ -69,7 +69,7 @@ def test_error_keys_of_the_code_are_declared_in_device_ts():
     utilisees |= set(re.findall(r'\be\.pop\("(\w+)"', code))
     utilisees |= {f"camera{n}" for n in (1, 2)} if 'f"camera{' in code else set()
     utilisees -= {"gpio_"}
-    assert {"mock", "gpio", "bme280", "ventilo", "delestage", "sonde_ext", "alerte_chaleur", "batterie", "tachymetre", "picamera2", "camera1"} <= utilisees
+    assert {"mock", "gpio", "bme280", "ventilo", "sonde_ext", "alerte_chaleur", "tachymetre", "picamera2", "camera1"} <= utilisees
     assert sorted(utilisees - declarees) == [], f"clés d'erreur du Pi absentes de DeviceErrors : {sorted(utilisees - declarees)}"
 
 
@@ -80,7 +80,6 @@ def test_enum_values_are_declared_in_device_ts():
         assert f"'{m_}'" in texte
     for e in ("inactif", "veille", "ventile", "securite"):
         assert f"'{e}'" in texte and f'"{e}"' in code
-    assert "'simulée'" in texte and "'mesurée'" in texte
 
 
 def test_api_routes_used_by_the_site(m):
@@ -122,3 +121,15 @@ def test_chapitres_de_nichoir_sont_tous_listes_dans_init_et_existent():
     assert sorted(nommes) == files and len(set(nommes)) == len(nommes)
     for nom in nommes:   # chaque chapitre commence par son cadre d'explication
         assert (PI / "nichoir" / f"{nom}.py").read_text(encoding="utf-8").startswith("# ====")
+
+
+def test_nginx_relays_every_route_used_by_the_site():
+    """Le relais du Pi serveur (pi/serveur/nichoir-nginx.conf) couvre toutes les adresses que le site appelle."""
+    conf = (PI / "serveur" / "nichoir-nginx.conf").read_text(encoding="utf-8")
+    prefixes = re.findall(r"location\s+(/\w+/)\s*\{", conf)   # les préfixes relayés : /api/, /video/
+    assert set(prefixes) == {"/api/", "/video/"}
+    sources = "".join(f.read_text(encoding="utf-8") for f in (PI / "site" / "src").rglob("*.ts*") if ".test." not in f.name)   # tout le code du site
+    for path in set(re.findall(r"['\"`](/(?:api|video)/[\w/]*)", sources)):
+        assert any(path.startswith(p) for p in prefixes), path
+    assert "proxy_buffering off" in conf   # le flux vidéo n'est pas mis en tampon
+    assert conf.count("proxy_pass http://NICHOIR_IP:8080;") == len(prefixes)   # une seule adresse à remplacer

@@ -58,7 +58,7 @@ def check_fan():
     """Panne : commandé à 30 % ou plus depuis plus de FAN_FAULT_S secondes mais 0 tr/min (seulement si le tachymètre a déjà donné des impulsions : il est branché)."""
     v, e = state["ventilo"], state["erreurs"]
     if v["alimente"] and v["pourcent"] >= FAN_MIN and _fan["depuis"] and time.time() - _fan["depuis"] > FAN_FAULT_S and v["rpm"] == 0 and _fan["tacho_vu"]:
-        e["ventilo"] = f"Le ventilateur est commandé à {v['pourcent']} % mais ne tourne pas (0 tr/min) : câblage, alimentation 12 V ou hélice bloquée ?"
+        e["ventilo"] = f"Le ventilateur est commandé à {v['pourcent']} % mais ne tourne pas (0 tr/min) : câblage, alimentation 5 V ou hélice bloquée ?"
         if time.time() - _notified["alerte_vent"] > 3600:   # une notification par heure au plus
             _notified["alerte_vent"] = time.time()
             notify("panne ventilateur", e["ventilo"])

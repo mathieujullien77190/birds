@@ -1,4 +1,4 @@
-"""Logique : fan(), ventilation automatique, caméras, LED, batterie, alertes, sonde extérieure, simulation, réglages, historique."""
+"""Logique : fan(), ventilation automatique, caméras, LED, consommation, alertes, sonde extérieure, simulation, réglages, historique."""
 import io
 import json
 import struct
@@ -18,17 +18,7 @@ def auto_on(m, **kw):
     m.state["auto"].update(actif=True, **kw)
 
 
-# ------------------------------------------------------------------ conversions batterie / consommation
-@pytest.mark.parametrize("v,attendu", [(9.0, 0.0), (10.0, 0.0), (11.0, 5.0), (12.8, 20.0), (13.05, 55.0), (13.4, 100.0), (14.5, 100.0)])
-def test_pourcent_depuis_tension(m, v, attendu):
-    assert m.percent_from_voltage(v) == pytest.approx(attendu)
-
-
-@pytest.mark.parametrize("p,attendu", [(0, 10.0), (5, 11.0), (20, 12.8), (55, 13.05), (100, 13.4), (120, 13.4)])
-def test_tension_depuis_pourcent(m, p, attendu):
-    assert m.voltage_from_percent(p) == pytest.approx(attendu)
-
-
+# ------------------------------------------------------------------ consommation
 def test_consommation(m):
     assert m.consumption() == {"total_w": 6.9, "detail": {"pi": 5.5, "cameras": 1.4, "led": 0.0, "ventilo": 0.0}}
     m.state.update(cam1=False, led_nid=True, led_ext=True)
@@ -281,21 +271,6 @@ def test_camera_mock_toggle(m, capsys):
     assert m.state["cam2"] is True and "Caméra 2 : allumée" in capsys.readouterr().out
 
 
-@pytest.mark.parametrize("pc,attendu", [(5, False), (9.9, False), (10, True), (None, True)])
-def test_camera_refused_on_critical_battery(m, pc, attendu, capsys):
-    m.state["batterie"]["pourcent"] = pc
-    m.state["cam2"] = False
-    m.camera(1, True)
-    assert m.state["cam2"] is attendu
-    assert ("refusée" in capsys.readouterr().out) is (not attendu)
-
-
-def test_camera_off_allowed_on_critical_battery(m):
-    m.state["batterie"]["pourcent"] = 2
-    m.camera(0, False)
-    assert m.state["cam1"] is False
-
-
 def test_camera_controls_real_recorder(load):
     m = load(mock=False, hw=True)
     cam = m.camera_devices[0][0]
@@ -326,49 +301,6 @@ def test_leds_without_gpio(m):
     m.led_nest.value = m.led_outside.value = "intact"
     m.leds(True, True)
     assert m.state["led_nid"] and m.state["led_ext"] and m.led_nest.value == "intact" and m.led_outside.value == "intact"
-
-
-# ------------------------------------------------------------------ délestage (batterie)
-def delest(m, wh_fraction):
-    m.sim["wh"] = wh_fraction * m.CAPACITY_WH
-    m.MOCK_NIGHT = True
-    m.read_sensors()
-
-
-def test_load_shedding_critical(m, capsys):
-    m.state.update(led_nid=True, cam1=True, cam2=False)
-    delest(m, 0.05)
-    assert "caméras et LED coupées" in m.state["erreurs"]["delestage"]
-    assert not m.state["led_nid"] and not m.state["cam1"] and not m.state["cam2"]
-    assert capsys.readouterr().out.count("DÉLESTAGE") == 1
-    m.read_sensors()   # déjà signalé : pas de nouvelle ligne
-    assert "DÉLESTAGE" not in capsys.readouterr().out
-
-
-def test_load_shedding_critical_with_only_ext_led_and_cam2(m):
-    m.state.update(led_ext=True, cam1=False, cam2=True)
-    delest(m, 0.05)
-    assert not m.state["led_ext"] and not m.state["cam2"]
-
-
-def test_load_shedding_critical_nothing_on(m):
-    m.state.update(cam1=False, cam2=False)
-    delest(m, 0.05)
-    assert "delestage" in m.state["erreurs"]
-
-
-def test_low_battery_only_warns(m):
-    m.state.update(led_nid=True, cam1=True)
-    delest(m, 0.15)
-    assert "économie d'énergie" in m.state["erreurs"]["delestage"]
-    assert m.state["led_nid"] and m.state["cam1"]
-
-
-def test_delestage_cleared_when_battery_recovers(m):
-    delest(m, 0.15)
-    assert "delestage" in m.state["erreurs"]
-    delest(m, 0.8)
-    assert "delestage" not in m.state["erreurs"]
 
 
 # ------------------------------------------------------------------ alerte chaleur / panne ventilateur / notifications
@@ -569,13 +501,10 @@ def test_simulation_day_and_night(calm):
     m.simulate()
     assert m.state["ext"]["t"] == 16.0
     assert m.state["ext"]["source"] == "simulée" and "sonde_ext" not in m.state["erreurs"]
-    assert m.state["batterie"]["solaire_w"] > 0
     assert m.state["t_nid"] == pytest.approx(16 + 3.05, abs=0.06)
-    assert m.state["batterie"]["source"] == "simulée" and m.state["batterie"]["solaire_w"] > 0
     m.time.hour = 3
     m.simulate()
     assert m.state["ext"]["t"] == 9.0
-    assert m.state["batterie"]["solaire_w"] == 0.0
 
 
 def test_simulation_night_override(calm):
@@ -583,11 +512,11 @@ def test_simulation_night_override(calm):
     m.time.hour = 12
     m.MOCK_NIGHT = True
     m.simulate()
-    assert m.state["ext"]["t"] == 9.0 and m.state["batterie"]["solaire_w"] == 0.0
+    assert m.state["ext"]["t"] == 9.0
     m.time.hour = 3
     m.MOCK_NIGHT = False
     m.simulate()
-    assert m.state["ext"]["t"] == 16.0 and m.state["batterie"]["solaire_w"] > 0
+    assert m.state["ext"]["t"] == 16.0
 
 
 def test_simulation_forced_temperatures(calm):
@@ -626,49 +555,6 @@ def test_simulation_probe_failure_and_recovery(calm):
     m.MOCK_FAULTS["sonde"] = False
     m.simulate()
     assert m.state["ext"]["t"] == 16.0 and "sonde_ext" not in m.state["erreurs"]
-
-
-def test_simulation_cloud_change(calm, monkeypatch):
-    m = calm
-    monkeypatch.setattr(m.random, "random", lambda: 0.0)
-    m.simulate()
-    assert m.sim["nuage_cible"] == pytest.approx(0.6)
-
-
-def test_simulation_battery_charge_taper_and_drain(calm):
-    m = calm
-    m.time.hour = 12
-    m.sim["nuage"] = m.sim["nuage_cible"] = 1.0
-    m.sim["wh"] = 0.5 * m.CAPACITY_WH
-    m.simulate()
-    gain_milieu = m.sim["wh"] - 0.5 * m.CAPACITY_WH
-    assert gain_milieu == pytest.approx((60 - m.consumption()["total_w"]) / 3600, rel=1e-6)
-    m.sim["wh"] = 0.98 * m.CAPACITY_WH
-    m.simulate()
-    gain_fin = m.sim["wh"] - 0.98 * m.CAPACITY_WH
-    assert 0 < gain_fin < gain_milieu / 2        # le courant diminue près de 100 %
-    m.sim["wh"] = m.CAPACITY_WH
-    m.simulate()
-    assert m.sim["wh"] == m.CAPACITY_WH            # plafonné
-    m.MOCK_NIGHT = True
-    m.sim["wh"] = 0.5 * m.CAPACITY_WH
-    m.simulate()
-    assert m.sim["wh"] < 0.5 * m.CAPACITY_WH      # la nuit : décharge
-    m.sim["wh"] = 0.0
-    m.simulate()
-    assert m.sim["wh"] == 0.0 and m.state["batterie"]["pourcent"] == 0.0
-
-
-def test_simulation_acceleration(calm):
-    m = calm
-    m.MOCK_NIGHT = True
-    m.sim["wh"] = 0.5 * m.CAPACITY_WH
-    m.simulate()
-    lent = 0.5 * m.CAPACITY_WH - m.sim["wh"]
-    m.SIM_ACCEL = 60
-    m.sim["wh"] = 0.5 * m.CAPACITY_WH
-    m.simulate()
-    assert 0.5 * m.CAPACITY_WH - m.sim["wh"] == pytest.approx(60 * lent, rel=1e-6)
 
 
 def test_fake_stream_png(m):

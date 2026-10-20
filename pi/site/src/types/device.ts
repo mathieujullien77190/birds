@@ -9,9 +9,7 @@ export interface DeviceErrors {
   ventilo_gpio?: string;
   ventilo_pwm?: string;
   tachymetre?: string;
-  delestage?: string;
   picamera2?: string;
-  batterie?: string;
   sonde_ext?: string;
   alerte_chaleur?: string;
   camera1?: string;
@@ -28,7 +26,6 @@ export interface DeviceState {
   cam2: boolean;
   erreurs: DeviceErrors;
   derniere_lecture: string | null;
-  batterie: Battery;
   ext: Outside;
   auto: AutoState;
   conso: Consumption;
@@ -40,16 +37,8 @@ export interface Fan {
   rpm: number | null;
   mode: 'arret' | 'manuel' | 'auto';
   raison: string;
-  /** 12 V présent (interrupteur GPIO27) ; faux = ventilateur vraiment coupé. */
+  /** 5 V présent (interrupteur GPIO27) ; faux = ventilateur vraiment coupé. */
   alimente: boolean;
-}
-
-/** Niveau de la batterie (mesuré par l'INA219, sinon simulé) ; `pourcent` est null quand on ne sait pas. */
-export interface Battery {
-  pourcent: number | null;
-  tension: number | null;
-  source: 'simulée' | 'mesurée' | null;
-  solaire_w?: number;
 }
 
 /** Réglages modifiables de la ventilation automatique. */

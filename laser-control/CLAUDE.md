@@ -1,4 +1,4 @@
-# laser-control/ — pilotage Sculpfun S30 Ultra 22 W
+# laser-control/ — pilotage Sculpfun E1 Pro 21 W
 
 Projet **autonome** (GRBL 1.1, Web Serial) : aucun import hors du dossier, imports relatifs (jamais `@/`). Source de vérité du pilotage ; l'app l'importe par `@laser` via `src/features/laser/adapter.ts`.
 - `src/grbl/` (logique pure), `src/job/` (G-code, import SVG), `src/ui/` (copie des briques de `src/ui/`, à garder d'accord).

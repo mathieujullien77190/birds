@@ -17,7 +17,7 @@ export interface Plank {
   /** Élément spécial (pas du bois) : dessiné par son propre modèle 3D, exclu de la découpe laser. « camera » (carte caméra) ou « ir » (carte de LED infrarouges). */
   /** Contour libre (repère de la plaque, sens trigonométrique) : remplace le rectangle (crans et trous restent possibles). */
   poly?: [number, number][];
-  special?: 'camera' | 'ir' | 'bar' | 'pi' | 'cable' | 'wire' | 'case' | 'block' | 'sensor' | 'fan' | 'driver' | 'relay' | 'solar' | 'doc' | 'conduit' | 'guard' | 'pin';
+  special?: 'camera' | 'ir' | 'bar' | 'pi' | 'cable' | 'wire' | 'case' | 'block' | 'sensor' | 'fan' | 'driver' | 'relay' | 'doc' | 'conduit' | 'guard' | 'pin';
   /** « block » (pavé) ou plaque d'un autre matériau (`material`) : épaisseur réelle selon z, au lieu de l'épaisseur du bois. */
   depth?: number;
   /** Caméra, LED infrarouges, capteur : épaisseur de bois que traverse leur corps (lentille, LED, puce). La carte s'appuie sur une face du bois, le bout du corps affleure l'autre face. */
@@ -59,4 +59,4 @@ export interface NestSheet { items: NestItem[]; used: number; /** 'mdf' : feuill
 export type FaceAxis = 'x' | 'y' | 'z';
 
 /** Réglages d'un nichoir à double paroi (mm) : intérieur utile l × L, hauteur du sol au bas du trou, trou, hauteur au-dessus du trou, épaisseur d'isolant. */
-export interface NestParams { l: number; L: number; floorToHole: number; hole: number; above: number; ins: number; /** côté intérieur du compartiment caméra dans l'isolant du toit (0 = aucun) */ cam: number; /** deuxième caméra dans une mini boîte en contreplaqué, sous le toit à gauche, tournée vers le trou d'entrée ; longue nappe jusqu'au 2ᵉ port caméra du Pi */ cam2: boolean; /** système solaire : panneau de 100 W sur poteaux, déporté ; batterie et régulateur */ solar: boolean; /** lambris : une couche de lames verticales sur les quatre côtés du corps */ chene: boolean; /** planche de chêne de 18 mm posée sur le toit, qui déborde de 15 mm */ lambris: boolean; /** toit en pente (deux pans en diagonale sur les côtés, au-dessus du toit plat) */ pente: boolean; }
+export interface NestParams { l: number; L: number; floorToHole: number; hole: number; above: number; ins: number; /** côté intérieur du compartiment caméra dans l'isolant du toit (0 = aucun) */ cam: number; /** deuxième caméra dans une mini boîte en contreplaqué, sous le toit à gauche, tournée vers le trou d'entrée ; longue nappe jusqu'au 2ᵉ port caméra du Pi */ cam2: boolean; /** lambris : une couche de lames verticales sur les quatre côtés du corps */ chene: boolean; /** planche de chêne de 18 mm posée sur le toit, qui déborde de 15 mm */ lambris: boolean; /** toit en pente (deux pans en diagonale sur les côtés, au-dessus du toit plat) */ pente: boolean; }

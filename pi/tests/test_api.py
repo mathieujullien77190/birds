@@ -153,12 +153,6 @@ def test_api_camera(client, m):
     assert d["cam1"] is True
 
 
-def test_api_camera_refused_on_critical_battery(client, m):
-    m.state["batterie"]["pourcent"] = 3
-    m.state["cam1"] = False
-    assert post(client, "/api/camera", {"num": 0, "on": True}).get_json()["cam1"] is False
-
-
 def test_api_led(client, m):
     d = post(client, "/api/led", {"nid": True}).get_json()
     assert d["led_nid"] is True and d["led_ext"] is False
@@ -244,7 +238,7 @@ def run_main(monkeypatch, tmp_path, mock):
     monkeypatch.setattr(flask.Flask, "run", lambda self, **kw: runs.append(kw))
     monkeypatch.setattr("atexit.register", lambda f, *a, **k: f)
     monkeypatch.setattr(sys, "argv", ["nichoir.py"])
-    for n in ("gpiozero", "bme280", "smbus2", "ina219", "picamera2", "picamera2.encoders", "picamera2.outputs"):
+    for n in ("gpiozero", "bme280", "smbus2", "picamera2", "picamera2.encoders", "picamera2.outputs"):
         monkeypatch.setitem(sys.modules, n, None)
     if mock:
         monkeypatch.setenv("NICHOIR_MOCK", "1")
@@ -267,7 +261,7 @@ def test_python_m_nichoir(monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(flask.Flask, "run", lambda self, **kw: runs.append(kw))
     monkeypatch.setattr("atexit.register", lambda f, *a, **k: f)
     monkeypatch.setattr(sys, "argv", ["nichoir"])
-    for n in ("gpiozero", "bme280", "smbus2", "ina219", "picamera2", "picamera2.encoders", "picamera2.outputs"):
+    for n in ("gpiozero", "bme280", "smbus2", "picamera2", "picamera2.encoders", "picamera2.outputs"):
         monkeypatch.setitem(sys.modules, n, None)
     monkeypatch.setenv("NICHOIR_MOCK", "1")
     monkeypatch.chdir(tmp_path)

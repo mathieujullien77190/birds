@@ -11,23 +11,23 @@ describe('baguettes de cale (à couper au montage) à la place des cales de bois
     it(`plus aucune cale de composant, des baguettes de 3 × 5 mm de longueur maximale, hors du nichoir (${name})`, () => {
       expect(sc.planks.filter((p) => /^Cale /.test(p.name))).toEqual([]);
       const list = strips(sc);
-      expect(list.length).toBeGreaterThanOrEqual(4);
+      expect(list.length).toBeGreaterThanOrEqual(2);
       expect(t).toBe(3);
-      expect(STRIP.length).toBe(384); // marge 8 mm, plus petite dimension (400) : tient sur 410 × 400 comme sur 400 × 400
+      expect(STRIP.length).toBe(384); // marge 8 mm, plus petite dimension (400) : tient sur 410 × 400, 400 × 400 comme 400 × 320
       for (const p of list) {
         expect(p.w).toBe(STRIP.length); expect(p.h).toBe(5); expect(p.special).toBeUndefined();
         expect(p.holes).toEqual([]); expect(p.notches).toEqual([]);
         expect(p.group).toBeDefined(); expect(sc.groupNames?.[p.group!]).toBe('Baguettes de cale (à couper)');
       }
-      // le triple du besoin : le besoin (somme des anciennes cales : Pi 96, convertisseur 204, interrupteur 96 : 396 mm, plus deux cales de 8 mm sous chacune des deux cartes de LED : 32 mm ; la batterie est sous le nichoir dans des étriers) donne 4 baguettes
-      const need = 396 + 16 + (sc.planks.some((p) => /^LED infrarouges extérieures/.test(p.name)) ? 16 : 0); // + deux cales de 8 mm sous la carte de LED du nid, et sous celle de l'extérieur s'il y en a une
+      // le triple du besoin : le besoin (somme des anciennes cales : Pi 96, interrupteur 96 : 192 mm, plus deux cales de 8 mm sous chacune des deux cartes de LED : 32 mm) donne 2 baguettes
+      const need = 192 + 16 + (sc.planks.some((p) => /^LED infrarouges extérieures/.test(p.name)) ? 16 : 0); // + deux cales de 8 mm sous la carte de LED du nid, et sous celle de l'extérieur s'il y en a une
       expect(list.length).toBeGreaterThanOrEqual(Math.ceil((3 * need) / STRIP.length));
       expect(list.length).toBeLessThanOrEqual(Math.ceil((3 * (need + 20)) / STRIP.length));
       expect(new Set(list.map((p) => p.group)).size).toBe(1);
     });
     it(`posées au sol à l'écart du nichoir, sans recouvrement entre elles ni avec les autres pièces (${name})`, () => {
       const list = strips(sc), ids = new Set(list.map((p) => p.id));
-      const nest = sc.planks.filter((p) => !ids.has(p.id) && !p.path && p.special !== 'doc' && p.special !== 'solar');
+      const nest = sc.planks.filter((p) => !ids.has(p.id) && !p.path && p.special !== 'doc');
       const house = bounds(nest.filter((p) => !/^(Bloc isolant d'hiver|Isolant bloc|Poignée bloc|Bouchon|Laine bouchon|Poignée bouchon)/.test(p.name)), t);
       for (const p of list) {
         const b = aabb(p, t);

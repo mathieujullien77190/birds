@@ -35,7 +35,7 @@ describe('montage : le câblage cite le nom des broches du Pi', () => {
     const ghost = { ...sc.planks.find((p) => /^Fil PWM ventilateur/.test(p.name))!, id: 'x', name: 'Fil inconnu' };
     expect(wiringText([...sc.planks, ghost], ['x'])).toBe(''); // pas dans la table : rien d'inventé
     expect(wiringText(sc.planks, ['absent'])).toBe('');
-    const wago = sc.planks.find((p) => /^Fil rail → convertisseur \+/.test(p.name))!;
+    const wago = sc.planks.find((p) => /^Fil Wago \+ → interrupteur/.test(p.name))!;
     const t1 = wiringText(sc.planks, [wago.id]); expect(t1).toContain('→'); expect(t1).not.toContain('Broches du Pi'); expect(t1).toContain('Raccord');
     expect(pinLabel(99)).toBe('broche 99 (?)');
     const noText = steps.filter((s) => s.kind === 'cabler' && s.pieceIds.length && !s.text); expect(noText).toEqual([]);

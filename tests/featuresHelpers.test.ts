@@ -16,30 +16,23 @@ const linkStyles = (src: string) => src.split('\n').filter((l) => /^\s*linkStyle
 
 describe('buildSchema : schéma dynamique', () => {
   it('toutes les options présentes : le schéma complet du document, tel quel', () => {
-    expect(buildSchema({ cam2: true, solar: true })).toBe(MERMAID_SRC);
+    expect(buildSchema({ cam2: true })).toBe(MERMAID_SRC);
   });
   it('sans 2ᵉ caméra : plus de CAM2 ni IR2, ni de leurs flèches, et un `linkStyle` par flèche restante avec la couleur d\'origine', () => {
-    const out = buildSchema({ cam2: false, solar: true });
+    const out = buildSchema({ cam2: false });
     expect(out).not.toMatch(/\bCAM2\b|\bIR2\b/);
     expect(out).toContain('CAM1');
     const full = arrowsOf(MERMAID_SRC), now = arrowsOf(out);
     expect(full.length - now.length).toBe(3); // nappe vers CAM2, 5 V vers IR2, masse commutée vers IR2
     expect(linkStyles(out)).toHaveLength(now.length);
-    // la couleur suit la flèche : la première flèche (câble du panneau) reste noire
-    expect(linkStyles(out)[0]).toContain('#111827');
+    // la couleur suit la flèche : la première flèche (câble Ethernet du switch) reste bleue
+    expect(linkStyles(out)[0]).toContain('#2563eb');
     // `class CAM1,CAM2 cam` devient `class CAM1 cam`
     expect(out).toMatch(/class CAM1 cam/);
     expect(out).toMatch(/class IR ir/);
   });
-  it('sans solaire : plus de PV ni MPPT, le bloc « Dehors » garde la caméra 2', () => {
-    const out = buildSchema({ cam2: true, solar: false });
-    expect(out).not.toMatch(/\bPV\b|\bMPPT\b/);
-    expect(out).not.toMatch(/class PV|class MPPT/);
-    expect(out).toContain('subgraph DEHORS');
-    expect(linkStyles(out)).toHaveLength(arrowsOf(out).length);
-  });
   it('sans aucune option : la zone « Dehors » garde la sonde de température extérieure', () => {
-    const out = buildSchema({ cam2: false, solar: false });
+    const out = buildSchema({ cam2: false });
     expect(out).toContain('subgraph DEHORS');
     expect(out).toContain('SONDE[');
     expect(out).not.toContain('CAM2[');
@@ -55,7 +48,8 @@ describe('liens pièce ↔ schéma', () => {
     expect(schemaKeys('Caméra')?.nodes).toEqual(['CAM1']);
     expect(schemaKeys('Fil masse (noir)')?.edges).toEqual([['SW', 'IR'], ['PI', 'SENS']]);
     expect(schemaKeys('Fil Wago + → interrupteur ventilateur (rouge)')?.edges).toEqual([['RAIL', 'SWF']]);
-    expect(schemaKeys('Fil fusible → Wago + (rouge)')?.edges).toEqual([['FUSE', 'RAIL']]);
+    expect(schemaKeys('Câble USB-C splitter → Pi (non fourni, 20 à 30 cm)')?.edges).toEqual([['POE', 'PI']]);
+    expect(schemaKeys('Splitter PoE+ 802.3at → USB-C 5 V (taille à confirmer, ≈ 60 × 36 × 16)')?.nodes).toEqual(['POE']);
     expect(schemaKeys('Face avant ext')).toBeNull();
   });
   it('nodeKey et edgeKey lisent les identifiants fabriqués par mermaid', () => {
@@ -125,7 +119,7 @@ describe('petits calculs de l\'interface', () => {
     expect(parseCutCfg('{"W":500,"H":300,"gap":2}')).toEqual({ W: 500, H: 300, gap: 2 });
     for (const bad of [null, 'pas du json', '{"W":"410"}', 'null']) expect(parseCutCfg(bad)).toEqual(DEFAULT_CUT_CFG);
     expect(parseCutCfg(null)).not.toBe(DEFAULT_CUT_CFG); // une copie : on ne modifie jamais la constante
-    expect(DEFAULT_CUT_CFG).toEqual({ W: 400, H: 400, gap: 5 });
+    expect(DEFAULT_CUT_CFG).toEqual({ W: 400, H: 320, gap: 5 });
     expect(CUT_CFG_KEY).toBe('plaques-decoupe');
     expect(SHEET_GAP_PREVIEW).toBeGreaterThan(0);
   });

@@ -4,9 +4,9 @@ import { MAP, FICHES, MERMAID_SRC, OPTION_NODES, SECTIONS } from './constants';
 import type { Keys, SchemaOptions } from './types';
 
 /** Schéma DYNAMIQUE : on part du schéma complet du document et on enlève les blocs et les flèches des options absentes de la scène
- *  (2ᵉ caméra : CAM2, IR2 ; Solaire : PV, MPPT), puis les zones devenues vides. Les couleurs des traits suivent leur flèche. */
+ *  (2ᵉ caméra : CAM2, IR2), puis les zones devenues vides. Les couleurs des traits suivent leur flèche. */
 export function buildSchema(opts: SchemaOptions): string {
-  const gone = new Set<string>([...(opts.cam2 ? [] : OPTION_NODES.cam2), ...(opts.solar ? [] : OPTION_NODES.solar)]);
+  const gone = new Set<string>([...(opts.cam2 ? [] : OPTION_NODES.cam2),]);
   if (!gone.size) return MERMAID_SRC;
   const lines = MERMAID_SRC.split('\n');
   const colors = lines.filter((l) => /^\s*linkStyle \d+ /.test(l)).map((l) => /stroke:([^,]+)/.exec(l)?.[1] ?? '#444');

@@ -30,6 +30,29 @@ sudo systemctl enable --now nichoir
 journalctl -u nichoir -f         # voir ce qu'il raconte
 ```
 
+## Héberger le site sur un autre Pi
+
+Le Pi du nichoir pilote tout (capteurs, ventilateur automatique, LED, caméras) et garde son API sur le port 8080 ; c'est un second Pi, relié au même switch, qui sert le site au navigateur. Le navigateur ne parle qu'à ce **Pi serveur**, qui relaie `/api/` et `/video/` vers le nichoir (le site ne change pas : ses adresses restent relatives).
+
+Sur le Pi serveur :
+
+```sh
+sudo apt install nginx
+# copier ici le dossier web/ (compilé, présent dans le dépôt) et pi/serveur/nichoir-nginx.conf
+sudo cp nichoir-nginx.conf /etc/nginx/sites-available/nichoir
+sudo sed -i 's/NICHOIR_IP/192.168.1.50/' /etc/nginx/sites-available/nichoir   # l'adresse du Pi du nichoir
+sudo ln -sf /etc/nginx/sites-available/nichoir /etc/nginx/sites-enabled/nichoir
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Puis ouvrir `http://<adresse-du-pi-serveur>/`. Donner une adresse fixe (réservation DHCP du switch ou du routeur) au Pi du nichoir : si elle change, le site ne le trouve plus.
+
+À savoir :
+- L'API du nichoir n'a **aucun mot de passe** : n'importe qui sur le réseau peut allumer les LED ou couper le ventilateur. Sur le Pi du nichoir, ne laisser entrer le port 8080 que depuis le serveur (`sudo ufw allow from <adresse-du-serveur> to any port 8080`, puis `sudo ufw enable`, après avoir autorisé le SSH).
+- Nichoir hors ligne : le site s'affiche mais les données restent vides ; le ventilateur du nichoir continue seul en mode automatique.
+- Plusieurs nichoirs : un second fichier avec un autre préfixe, à prévoir plus tard (ce n'est pas fait).
+
 ## Essayer sans matériel (mode simulé)
 Sur un ordinateur, sans rien de branché : capteurs, GPIO et caméras sont remplacés par des valeurs fausses mais plausibles (le nid suit dehors + 2 à 4 °C, refroidi par le ventilateur, deux flux vidéo animés, tachymètre simulé). Un bandeau « MODE SIMULÉ » s'affiche en haut de la page.
 ```sh
@@ -43,13 +66,13 @@ Dans l'app 3D, le bouton « 🐍 Pi » fait la même chose **sans installer Pyth
 
 ## Brochage
 
-Voir le document « Dossier du nichoir » de l'application. En résumé : ventilateur Noctua NF-A6x25 PWM : **GPIO27 (broche 13) = interrupteur 12 V (MOSFET côté +)**, **GPIO18 (broche 12) = PWM** (gpiozero / lgpio : 25 kHz visé, repli à 10 kHz), **GPIO17 (broche 11) = tachymètre** (pull-up), masse commune broche 14, 12 V du rail ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; sonde de dehors DS18B20 : 3,3 V broche 17, masse broche 20, donnée GPIO4 (broche 7, 1-Wire : `dtoverlay=w1-gpio` dans `/boot/firmware/config.txt`) ; INA219 (batterie) I2C 0x41 ; caméras sur CAM0 et CAM1.
+Voir le document « Dossier du nichoir » de l'application. En résumé : ventilateur Noctua NF-A6x25 PWM : **GPIO27 (broche 13) = interrupteur 5 V (relais côté +)**, **GPIO18 (broche 12) = PWM** (gpiozero / lgpio : 25 kHz visé, repli à 10 kHz), **GPIO17 (broche 11) = tachymètre** (pull-up), masse commune broche 14, relais 3 V sur le 5 V ; LED du nid GPIO23, LED extérieures GPIO24 ; BME280 sur I2C (adresse 0x76) ; sonde de dehors DS18B20 : 3,3 V broche 17, masse broche 20, donnée GPIO4 (broche 7, 1-Wire : `dtoverlay=w1-gpio` dans `/boot/firmware/config.txt`) ; caméras sur CAM0 et CAM1.
 
-**À valider sur le Pi 5** : gpiozero / lgpio limite peut-être le PWM à 10 kHz ; le programme essaie 25 kHz et retombe sur 10 kHz en le signalant. « Arrêt » coupe vraiment le 12 V (GPIO27 bas, PWM à 0), car un Noctua tourne encore à ~20 % à 0 % de PWM ; à la mise en marche : 12 V, 0,5 s, puis PWM.
+**À valider sur le Pi 5** : gpiozero / lgpio limite peut-être le PWM à 10 kHz ; le programme essaie 25 kHz et retombe sur 10 kHz en le signalant. « Arrêt » coupe vraiment le 5 V (GPIO27 bas, PWM à 0), car un Noctua tourne encore à ~20 % à 0 % de PWM ; à la mise en marche : 5 V, 0,5 s, puis PWM.
 
 ## Ce que fait la page
 
-- Toutes les 5 s : température et humidité du nid (et écart avec dehors), température de dehors (sonde DS18B20), batterie, consommation estimée.
+- Toutes les 5 s : température et humidité du nid (et écart avec dehors), température de dehors (sonde DS18B20), consommation estimée.
 - Carte Ventilateur : vitesse, tr/min, boutons Arrêt / Marche, curseur de 30 à 100 %, **ventilation automatique** (réglages modifiables et case « Mode hiver » (cassette retirée, bloc isolant, bouchon du dessous), gardés dans `reglages.json`).
 - Graphique des températures sur 24 h (un point toutes les 5 min dans `historique.json`).
 - Deux flux vidéo MJPEG (640 × 480) et boutons caméras / LED infrarouges.
@@ -57,7 +80,7 @@ Voir le document « Dossier du nichoir » de l'application. En résumé : ventil
 
 ## Sécurités intégrées
 
-Alerte au-dessus de 35 °C dans le nid (notification ntfy si `NICHOIR_NTFY_TOPIC` est réglé) ; capteur du nid muet = le ventilateur automatique ne démarre pas ; ventilateur commandé mais 0 tr/min pendant plus de 10 s = erreur ; sous 10 % de batterie les caméras et LED sont coupées, **jamais le ventilateur**.
+Alerte au-dessus de 35 °C dans le nid (notification ntfy si `NICHOIR_NTFY_TOPIC` est réglé) ; capteur du nid muet = le ventilateur automatique ne démarre pas ; ventilateur commandé mais 0 tr/min pendant plus de 10 s = erreur.
 
 ## Ce que ce programme ne fait pas encore
 
@@ -66,4 +89,4 @@ Pas de mot de passe, pas d'horaire automatique des LED. « On mesure d'abord » 
 ## Séparation des dossiers
 `pi/` = ce qui tourne sur le Raspberry (Python + site) ; `src/` à la racine = l'app de conception et de simulation. `pi/site` a son propre `package.json` et `node_modules` ; aucun import entre `src/` et `pi/site/` (l'app lit seulement la sortie `pi/web/` pour le simulateur « 🐍 Pi »).
 
-La page affiche aussi la batterie (niveau, tension, énergie restante) et la consommation estimée par élément (cartes `BatteryCard` et `ConsumptionCard` de `site/`).
+La page affiche aussi la consommation estimée par élément (carte `ConsumptionCard` de `site/`).

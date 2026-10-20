@@ -53,14 +53,14 @@ export const FAB_IR = [
 
 export const TEST_MULTIMETER = [
   'Avant la mise sous tension, au multimètre :',
-  '- continuité sur le rail 12 V ;',
-  '- jamais de court-circuit entre le + et le − du rail.',
+  '- continuité sur le rail 5 V (Wago) jusqu\'à la borne COM du relais ;',
+  '- jamais de court-circuit entre le 5 V et la masse.',
   'Tirer légèrement sur chaque fil après l\'avoir serré : s\'il bouge, le bornier ou le Wago n\'est pas bien fermé.',
 ].join('\n');
 
-export const TEST_BATTERY = [
-  'Le panneau solaire reste débranché. Brancher la batterie, avec son fusible et le régulateur de charge en place.',
-  '- La batterie LiFePO4 4S se situe autour de 12,8 V (14,6 V au plus à la charge, coupure basse vers 10 à 10,5 V).',
-  '- Le convertisseur alimente le Pi : la page `http://<ip-du-pi>:8080` répond, avec le niveau de la batterie.',
-  '- Refaire en vrai les essais de l\'établi : capteurs, caméras, LED, ventilateur (marche, arrêt, tr/min).',
+export const TEST_POE = [
+  'Brancher le câble Ethernet du switch PoE+ sur l\'entrée du splitter.',
+  '- Le splitter fournit 5 V sur sa sortie USB-C (mesurer avant de brancher le Pi) ; il ne doit pas trop chauffer.',
+  '- Le Pi démarre : la page `http://<ip-du-pi>:8080` répond (le Pi est joignable par le cordon RJ45 du splitter).',
+  '- Refaire en vrai les essais de l\'établi : capteurs, caméras, LED, ventilateur 5 V (marche, arrêt, tr/min).',
 ].join('\n');

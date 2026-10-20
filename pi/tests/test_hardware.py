@@ -6,7 +6,7 @@ from conftest import StopLoop
 
 def test_all_hardware_ok(load):
     m = load(mock=False, hw=True)
-    assert (m.LED_OK, m.FAN_OK, m.TACH_OK, m.BME_OK, m.BAT_OK) == (True,) * 5
+    assert (m.LED_OK, m.FAN_OK, m.TACH_OK, m.BME_OK) == (True,) * 4
     assert m.state["erreurs"] == {}
     assert m.fan_pwm.frequency == 25000
     assert set(m.cameras) == {0, 1} and set(m.camera_devices) == {0, 1}
@@ -34,16 +34,16 @@ def test_pwm_unavailable(load):
 
 
 def test_gpio_and_tacho_failures(load):
-    m = load(mock=False, hw=True, gpio="fail", tacho="fail", bme="calfail", ina="fail")
-    assert not (m.LED_OK or m.TACH_OK or m.BME_OK or m.BAT_OK)
+    m = load(mock=False, hw=True, gpio="fail", tacho="fail", bme="calfail")
+    assert not (m.LED_OK or m.TACH_OK or m.BME_OK)
     assert m.FAN_OK   # le PWM fonctionne même sans l'interrupteur
-    for k in ("gpio", "tachymetre", "bme280", "batterie"):
+    for k in ("gpio", "tachymetre", "bme280"):
         assert k in m.state["erreurs"]
 
 
 def test_nothing_installed(load):
     m = load(mock=False)
-    assert set(m.state["erreurs"]) == {"gpio", "ventilo_gpio", "tachymetre", "bme280", "batterie", "picamera2"}
+    assert set(m.state["erreurs"]) == {"gpio", "ventilo_gpio", "tachymetre", "bme280", "picamera2"}
     assert m.cameras == {} and not m.BME_OK
 
 
@@ -59,7 +59,7 @@ def test_mock_mode_switches(load, argv, env):
     assert m.MOCK and m.HISTORY_PERIOD == 5 and m.PERIOD == 1.0
     assert m.HISTORY_FILE.endswith("historique.json")   # chemin re-patché par la fixture
     assert list(m.state["erreurs"]) == ["mock"]
-    assert m.LED_OK and m.FAN_OK and m.TACH_OK and m.BME_OK and m.BAT_OK
+    assert m.LED_OK and m.FAN_OK and m.TACH_OK and m.BME_OK
     assert m._fan["tacho_vu"] is True
     assert set(m.cameras) == {0, 1} and m.cameras[0].mime == "image/png"
 
@@ -70,7 +70,7 @@ def test_mock_history_filename_at_import(monkeypatch, tmp_path):
     monkeypatch.setenv("NICHOIR_MOCK", "1")
     monkeypatch.setattr(sys, "argv", ["x"])
     monkeypatch.setattr("atexit.register", lambda f: f)
-    for n in ("gpiozero", "bme280", "smbus2", "ina219", "picamera2", "picamera2.encoders", "picamera2.outputs"):
+    for n in ("gpiozero", "bme280", "smbus2", "picamera2", "picamera2.encoders", "picamera2.outputs"):
         monkeypatch.setitem(sys.modules, n, None)
     spec = importlib.util.spec_from_file_location("nichoir", PI / "nichoir" / "__init__.py", submodule_search_locations=[str(PI / "nichoir")])
     mod = importlib.util.module_from_spec(spec)
@@ -100,26 +100,14 @@ def test_lecture_bme_ok_and_error(load):
     assert m.state["t_nid"] == 21.3   # gardée
 
 
-def test_lecture_battery_ok_and_error(load):
-    m = load(mock=False, hw=True)
-    m.read_sensors()
-    assert m.state["batterie"] == {"pourcent": 70.0, "tension": 13.1, "source": "mesurée"}
-    m.ina_bat.voltage = lambda: 1 / 0
-    m.read_sensors()
-    assert "lecture de la batterie" in m.state["erreurs"]["batterie"]
-    m.ina_bat.voltage = lambda: 13.1
-    m.read_sensors()
-    assert "batterie" not in m.state["erreurs"]
-
-
 def test_lecture_without_any_hardware(load, capsys):
     m = load(mock=False)
     m.fan(60)
     m.read_sensors()
-    assert m.state["t_nid"] is None and m.state["batterie"]["pourcent"] is None
+    assert m.state["t_nid"] is None
     assert m.state["ventilo"]["rpm"] is None
     out = capsys.readouterr().out
-    assert "ventilateur 60 %" in out and "tr/min" not in out and "batterie" not in out
+    assert "ventilateur 60 %" in out and "tr/min" not in out
     assert m.state["derniere_lecture"] and m._read_count[0] == 1
 
 
@@ -134,14 +122,14 @@ def test_log_situation_only_every_10_readings(load, capsys):
     assert "nid 21.3 °C" in capsys.readouterr().out
 
 
-def test_log_with_rpm_and_battery(load, capsys):
+def test_log_with_rpm(load, capsys):
     m = load(mock=False, hw=True)
     m.fan(60)
     m.state["ventilo"]["rpm"] = 1500
     m.measure_fan = lambda: None   # garde le rpm choisi
     m.read_sensors()
     out = capsys.readouterr().out
-    assert "ventilateur 60 % (1500 tr/min)" in out and "batterie 70.0 %" in out and "conso" in out
+    assert "ventilateur 60 % (1500 tr/min)" in out and "conso" in out
 
 
 def test_boucle_runs_lecture_then_sleeps(m):

@@ -1,6 +1,6 @@
 import type { DeviceState, HistoryPoint } from '@/types';
 
-/** État complet et sain (nid 24 °C, ventilateur arrêté, batterie 80 %). */
+/** État complet et sain (nid 24 °C, ventilateur arrêté). */
 export function makeState(over: Partial<DeviceState> = {}): DeviceState {
   return {
     t_nid: 24.5,
@@ -12,7 +12,6 @@ export function makeState(over: Partial<DeviceState> = {}): DeviceState {
     cam2: false,
     erreurs: {},
     derniere_lecture: '12:34:56',
-    batterie: { pourcent: 80, tension: 13.1, source: 'mesurée', solaire_w: 12 },
     ext: { t: 20, source: 'DS18B20', maj: '12:30' },
     auto: {
       seuil_marche: 28, ecart_ext: 2, hysteresis: 1, vitesse_min: 30, vitesse_max: 100, plage: 6, alerte_chaleur: 38,

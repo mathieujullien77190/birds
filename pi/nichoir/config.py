@@ -2,7 +2,7 @@
 # config.py — CHAPITRE 1 : les bibliothèques, le journal et TOUTES les constantes du programme.
 #
 # Ce fichier ne fait rien tout seul : il pose les réglages (seuils, limites, durées, mode simulé) que
-# les autres chapitres lisent. Pour changer un seuil de ventilation, une limite de batterie ou une
+# les autres chapitres lisent. Pour changer un seuil de ventilation, un réglage ou une
 # durée, c'est ici.
 #
 # Rappel : les chapitres du dossier `nichoir/` partagent UN SEUL espace de noms (voir __init__.py) :
@@ -66,15 +66,10 @@ W1_DIR = "/sys/bus/w1/devices"
 OUTSIDE_PLAUSIBLE = (-40.0, 60.0)   # hors de ces bornes une mesure de dehors est jugée aberrante (sonde défaillante)
 DS18B20_ERROR_VALUE = 85.0       # valeur lue par un DS18B20 qui n'a pas encore converti (mise sous tension) : jamais une température
 
-# ---------------------------------------------------------------- batterie et consommation
-BATTERY_LOW = 20      # % : en dessous, message d'économie d'énergie (plus rien de gourmand à couper : le ventilateur reste actif, c'est la sécurité du nid)
-BATTERY_CRITICAL = 10   # % : en dessous, les caméras et les LED infrarouges sont coupées (et refusées)
-CAPACITY_WH = 76.8  # batterie LiFePO4 12,8 V × 6 Ah
-# Consommation estimée (W) de chaque élément quand il est allumé : valeurs usuelles, à remplacer par des mesures (INA219) dès que possible.
+# ---------------------------------------------------------------- consommation
+# Consommation estimée (W) de chaque élément quand il est allumé : valeurs usuelles, à remplacer par des mesures dès que possible.
 # Pi 5 : ≈ 3 W au repos, ≈ 5-6 W avec deux flux caméra (on garde 5,5 W : le programme sert les flux en continu) ; ancienne valeur du Pi 4 : 3,5 W.
 POWER_W = {"pi": 5.5, "camera": 0.7, "led": 0.33, "ventilo_max": 0.6}  # ventilateur : 0,6 W à 100 %, proportionnel au cube de la vitesse (loi des ventilateurs)
-# Tension au repos d'une batterie LiFePO4 12,8 V (4 cellules) selon sa charge : (pourcentage, volts). Sous charge la tension chute : l'estimation est grossière.
-LIFEPO4_CURVE = [(0, 10.0), (10, 12.0), (20, 12.8), (30, 12.9), (40, 13.0), (70, 13.1), (90, 13.2), (100, 13.4)]
 
 # ---------------------------------------------------------------- historique des températures
 # Historique des températures : « on mesure d'abord » — une saison de mesures avant de décider d'autre chose.
@@ -86,7 +81,6 @@ HISTORY_FILE = os.path.join(_ROOT, "historique-simule.json" if (os.environ.get("
 # FACULTATIF : mode simulé, pour tester la page sans matériel (ordinateur). Jamais actif par défaut.
 MOCK = os.environ.get("NICHOIR_MOCK") == "1" or "--mock" in sys.argv   # vrai si on lance avec NICHOIR_MOCK=1 ou l'option --mock
 HISTORY_PERIOD = 5 if MOCK else 300    # secondes entre deux points (5 s en mode simulé pour que le graphique se remplisse)
-SIM_ACCEL = float(os.environ.get("NICHOIR_MOCK_ACCEL", "1"))  # 1 = temps réel ; 10 ou 60 = le temps passe plus vite sur la batterie simulée (pour voir le niveau bouger)
 MOCK_FORCE = {"nid": None, "ext": None}  # températures imposées pour les essais (nid de base, extérieur)
 MOCK_NIGHT = None   # None : jour / nuit d'après l'horloge ; True / False : imposé (le simulateur de l'app suit son bouton Jour / Nuit)
 MOCK_FAULTS = {"bme": False, "ventilo": False, "sonde": False}  # pannes simulées (essais depuis le simulateur de l'app) ; « ventilo » : le tachymètre ne compte plus rien ; « sonde » : la sonde de dehors est muette

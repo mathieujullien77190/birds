@@ -14,7 +14,6 @@ import { irBoardGeometry } from './ir';
 import { piGeometry } from './pi';
 import { pinGeometry } from './pin';
 import { sensorGeometry } from './sensor';
-import { solarGeometry } from './solar';
 
 type Special = NonNullable<Plank['special']>;
 type PartFactory = (p: Plank, t: number) => PartGeometry;
@@ -25,7 +24,6 @@ type PartFactory = (p: Plank, t: number) => PartGeometry;
  */
 const FACTORIES: Partial<Record<Special, PartFactory>> = {
   case: caseGeometry,
-  solar: solarGeometry,
   fan: fanGeometry,
   guard: guardGeometry,
   driver: driverGeometry,

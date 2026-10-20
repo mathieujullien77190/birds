@@ -214,11 +214,6 @@ describe('nichoir par défaut : tous les codes gravés', () => {
     expect(sheets.some((s) => s.material === 'okoume')).toBe(true);
     expect(items.filter((it) => /^Lambris/.test(it.plank.name)).every((it) => it.code!.startsWith('H'))).toBe(true);
   });
-  it('des pièces identiques ont le même code (4 étriers du régulateur)', () => {
-    const e = items.filter((it) => /^Étrier régulateur/.test(it.plank.name) && !it.plank.spareOf).map((it) => it.code);
-    expect(e).toHaveLength(4);
-    expect(new Set(e).size).toBe(1);
-  });
   it('le code gravé est dans la matière, à ≥ 1 mm de tout bord, dent et trou, quelle que soit la rotation de la pièce sur la planche', () => {
     let engraved = 0;
     for (const it of items) {
