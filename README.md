@@ -39,6 +39,13 @@ Cinq documents Markdown dans [`docs/`](docs/), lisibles aussi dans l'application
 | [`docs/checklist-changements.md`](docs/checklist-changements.md) | **Checklist** : quand je change X, quels fichiers mettre à jour et quelle commande vérifie. |
 | [`docs/laser.md`](docs/laser.md) | **Pilotage de la laser** (Sculpfun S30 Ultra 22 W, GRBL) : branchement USB, mise en place pas à pas, cadre à vide, réglages de coupe à calibrer, sécurité, convention d'axes. |
 
+## Architecture
+
+![Schéma d'architecture : application racine (interface, three.js, modèle pur), laser-control, programme et site du Pi, build et déploiement](docs/architecture.svg)
+
+Trois projets : l'application racine (modèle pur → couche three.js → interface React), `laser-control/` (autonome, importé par l'app via l'alias `@laser`) et `pi/` (service Python Flask + site React compilé dans `pi/web`). Le simulateur fait tourner `pi/nichoir/` dans le navigateur avec Pyodide ; l'app est publiée sur GitHub Pages par le workflow `pages.yml`.
+
+
 ## Lancer en local
 
 ```sh
