@@ -9,11 +9,11 @@ describe('constants', () => {
   it('valeurs de départ prudentes et cohérentes avec les bornes', () => {
     expect(MACHINE_SETTINGS_KEY).toBe('laser-reglages');
     expect([...JOG_STEPS]).toEqual([0.1, 1, 10, 50]);
-    expect(FEED_RANGE).toEqual({ min: 20, max: 3000 });
+    expect(FEED_RANGE).toEqual({ min: 20, max: 6000 });
     const d = DEFAULT_MACHINE_SETTINGS;
     expect(d.feed).toBeGreaterThanOrEqual(FEED_RANGE.min);
     expect(d.feed).toBeLessThanOrEqual(FEED_RANGE.max);
-    expect(d.capPct).toBe(80);
+    expect(d.capPct).toBe(100);
     expect(d.passMode).toBe('all');
     expect(JOG_STEPS).toContain(d.jogStep as 10);
     expect(d.test.speedMin).toBeLessThan(d.test.speedMax);

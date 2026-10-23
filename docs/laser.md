@@ -8,7 +8,7 @@ L'app pilote la découpeuse directement depuis le navigateur (API **Web Serial**
 | Élément | Valeur |
 |---|---|
 | Machine | Sculpfun E1 Pro 21 W (la seule machine prise en charge), caisson fermé classe 1, diode bleue de 21 W (455 nm), assistance d'air fournie ; la variante Dual ajoute un module infrarouge 3 W (1064 nm), non piloté par l'app ; prix relevé sur fr.sculpfun.com le 19/10/2026 : 799 € (21 W) et 1 049 € (Dual), expédition annoncée mi-juillet sur la fiche (à revérifier) |
-| Contrôleur | GRBL 1.1, USB série 115200 bauds 8N1 |
+| Contrôleur | GRBL 1.1, USB série 115200 bauds 8N1 (carte STM32 + ESP32, GRBL personnalisé ; réglages relevés sur diode-laser-wiki.com : `$30=1000`, `$32=1`, `$110/$111=36000`, `$130=400`, `$131=320`, à confirmer par `$$` ; butées matérielles actives `$21=1`, limites logicielles `$20=0` ; `$s` liste les réglages propres à la machine) |
 | Zone | 400 × 320 mm (zone de gravure ; le matériau posé peut faire 450 × 350 mm, épaisseur 30 mm sur le nid d'abeille) ; la planche par défaut de l'app est de 400 × 320 mm : le contreplaqué du commerce de 400 × 400 mm doit être recoupé à 400 × 320 (ou 400 × 350 au plus), réglable par les curseurs de « Découpe laser » |
 | Navigateur | Chrome ou Edge, page en HTTPS ou sur `localhost` (Firefox et Safari : pas de Web Serial) |
 
@@ -18,9 +18,17 @@ L'app pilote la découpeuse directement depuis le navigateur (API **Web Serial**
 4. « Connecter la laser » : le navigateur demande de choisir le port (clic obligatoire).
 
 ## La machine : Sculpfun E1 Pro 21 W
-Fiche du vendeur : caisson fermé classe 1, diode bleue de 21 W (455 nm, spot 0,06 × 0,08 mm), zone de gravure 400 × 320 mm, CoreXY jusqu à 600 mm/s, caméra intégrée, pompe d assistance d air fournie, alimentation 24 V 6 A, USB ou WiFi (via application), logiciels Sculpfun Space, LightBurn et LaserGRBL. **À confirmer à la réception** : la version de GRBL (`$I`) et le 115200 bauds en USB ; le guide de démarrage du constructeur ne cite que LightBurn. La case **« Assistance d'air (M8 / M9) »** des réglages de coupe est cochée par défaut : le programme envoie `M8` avant la coupe et `M9` après. Le Web Serial réel reste non testé faute de machine.
+Fiche du vendeur : caisson fermé classe 1, diode bleue de 21 W (455 nm, spot 0,06 × 0,08 mm), zone de gravure 400 × 320 mm, CoreXY jusqu à 600 mm/s, caméra intégrée, pompe d assistance d air fournie, alimentation 24 V 6 A, USB ou WiFi (via application), logiciels Sculpfun Space, LightBurn et LaserGRBL. **À confirmer à la réception** : la version de GRBL (`$I`) et le 115200 bauds en USB ; le guide de démarrage du constructeur ne cite que LightBurn. La case **« Assistance d'air (M8 / M9) »** des réglages de coupe est cochée par défaut : le programme envoie `M8` avant la coupe et `M9` après. Le Web Serial réel reste non testé faute de machine. Manuel E1 V1.0 : pilote CH340 ; la machine ne tire pas couvercle ouvert ; après une ouverture, un clic sur le bouton E1 libère le verrou de sécurité ; double-clic = retour à l'origine machine ; avec la « Safety Positioning », ouvrir le couvercle envoie la tête au coin haut-gauche puis elle revient à sa position ; la caméra se branche au PC par un câble USB-A vers USB-A (fourni) sur son propre port, sans passer par le port de la carte, et doit être calibrée dans le logiciel ; l'éclairage intérieur se règle par la commande `$light/duty=0..1000` (la syntaxe `$nom/valeur` fait penser à un contrôleur de type ESP32, à confirmer par `$I`).
+
+## Caméra
+Le bloc « Caméra de la machine » (colonne de droite) affiche l'image de la caméra intégrée, reconnue comme une webcam USB (câble USB-A vers USB-A sur son port « Camera »). Il sert à regarder la planche et le cadre à vide ; la caméra n'est pas calibrée dans l'app (le positionnement par caméra reste dans Sculpfun Space ou LightBurn). Autoriser la caméra dans le navigateur, fermer les autres logiciels qui l'utilisent. La luminosité de l'éclairage intérieur se règle depuis la console de l'app par `$light/duty=0..1000`.
+
+## Réglages relevés de la machine (`$s`, diode-laser-wiki.com)
+Mode laser actif, S max 1000, homing actif (X puis Y, retrait 1,5 mm), butées matérielles actives, erreurs en `error:NN` (`$Errors/Verbose Off`). Autres : pompe d'air gérée par la carte (`$AirPump/Enable On`, 50 % en marche, 5 % au repos ; l'effet de `M8` n'est pas documenté, décocher « Assistance d'air » si la carte le refuse), alerte incendie (`$FireAlert/Enable On`), ventilateur d'extraction qui continue après la coupe (`$Fan/VentingTime 120`), éclairage intérieur (`$Light/Duty 500`), compensation de puissance du laser bleu (`$BlueLaser/PowerComp/Enable On`), buzzer. À comparer avec la sortie réelle de `$s` à la réception.
 
 ## Mise en place d'une découpe
+0. Arrêt d'urgence relevé, clé USB de sécurité insérée, couvercle fermé. La E1 Pro a le homing actif (`$22 = 1`, vu sur diode-laser-wiki.com) : si l'app affiche une alarme à la connexion, « Référencer ($H) » (ou un double-clic sur le bouton E1) envoie la tête sur ses butées ; si `$H` répond `error:5`, le homing est désactivé et « Déverrouiller ($X) » suffit. Après un `$X`, refaire l'origine.
+Premier homing : près de l'arrêt d'urgence, couvercle fermé ; si les moteurs forcent contre un bord (bruit), couper l'alimentation tout de suite et vérifier que rien ne gêne la tête ni les butées (un module laser relevé trop haut peut empêcher une butée de se déclencher, cas relevé sur une S30 Pro Max).
 1. Connexion ; vérifier `$32 = 1` (mode laser). Sinon l'app avertit, verrouille la découpe et propose `$32=1` après confirmation.
 2. Poser et fixer la planche, régler la focale.
 3. Avec les flèches, amener la tête sur le **coin bas-gauche** du matériau, puis « Origine ici » (`G10 L20 P1 X0 Y0`).
@@ -131,7 +139,7 @@ Liste générée à partir du modèle (`partTable`) ; l'ordre est celui de la sc
 Total : 219 plaques, 80 codes (sur la planche par défaut de 400 × 320 mm les 219 pièces tiennent sur 16 planches : 11 de contreplaqué 3 mm et 5 d'okoumé 5 mm ; sur 400 × 400, 14 planches).
 
 ## Réglages à calibrer
-Valeurs de départ prudentes : 300 mm/min, 60 %, 3 passes, plafond de puissance 80 %. Elles dépendent du contreplaqué, de la focale et de l'air assist : la **planche d'essai** découpe une grille de petits carrés (colonnes = vitesses, lignes = puissances) ; le tableau à l'écran donne la position de chaque carré. Retenir le couple qui détache le carré proprement avec le moins de brûlure.
+Valeurs de départ du constructeur (tableau « Sculpfun E1 Paramètres », laser bleu 21 W, contreplaqué de tilleul 3 mm) : coupe 750 mm/min, 100 %, 1 passe ; gravure 5000 mm/min, 10 % ; plafond de puissance 100 %. Elles dépendent du contreplaqué, de la focale et de l'air assist : la **planche d'essai** découpe une grille de petits carrés (colonnes = vitesses, lignes = puissances) ; le tableau à l'écran donne la position de chaque carré. Retenir le couple qui détache le carré proprement avec le moins de brûlure.
 
 ## Sécurité
 - Lunettes de protection (445 nm), surveillance permanente, arrêt d'urgence matériel à portée, extincteur ou eau proche, air assist allumé.

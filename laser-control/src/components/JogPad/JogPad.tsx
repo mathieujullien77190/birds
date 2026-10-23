@@ -8,7 +8,7 @@ const ARROW = 'flex h-10 w-10 items-center justify-center rounded-md border bord
 /** Pilotage manuel : flèches (pas réglable), vitesse, origine ici / aller à l'origine, déverrouillage, réinitialisation. Jamais de laser. */
 export function JogPad({ m }: { m: LaserMachine }) {
   const { grbl, settings, setSettings } = m;
-  const [confirm, setConfirm] = useState<'unlock' | 'reset' | null>(null);
+  const [confirm, setConfirm] = useState<'unlock' | 'reset' | 'home' | null>(null);
   const state = grbl.status?.state;
   const moveOk = grbl.connected && !m.job.running && (state === 'Idle' || state === 'Jog');
   const step = settings.jogStep, feed = settings.jogFeed;
@@ -35,6 +35,7 @@ export function JogPad({ m }: { m: LaserMachine }) {
       <div className="grid grid-cols-2 gap-2">
         <Btn variant="primary" disabled={!moveOk || state !== 'Idle'} onClick={() => void grbl.setOrigin()} title="La position actuelle de la tête devient X0 Y0 (G10 L20 P1)">Origine ici</Btn>
         <Btn disabled={!moveOk} onClick={() => void grbl.goOrigin(feed)}>Aller à l'origine</Btn>
+        <Btn disabled={!grbl.connected || m.job.running || (state !== 'Idle' && state !== 'Alarm')} onClick={() => setConfirm('home')} title="Envoie la tête sur ses butées ($H) : à faire à la mise sous tension si la machine est en alarme">Référencer ($H)</Btn>
         <Btn variant="warn" disabled={!grbl.connected || state !== 'Alarm'} onClick={() => setConfirm('unlock')}>Déverrouiller ($X)</Btn>
         <Btn disabled={!grbl.connected || m.job.running} onClick={() => setConfirm('reset')}>Réinitialiser</Btn>
       </div>
@@ -43,6 +44,12 @@ export function JogPad({ m }: { m: LaserMachine }) {
         <ConfirmDialog title="Déverrouiller la machine ?" confirmLabel="Envoyer $X" danger onCancel={() => setConfirm(null)} onConfirm={() => { setConfirm(null); void grbl.unlock(); }}>
           <p>$X lève l'alarme sans vérifier la position de la tête. Après une alarme, la position connue par la machine peut être fausse.</p>
           <p>Vérifie que rien ne gêne la tête, puis <b>refais l'origine</b> avant de couper.</p>
+        </ConfirmDialog>
+      )}
+      {confirm === 'home' && (
+        <ConfirmDialog title="Référencer la machine ?" confirmLabel="Envoyer $H" onCancel={() => setConfirm(null)} onConfirm={() => { setConfirm(null); void grbl.home(); }}>
+          <p>$H envoie la tête sur ses butées pour retrouver sa position. Couvercle fermé, rien dans la machine qui gêne la tête. Si la commande est refusée (error:5), le homing est désactivé : utilise « Déverrouiller ($X) » à la place, puis refais l'origine.</p>
+          <p>Le double-clic sur le bouton E1 de la machine fait la même chose.</p>
         </ConfirmDialog>
       )}
       {confirm === 'reset' && (

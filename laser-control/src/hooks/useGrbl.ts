@@ -86,6 +86,8 @@ export function useGrbl() {
   const setOrigin = useCallback(() => command('G10 L20 P1 X0 Y0'), [command]);
   const goOrigin = useCallback((feed: number) => command(`$J=G90 G21 X0 Y0 F${feed}`), [command]);
   const unlock = useCallback(() => command('$X'), [command]);
+  /** Référencement ($H) : la tête va chercher ses butées ; sur la E1 Pro le homing est actif ($22=1), la machine démarre en alarme tant qu'il n'est pas fait. */
+  const home = useCallback(() => command('$H'), [command]);
   const softReset = useCallback(async () => { await clientRef.current?.realtime(RT.reset); }, []);
   const readSettings = useCallback(() => command('$$'), [command]);
   /** Active le mode laser ($32=1) : à appeler seulement après confirmation. */
@@ -96,7 +98,7 @@ export function useGrbl() {
     connected: conn === 'connected',
     clearLog: () => { logBuf.current = []; setLog([]); },
     clearProblem: () => setProblem(null),
-    connect, disconnect, command, jog, jogCancel, setOrigin, goOrigin, unlock, softReset, readSettings, enableLaserMode,
+    connect, disconnect, command, jog, jogCancel, setOrigin, goOrigin, unlock, home, softReset, readSettings, enableLaserMode,
   };
 }
 
