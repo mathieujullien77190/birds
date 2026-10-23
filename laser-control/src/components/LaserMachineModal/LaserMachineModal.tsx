@@ -11,6 +11,7 @@ import { JogPad } from '../JogPad';
 import { SendPanel } from '../SendPanel';
 import { StopButton } from '../StopButton';
 import { TestCard } from '../TestCard';
+import { Webcam } from '../Webcam';
 
 /** Contenu du pilotage de la laser : connexion, déplacements, cadre, réglages, planche d'essai, aperçu, envoi, journal. `top` = blocs ajoutés en haut de la colonne de gauche (fichiers…). */
 export function LaserPanel({ m, top }: { m: LaserMachine; top?: ReactNode }) {
@@ -25,6 +26,7 @@ export function LaserPanel({ m, top }: { m: LaserMachine; top?: ReactNode }) {
         <Section title="Planche d'essai"><TestCard m={m} /></Section>
       </div>
       <div className="min-w-0 space-y-2.5">
+        <Section title="Caméra de la machine"><Webcam /></Section>
         <Section title="Aperçu du trajet" defaultOpen><GcodePreview m={m} /></Section>
         <Section title="Envoi à la machine" defaultOpen><SendPanel m={m} /></Section>
         <GrblConsole grbl={m.grbl} />
