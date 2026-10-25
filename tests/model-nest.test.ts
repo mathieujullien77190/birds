@@ -282,7 +282,7 @@ describe('découpe : planches MDF, libellés, SVG', () => {
     const sheets = nestSheets({ t: 3, fit: 0, planks: [p('big', 500, 100)] }, 300, 300);
     expect(sheets).toHaveLength(1);
     expect(sheets[0].used).toBeGreaterThan(1);
-    expect(sheets[0].items[0]).toMatchObject({ x: 8, y: 8, rotated: false });
+    expect(sheets[0].items[0]).toMatchObject({ x: 8, y: 192, rotated: false }); // calée dans le coin de l'origine : bas-gauche, dépasse vers la droite
   });
   it('une pièce haute est tournée d\'un quart de tour pour entrer dans la planche', () => {
     const sheets = nestSheets({ t: 3, fit: 0, planks: [p('long', 100, 380)] }, 400, 150);
@@ -298,8 +298,8 @@ describe('découpe : planches MDF, libellés, SVG', () => {
     expect(svg).toContain('>X-01 Pièce A</text>'); // code de la plaque (sans groupe : X-01) + nom
     expect(svg.match(/<polygon(?! class="e")/g)).toHaveLength(2); // contour + trou (le code gravé est à part, en bleu, class="e")
     expect(sheets[0].items[0].rotated).toBe(true); // 10 × 20 : tournée d'un quart de tour, au plus près du coin
-    expect(svg).toContain('points="18,28 18,8 8,8 8,28"'); // pièce 10 × 20 en (8, 8), y vers le bas
-    expect(svg).toContain('points="13,16 12.61,16.04'); // trou Ø 4 au centre (13, 18)
+    expect(svg).toContain('points="18,42 18,22 8,22 8,42"'); // pièce 10 × 20 calée vers l'origine de la laser (bas de la planche, marge 8), y vers le bas
+    expect(svg).toContain('points="13,30 12.61,30.04'); // trou Ø 4 au centre (13, 32)
   });
   it('sheetsPreviewSvg : planches empilées avec un intervalle', () => {
     const sheets = nestSheets({ t: 3, fit: 0, planks: [p('a', 280, 280), p('b', 280, 280)] }, 300, 300);

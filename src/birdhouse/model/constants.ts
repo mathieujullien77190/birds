@@ -3,6 +3,9 @@ import { type PlankScene, type NestParams } from './types';
 /** Taille de base d'une dent, en mm (boîtes et « Dents : auto »). */
 export const TOOTH = 16;
 
+/** Serrage des crans (mm, négatif = plus serré) : chaque cran est plus étroit que la dent qui y entre, pour que les plaques tiennent seules (le trait de la laser retire 0,1 à 0,2 mm). Validé par l'essai sur les plaques « Essai crans » : 0 glissait, -0,1 et -0,15 tombaient encore, -0,2 tient. S'ajoute au jeu `fit`. */
+export const CRENEL_SNUG = -0.2;
+
 export const DEFAULT_SCENE: PlankScene = { t: 3, fit: 0, planks: [], up: 'z2' }; // jeu 0 : crans ajustés exactement (le laser enlève déjà ~0,1 mm, ce qui donne le jeu)
 
 export const NEST_DEFAULT: NestParams = { l: 120, L: 120, floorToHole: 130, hole: 32, above: 20, ins: 39, cam: 38, chene: false, lambris: true, pente: true, cam2: true }; // lambris et toit en pente : retirés pour le moment (cases « Lambris » et « Toit en pente » pour les remettre)
@@ -61,7 +64,7 @@ export const PI_PIN_X0 = -35.4 + 1.27; // broche 2 (x de la première colonne)
 export const SENSOR_CHIP_DX = -1.5; // décalage de la puce par rapport au centre de la carte du capteur (sensor.ts)
 
 /** Planche de découpe par défaut (mm) et marge sur ses bords : une seule source pour le réglage de la découpe laser (`DEFAULT_CUT_CFG`) et pour la longueur des baguettes de cale. */
-export const DEFAULT_SHEET = { W: 400, H: 320, margin: 8 }; // planche = zone de gravure de la Sculpfun E1 Pro (400 × 320 mm ; le matériau posé peut faire 450 × 350) : le contreplaqué de 400 × 400 du commerce se recoupe à 400 × 320 ; les curseurs de « Découpe laser » changent la taille
+export const DEFAULT_SHEET = { W: 300, H: 300, margin: 8 }; // planche générale 300 × 300 mm, dans la zone de gravure de la Sculpfun E1 Pro (400 × 320 mm) ; les curseurs de « Découpe laser » changent la taille
 /** Baguettes de cale (contreplaqué 3 mm) : longueur MAX qui tient sur toutes les planches courantes, 410 × 400, 400 × 400 comme 400 × 320 (le sens de la longueur est celui de la largeur : plus petite dimension utile = 384), largeur, écart de rangement au sol, et facteur du besoin (on en fait le triple). */
 export const STRIP = { length: 384, width: 5, pitch: 15, spare: 3 };
 

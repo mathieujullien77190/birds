@@ -27,7 +27,7 @@ export default function Planks() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [extra, setExtra] = useState<Set<string>>(new Set()); // sélection multiple (Ctrl + clic) en plus de la plaque principale
   const [hover, setHover] = useState<Hover | null>(null); // survol dans le volet « Pièces » : surbrillance dans la 3D
-  const { cutCfg, setCutCfg, cutView, setCutView, sheets, preview, machine } = useLaser(sc);
+  const { cutCfg, setCutCfg, cutView, setCutView, sheets, preview, machine, boxTest } = useLaser(sc);
   const [pull, setPull] = useState<PullState | null>(null); // face double-cliquée, à tirer
   const [meterOn, setMeterOn] = useState(false); // mètre ruban : deux clics sur les pièces = une distance
   const [meter, setMeter] = useState<MeterReading | null>(null);
@@ -189,7 +189,7 @@ export default function Planks() {
           {asm.on && <AssemblyPanel steps={asm.steps} index={asm.index} setIndex={asm.setIndex} onClose={() => asm.setOn(false)} mobile />}
           {mSettings && (
             <div className="absolute inset-0 z-20 flex flex-col bg-stone-50 [&>aside]:!w-full [&>aside]:flex-1">
-              <LeftPanel open setOpen={(o) => setMSettings(o)} sc={sc} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} hideMachine />
+              <LeftPanel open setOpen={(o) => setMSettings(o)} sc={sc} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} boxTest={boxTest} hideMachine />
             </div>
           )}
           {mParts && <PartsSheet sc={sc} hidden={hidden} toggleHidden={toggleHidden} setHidden={setHidden} onClose={() => setMParts(false)}
@@ -202,7 +202,7 @@ export default function Planks() {
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-stone-100 text-stone-800">
-      <LeftPanel open={leftOpen} setOpen={setLeftOpen} sc={sc} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} />
+      <LeftPanel open={leftOpen} setOpen={setLeftOpen} sc={sc} nest={nest} setNest={setNest} addNest={addNest} cutCfg={cutCfg} setCutCfg={setCutCfg} cutView={cutView} setCutView={setCutView} sheets={sheets} machine={machine} boxTest={boxTest} />
 
       <main className="relative min-w-0 flex-1" onClick={() => setCtx(null)}>
         <div ref={host} className="h-full w-full" />

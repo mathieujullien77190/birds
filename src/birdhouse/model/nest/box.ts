@@ -10,7 +10,7 @@ import { rotFromBasis } from '../geometry/transform';
  * impair, donc symétrique : l'orientation de chaque plaque n'a pas d'importance.
  */
 export function makeBox(l: number, L: number, H: number, t: number, fit: number, start = 1): { planks: Plank[]; group: string; name: string } {
-  void fit; // une boîte est toujours créée avec des crans ajustés exactement : la largeur d'un cran = celle d'une dent
+  void fit; // une boîte est toujours créée sans jeu : la largeur d'un cran = celle d'une dent moins le serrage `CRENEL_SNUG` (les plaques tiennent seules)
   fit = 0;
   const nl = teethFor(l), nL = teethFor(L), nH = teethFor(H);
   const mk = (name: string, w: number, h: number, pos: Vec3, rot: Vec3, edges: Partial<Record<Edge, { n: number; phase: 0 | 1 }>>): Plank => {

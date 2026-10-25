@@ -1,6 +1,8 @@
 import { type Pt, type Plank, type PlankScene, type Placed, type NestItem, type NestSheet } from '../types';
 import { holeOutline } from '../geometry/holes';
 import { outline } from '../geometry/outline';
+import { castellation, teethFor } from '../geometry/castellation';
+import { r2, uid } from '../util';
 import { plankCodes } from './partCodes';
 import { codeOutlines, codeSpot } from './codeSpot';
 
@@ -222,7 +224,9 @@ function nestRaw(s: PlankScene, W: number, H: number, gap = 5, margin = 8): Nest
     sheets.push({ sheet: { items: [], used: 0 }, free: [{ x: margin, y: margin, w: W - 2 * margin + g, h: H - 2 * margin + g }] }); // la place libre commence à la marge ; une pièce occupe (taille + g), d'où le + g
     if (!place(p)) { // plus grande que la planche : posée seule, signalée
       const S = sheets[sheets.length - 1];
-      const it: NestItem = { plank: p, rotated: false, turns: 0, ...flat(p, false), x: margin, y: margin };
+      const rotated = p.h > p.w; // le grand côté suit X (la machine est plus large que haute) ; calée dans le coin de l'origine de la laser (bas-gauche), elle dépasse vers la droite / le haut
+      const it: NestItem = { plank: p, rotated, turns: rotated ? 1 : 0, ...flat(p, rotated), x: margin, y: margin };
+      it.y = H - margin - it.h;
       S.sheet.items.push(it);
       S.sheet.used = Math.max(1.01, (g + p.h + g) / H);
       S.free = [];
@@ -238,10 +242,16 @@ function nestRaw(s: PlankScene, W: number, H: number, gap = 5, margin = 8): Nest
  * à l'emplacement libre choisi par `codeSpot`, tourné comme la pièce). Les codes sont ceux de la scène ENTIÈRE (jamais ceux d'un sous-ensemble par matériau).
  * Une plaque trop petite pour un texte de 3 mm avec sa marge n'a pas de gravure (`code` seul).
  */
-export function nestSheets(s: PlankScene, W: number, H: number, gap = 5, margin = 8): NestSheet[] {
-  const sheets = nestRaw(s, W, H, gap, margin), codes = plankCodes(s);
+export function nestSheets(s: PlankScene, W: number, H: number, gap = 5, margin = 8, only?: (p: Plank) => boolean, extras: TestPlank[] = []): NestSheet[] {
+  // `only` : planche d'essai d'un sous-ensemble de la scène (les codes restent ceux de la scène entière) ; `extras` : plaques d'essai en plus, avec leur propre code
+  const sheets = nestRaw({ ...s, planks: [...(only ? s.planks.filter(only) : s.planks), ...extras.map((e) => e.plank)] }, W, H, gap, margin), codes = plankCodes(s);
+  for (const e of extras) codes.set(e.plank.id, e.code);
+  for (const sh of sheets) { // tout est calé vers l'origine de la laser (coin bas-gauche de la planche) : le bas des pièces touche la marge du bas
+    const dy = H - margin - Math.max(0, ...sh.items.map((it) => it.y + it.h));
+    if (dy > 0 && sh.used <= 1) for (const it of sh.items) it.y += dy;
+  }
   for (const sh of sheets) for (const it of sh.items) {
-    const code = codes.get(it.plank.id)!; // toute plaque posée sur une planche est une plaque découpée de la scène
+    const code = codes.get(it.plank.id)!; // toute plaque posée sur une planche est une plaque découpée de la scène (ou une plaque d'essai)
     it.code = code;
     const spot = codeSpot(it.plank, code.length);
     if (!spot) continue;
@@ -251,11 +261,49 @@ export function nestSheets(s: PlankScene, W: number, H: number, gap = 5, margin 
   return sheets;
 }
 
+/** Distance entre le cadre bleu gravé et les pièces les plus extérieures (mm). */
+export const FRAME_OUTSET = 2;
+
+/** Cadre bleu d'une planche : le plus petit rectangle qui entoure toutes ses pièces, élargi de `FRAME_OUTSET`, dans le repère de la planche (origine en haut à gauche, y vers le bas). Null si la planche est vide. */
+export function sheetFrame(sheet: NestSheet): { x0: number; y0: number; x1: number; y1: number } | null {
+  if (!sheet.items.length) return null;
+  const f = (n: number) => +n.toFixed(2);
+  return {
+    x0: f(Math.min(...sheet.items.map((it) => it.x)) - FRAME_OUTSET), y0: f(Math.min(...sheet.items.map((it) => it.y)) - FRAME_OUTSET),
+    x1: f(Math.max(...sheet.items.map((it) => it.x + it.w)) + FRAME_OUTSET), y1: f(Math.max(...sheet.items.map((it) => it.y + it.h)) + FRAME_OUTSET),
+  };
+}
+
+/** Une plaque d'essai qui n'est pas dans la scène, avec le code à graver. */
+export interface TestPlank { plank: Plank; code: string }
+
+/**
+ * Deux plaques d'essai qui s'emboîtent par leurs dents (« Essai crans A / B » : codes CR-01 et CR-02), de la moitié de « Bouchon-boîte prise d'air 2 » (même largeur, moitié de la hauteur) :
+ * la première a ses deux bords crénelés dents creuses en premier (phase 0), la seconde l'autre phase (comme une face et un côté de la boîte, qui se joignent en angle) ; même profondeur de cran (épaisseur du bois) ; mêmes crans que les boîtes (serrage `CRENEL_SNUG`).
+ * Vide si la scène n'a pas cette plaque de référence.
+ */
+export function crenelTestPlanks(s: PlankScene): TestPlank[] {
+  const ref = s.planks.find((p) => p.name === "Bouchon-boîte prise d'air 2" && !p.spareOf);
+  if (!ref) return [];
+  const h = r2(ref.h / 2), n = teethFor(h);
+  return ([['A', 0], ['B', 1]] as const).map(([k, phase], i): TestPlank => {
+    const p: Plank = { id: uid(), name: `Essai crans ${k}`, w: ref.w, h, pos: [0, 0, 0], rot: [0, 0, 0], notches: [], holes: [], cast: { left: { n, phase }, right: { n, phase } } };
+    p.notches = (['left', 'right'] as const).flatMap((e) => castellation(p, e, n, phase, s.t, 0)); // serrage `CRENEL_SNUG` appliqué par `castellation`, comme sur toutes les boîtes
+    return { plank: p, code: `CR-0${i + 1}` };
+  });
+}
+
 /** Libellé d'une planche de découpe : « Planche 3 » pour le contreplaqué, « Planche MDF 1 » pour le MDF, « Planche okoumé 5 mm 1 » pour l'habillage (numérotées à part). */
 export function sheetLabel(sheets: NestSheet[], i: number): string {
   const m = sheets[i]?.material;
   if (!m) return `Planche ${i + 1}`;
   return `Planche ${m === 'mdf' ? 'MDF' : 'okoumé 5 mm'} ${sheets.slice(0, i + 1).filter((x) => x.material === m).length}`;
+}
+
+/** Le cadre bleu d'une planche en polygone gravé (`class="e"`), vide si la planche n'a pas de pièce. */
+function frameSvg(sheet: NestSheet): string {
+  const fr = sheetFrame(sheet);
+  return fr ? `<polygon class="e" points="${fr.x0},${fr.y0} ${fr.x1},${fr.y0} ${fr.x1},${fr.y1} ${fr.x0},${fr.y1}" fill="none" stroke="#00f" stroke-width="0.1"/>` : '';
 }
 
 /** SVG d'une planche pour la machine : cadre de la planche en gris (repère, à ne pas couper), noir 0,1 mm = coupe, bleu = code de chaque plaque à graver (contours fermés fins, avant la coupe ; `class="e"`) et son nom (texte, non gravé). 1 unité = 1 mm, origine en haut à gauche. */
@@ -267,7 +315,7 @@ export function sheetSvg(sheet: NestSheet, W: number, H: number, index: number):
     const eg = (engrave ?? []).map((c) => `<polygon class="e" points="${c.map(([a, b]) => `${px(a)},${py(b)}`).join(' ')}" fill="none" stroke="#00f" stroke-width="0.1"/>`).join('');
     return pg(poly) + holes.map(pg).join('') + eg + `<text x="${f(x + 4)}" y="${f(y + 6)}" font-size="4" fill="#00f" font-family="sans-serif">${code ? `${code} ` : ''}${plank.name}</text>`;
   });
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}mm" height="${H}mm" viewBox="0 0 ${W} ${H}"><rect x="0.05" y="0.05" width="${W - 0.1}" height="${H - 0.1}" fill="none" stroke="#bbb" stroke-width="0.1" stroke-dasharray="2 2"/><text x="${W - 3}" y="${H - 3}" font-size="4" text-anchor="end" fill="#999" font-family="sans-serif">planche ${index + 1}</text>${parts.join('')}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}mm" height="${H}mm" viewBox="0 0 ${W} ${H}"><rect x="0.05" y="0.05" width="${W - 0.1}" height="${H - 0.1}" fill="none" stroke="#bbb" stroke-width="0.1" stroke-dasharray="2 2"/>${frameSvg(sheet)}<text x="${W - 3}" y="${H - 3}" font-size="4" text-anchor="end" fill="#999" font-family="sans-serif">planche ${index + 1}</text>${parts.join('')}</svg>`;
 }
 
 /** Aperçu : toutes les planches empilées, avec un fond clair pour chacune. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Plank } from '@/birdhouse/model';
+import { CRENEL_SNUG, type Plank } from '@/birdhouse/model';
 import { VARIANTS, buildNest } from './helpers';
 import { ligament } from './geomLigament';
 import { aabb } from './geomChecks';
@@ -24,8 +24,9 @@ describe('goulotte du ventilateur : crénelage entre les parois', () => {
       // les crans de l'avant (phase 0) et ceux des côtés (phase 1) sont complémentaires : à chaque hauteur, un seul des deux est creusé
       const pos = (p: Plank, e: 'left' | 'right') => p.notches.filter((k) => k.edge === e).map((k) => k.pos).sort((a, b) => a - b);
       const seg = av.h / n;
-      expect(pos(av, 'left')).toEqual(Array.from({ length: n }, (_, i) => i).filter((i) => i % 2 === 0).map((i) => +((i + 0.5) * seg).toFixed(2)));
-      expect(pos(g, 'left')).toEqual(Array.from({ length: n }, (_, i) => i).filter((i) => i % 2 === 1).map((i) => +((i + 0.5) * seg).toFixed(2)));
+      const centre = (i: number) => +((i * seg + (i === 0 ? 0 : -CRENEL_SNUG / 2) + (i + 1) * seg + (i === n - 1 ? 0 : CRENEL_SNUG / 2)) / 2).toFixed(2); // centre du cran : resserré de CRENEL_SNUG, sauf côté bord
+      expect(pos(av, 'left')).toEqual(Array.from({ length: n }, (_, i) => i).filter((i) => i % 2 === 0).map(centre));
+      expect(pos(g, 'left')).toEqual(Array.from({ length: n }, (_, i) => i).filter((i) => i % 2 === 1).map(centre));
       expect(pos(av, 'left')).toEqual(pos(av, 'right'));
     });
     it(`${name} : l'intérieur du siège est inchangé (la cassette entre à jeu 0), la paroi avant couvre toute la largeur extérieure`, () => {

@@ -4,7 +4,7 @@ import type { Plank, PlankScene } from '@/birdhouse/model';
 import { HIDDEN_AT_CREATION } from '@/features/viewer/constants';
 import { VARIANTS, buildNest } from './helpers';
 import { aabb, gap, inside, obb, pathContacts, pathItems, ribbonPoints, thick } from './geomChecks';
-import { nestSheets, outline, setAirPlug, setWinterCassette, winterState } from '@/birdhouse/model';
+import { CRENEL_SNUG, nestSheets, outline, setAirPlug, setWinterCassette, winterState } from '@/birdhouse/model';
 import { ligament } from './geomLigament';
 
 const by = (sc: PlankScene, re: RegExp): Plank[] => sc.planks.filter((p) => re.test(p.name));
@@ -437,6 +437,8 @@ describe("conduit de la prise d'air : boîte crénelée", () => {
   const w = [1, 2, 3, 4].map((i) => one(sc0, new RegExp(`^Conduit d'air ${i}$`))), cover = one(sc0, /^Conduit d'air 5/), all = [...w, cover];
   const inPoly = (pt: [number, number], poly: [number, number][]) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if (yi > pt[1] !== yj > pt[1] && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
   const solid = (p: Plank, pt: Vector3, m = 0): boolean => { const b = obb(p, t), d = pt.clone().sub(b.c), lx = d.dot(b.ax[0]), ly = d.dot(b.ax[1]), lz = d.dot(b.ax[2]); return Math.abs(lz) <= t / 2 - m && inPoly([lx, ly], outline(p)) && !p.holes.some((h) => Math.abs(lx - h.x) <= h.size / 2 && Math.abs(ly - h.y) <= (h.sh ?? h.size) / 2); };
+  /** Le point est à plus de 2 × |CRENEL_SNUG| + 0,05 mm du bord de la plaque dans son plan : le serrage voulu des dents (quelques dixièmes) n'est pas un recoupement. */
+  const interior = (p: Plank, pt: Vector3, ob: ReturnType<typeof obb>): boolean => { const e = 2 * Math.abs(CRENEL_SNUG) + 0.05; return [[1, 0], [-1, 0], [0, 1], [0, -1]].every(([i, j]) => solid(p, pt.clone().addScaledVector(ob.ax[0], i * e).addScaledVector(ob.ax[1], j * e))); };
   it('quatre parois à dents verticales et un couvercle : chaque arête réunit un bord de phase 0 et un bord de phase 1', () => {
     for (const p of w) { expect(p.cast?.left?.n, p.name).toBeGreaterThan(1); expect(p.cast?.right?.n).toBe(p.cast?.left?.n); expect(p.cast?.top?.phase).toBe(0); expect(p.cast?.bottom, p.name + ' : bas droit, sans dents').toBeUndefined(); expect(p.notches.some((x) => x.edge === 'bottom'), p.name).toBe(false); expect(p.notches.length, p.name).toBeGreaterThan(3); } // ouvert en dessous, bas droit posé sur le fond (aucune dent dans le fond)
     expect(w[0].cast!.left!.phase).toBe(1); expect(w[1].cast!.left!.phase).toBe(1); expect(w[2].cast!.left!.phase).toBe(0); expect(w[3].cast!.left!.phase).toBe(0); // côtés (1, 2) contre faces (3, 4)
@@ -449,7 +451,7 @@ describe("conduit de la prise d'air : boîte crénelée", () => {
       const a = all[i], b = all[j], ob = obb(a, t);
       for (let x = -a.w / 2 + 0.3; x < a.w / 2; x += 1.1) for (let y = -a.h / 2 + 0.3; y < a.h / 2; y += 1.1) {
         const pt = ob.c.clone().addScaledVector(ob.ax[0], x).addScaledVector(ob.ax[1], y);
-        if (solid(a, pt) && solid(b, pt, 0.05)) throw new Error(`${a.name} recoupe ${b.name} en ${pt.toArray().map((v) => v.toFixed(1))}`);
+        if (solid(a, pt) && solid(b, pt, 0.05) && interior(a, pt, ob) && interior(b, pt, obb(b, t))) throw new Error(`${a.name} recoupe ${b.name} en ${pt.toArray().map((v) => v.toFixed(1))}`);
       }
     }
     expect(Math.abs(w[1].pos[0] - w[0].pos[0]) - t, 'largeur libre').toBeGreaterThanOrEqual(23);
@@ -631,7 +633,7 @@ describe("évacuation de l'eau : ouverture rectangulaire au ras du plancher, en 
     const dr = bn.find((x) => x[2] > t + 5)!; expect(dr).toBeTruthy(); expect(dr[2]).toBeCloseTo(t + 6, 5);
     expect(dr[0] - (wy0 - b.c.y + inner.w / 2)).toBeLessThanOrEqual(0.01); expect(dr[1] - (wy1 - b.c.y + inner.w / 2)).toBeGreaterThanOrEqual(-0.01); // couvre le trou du conduit
     const before = bn.filter((x) => x !== dr && x[1] <= dr[0] + 0.01).pop()!, after = bn.find((x) => x !== dr && x[0] >= dr[1] - 0.01)!;
-    expect(before[0]).toBeLessThanOrEqual(0.01); // cran de coin gardé : le coin reste en bois (pas d'encoche jusqu'au coin)
+    expect(before[0]).toBeLessThanOrEqual(0.01 - CRENEL_SNUG); // cran de coin gardé (il commence à CRENEL_SNUG / 2 du coin, crans plus étroits que les dents) : le coin reste en bois (pas d'encoche jusqu'au coin)
     expect(dr[0] - before[1]).toBeCloseTo(0, 5); // aucun moignon de dent entre le cran de coin et l'encoche
     expect(after[0] - dr[1]).toBeGreaterThanOrEqual(3 - 1e-6); // au moins 3 mm de bois (une dent entière) entre l'encoche et le cran suivant
     expect(before[1]).toBeGreaterThan(13.9);

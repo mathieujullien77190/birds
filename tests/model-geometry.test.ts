@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { rotate } from '@/birdhouse/model/math/rotation';
 import {
-  bounds, castellation, corners, edgeLength, extents, fitHole, holeHalf, holeOutline, moveWithGroup, movingWith,
+  CRENEL_SNUG, bounds, castellation, corners, edgeLength, extents, fitHole, holeHalf, holeOutline, moveWithGroup, movingWith,
   outline, pullFace, recastAll, rectUnion, rotFromBasis, slotsForTeeth, teethFor, toZUp, transformPlanks,
   fromAxisAngle, fromEulerDeg, makeBox,
   type Hole, type Plank, type PlankScene, type Pt, type Vec3,
@@ -21,9 +21,13 @@ describe('castellation', () => {
   it('une dent sur deux est creusée, selon la phase', () => {
     const p = mk({ id: 'a', w: 90, h: 20 });
     const n0 = castellation(p, 'top', 5, 0, 3, 0.2), n1 = castellation(p, 'top', 5, 1, 3, 0.2);
-    expect(n0.map((n) => n.pos)).toEqual([9, 45, 81]);
+    // dents de 18 mm, jeu 0,2 : chaque cran est resserré de CRENEL_SNUG sur ses deux côtés, sauf le côté qui touche le bout du bord (à ras du bord)
+    expect(n0.map((n) => n.pos)).toEqual([8.95, 45, 81.05]);
     expect(n1.map((n) => n.pos)).toEqual([27, 63]);
-    expect(n0.every((n) => n.width === 18.2 && n.depth === 3 && n.edge === 'top')).toBe(true);
+    expect(n0.map((n) => n.width)).toEqual([+(18.2 + CRENEL_SNUG / 2).toFixed(2), +(18.2 + CRENEL_SNUG).toFixed(2), +(18.2 + CRENEL_SNUG / 2).toFixed(2)]);
+    expect(n0[0].pos - n0[0].width / 2).toBeCloseTo(-0.1, 6); // le premier cran commence au bord (moins la moitié du jeu 0,2)
+    expect(n1.every((n) => n.width === +(18.2 + CRENEL_SNUG).toFixed(2))).toBe(true);
+    expect(n0.every((n) => n.depth === 3 && n.edge === 'top')).toBe(true);
   });
   it('teethFor : impair, au moins 3, dent ≈ 16 mm', () => {
     expect(teethFor(10)).toBe(3);
@@ -41,7 +45,7 @@ describe('castellation', () => {
     const r = recastAll(p, 5, 0);
     expect(r.notches).toHaveLength(3); // other + deux dents creuses (0 et 2)
     expect(r.notches[0]).toBe(other);
-    expect(r.notches.slice(1).map((n) => [n.edge, n.pos, n.width, n.depth])).toEqual([['top', 8, 16, 5], ['top', 40, 16, 5]]);
+    expect(r.notches.slice(1).map((n) => [n.edge, n.pos, n.width, n.depth])).toEqual([['top', 7.95, 15.9, 5], ['top', 40.05, 15.9, 5]]); // dents de 16 mm : le premier cran commence au bord, le dernier finit au bord, l'autre côté est resserré de 0,1
   });
 });
 
@@ -300,7 +304,7 @@ describe('pullFace', () => {
     const p = mk({ id: 'P', w: 48, h: 20, cast: { top: { n: 3, phase: 0 } }, notches: castellation(mk({ id: 'P', w: 48, h: 20 }), 'top', 3, 0, 3, 0) });
     const r = pullFace(scene([p]), 'P', 'x', 1, 16);
     expect(get(r.scene, 'P').w).toBe(64);
-    expect(get(r.scene, 'P').notches.map((n) => n.pos)).toEqual([10.67, 53.33]); // dents de 64 / 3, creuses : 0 et 2
+    expect(get(r.scene, 'P').notches.map((n) => n.pos)).toEqual([10.62, 53.38]); // dents de 64 / 3, creuses : 0 et 2
   });
 });
 
@@ -370,10 +374,10 @@ describe('boîte (makeBox)', () => {
     expect(b.name).toBe('Boîte 4');
     expect(b.planks[0].name).toBe('Face avant 4');
     const front = b.planks[0];
-    // 7 dents sur 100 mm : 4 creuses (phase 0) de 100 / 7 de large, sans jeu
+    // 7 dents sur 100 mm : 4 creuses (phase 0) de 100 / 7 de large moins le serrage, sans jeu
     const top = front.notches.filter((n) => n.edge === 'top');
     expect(top).toHaveLength(4);
-    expect(top[0].width).toBe(+(100 / 7).toFixed(2));
+    expect(top[0].width).toBe(+(100 / 7 + CRENEL_SNUG / 2).toFixed(2)); // sans jeu, avec le serrage ; le premier cran touche le bord : un seul côté resserré
     expect(top[0].depth).toBe(3);
   });
   it('une arête réunit un bord creux et un bord plein (les dents s\'emboîtent)', () => {

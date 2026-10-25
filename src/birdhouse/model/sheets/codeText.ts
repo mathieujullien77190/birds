@@ -6,7 +6,7 @@ import type { Pt } from '../types';
  * À l'échelle 1 : chiffre de 3,2 × 5,6 mm, trait de 0,8 mm, 4,4 mm d'un caractère au suivant. Le tiret (« T-01 ») sépare la catégorie du numéro.
  */
 
-const UNIT = 1.2, STROKE = 0.8, ADVANCE = 4.4, GLYPH_W = 2 * UNIT + STROKE, GLYPH_H = 4 * UNIT + STROKE;
+const UNIT = 1.2, STROKE = 0.8, INNER_STROKE = 0.3, ADVANCE = 4.4, GLYPH_W = 2 * UNIT + STROKE, GLYPH_H = 4 * UNIT + STROKE;
 /** Hauteur d'un texte à l'échelle 1 (mm). */
 export const TEXT_HEIGHT = GLYPH_H;
 
@@ -75,7 +75,7 @@ export interface TextShape {
 export const textWidth = (n: number, scale = 1): number => (n * ADVANCE - (ADVANCE - GLYPH_W)) * scale;
 
 /**
- * Le texte en contours fermés (un rectangle par segment). Les caractères inconnus sont sautés (laissés en blanc) ; les minuscules passent en majuscules.
+ * Le texte en contours fermés (deux rectangles emboîtés par segment : le contour et un second trait à l'intérieur, pour un trait plus marqué). Les caractères inconnus sont sautés (laissés en blanc) ; les minuscules passent en majuscules.
  */
 export function textContours(text: string, scale = 1): TextShape {
   const contours: Pt[][] = [];
@@ -87,7 +87,7 @@ export function textContours(text: string, scale = 1): TextShape {
     for (const stroke of FONT[ch] ?? []) {
       for (let k = 0; k + 1 < stroke.length; k++) {
         const a: Pt = [x0 + stroke[k][0] * UNIT, y0 + stroke[k][1] * UNIT], b: Pt = [x0 + stroke[k + 1][0] * UNIT, y0 + stroke[k + 1][1] * UNIT];
-        contours.push(segmentRect(a, b, STROKE).map(clamp));
+        contours.push(segmentRect(a, b, STROKE).map(clamp), segmentRect(a, b, INNER_STROKE).map(clamp)); // le rectangle, puis un second trait à 0,25 mm à l'intérieur : le trait gravé est plus large et plus marqué
       }
     }
   });

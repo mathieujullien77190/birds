@@ -52,7 +52,7 @@ describe('étiquette d’un code', () => {
     const a = createCodeLabel('T-01', spot, 3), b = createCodeLabel('T-01', spot, 3), c = createCodeLabel('T-02', spot, 3);
     expect(a.material).toBe(b.material);
     expect(c.material).not.toBe(a.material);
-    expect(calls.filter((x) => x === 'fill')).toHaveLength(10 + 13); // T-01 : 10 rectangles, T-02 : 13, dessinés une fois par code
+    expect(calls.filter((x) => x === 'fill')).toHaveLength(2 * (10 + 13)); // T-01 : 10 segments, T-02 : 13, deux rectangles par segment (contour et second trait), dessinés une fois par code
     expect(a.material.map!.colorSpace).toBe('srgb');
   });
 });
@@ -91,7 +91,7 @@ describe('PlankMesh.setCode', () => {
     expect(m.label!.position.z).toBeCloseTo(1.5 + 0.08, 9);
   });
   it('plaque trop petite pour un code : pas d’étiquette', () => {
-    const p = P({ w: 4, h: 30 }), m = createPlankMesh(p, 3);
+    const p = P({ w: 1.5, h: 1.5 }), m = createPlankMesh(p, 3);
     m.setCode('T-01', p, 3);
     expect(m.label).toBeNull();
   });

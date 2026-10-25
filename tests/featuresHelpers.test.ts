@@ -117,9 +117,10 @@ describe('petits calculs de l\'interface', () => {
   });
   it('parseCutCfg : réglages lus, sinon ceux par défaut (texte absent, invalide ou sans largeur numérique)', () => {
     expect(parseCutCfg('{"W":500,"H":300,"gap":2}')).toEqual({ W: 500, H: 300, gap: 2 });
+    expect(parseCutCfg('{"W":400,"H":320,"gap":3}')).toEqual({ W: 300, H: 300, gap: 3 }); // l'ancien défaut est migré
     for (const bad of [null, 'pas du json', '{"W":"410"}', 'null']) expect(parseCutCfg(bad)).toEqual(DEFAULT_CUT_CFG);
     expect(parseCutCfg(null)).not.toBe(DEFAULT_CUT_CFG); // une copie : on ne modifie jamais la constante
-    expect(DEFAULT_CUT_CFG).toEqual({ W: 400, H: 320, gap: 5 });
+    expect(DEFAULT_CUT_CFG).toEqual({ W: 300, H: 300, gap: 5 });
     expect(CUT_CFG_KEY).toBe('plaques-decoupe');
     expect(SHEET_GAP_PREVIEW).toBeGreaterThan(0);
   });

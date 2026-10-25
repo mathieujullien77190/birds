@@ -115,10 +115,10 @@ describe('police de gravure', () => {
       }
     }
   });
-  it('un rectangle FERMÉ (4 points) par segment, trait de 0,6 mm, texte de 5 mm de haut', () => {
+  it('deux rectangles FERMÉS (4 points) emboîtés par segment (contour + second trait), texte de 5,6 mm de haut', () => {
     const { contours, w, h } = textContours('T-01');
     expect(contours.every((c) => c.length === 4)).toBe(true);
-    expect(contours).toHaveLength(2 + 1 + 5 + 2); // T : 2, tiret : 1, 0 barré : 4 + 1, 1 : 2
+    expect(contours).toHaveLength(2 * (2 + 1 + 5 + 2)); // 2 par segment : T : 2, tiret : 1, 0 barré : 4 + 1, 1 : 2
     expect(h).toBeCloseTo(TEXT_HEIGHT, 9);
     expect(TEXT_HEIGHT).toBeCloseTo(5.6, 9);
     expect(w).toBeCloseTo(textWidth(4), 9);
@@ -178,9 +178,13 @@ describe('emplacement du code sur une plaque', () => {
     expect(Math.max(...ys) - Math.min(...ys)).toBeGreaterThan(textWidth(4) - 1.5);
     expect(Math.max(...xs) - Math.min(...xs)).toBeCloseTo(TEXT_HEIGHT, 6);
   });
-  it('trop petite (moins de 3 mm de texte avec la marge) : pas de code gravé', () => {
-    expect(codeSpot(P('e', 'T', { w: 4.7, h: 40 }), 4)).toBeNull();
-    expect(codeSpot(P('f', 'T', { w: 30, h: 5 }), 4)).toBeNull();
+  it('trop petite pour 3 mm de texte avec la marge : le code est gravé tout mini (couché au besoin) ; pas de code seulement si la plaque est plus petite que le texte', () => {
+    const a = codeSpot(P('e', 'T', { w: 4.7, h: 40 }), 4)!, b = codeSpot(P('f', 'T', { w: 30, h: 5 }), 4)!;
+    expect(a.scale).toBeLessThanOrEqual(0.5); expect(a.turned).toBe(true); // couché le long de la bande
+    expect(b.scale).toBeLessThanOrEqual(0.5); expect(b.turned).toBe(false);
+    expect(codeSpot(P('g0', 'T', { w: 1.5, h: 1.5 }), 4)).toBeNull();
+    const forced = codeSpot(P('f2', 'T', { w: 6, h: 2 }), 4)!; // ni marge ni place : au plus petit, sans marge
+    expect(forced).toMatchObject({ scale: 0.3, turned: false });
   });
   it('évite un trou central et la même plaque donne le même résultat (mémorisé)', () => {
     const p = P('g', 'T', { holes: [hole(0, 0, 30)] });
@@ -220,14 +224,15 @@ describe('nichoir par défaut : tous les codes gravés', () => {
       if (!it.engrave) continue;
       engraved++;
       expect(it.engrave.length).toBeGreaterThan(3);
+      const ex = it.engrave.flat(), tiny = Math.min(Math.max(...ex.map((q) => q[0])) - Math.min(...ex.map((q) => q[0])), Math.max(...ex.map((q) => q[1])) - Math.min(...ex.map((q) => q[1]))) < 3.3; // petit côté du texte : 3,4 mm ou plus = taille normale
       for (const c of it.engrave) {
         expect(c).toHaveLength(4);
-        for (const q of c) expect(clearance(it.poly, it.holes, q), `${it.code} ${it.plank.name}`).toBeGreaterThanOrEqual(1 - 1e-6);
+        for (const q of c) expect(clearance(it.poly, it.holes, q), `${it.code} ${it.plank.name}`).toBeGreaterThanOrEqual(tiny ? -1e-6 : 1 - 1e-6); // les codes tout mini ont une marge réduite
       }
     }
     expect(engraved).toBeGreaterThan(100);
-    // sans gravure : seulement des plaques où 3 mm de texte + marges ne tiennent pas
-    for (const it of items.filter((i) => !i.engrave)) expect(Math.min(it.plank.w, it.plank.h), it.plank.name).toBeLessThan(40);
+    // sans gravure : seulement des plaques plus petites que le texte tout mini
+    for (const it of items.filter((i) => !i.engrave)) expect(Math.min(it.plank.w, it.plank.h), it.plank.name).toBeLessThan(5);
   });
   it('des pièces posées de travers (quart de tour, demi-tour) portent leur code dans leur propre sens', () => {
     expect(new Set(items.map((i) => i.turns)).size).toBeGreaterThan(1);
@@ -241,7 +246,7 @@ describe('nichoir par défaut : tous les codes gravés', () => {
   it('SVG de la planche : le code est en bleu (contours fermés) ; laser-control le lit en gravure et la coupe est inchangée', () => {
     for (const [i, sh] of sheets.entries()) {
       const svg = sheetSvg(sh, 410, 400, i);
-      const nGraved = sh.items.reduce((a, it) => a + (it.engrave?.length ?? 0), 0);
+      const nGraved = sh.items.reduce((a, it) => a + (it.engrave?.length ?? 0), 0) + (sh.items.length ? 1 : 0); // les codes et le cadre bleu autour des pièces
       expect((svg.match(/<polygon class="e"/g) ?? []).length).toBe(nGraved);
       const { job, warnings } = parseSvg(svg);
       expect(job.layers.engrave?.length ?? 0).toBe(nGraved);
@@ -262,7 +267,7 @@ describe('nichoir par défaut : tous les codes gravés', () => {
     const it = { plank: P('Seule', 'T'), poly: [[0, 0], [10, 0], [10, 10], [0, 10]] as Pt[], holes: [], w: 10, h: 10, x: 0, y: 0, rotated: false, turns: 0 as const };
     const svg = sheetSvg({ items: [it], used: 0.1 }, 100, 100, 0);
     expect(svg).toContain('>Seule</text>');
-    expect(svg).not.toContain('class="e"');
+    expect((svg.match(/class="e"/g) ?? []).length).toBe(1); // seulement le cadre bleu : pas de code gravé
   });
   it('l’adaptateur envoie la gravure à la machine, dans le repère bas-gauche', () => {
     const sh = sheets[0], job = sheetToJob(sh, 410, 400), it = sh.items.find((i) => i.engrave)!;

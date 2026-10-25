@@ -1,6 +1,6 @@
 import { type Vec3, type Pt, type Edge, type Notch, type Hole, type Plank, type PlankScene, type NestParams } from '../types';
 import { r2, uid } from '../util';
-import { SENSOR_CHIP_DX, SENSOR_X, LENS_HOLE, CAM_W, IR_W, IR_LIFT, IR_WIN, irHole, CAM_X, PI_CSI2, PI_W, PI_CSI, PI_PIN_Y, PI_PIN_X0, CAM_Y, SENSOR_Y, CAM_H, IR_H, IR_X, OKOUME_T, OKOUME_COLOR, OKOUME_NATURAL, PI_H, FAN, FAN_T, FAN_OPEN, FAN_PLOT, STRIP } from '../constants';
+import { SENSOR_CHIP_DX, SENSOR_X, LENS_HOLE, CAM_W, IR_W, IR_LIFT, IR_WIN, irHole, CAM_X, PI_CSI2, PI_W, PI_CSI, PI_PIN_Y, PI_PIN_X0, CAM_Y, SENSOR_Y, CAM_H, IR_H, IR_X, OKOUME_T, OKOUME_COLOR, OKOUME_NATURAL, PI_H, FAN, FAN_T, FAN_OPEN, FAN_PLOT, STRIP, CRENEL_SNUG } from '../constants';
 import { fitHole, rectUnion } from '../geometry/holes';
 import { teethFor, recastAll } from '../geometry/castellation';
 import { outline } from '../geometry/outline';
@@ -94,6 +94,7 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
   // elle va de DRAIN_LO à DRAIN_HI (depuis la position du conduit sur le bord) et couvre le trou de « Conduit d'air 2 » (DRAIN_HOLE) ; elle absorbe les crans du bord bas qu'elle recouvre (ces dents ne sont plus percées dans le plancher),
   // mais JAMAIS un cran qui touche un coin de la plaque ; les deux moignons de dent de 3 mm (« 3 mm d'espace ») qui restaient de chaque côté sont supprimés à la demande de l'utilisateur (« les deux mini encoches… vire-les, et les trous équivalents de la plaque ») : les crans voisins [0 ; 17] et [53 ; 70] touchent l'encoche, le bois reste plein et le plancher n'a plus leurs fentes
   const DRAIN_LO = -14, DRAIN_HI = 14, DRAIN_HOLE: [number, number] = [-13, 13], DRAIN_KEEP = 3; // encoche et trou du conduit centrés sur le même axe que la fente d'aération (AIR_CY) : encoche de 28 mm, trou de 26 mm
+  const TOL = 0.01 - CRENEL_SNUG; // les crans sont plus étroits que les dents du serrage : un cran qui « touche » un bord ou l'encoche en est à CRENEL_SNUG / 2 près
   const drain = (q: Plank): Plank => {
     const c = r2(AIR_CY - q.pos[1] + q.w / 2); let s0 = c + DRAIN_LO, s1 = c + DRAIN_HI, rest = q.notches.filter((x) => x.edge === 'bottom');
     for (let again = true; again;) {
@@ -101,16 +102,16 @@ export function makeNest(n0: NestParams, t: number, fit: number, start: number):
       for (const x of rest) {
         const x0 = x.pos - x.width / 2, x1 = x.pos + x.width / 2;
         if (x0 < s1 && x1 > s0) { // recouvre l'encoche
-          if (x0 <= 0.01) { s0 = Math.max(s0, x1 + DRAIN_KEEP); again = true; break; } // cran de coin : on le garde, on recule l'encoche
-          if (x1 >= q.w - 0.01) { s1 = Math.min(s1, x0 - DRAIN_KEEP); again = true; break; }
+          if (x0 <= TOL) { s0 = Math.max(s0, x1 + DRAIN_KEEP); again = true; break; } // cran de coin : on le garde, on recule l'encoche
+          if (x1 >= q.w - TOL) { s1 = Math.min(s1, x0 - DRAIN_KEEP); again = true; break; }
           s0 = Math.min(s0, x0); s1 = Math.max(s1, x1); rest = rest.filter((y) => y !== x); again = true; break;
         }
-        if (x1 <= s0 && s0 - x1 > 0.01 && s0 - x1 < DRAIN_KEEP - 1e-6) { s0 = x1 + DRAIN_KEEP; again = true; break; } // moignon de dent trop étroit
-        if (x0 >= s1 && x0 - s1 > 0.01 && x0 - s1 < DRAIN_KEEP - 1e-6) { s1 = x0 - DRAIN_KEEP; again = true; break; }
+        if (x1 <= s0 && s0 - x1 > TOL && s0 - x1 < DRAIN_KEEP - 1e-6) { s0 = x1 + DRAIN_KEEP; again = true; break; } // moignon de dent trop étroit
+        if (x0 >= s1 && x0 - s1 > TOL && x0 - s1 < DRAIN_KEEP - 1e-6) { s1 = x0 - DRAIN_KEEP; again = true; break; }
       }
     }
     // plus de moignon de dent : un cran voisin qui s'arrête à DRAIN_KEEP au plus de l'encoche est prolongé jusqu'à elle (le bois reste plein entre le coin ou le cran suivant et l'encoche ; ces dents n'existent plus, le plancher n'a pas leurs fentes)
-    rest = rest.map((x) => { const x0 = x.pos - x.width / 2, x1 = x.pos + x.width / 2; if (x1 <= s0 + 0.01 && s0 - x1 <= DRAIN_KEEP + 0.01) return { ...x, pos: r2((x0 + s0) / 2), width: r2(s0 - x0) }; if (x0 >= s1 - 0.01 && x0 - s1 <= DRAIN_KEEP + 0.01) return { ...x, pos: r2((s1 + x1) / 2), width: r2(x1 - s1) }; return x; });
+    rest = rest.map((x) => { const x0 = x.pos - x.width / 2, x1 = x.pos + x.width / 2; if (x1 <= s0 + TOL && s0 - x1 <= DRAIN_KEEP + TOL) return { ...x, pos: r2((x0 + s0) / 2), width: r2(s0 - x0) }; if (x0 >= s1 - TOL && x0 - s1 <= DRAIN_KEEP + TOL) return { ...x, pos: r2((s1 + x1) / 2), width: r2(x1 - s1) }; return x; });
     return { ...q, notches: [...q.notches.filter((x) => x.edge !== 'bottom'), ...rest, { id: uid(), edge: 'bottom' as const, pos: r2((s0 + s1) / 2), width: r2(s1 - s0), depth: r2(t + DRAIN_H) }] };
   };
   const innerParts = innerBox.planks.filter(isWall).map((p) => { let q = noTop({ ...p, pos: [p.pos[0], p.pos[1], p.pos[2] + e] as Vec3, group }); return /^Face avant/.test(p.name) ? hole(entrySlots(q)) : /^Côté gauche/.test(p.name) ? drain(q) : q; });
