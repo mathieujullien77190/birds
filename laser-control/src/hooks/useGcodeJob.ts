@@ -46,7 +46,7 @@ export function useGcodeJob(grbl: Grbl) {
     return () => clearInterval(id);
   }, [running]);
 
-  /** Lance l'envoi. L'appelant a déjà obtenu la confirmation de sécurité. */
+  /** Lance l'envoi (l'appelant a vérifié que la machine peut recevoir un programme). */
   const start = useCallback((kind: JobKind, job: GcodeJob) => {
     if (!client?.connected || streamer.current && ['running', 'paused', 'draining'].includes(streamer.current.snapshot().phase)) return;
     const s = new GcodeStreamer(client, job.lines);

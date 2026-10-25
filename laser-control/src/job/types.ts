@@ -1,5 +1,7 @@
 /** Format neutre d'un travail de découpe : ce que `buildGcode` consomme, quelle que soit l'origine (SVG, logiciel de CAO, autre application). */
 
+import type { GcodeJob } from '../grbl';
+
 /** Polyligne fermée en millimètres (le dernier point revient au premier sans être répété). Origine = coin BAS-GAUCHE de la planche, X à droite, Y vers le haut. */
 export type Polyline = [number, number][];
 
@@ -36,4 +38,8 @@ export interface LaserItem {
   gcode?: string;
   /** Remarque affichée sous l'aperçu du trajet. */
   notice?: string;
+  /** Programme déjà construit (planche d'essai) : envoyé tel quel, sans passer par `buildGcode`. */
+  program?: GcodeJob;
+  /** Planche d'essai intégrée à la liste : pas de bouton « retirer », envoyée comme « essai ». */
+  test?: boolean;
 }

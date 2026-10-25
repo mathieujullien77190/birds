@@ -9,9 +9,9 @@ const num = (v: number): string => (Math.round(v * 1000) / 1000).toString().repl
 function emitContours(w: Writer, contours: Contour[], o: { feed: number; s: number; passes: number; passMode: PassMode }) {
   const passes = Math.max(1, Math.round(o.passes));
   if (o.passMode === 'contour') {
-    for (const c of contours) for (let p = 0; p < passes; p++) w.cut(c.pts, o.feed, o.s, p === 0);
+    for (const c of contours) for (let p = 0; p < passes; p++) w.cut(c.pts, o.feed, o.s, p === 0, false, c.piece);
   } else {
-    for (let p = 0; p < passes; p++) for (const c of contours) w.cut(c.pts, o.feed, o.s, p === 0);
+    for (let p = 0; p < passes; p++) for (const c of contours) w.cut(c.pts, o.feed, o.s, p === 0, false, c.piece);
   }
 }
 
@@ -20,7 +20,7 @@ function emitContours(w: Writer, contours: Contour[], o: { feed: number; s: numb
  * `M5` final et retour à l'origine. La valeur S n'est jamais au-dessus du plafond (`capPct`) ni de S max (`sMax`).
  */
 export function buildGcode(job: LaserJob, opt: CutOptions): GcodeJob {
-  const w = new Writer(opt.rapidFeed ?? DEFAULT_RAPID, job.widthMm, job.heightMm);
+  const w = new Writer(opt.rapidFeed ?? DEFAULT_RAPID, job.widthMm, job.heightMm, opt.motion);
   const contours = orderContours(job);
   const engrave = (job.layers.engrave ?? []).map((p) => simplifyContour(p)).filter((p) => p.length >= 3);
   const s = powerToS(opt.powerPct, opt.sMax, opt.capPct);
@@ -36,7 +36,7 @@ export function buildGcode(job: LaserJob, opt: CutOptions): GcodeJob {
   epilogue(w, opt.air);
   const stats = w.stats(contours.length + engrave.length, clamped);
   return {
-    lines: w.lines, lineTimes: w.lineTimes, segments: w.segments, stats,
+    lines: w.lines, lineTimes: w.lineTimes, segments: w.segments, segLines: w.segLines, stats,
     header: [
       `${job.title ?? 'Découpe laser'} (Sculpfun E1 Pro 21 W, GRBL 1.1)`,
       `Planche ${num(job.widthMm)} x ${num(job.heightMm)} mm ; origine de travail = coin bas-gauche, X à droite, Y vers l'arrière`,

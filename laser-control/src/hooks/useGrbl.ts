@@ -84,6 +84,8 @@ export function useGrbl() {
   const jogCancel = useCallback(() => clientRef.current?.realtime(RT.jogCancel), []);
   /** « Origine ici » : le point où se trouve la tête devient X0 Y0 (G54, gardé par la machine). */
   const setOrigin = useCallback(() => command('G10 L20 P1 X0 Y0'), [command]);
+  /** « Origine planche » : l'origine de travail (G54) est posée à (x, y) en coordonnées MACHINE (G10 L2), sans bouger la tête ; la machine doit être référencée ($H). */
+  const setPlateOrigin = useCallback((x: number, y: number) => command(`G10 L2 P1 X${x} Y${y}`), [command]);
   const goOrigin = useCallback((feed: number) => command(`$J=G90 G21 X0 Y0 F${feed}`), [command]);
   const unlock = useCallback(() => command('$X'), [command]);
   /** Référencement ($H) : la tête va chercher ses butées ; sur la E1 Pro le homing est actif ($22=1), la machine démarre en alarme tant qu'il n'est pas fait. */
@@ -98,7 +100,7 @@ export function useGrbl() {
     connected: conn === 'connected',
     clearLog: () => { logBuf.current = []; setLog([]); },
     clearProblem: () => setProblem(null),
-    connect, disconnect, command, jog, jogCancel, setOrigin, goOrigin, unlock, home, softReset, readSettings, enableLaserMode,
+    connect, disconnect, command, jog, jogCancel, setOrigin, setPlateOrigin, goOrigin, unlock, home, softReset, readSettings, enableLaserMode,
   };
 }
 

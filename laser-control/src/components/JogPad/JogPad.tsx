@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Btn, Chip, ConfirmDialog, Hint, Slider } from '../../ui';
-import { JOG_STEPS } from '../../constants';
+import { JOG_STEPS, PLATE_ORIGIN } from '../../constants';
 import type { LaserMachine } from '../../hooks/useLaserMachine';
 
 const ARROW = 'flex h-10 w-10 items-center justify-center rounded-md border border-stone-300 bg-white text-lg text-stone-700 hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-40';
@@ -12,6 +12,8 @@ export function JogPad({ m }: { m: LaserMachine }) {
   const state = grbl.status?.state;
   const moveOk = grbl.connected && !m.job.running && (state === 'Idle' || state === 'Jog');
   const step = settings.jogStep, feed = settings.jogFeed;
+  /** Origine de planche : X0 Y0 posé à PLATE_ORIGIN (coordonnées machine), puis la tête s'y rend. */
+  const plateOrigin = async () => { const r = await grbl.setPlateOrigin(PLATE_ORIGIN.x, PLATE_ORIGIN.y); if (r.ok) void grbl.goOrigin(feed); };
   const go = (dx: number, dy: number) => void grbl.jog(dx * step, dy * step, feed);
 
   return (
@@ -35,11 +37,12 @@ export function JogPad({ m }: { m: LaserMachine }) {
       <div className="grid grid-cols-2 gap-2">
         <Btn variant="primary" disabled={!moveOk || state !== 'Idle'} onClick={() => void grbl.setOrigin()} title="La position actuelle de la tête devient X0 Y0 (G10 L20 P1)">Origine ici</Btn>
         <Btn disabled={!moveOk} onClick={() => void grbl.goOrigin(feed)}>Aller à l'origine</Btn>
+        <Btn disabled={!moveOk || state !== 'Idle'} onClick={() => void plateOrigin()} title={`L'origine de travail (X0 Y0) est posée à X${PLATE_ORIGIN.x} Y${PLATE_ORIGIN.y} de l'origine machine (G10 L2 P1), puis la tête s'y rend : à faire après le référencement ($H)`}>Origine planche (X{PLATE_ORIGIN.x} Y{PLATE_ORIGIN.y})</Btn>
         <Btn disabled={!grbl.connected || m.job.running || (state !== 'Idle' && state !== 'Alarm')} onClick={() => setConfirm('home')} title="Envoie la tête sur ses butées ($H) : à faire à la mise sous tension si la machine est en alarme">Référencer ($H)</Btn>
         <Btn variant="warn" disabled={!grbl.connected || state !== 'Alarm'} onClick={() => setConfirm('unlock')}>Déverrouiller ($X)</Btn>
         <Btn disabled={!grbl.connected || m.job.running} onClick={() => setConfirm('reset')}>Réinitialiser</Btn>
       </div>
-      <Hint>L'origine de travail (X0 Y0) est le coin bas-gauche de la planche : place la tête sur ce coin du matériau puis « Origine ici ». X augmente vers la droite, Y vers l'arrière de la machine.</Hint>
+      <Hint>L'origine de travail (X0 Y0) est le coin bas-gauche de la planche : place la tête sur ce coin du matériau puis « Origine ici », ou, après le référencement ($H), « Origine planche » : la tête se range {PLATE_ORIGIN.x} mm plus loin sur X et {PLATE_ORIGIN.y} mm sur Y de l'origine machine. X augmente vers la droite, Y vers l'arrière de la machine.</Hint>
       {confirm === 'unlock' && (
         <ConfirmDialog title="Déverrouiller la machine ?" confirmLabel="Envoyer $X" danger onCancel={() => setConfirm(null)} onConfirm={() => { setConfirm(null); void grbl.unlock(); }}>
           <p>$X lève l'alarme sans vérifier la position de la tête. Après une alarme, la position connue par la machine peut être fausse.</p>

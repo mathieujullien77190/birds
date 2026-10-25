@@ -6,7 +6,7 @@ import { NEST_DEFAULT, makeNest, nestSheets, sheetsPreviewSvg, type NestSheet, t
 import { sheetToJob, sheetsToItems } from '@/features/laser/adapter';
 import { CUT_CFG_KEY, DEFAULT_CUT_CFG } from '@/features/laser/constants';
 
-const machine = { fake: 'machine' };
+const machine = { fake: 'machine', setItemIndex: vi.fn() };
 const useLaserMachine = vi.fn((..._a: unknown[]) => machine);
 vi.mock('@laser', () => ({ useLaserMachine: (...a: unknown[]) => useLaserMachine(...a) }));
 
@@ -42,13 +42,23 @@ describe('useLaser', () => {
     const r = result.current;
     expect(r.cutCfg).toEqual(DEFAULT_CUT_CFG);
     expect(r.cutView).toBe(false);
-    expect(r.sheets).toEqual(nestSheets(sc, 400, 320, 5));
-    expect(r.preview).toBe(sheetsPreviewSvg(r.sheets, 400, 320));
+    expect(r.sheets).toEqual(nestSheets(sc, DEFAULT_CUT_CFG.W, DEFAULT_CUT_CFG.H, 5));
+    expect(r.preview).toBe(sheetsPreviewSvg(r.sheets, DEFAULT_CUT_CFG.W, DEFAULT_CUT_CFG.H));
     expect(r.preview).toContain('<svg');
     expect(r.machine).toBe(machine);
     const [items, size] = useLaserMachine.mock.calls[useLaserMachine.mock.calls.length - 1] as [{ fileName: string }[], { W: number; H: number }];
-    expect(items.map((i) => i.fileName)).toEqual(r.sheets.map((_, i) => `planche-${i + 1}`));
-    expect(size).toEqual({ W: 400, H: 320 });
+    expect(items.map((i) => i.fileName)).toEqual([...r.sheets.map((_, i) => `planche-${i + 1}`), 'essai-boite-1']); // la planche d'essai de la boîte suit les planches du nichoir
+    expect(size).toEqual({ W: DEFAULT_CUT_CFG.W, H: DEFAULT_CUT_CFG.H });
+  });
+  it("la planche d'essai de la boîte est disponible et se choisit comme programme", () => {
+    const { result } = renderHook(() => useLaser(sc));
+    expect(result.current.boxTest.available).toBe(true);
+    act(() => result.current.boxTest.select());
+    expect(machine.setItemIndex).toHaveBeenCalledWith(result.current.sheets.length);
+  });
+  it("sans bouchon dans la scène, pas de planche d'essai de la boîte", () => {
+    const { result } = renderHook(() => useLaser({ ...sc, planks: sc.planks.filter((p) => !/prise d'air/.test(p.name)) }));
+    expect(result.current.boxTest.available).toBe(false);
   });
   it('lit les réglages enregistrés, les enregistre à chaque changement et refait le rangement', () => {
     localStorage.setItem(CUT_CFG_KEY, JSON.stringify({ W: 300, H: 250, gap: 4 }));

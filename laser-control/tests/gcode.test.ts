@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildFrame, buildGcode, buildTestCard, cleanLine, formatDuration, jogLine, powerToS, spread, type CutOptions, type LaserJob } from '../src';
+import { LABEL_LEFT, buildFrame, buildGcode, buildTestCard, textStrokes, textWidth, cleanLine, formatDuration, jogLine, powerToS, spread, type CutOptions, type LaserJob } from '../src';
 
 const OPT: CutOptions = { feed: 300, powerPct: 60, passes: 2, passMode: 'all', sMax: 1000, capPct: 80 };
 
@@ -130,6 +130,30 @@ describe('cadre à vide et planche d\'essai', () => {
     expect(t.job.stats.maxS).toBe(800);
     expect(t.job.lines[t.job.lines.length - 1]).toBe('M5');
     expect(t.cells[0]).toMatchObject({ speed: 150, power: 40, x: 5, y: 5 });
+  });
+
+  it("la planche d'essai avec valeurs grave la puissance et la vitesse à bas régime avant la coupe, la grille est décalée", () => {
+    const o = { W: 410, H: 400, speeds: [300, 600], powers: [50, 100], size: 10, gap: 5, passes: 1, sMax: 1000, capPct: 80 };
+    const plain = buildTestCard(o), t = buildTestCard({ ...o, labels: { feed: 4000, powerPct: 10 } });
+    expect(t.cells[0]).toMatchObject({ x: plain.cells[0].x + LABEL_LEFT, y: plain.cells[0].y }); // la grille laisse la place à gauche
+    expect(t.fits).toBe(true);
+    const firstCut = t.job.lines.findIndex((l) => l.includes('F300 S500'));
+    const labelLines = t.job.lines.slice(0, firstCut).filter((l) => l.startsWith('G1'));
+    expect(labelLines.length).toBeGreaterThan(20);
+    expect(t.job.lines.slice(0, firstCut).filter((l) => l.startsWith('G1') && l.includes(' S')).every((l) => l.includes('F4000 S100'))).toBe(true); // 10 % de S max, loin du plafond
+    expect(t.job.stats.maxS).toBe(800); // la coupe garde son plafond
+    expect(t.job.segments.some((s) => s.engrave)).toBe(true);
+    expect(t.job.lines[t.job.lines.length - 1]).toBe('M5');
+    expect(plain.job.segments.some((s) => s.engrave)).toBe(false); // sans valeurs : rien n'est gravé
+  });
+
+  it('textStrokes : un caractère connu donne des traits, un inconnu ou une espace avance sans graver, textWidth suit', () => {
+    expect(textStrokes('1', 0, 0, 4)).toEqual([[[1, 0], [1, 4], [0, 3]]]);
+    expect(textStrokes(' 1', 0, 0, 4)[0][0][0]).toBeCloseTo(3 + 1, 9); // le « 1 » est décalé d'un caractère (0,75 × hauteur = 3 mm)
+    expect(textStrokes('?', 0, 0, 4)).toEqual([]);
+    expect(textWidth('', 4)).toBe(0);
+    expect(textWidth('100%', 4)).toBeCloseTo(4 * 3 - 1, 9);
+    for (const ch of '0123456789%') expect(textStrokes(ch, 10, 20, 8).every((s) => s.every(([x, y]) => x >= 10 && x <= 18 && y >= 20 && y <= 28))).toBe(true);
   });
 });
 

@@ -27,10 +27,10 @@ Ouvrir la page dans **Chrome ou Edge** (Firefox et Safari n'ont pas Web Serial ;
 2. **Connecter** la laser (ou « Machine simulée »). Vérifier `$32 = 1` (mode laser) ; sinon la découpe reste verrouillée.
 3. Amener la tête sur le **coin bas-gauche** du matériau avec les flèches, puis « Origine ici ».
 4. « Tracer le cadre à vide » : la tête suit le rectangle des pièces, **laser éteint** (`M5` et déplacements `$J=`).
-5. Régler vitesse, puissance, passes, plafond ; **lancer d'abord la planche d'essai** (carrés par vitesse × puissance).
-6. Vérifier l'aperçu du trajet, « Lancer la découpe… », cocher la liste de sécurité. Pendant l'envoi : Pause, Reprise, **Arrêt** (pause `!`, réinitialisation 0x18, `M5`) toujours visible.
+5. Régler vitesse, puissance, passes, plafond ; **lancer d'abord la planche « Essai puissance × vitesse »** (dernière de la liste : 6 × 6 carrés, avec la puissance et la vitesse gravées à côté de chaque ligne et colonne).
+6. Vérifier l'aperçu du trajet, « Lancer la découpe… » puis confirmer (une seule confirmation, sans liste à cocher). Pendant l'envoi : Pause, Reprise, **Arrêt** (pause `!`, réinitialisation 0x18, `M5`) toujours visible.
 
-Rien n'est envoyé sans ton clic et la confirmation de sécurité ; charger ou déposer un fichier ne lance jamais la découpe.
+Rien n'est envoyé sans ton clic et une confirmation ; charger ou déposer un fichier ne lance jamais la découpe.
 
 ## Branchement et sécurité
 
@@ -60,7 +60,7 @@ interface LaserJob {
 src/grbl/        logique GRBL pure : client, streamer (character counting 127 octets), gcode, status, errors, mockGrbl, webSerial
 src/job/         LaserJob, buildGcode, import SVG et G-code, ordre de coupe
 src/hooks/       useGrbl, useGcodeJob, useLaserMachine, usePersistentState…
-src/components/  ConnectionBar, JogPad, FramePanel, CutSettings, TestCard, GcodePreview, SendPanel, SafetyDialog, GrblConsole, FilesPanel…
+src/components/  ConnectionBar, JogPad, FramePanel, CutSettings, TestCard, GcodePreview, SendPanel, GrblConsole, FilesPanel…
 src/ui/          briques d'interface (un dossier par brique)
 src/App/         la page autonome
 tests/           vitest

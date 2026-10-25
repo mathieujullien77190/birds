@@ -1,4 +1,5 @@
 import { DEFAULT_RAPID, MACHINE_AREA, cleanLine, powerToS, type GcodeJob, type Segment } from '../grbl/gcode';
+import { blockTimes, E1_MOTION, type MotionBlock, type MotionParams } from '../grbl/motion';
 
 export interface GcodeImportOptions {
   /** Valeur `$30` de la machine (S max). */
@@ -9,6 +10,8 @@ export interface GcodeImportOptions {
   W?: number;
   H?: number;
   rapidFeed?: number;
+  /** Accélération, coins, vitesse maximale de la machine (durée estimée juste). */
+  motion?: MotionParams;
 }
 
 export interface GcodeImport { job: GcodeJob; warnings: string[] }
@@ -26,7 +29,8 @@ export function parseGcode(text: string, opt: GcodeImportOptions): GcodeImport {
   const W = opt.W ?? MACHINE_AREA.W, H = opt.H ?? MACHINE_AREA.H;
   const rapid = opt.rapidFeed ?? DEFAULT_RAPID;
   const capS = powerToS(100, opt.sMax, opt.capPct);
-  const lines: string[] = [], lineTimes: number[] = [], segments: Segment[] = [];
+  const lines: string[] = [], lineTimes: number[] = [], segments: Segment[] = [], segLines: number[] = [];
+  const blocks: { line: number; b: MotionBlock }[] = [], dwell = new Map<number, number>(); // déplacements et pauses, par ligne : la durée est calculée à la fin comme le fait GRBL
   let x = 0, y = 0, t = 0, feed = 0, s = 0, spindle = false, rel = false, inch = false, motion = 0;
   let cutMm = 0, rapidMm = 0, maxS = 0, contours = 0, wasCutting = false, clamped = false, dropped = 0, long = 0;
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -35,10 +39,9 @@ export function parseGcode(text: string, opt: GcodeImportOptions): GcodeImport {
   const move = (nx: number, ny: number, cutting: boolean) => {
     const d = Math.hypot(nx - x, ny - y);
     if (d > 0) {
-      const f = motion === 0 ? rapid : Math.max(1, feed || 1);
-      t += (d / f) * 60;
+      blocks.push({ line: lines.length, b: { dx: nx - x, dy: ny - y, feed: motion === 0 ? rapid : Math.max(1, feed || 1) } });
       if (cutting) { cutMm += d; bound(x, y); bound(nx, ny); } else rapidMm += d;
-      segments.push({ x0: x, y0: y, x1: nx, y1: ny, cut: cutting });
+      segments.push({ x0: x, y0: y, x1: nx, y1: ny, cut: cutting }); segLines.push(lines.length);
     }
     x = nx; y = ny;
   };
@@ -71,7 +74,7 @@ export function parseGcode(text: string, opt: GcodeImportOptions): GcodeImport {
     const hasMove = w('X') !== undefined || w('Y') !== undefined;
     const g4 = gs.includes(4);
     const k = inch ? 25.4 : 1;
-    if (g4) t += w('P') ?? 0;
+    if (g4) dwell.set(lines.length, (dwell.get(lines.length) ?? 0) + (w('P') ?? 0));
     if (hasMove && !gs.includes(10) && !gs.includes(92) && !gs.includes(53)) {
       const nx = w('X') !== undefined ? (rel ? x : 0) + (w('X') as number) * k : x;
       const ny = w('Y') !== undefined ? (rel ? y : 0) + (w('Y') as number) * k : y;
@@ -93,8 +96,10 @@ export function parseGcode(text: string, opt: GcodeImportOptions): GcodeImport {
       if (cutting) maxS = Math.max(maxS, s);
     } else if (!hasMove) wasCutting = wasCutting && spindle;
     lines.push(out);
-    lineTimes.push(t);
   }
+  const times = blockTimes(blocks.map((q) => q.b), opt.motion ?? E1_MOTION), byLine = new Map<number, number>();
+  blocks.forEach((q, k) => byLine.set(q.line, (byLine.get(q.line) ?? 0) + times[k]));
+  lines.forEach((_, k) => lineTimes.push((t += (dwell.get(k) ?? 0) + (byLine.get(k) ?? 0))));
   if (!lines.length) warnings.push('Le fichier ne contient aucune commande.');
   const last = lines[lines.length - 1];
   if (lines.length && last !== 'M5' && !/^M(2|30)$/.test(last)) {
@@ -113,5 +118,5 @@ export function parseGcode(text: string, opt: GcodeImportOptions): GcodeImport {
     outOfBounds: has && (minX < -eps || minY < -eps || maxX > W + eps || maxY > H + eps),
     maxS, clamped,
   };
-  return { job: { lines, lineTimes, segments, stats, header: [`G-code importé : ${lines.length} lignes, X0 Y0 = origine de travail, F${num(feed)} dernier`] }, warnings };
+  return { job: { lines, lineTimes, segments, segLines, stats, header: [`G-code importé : ${lines.length} lignes, X0 Y0 = origine de travail, F${num(feed)} dernier`] }, warnings };
 }

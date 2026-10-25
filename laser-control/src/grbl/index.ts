@@ -2,6 +2,8 @@ export * from './client';
 export * from './emitter';
 export * from './errors';
 export * from './gcode';
+export * from './labels';
+export * from './motion';
 export * from './mockGrbl';
 export * from './status';
 export * from './streamer';

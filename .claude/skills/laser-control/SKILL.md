@@ -15,4 +15,4 @@ Lire la **section 6** de `docs/checklist-changements.md`.
 6. L'export autonome doit rester possible : `npm --prefix laser-control run export -- <dossier-vide>`.
 7. `npm run check`.
 
-Sécurité : rien n'est envoyé à la connexion ; la découpe exige la liste de sécurité cochée ; « Arrêt » = `!`, `0x18`, `M5`. Ne jamais affaiblir ces garde-fous sans demande explicite.
+Sécurité : rien n'est envoyé à la connexion ; la découpe demande une simple confirmation (la liste de sécurité à cocher a été retirée à la demande de l'utilisateur) ; « Arrêt » = `!`, `0x18`, `M5`. Ne jamais affaiblir ces garde-fous sans demande explicite.

@@ -4,14 +4,14 @@ import { saveZip } from '@/lib';
 import { sheetSvg } from '@/birdhouse/model';
 import { LaserSection as LaserShell, type LaserMachine } from '@laser';
 import { sheetFiles } from '../helpers';
-import type { CutCfg, Sheets } from '../types';
+import type { BoxTest, CutCfg, Sheets } from '../types';
 
 /**
  * Section « Découpe laser » du panneau de gauche : taille de la planche, espace entre pièces, vue 3D / planches, un SVG par planche.
  * Le pilotage de la machine est un bloc à part (`MachineSection` de laser-control, posé par `LeftPanel` sous cette section).
  */
-export function LaserSection({ cutCfg, setCutCfg, cutView, setCutView, sheets, machine }: {
-  cutCfg: CutCfg; setCutCfg: Dispatch<SetStateAction<CutCfg>>; cutView: boolean; setCutView: (v: boolean) => void; sheets: Sheets; machine: LaserMachine;
+export function LaserSection({ cutCfg, setCutCfg, cutView, setCutView, sheets, machine, boxTest }: {
+  cutCfg: CutCfg; setCutCfg: Dispatch<SetStateAction<CutCfg>>; cutView: boolean; setCutView: (v: boolean) => void; sheets: Sheets; machine: LaserMachine; boxTest: BoxTest;
 }) {
   return (
     <LaserShell machine={machine} hideMachine note={`${sheets.length} planche${sheets.length > 1 ? 's' : ''} de ${cutCfg.W} × ${cutCfg.H}`}>
@@ -23,6 +23,7 @@ export function LaserSection({ cutCfg, setCutCfg, cutView, setCutView, sheets, m
         <Chip active={!cutView} onClick={() => setCutView(false)}>3D</Chip>
         <Chip active={cutView} onClick={() => setCutView(true)}>Planches à découper</Chip>
       </div>
+      <Btn disabled={!boxTest.available || machine.job.running} onClick={boxTest.select} title="Deux plaques à crans qui s'emboîtent (la moitié de P-07), avec leur code gravé : pour essayer les crans avant la série">Planche d'essai boîte</Btn>
       <Btn variant="primary" disabled={!sheets.length} onClick={() => saveZip(sheetFiles(sheets, cutCfg, sheetSvg), `planches-nichoir-${cutCfg.W}x${cutCfg.H}.zip`)}>Télécharger les planches (ZIP)</Btn>
     </LaserShell>
   );

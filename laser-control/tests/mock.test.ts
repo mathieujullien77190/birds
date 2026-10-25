@@ -90,7 +90,7 @@ describe('MockGrbl : réponses', () => {
   it('G10 L20 : exige L20 et P ; fixe l\'origine de travail ; G92 aussi', () => {
     const { g, tx } = rig();
     expect(tx('G10 X0')).toBe('error:2\r\n');
-    expect(tx('G10 L2 P1 X0')).toBe('error:2\r\n');
+    expect(tx('G10 L3 P1 X0')).toBe('error:2\r\n');
     expect(tx('G10 L20 X0')).toBe('error:2\r\n');
     tx('G0 X10 Y20');
     g.step(10);
@@ -101,6 +101,10 @@ describe('MockGrbl : réponses', () => {
     expect(tx('G92 Y1')).toBe('ok\r\n');
     expect(g.wco).toEqual({ x: 7, y: 19 });
     expect(tx('$#')).toBe('[G54:-7.000,-19.000,0.000]\r\nok\r\n');
+    expect(tx('G10 L2 P1 X10 Y0')).toBe('ok\r\n'); // origine de planche : coordonnées MACHINE, la tête ne compte pas
+    expect(g.wco).toEqual({ x: 10, y: 0 });
+    expect(tx('G10 L2 P1 Y5')).toBe('ok\r\n'); // seul Y
+    expect(g.wco).toEqual({ x: 10, y: 5 });
   });
 });
 

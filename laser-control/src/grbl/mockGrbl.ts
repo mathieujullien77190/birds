@@ -192,11 +192,12 @@ export class MockGrbl {
       } else if (!'XYZFSPLN'.includes(c)) return 'error:1\r\n';
     }
     if (offset) {
-      if (offset === 'g10' && (w('L') !== 20 || w('P') === undefined)) return 'error:2\r\n';
+      if (offset === 'g10' && ((w('L') !== 20 && w('L') !== 2) || w('P') === undefined)) return 'error:2\r\n'; // L20 : la position actuelle devient X Y ; L2 : X Y sont les coordonnées MACHINE de l'origine de travail
       this.settleBeforeOffset();
       this.reports = 0; // GRBL joint le WCO au prochain rapport après un changement d'origine
-      if (w('X') !== undefined) this.wco.x = this.mpos.x - (w('X') as number);
-      if (w('Y') !== undefined) this.wco.y = this.mpos.y - (w('Y') as number);
+      const abs = offset === 'g10' && w('L') === 2; // L2 : le décalage est donné en coordonnées machine, la position de la tête ne compte pas
+      if (w('X') !== undefined) this.wco.x = abs ? (w('X') as number) : this.mpos.x - (w('X') as number);
+      if (w('Y') !== undefined) this.wco.y = abs ? (w('Y') as number) : this.mpos.y - (w('Y') as number);
       this.executed.push(line);
       return 'ok\r\n';
     }

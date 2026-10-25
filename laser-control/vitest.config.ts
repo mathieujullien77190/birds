@@ -19,6 +19,7 @@ export default defineConfig({
         'src/vite-env.d.ts',
         // Hooks qui demandent un rendu React complet (état, effets, port série, minuteries) : ils ne font que relier la logique déjà testée (GrblClient, GcodeStreamer, parseGcode…) à l'interface.
         'src/hooks/useGcodeJob.ts',
+        'src/hooks/useJobProgress.ts', // relie `currentSegment` (testé) à l'état de l'envoi et à la position de la tête
         'src/hooks/useGrbl.ts',
         'src/hooks/useLaserMachine.ts',
         // Fichiers de barrels (`index.ts`) : uniquement des `export * from`, aucune ligne de logique.

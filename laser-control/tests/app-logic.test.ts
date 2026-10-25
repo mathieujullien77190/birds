@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  DEFAULT_MACHINE_SETTINGS, FEED_RANGE, JOG_STEPS, MACHINE_SETTINGS_KEY, WebSerialTransport, isWebSerialSupported, latin1, parseMachineSettings, saveSvg, saveText, webSerialProblem,
+  DEFAULT_MACHINE_SETTINGS, FEED_RANGE, JOG_STEPS, MACHINE_SETTINGS_KEY, TEST_CARD, WebSerialTransport, isWebSerialSupported, latin1, parseMachineSettings, saveSvg, saveText, webSerialProblem,
 } from '../src';
 
 afterEach(() => { vi.unstubAllGlobals(); });
@@ -16,8 +16,8 @@ describe('constants', () => {
     expect(d.capPct).toBe(100);
     expect(d.passMode).toBe('all');
     expect(JOG_STEPS).toContain(d.jogStep as 10);
-    expect(d.test.speedMin).toBeLessThan(d.test.speedMax);
-    expect(d.test.powerMax).toBeLessThanOrEqual(d.capPct);
+    expect(TEST_CARD.speedMin).toBeLessThan(TEST_CARD.speedMax);
+    expect(TEST_CARD.powerMax).toBeLessThanOrEqual(d.capPct); // la planche d'essai ne dépasse pas le plafond par défaut
   });
 });
 
@@ -34,7 +34,7 @@ describe('parseMachineSettings', () => {
     expect(parseMachineSettings('{}')).toEqual(D);
   });
   it('un objet complet valide revient tel quel (aller-retour JSON)', () => {
-    const custom = { ...D, feed: 450, power: 75, passes: 5, passMode: 'contour' as const, capPct: 90, jogFeed: 1000, jogStep: 1, engraveFeed: 2000, engravePower: 20, frameMode: 'sheet' as const, test: { ...D.test, size: 12 } };
+    const custom = { ...D, feed: 450, power: 75, passes: 5, passMode: 'contour' as const, capPct: 90, jogFeed: 1000, jogStep: 1, engraveFeed: 2000, engravePower: 20, frameMode: 'sheet' as const };
     expect(parseMachineSettings(JSON.stringify(custom))).toEqual(custom);
   });
   it('assistance d air : cochée par défaut, décochée seulement si le texte stocké dit exactement false', () => {
@@ -67,14 +67,8 @@ describe('parseMachineSettings', () => {
     expect(parseMachineSettings('{"jogStep":7}').jogStep).toBe(D.jogStep);
     expect(parseMachineSettings('{"jogStep":"10"}').jogStep).toBe(D.jogStep);
   });
-  it('planche d\'essai : bornes, arrondis, objet absent ou nul', () => {
-    const hi = parseMachineSettings(JSON.stringify({ test: { speedMin: 99999, speedMax: 99999, speedCount: 99, powerMin: 500, powerMax: 500, powerCount: 99, size: 99, passes: 99 } })).test;
-    expect(hi).toEqual({ speedMin: 6000, speedMax: 6000, speedCount: 8, powerMin: 100, powerMax: 100, powerCount: 8, size: 30, passes: 20 });
-    const lo = parseMachineSettings(JSON.stringify({ test: { speedMin: 0, speedMax: 0, speedCount: 0, powerMin: 0, powerMax: 0, powerCount: 0, size: 0, passes: 0 } })).test;
-    expect(lo).toEqual({ speedMin: 10, speedMax: 10, speedCount: 1, powerMin: 1, powerMax: 1, powerCount: 1, size: 5, passes: 1 });
-    expect(parseMachineSettings('{"test":null}').test).toEqual(D.test);
-    expect(parseMachineSettings('{"test":{"speedMin":200}}').test).toEqual({ ...D.test, speedMin: 200 });
-    expect(parseMachineSettings('{"test":{"speedCount":3.5}}').test.speedCount).toBe(4);
+  it('un ancien réglage « test » enregistré est ignoré', () => {
+    expect(parseMachineSettings('{"test":{"speedMin":200},"feed":500}')).toEqual({ ...D, feed: 500 });
   });
 });
 

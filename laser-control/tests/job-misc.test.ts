@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EXAMPLE_SVG, GCODE_EXT, area, boundsOf, buildGcode, groupPieces, inside, itemFromFile, jobBox, orderContours, parseGcode, simplifyContour, type GcodeImportOptions, type LaserJob, type Polyline } from '../src';
+import { ZOOM_MAX, panView, zoomView } from '../src/components/GcodePreview/helpers';
 
 const box = (x: number, y: number, w: number, h: number): Polyline => [[x, y], [x + w, y], [x + w, y + h], [x, y + h]];
 
@@ -205,7 +206,9 @@ describe('parseGcode', () => {
     expect(stats.lines).toBe(6);
     expect(stats.cutMm).toBe(10);
     expect(stats.rapidMm).toBeCloseTo(Math.hypot(10, 10), 9);
-    expect(stats.seconds).toBeCloseTo((Math.hypot(10, 10) / 6000) * 60 + 1, 9);
+    const naive = (Math.hypot(10, 10) / 36000) * 60 + 1; // longueur / vitesse : le vrai temps y ajoute les accélérations et le ralentissement dans le coin
+    expect(stats.seconds).toBeGreaterThan(naive);
+    expect(stats.seconds).toBeLessThan(naive + 0.5);
     expect(stats.maxS).toBe(500);
     expect(stats.bounds).toEqual({ minX: 10, minY: 10, maxX: 20, maxY: 10 });
     expect(stats.outOfBounds).toBe(false);
@@ -274,10 +277,10 @@ describe('parseGcode', () => {
   });
   it('durée : avance à 0 ramenée à 1 mm/min ; G0 au rapide ; G4 ajoute P', () => {
     const slow = parseGcode('M4 S100\nG1 X1\nM5', OPT);
-    expect(slow.job.stats.seconds).toBeCloseTo(60, 9);
+    expect(slow.job.stats.seconds).toBeCloseTo(60, 3); // 1 mm à 1 mm/min (l'accélération y ajoute moins d'un millième de seconde)
     expect(parseGcode('G4 P2\nM5', OPT).job.stats.seconds).toBe(2);
     expect(parseGcode('G4\nM5', OPT).job.stats.seconds).toBe(0);
-    expect(parseGcode('G0 X100\nM5', { ...OPT, rapidFeed: 1200 }).job.stats.seconds).toBeCloseTo(5, 9);
+    expect(parseGcode('G0 X100\nM5', { ...OPT, rapidFeed: 1200 }).job.stats.seconds).toBeCloseTo(5.02, 2); // 100 mm à 20 mm/s : 5 s de palier plus 0,02 s d'accélération et de freinage
   });
   it('G10 / G92 / G53 avec X Y ne déplacent pas la tête', () => {
     const r = parseGcode('G10 L20 P1 X5 Y5\nG92 X0 Y0\nG53 G0 X100\nM5', OPT);
@@ -335,5 +338,27 @@ describe('parseGcode', () => {
   });
   it('« Aucun trait de coupe » quand il n\'y a que des déplacements', () => {
     expect(parseGcode('G0 X10\nM5', OPT).warnings).toEqual(['Aucun trait de coupe trouvé (G1 avec laser allumé).']);
+  });
+});
+
+describe('aperçu du trajet : zoom et déplacement', () => {
+  const base = { x: -12, y: -12, w: 424, h: 344 };
+  it('le zoom garde sous le curseur le point visé, plafonne à 40 × et revient à la vue d\'ensemble en dézoomant', () => {
+    const z = zoomView(base, base, 2, 100, 50);
+    expect(z.w).toBeCloseTo(212, 9);
+    expect(z.h).toBeCloseTo(172, 9);
+    expect((100 - z.x) / z.w).toBeCloseTo((100 - base.x) / base.w, 9); // le point reste à la même place dans la fenêtre
+    expect((50 - z.y) / z.h).toBeCloseTo((50 - base.y) / base.h, 9);
+    expect(zoomView(base, base, 1e9, 0, 0).w).toBeCloseTo(base.w / ZOOM_MAX, 9);
+    expect(zoomView(z, base, 0.1, 100, 50)).toEqual(base); // dézoomer au-delà de l'ensemble : la vue d'ensemble
+    expect(zoomView(base, base, 0.5, 10, 10)).toEqual(base);
+  });
+  it('la fenêtre reste dans la vue d\'ensemble en zoomant près d\'un bord et en se déplaçant', () => {
+    const z = zoomView(base, base, 4, 410, 318);
+    expect(z.x + z.w).toBeLessThanOrEqual(base.x + base.w + 1e-9);
+    expect(z.y + z.h).toBeLessThanOrEqual(base.y + base.h + 1e-9);
+    expect(panView(z, base, 1000, 1000)).toMatchObject({ x: base.x + base.w - z.w, y: base.y + base.h - z.h });
+    expect(panView(z, base, -1000, -1000)).toMatchObject({ x: base.x, y: base.y });
+    expect(panView(z, base, -5, 3)).toMatchObject({ x: z.x - 5, y: z.y + 3, w: z.w, h: z.h });
   });
 });

@@ -1,13 +1,5 @@
 import type { PassMode } from './grbl';
 
-/** Réglages de la planche d'essai (grille vitesses × puissances). */
-export interface TestSettings {
-  speedMin: number; speedMax: number; speedCount: number;
-  powerMin: number; powerMax: number; powerCount: number;
-  size: number;
-  passes: number;
-}
-
 /** Réglages de la machine gardés d'une session à l'autre. */
 export interface MachineSettings {
   /** Vitesse de coupe (mm/min). */
@@ -28,5 +20,4 @@ export interface MachineSettings {
   engravePower: number;
   /** Cadre : autour des pièces ou de la planche entière. */
   frameMode: 'pieces' | 'sheet';
-  test: TestSettings;
 }

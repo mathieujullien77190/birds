@@ -16,7 +16,7 @@ export function App() {
   const ind = indicator(m.grbl);
   const locked = m.job.running;
 
-  /** Ajoute les fichiers lus (les erreurs sont affichées) et choisit le dernier ajouté. Rien n'est envoyé : lancer exige la confirmation de sécurité. */
+  /** Ajoute les fichiers lus (les erreurs sont affichées) et choisit le dernier ajouté. Rien n'est envoyé : lancer demande un clic sur « Lancer la découpe ». */
   const load = useCallback(async (files: { name: string; text: () => Promise<string> }[]) => {
     const added: LaserItem[] = [], errs: string[] = [];
     for (const f of files) {
@@ -27,7 +27,6 @@ export function App() {
     if (added.length) {
       m.setItemIndex(items.length + added.length - 1);
       setItems((cur) => [...cur, ...added]);
-      m.setTarget('sheet');
     }
   }, [m, items.length]);
 
